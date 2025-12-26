@@ -10,15 +10,30 @@ import {
 import { Box } from "@mui/system";
 import { useState } from "react";
 import type { User } from "../../context/UserContext ";
+import { useLocation } from "react-router-dom";
 
 interface HeaderProps {
   user: User | null;
 }
 
 const Header = ({ user }: HeaderProps) => {
-  console.log(user);
-
+  const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
+  const menuItems = [
+    { text: "Home", path: "/" },
+    { text: "Planes", path: "/planes" },
+    { text: "Usuarios", path: "/usuarios" },
+    {
+      text: "Configuraciones",
+
+      path: "/configuraciones",
+    },
+    {
+      text: "Historial de suscripciones",
+
+      path: "/historial-suscripciones",
+    },
+  ];
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -35,10 +50,14 @@ const Header = ({ user }: HeaderProps) => {
   };
 
   return (
-    <AppBar position="static" sx={{backgroundColor:"#f5e9cf"}} elevation={0}>
+    <AppBar position="static" sx={{ backgroundColor: "#f5e9cf" }} elevation={0}>
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1,color:"#008989" }}>
-          Adblocal
+        <Typography
+          className="fw-bold"
+          variant="h6"
+          sx={{ flexGrow: 1, color: "#008989" }}
+        >
+          {menuItems.find((item) => item.path === location.pathname)?.text}
         </Typography>
 
         {user && (

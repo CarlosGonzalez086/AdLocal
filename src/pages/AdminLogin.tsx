@@ -33,10 +33,8 @@ export default function AdminLogin() {
 
         <LoginForm onSubmit={handleLogin} />
 
-        {/* 🔽 Separador */}
         <Divider sx={{ my: 3 }} />
 
-        {/* 🔽 Botón crear admin */}
         <Button
           variant="outlined"
           fullWidth

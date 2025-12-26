@@ -9,8 +9,6 @@ export default function AdminCreate() {
   const handleCreate = async (data: any) => {
     try {
       const res = await adminApi.crearAdmin(data);
-
-      // ✅ Éxito
       Swal.fire({
         icon: "success",
         title: "Administrador creado",
@@ -19,9 +17,8 @@ export default function AdminCreate() {
         confirmButtonColor: "#111827",
       });
 
-      navigate("/login"); // regresar al login
+      navigate("/login");
     } catch (error: any) {
-      // ❌ Error desde backend
       const message =
         error?.response?.data?.mensaje ||
         "Ocurrió un error al crear el administrador";
@@ -57,7 +54,6 @@ export default function AdminCreate() {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* 🔽 Botón Iniciar sesión */}
         <Button variant="outlined" fullWidth onClick={() => navigate("/login")}>
           Iniciar sesión
         </Button>

@@ -49,7 +49,7 @@ export const usePlanes = () => {
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",      
+      cancelButtonText: "Cancelar",
     });
 
     if (!result.isConfirmed) return;

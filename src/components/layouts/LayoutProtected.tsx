@@ -5,7 +5,6 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { UserContext } from "../../context/UserContext ";
 
-
 const drawerWidth = 240;
 
 const LayoutProtected = () => {

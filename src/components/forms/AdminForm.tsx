@@ -1,9 +1,4 @@
-import {
-  TextField,
-  Button,
-  Box,
-  Stack,
-} from "@mui/material";
+import { TextField, Button, Box, Stack } from "@mui/material";
 import { useForm } from "react-hook-form";
 
 interface AdminFormProps {
@@ -26,20 +21,14 @@ export default function AdminForm({
   });
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(onSubmit)}
-      width="100%"
-    >
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} width="100%">
       <Stack spacing={3}>
-        {/* Nombre */}
         <TextField
           label="Nombre"
           fullWidth
           {...register("nombre", { required: true })}
         />
 
-        {/* Email */}
         <TextField
           label="Correo electrónico"
           type="email"
@@ -47,7 +36,6 @@ export default function AdminForm({
           {...register("email", { required: true })}
         />
 
-        {/* Password solo en crear */}
         {!isEdit && (
           <TextField
             label="Contraseña"
@@ -57,11 +45,7 @@ export default function AdminForm({
           />
         )}
 
-        {/* Botón */}
-        <Box
-          display="flex"
-          justifyContent="flex-end"
-        >
+        <Box display="flex" justifyContent="flex-end">
           <Button
             type="submit"
             variant="contained"

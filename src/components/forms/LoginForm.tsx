@@ -31,8 +31,8 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
     } catch (error: any) {
       setErrorMsg(
         error?.response?.data?.mensaje ||
-        error?.message ||
-        "Error al iniciar sesión"
+          error?.message ||
+          "Error al iniciar sesión"
       );
     }
   };
@@ -40,11 +40,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)}>
       <Stack spacing={2}>
-        {errorMsg && (
-          <Alert severity="error">
-            {errorMsg}
-          </Alert>
-        )}
+        {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
         <TextField
           label="Correo electrónico"

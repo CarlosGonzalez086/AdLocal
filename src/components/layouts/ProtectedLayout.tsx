@@ -1,4 +1,3 @@
-
 import PrivateRoute from "../../routes/PrivateRoute";
 import LayoutProtected from "./LayoutProtected";
 

@@ -1,6 +1,12 @@
-import { Dialog, DialogActions, TextField, Button } from "@mui/material";
-import { useState } from "react";
-import type { PlanCreateDto } from "../../services/planApi";
+import {
+  Dialog,
+  DialogActions,
+  TextField,
+  Button,
+  InputAdornment,
+} from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import type { PlanCreateDto, PlanFormErrors } from "../../services/planApi";
 
 interface Props {
   open: boolean;
@@ -11,23 +17,27 @@ interface Props {
 }
 
 export const PlanModal = ({ open, onClose, onSave, plan, soloVer }: Props) => {
-  const initialForm: PlanCreateDto = {
-    nombre: plan.nombre,
-    precio: plan.precio,
-    duracionDias: plan.duracionDias,
-    tipo: plan.tipo,
-  };
-
+  const initialForm = useMemo(
+    () => ({
+      nombre: plan.nombre ?? "",
+      precio: plan.precio ?? 0,
+      duracionDias: plan.duracionDias ?? 0,
+      tipo: plan.tipo ?? "",
+      id: plan.id,
+    }),
+    [plan]
+  );
   const [form, setForm] = useState<PlanCreateDto>(initialForm);
+  const [errors, setErrors] = useState<PlanFormErrors>({});
 
-  const [errors, setErrors] = useState<any>({});
+  const validar = (): boolean => {
+    const e: PlanFormErrors = {};
 
-  const validar = () => {
-    const e: any = {};
     if (!form.nombre) e.nombre = "Requerido";
     if (form.precio <= 0) e.precio = "Mayor a 0";
     if (form.duracionDias <= 0) e.duracionDias = "Mayor a 0";
     if (!form.tipo) e.tipo = "Requerido";
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -38,8 +48,13 @@ export const PlanModal = ({ open, onClose, onSave, plan, soloVer }: Props) => {
     onClose();
   };
 
-  console.log(form);
-  
+  useEffect(() => {
+    if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setForm(initialForm);
+      setErrors({});
+    }
+  }, [initialForm, open]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -69,12 +84,29 @@ export const PlanModal = ({ open, onClose, onSave, plan, soloVer }: Props) => {
                 }
                 fullWidth
                 size="small"
-                value={[item.field]}
-                error={!!errors[item.field]}
-                helperText={errors[item.field]}
+                value={form[item.field as keyof PlanCreateDto]}
+                error={!!errors[item.field as keyof PlanCreateDto]}
+                helperText={errors[item.field as keyof PlanCreateDto]}
                 disabled={soloVer}
+                InputProps={{
+                  startAdornment:
+                    item.field === "precio" ? (
+                      <InputAdornment position="start">$</InputAdornment>
+                    ) : undefined,
+
+                  endAdornment:
+                    item.field === "duracionDias" ? (
+                      <InputAdornment position="end">días</InputAdornment>
+                    ) : undefined,
+                }}
                 onChange={(e) =>
-                  setForm({ ...form, [item.field]: e.target.value })
+                  setForm({
+                    ...form,
+                    [item.field]:
+                      item.field === "precio" || item.field === "duracionDias"
+                        ? Number(e.target.value)
+                        : e.target.value,
+                  })
                 }
               />
             </div>

@@ -10,7 +10,7 @@ import {
 import { Box } from "@mui/system";
 import { useState } from "react";
 import type { User } from "../../context/UserContext ";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   user: User | null;
@@ -18,6 +18,7 @@ interface HeaderProps {
 
 const Header = ({ user }: HeaderProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const menuItems = [
     { text: "Home", path: "/" },
@@ -33,6 +34,16 @@ const Header = ({ user }: HeaderProps) => {
 
       path: "/historial-suscripciones",
     },
+    {
+      text: "Pefil",
+
+      path: "/perfil",
+    },
+    {
+      text: "Cambiar contraseña",
+
+      path: "/perfil/cambiar-password",
+    },
   ];
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
@@ -40,9 +51,8 @@ const Header = ({ user }: HeaderProps) => {
 
   const handleProfile = () => {
     handleMenuClose();
-    console.log("Ver perfil");
+    navigate("/perfil");
   };
-
   const handleLogout = () => {
     handleMenuClose();
     localStorage.removeItem("token");

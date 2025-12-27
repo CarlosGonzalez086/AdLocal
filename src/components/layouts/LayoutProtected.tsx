@@ -1,20 +1,17 @@
-import { useContext, type ReactElement } from "react";
+import { useContext } from "react";
 import { Box } from "@mui/material";
+import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { UserContext } from "../../context/UserContext ";
 
-interface LayoutProtectedProps {
-  children: ReactElement;
-}
-
 const drawerWidth = 240;
 
-const LayoutProtected = ({ children }: LayoutProtectedProps) => {
+const LayoutProtected = () => {
   const user = useContext(UserContext);
 
   return (
-    <Box sx={{ display: "flex", width: "100%" }}>
+    <Box sx={{ display: "flex", width: "100%", height: "100vh" }}>
       <Sidebar drawerWidth={drawerWidth} />
 
       <Box
@@ -22,22 +19,20 @@ const LayoutProtected = ({ children }: LayoutProtectedProps) => {
           flexGrow: 1,
           display: "flex",
           flexDirection: "column",
-          height: "100%",
           overflow: "hidden",
         }}
       >
         <Header user={user} />
 
         <Box
+          component="main"
           sx={{
             flexGrow: 1,
             overflow: "auto",
-            padding: "1rem",
-            height: "100%",
-            width: "100%",
+            p: 2,
           }}
         >
-          {children}
+          <Outlet />
         </Box>
       </Box>
     </Box>

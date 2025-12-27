@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Paper, Typography, Button, Divider } from "@mui/material";
 import { adminApi } from "../api/admin.api";
 import LoginForm from "../components/forms/LoginForm";
+import Swal from "sweetalert2";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -10,11 +11,30 @@ export default function AdminLogin() {
     try {
       const res = await adminApi.loginAdmin(data);
 
+      await Swal.fire({
+        icon: "success",
+        title: "Inicio de sesión exitoso",
+        text: "Bienvenido nuevamente",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
       localStorage.setItem("token", res.data.respuesta.token);
 
       window.location.href = "/";
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al iniciar sesión", error);
+
+      const mensaje =
+        error?.response?.data?.mensaje || "Usuario o contraseña incorrectos";
+
+      // Error
+      Swal.fire({
+        icon: "error",
+        title: "Error al iniciar sesión",
+        text: mensaje,
+        confirmButtonColor: "#d33",
+      });
     }
   };
 
@@ -33,10 +53,8 @@ export default function AdminLogin() {
 
         <LoginForm onSubmit={handleLogin} />
 
-        {/* 🔽 Separador */}
         <Divider sx={{ my: 3 }} />
 
-        {/* 🔽 Botón crear admin */}
         <Button
           variant="outlined"
           fullWidth

@@ -40,3 +40,38 @@
 .read-the-docs {
   color: #888;
 }
+
+.tabla-davincix thead .MuiTableCell-root {
+  color: #212212 !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  border-bottom: none !important;
+  padding: 1rem !important; 
+}
+
+.tabla-davincix thead th {
+  text-transform: lowercase;
+  font-weight: 400 !important;
+  
+}
+.tabla-davincix  {
+   font-family: "Roboto" !important;
+
+  
+}
+.tabla-davincix thead th::first-letter {
+  text-transform: uppercase;
+}
+
+.tabla-davincix tbody .MuiTableCell-root {
+  color: #212212 !important;
+  font-weight: 400 !important;
+  font-size: 1rem !important;
+  padding: 1rem !important;
+  font-family: "AvenirMedium" !important;
+}
+
+.tabla-davincix thead .MuiTableRow-root,
+.tabla-davincix .bg-tableHead {
+  background-color: #f9fafc !important;
+}

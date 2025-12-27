@@ -12,6 +12,8 @@ export const usePlanes = () => {
       const { data } = await planApi.getAll();
       setPlanes(data.respuesta ?? []);
     } catch (error) {
+      console.log(error);
+
       Swal.fire(
         "Error",
         "No se pudo cargar la información de los planes",
@@ -36,6 +38,7 @@ export const usePlanes = () => {
 
       listar();
     } catch (error) {
+      console.log(error);
       Swal.fire("Error", "No se pudo guardar el plan", "error");
     } finally {
       setLoading(false);
@@ -60,6 +63,7 @@ export const usePlanes = () => {
       Swal.fire("Eliminado", "Plan eliminado", "success");
       listar();
     } catch (error) {
+      console.log(error);
       Swal.fire("Error", "No se pudo eliminar el plan", "error");
     } finally {
       setLoading(false);

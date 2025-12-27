@@ -1,25 +1,25 @@
-import {
-  IconButton,
-  Button,
-  TablePagination,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Paper,
-} from "@mui/material";
+import { IconButton, Button } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { LinearProgress, Typography } from "@mui/material";
 
 import { useState } from "react";
 import { usePlanes } from "../../hooks/usePlanes";
 import type { PlanCreateDto } from "../../services/planApi";
 import { PlanModal } from "../../components/Plan/PlanModal";
+import {
+  GenericTable,
+  type TableColumn,
+} from "../../components/layouts/GenericTable";
+
+interface Plan {
+  id?: number;
+  nombre: string;
+  precio: number;
+  duracionDias: number;
+  tipo: string;
+}
 
 export const PlanesPage = () => {
   const initialForm: PlanCreateDto = {
@@ -44,6 +44,17 @@ export const PlanesPage = () => {
 
   const data = planes.slice(page * rows, page * rows + rows);
 
+  const columns: TableColumn<Plan>[] = [
+    { key: "nombre", label: "Nombre" },
+    {
+      key: "precio",
+      label: "Precio",
+      render: (p) => `$${p.precio}`,
+    },
+    { key: "duracionDias", label: "Días" },
+    { key: "tipo", label: "Tipo" },
+  ];
+
   return (
     <div>
       <div className="d-flex justify-content-end mb-3">
@@ -59,113 +70,46 @@ export const PlanesPage = () => {
         </Button>
       </div>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#f7ebd1" }}>
-              <TableCell
-                sx={{ color: "#008c82", fontWeight: "bold" }}
-                align="left"
-              >
-                Nombre
-              </TableCell>
-              <TableCell
-                sx={{ color: "#008c82", fontWeight: "bold" }}
-                align="left"
-              >
-                Precio
-              </TableCell>
-              <TableCell
-                sx={{ color: "#008c82", fontWeight: "bold" }}
-                align="left"
-              >
-                Días
-              </TableCell>
-              <TableCell
-                sx={{ color: "#008c82", fontWeight: "bold" }}
-                align="left"
-              >
-                Tipo
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ color: "#008c82", fontWeight: "bold" }}
-              >
-                Acciones
-              </TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={5}>
-                  <LinearProgress />
-                  <Typography
-                    variant="body2"
-                    align="center"
-                    sx={{ mt: 1, color: "text.secondary" }}
-                  >
-                    Cargando información...
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  No hay planes registrados
-                </TableCell>
-              </TableRow>
-            ) : (
-              data.map((p) => (
-                <TableRow key={p.id} hover>
-                  <TableCell>{p.nombre}</TableCell>
-                  <TableCell>${p.precio}</TableCell>
-                  <TableCell>{p.duracionDias}</TableCell>
-                  <TableCell>{p.tipo}</TableCell>
-
-                  <TableCell align="right">
-                    <IconButton
-                      color="primary"
-                      onClick={() => {
-                        setPlan(p);
-                        setView(true);
-                      }}
-                    >
-                      <VisibilityIcon />
-                    </IconButton>
-
-                    <IconButton
-                      color="info"
-                      onClick={() => {
-                        setPlan(p);
-                        setOpen(true);
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-
-                    <IconButton color="error" onClick={() => eliminar(p.id!)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <TablePagination
-        component="div"
-        count={planes.length}
+      <GenericTable<Plan>
+        columns={columns}
+        data={data}
+        loading={loading}
+        emptyText="No hay planes registrados"
         page={page}
-        onPageChange={(_, p) => setPage(p)}
         rowsPerPage={rows}
-        onRowsPerPageChange={(e) => {
-          setRows(+e.target.value);
+        total={planes.length}
+        onPageChange={setPage}
+        onRowsPerPageChange={(r) => {
+          setRows(r);
           setPage(0);
         }}
+        actions={(p) => (
+          <>
+            <IconButton
+              color="primary"
+              onClick={() => {
+                setPlan(p);
+                setView(true);
+              }}
+            >
+              <VisibilityIcon />
+            </IconButton>
+
+            <IconButton
+              color="info"
+              onClick={() => {
+                setPlan(p);
+                setOpen(true);
+              }}
+            >
+              <EditIcon />
+            </IconButton>
+
+            <IconButton color="error" onClick={() => eliminar(Number(p.id))}>
+              <DeleteIcon />
+            </IconButton>
+          </>
+        )}
       />
 
       <PlanModal

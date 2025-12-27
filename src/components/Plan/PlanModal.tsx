@@ -1,5 +1,5 @@
 import { Dialog, DialogActions, TextField, Button } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { PlanCreateDto } from "../../services/planApi";
 
 interface Props {
@@ -11,20 +11,16 @@ interface Props {
 }
 
 export const PlanModal = ({ open, onClose, onSave, plan, soloVer }: Props) => {
-  const initialForm: PlanCreateDto = plan ?? {
-    nombre: "",
-    precio: 0,
-    duracionDias: 0,
-    tipo: "",
+  const initialForm: PlanCreateDto = {
+    nombre: plan.nombre,
+    precio: plan.precio,
+    duracionDias: plan.duracionDias,
+    tipo: plan.tipo,
   };
 
   const [form, setForm] = useState<PlanCreateDto>(initialForm);
 
   const [errors, setErrors] = useState<any>({});
-
-  useEffect(() => {
-    if (plan) setForm(plan);
-  }, [plan]);
 
   const validar = () => {
     const e: any = {};
@@ -42,6 +38,9 @@ export const PlanModal = ({ open, onClose, onSave, plan, soloVer }: Props) => {
     onClose();
   };
 
+  console.log(form);
+  
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <div className="w-100 p-3">
@@ -54,20 +53,29 @@ export const PlanModal = ({ open, onClose, onSave, plan, soloVer }: Props) => {
             : "Nuevo Plan"}
         </h4>
         <div className="w-100 row gap-3 mt-4">
-          {["nombre", "precio", "duracionDias", "tipo"].map((field) => (
-            <div className="col-12 w-100" key={field}>
+          {[
+            { id: 1, text: "Nombre", field: "nombre" },
+            { id: 2, text: "Precio", field: "precio" },
+            { id: 3, text: "Duracion de dias", field: "duracionDias" },
+            { id: 4, text: "Tipo", field: "tipo" },
+          ].map((item) => (
+            <div className="col-12 w-100" key={item.id}>
               <TextField
-                label={field}
+                label={item.text}
                 type={
-                  field !== "nombre" && field !== "tipo" ? "number" : "text"
+                  item.field !== "nombre" && item.field !== "tipo"
+                    ? "number"
+                    : "text"
                 }
                 fullWidth
                 size="small"
-                value={(form as any)[field]}
-                error={!!errors[field]}
-                helperText={errors[field]}
+                value={[item.field]}
+                error={!!errors[item.field]}
+                helperText={errors[item.field]}
                 disabled={soloVer}
-                onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, [item.field]: e.target.value })
+                }
               />
             </div>
           ))}

@@ -35,7 +35,7 @@ const Header = ({ user }: HeaderProps) => {
       path: "/historial-suscripciones",
     },
     {
-      text: "Pefil",
+      text: "Perfil",
 
       path: "/perfil",
     },
@@ -58,6 +58,17 @@ const Header = ({ user }: HeaderProps) => {
     localStorage.removeItem("token");
     window.location.href = "/login";
   };
+  const getInitials = (nombre: string) => {
+    if (!nombre) return "";
+
+    const words = nombre.trim().split(" ");
+
+    if (words.length === 1) {
+      return words[0][0].toUpperCase();
+    }
+
+    return words[0][0].toUpperCase() + words[1][0].toUpperCase();
+  };
 
   return (
     <AppBar position="static" sx={{ backgroundColor: "#f5e9cf" }} elevation={0}>
@@ -73,7 +84,7 @@ const Header = ({ user }: HeaderProps) => {
         {user && (
           <Box>
             <IconButton onClick={handleMenuOpen} size="small">
-              <Avatar src={user.nombre}>{user.nombre}</Avatar>
+              <Avatar>{getInitials(user.nombre)}</Avatar>
             </IconButton>
             <Menu
               anchorEl={anchorEl}

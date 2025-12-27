@@ -39,8 +39,15 @@ export interface PlanCreateDto {
   tipo: string;
 }
 
+export type PlanFormErrors = Partial<Record<keyof PlanCreateDto, string>>;
+
 export const planApi = {
-  getAll: () => api.get(""),
+  getAll: (params?: {
+    page?: number;
+    pageSize?: number;
+    orderBy?: string;
+    search?: string;
+  }) => api.get("", { params }),
   getById: (id: number) => api.get(`/${id}`),
   crear: (data: PlanCreateDto) => api.post("", data),
   actualizar: (id: number, data: PlanCreateDto) => api.put(`/${id}`, data),

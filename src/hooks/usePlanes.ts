@@ -1,30 +1,50 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Swal from "sweetalert2";
 import { planApi, type PlanCreateDto } from "../services/planApi";
+
+interface ListarParams {
+  page: number;
+  rows: number;
+  orderBy: string;
+  search: string;
+}
 
 export const usePlanes = () => {
   const [planes, setPlanes] = useState<PlanCreateDto[]>([]);
   const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(0);
 
-  const listar = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data } = await planApi.getAll();
-      setPlanes(data.respuesta ?? []);
-    } catch (error) {
-      console.log(error);
+  const listar = useCallback(
+    async ({ page, rows, orderBy, search }: ListarParams) => {
+      setLoading(true);
+      try {
+        const { data } = await planApi.getAll({
+          page: page + 1,
+          pageSize: rows,
+          orderBy,
+          search,
+        });
 
-      Swal.fire(
-        "Error",
-        "No se pudo cargar la información de los planes",
-        "error"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+        setPlanes(data.respuesta?.data ?? []);
+        setTotal(data.respuesta?.totalRecords ?? 0);
+      } catch (error) {
+        console.error(error);
+        Swal.fire(
+          "Error",
+          "No se pudo cargar la información de los planes",
+          "error"
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
-  const guardar = async (plan: PlanCreateDto) => {
+  const guardar = async (
+    plan: PlanCreateDto,
+    refrescarParams: ListarParams
+  ) => {
     try {
       setLoading(true);
 
@@ -36,16 +56,16 @@ export const usePlanes = () => {
         Swal.fire("Creado", "Plan creado", "success");
       }
 
-      listar();
+      listar(refrescarParams);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       Swal.fire("Error", "No se pudo guardar el plan", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const eliminar = async (id: number) => {
+  const eliminar = async (id: number, refrescarParams: ListarParams) => {
     const result = await Swal.fire({
       title: "¿Eliminar plan?",
       text: "Esta acción no se puede deshacer",
@@ -61,24 +81,21 @@ export const usePlanes = () => {
       setLoading(true);
       await planApi.eliminar(id);
       Swal.fire("Eliminado", "Plan eliminado", "success");
-      listar();
+      listar(refrescarParams);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       Swal.fire("Error", "No se pudo eliminar el plan", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    listar();
-  }, [listar]);
-
   return {
     planes,
+    total,
     loading,
+    listar,
     guardar,
     eliminar,
-    refrescar: listar,
   };
 };

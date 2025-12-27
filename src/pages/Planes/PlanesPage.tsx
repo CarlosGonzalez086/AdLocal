@@ -4,7 +4,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePlanes } from "../../hooks/usePlanes";
 import type { PlanCreateDto } from "../../services/planApi";
 import { PlanModal } from "../../components/Plan/PlanModal";
@@ -12,6 +12,8 @@ import {
   GenericTable,
   type TableColumn,
 } from "../../components/layouts/GenericTable";
+import { SearchInput } from "../../components/SearchInput";
+import { OrderSelect } from "../../components/OrderSelect";
 
 interface Plan {
   id?: number;
@@ -29,20 +31,20 @@ export const PlanesPage = () => {
     tipo: "",
   };
 
-  const { planes, loading, guardar, eliminar } = usePlanes();
+  const { planes, total, loading, listar, guardar, eliminar } = usePlanes();
 
   const [page, setPage] = useState(0);
-  const [rows, setRows] = useState(5);
+  const [rows, setRows] = useState(10);
+  const [orderBy, setOrderBy] = useState("recent");
+  const [search, setSearch] = useState("");
+
   const [open, setOpen] = useState(false);
   const [view, setView] = useState(false);
-  const [plan, setPlan] = useState<PlanCreateDto>({
-    nombre: "",
-    precio: 0,
-    duracionDias: 0,
-    tipo: "",
-  });
+  const [plan, setPlan] = useState<PlanCreateDto>(initialForm);
 
-  const data = planes.slice(page * rows, page * rows + rows);
+  useEffect(() => {
+    listar({ page, rows, orderBy, search });
+  }, [page, rows, orderBy, search]);
 
   const columns: TableColumn<Plan>[] = [
     { key: "nombre", label: "Nombre" },
@@ -57,27 +59,52 @@ export const PlanesPage = () => {
 
   return (
     <div>
-      <div className="d-flex justify-content-end mb-3">
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => {
-            setPlan(initialForm);
-            setOpen(true);
-          }}
-        >
-          Nuevo
-        </Button>
+      <div className="row align-items-center mb-3">
+        <div className="col-12 col-md-7 mb-2 mb-md-0">
+          <SearchInput
+            value={search}
+            placeholder="Buscar plan..."
+            onChange={(value) => {
+              setSearch(value);
+              setPage(0);
+            }}
+          />
+        </div>
+
+        <div className="col-12 col-md-3 mb-2 mb-md-0">
+          <OrderSelect
+            value={orderBy}
+            onChange={(value) => {
+              setOrderBy(value);
+              setPage(0);
+            }}
+          />
+        </div>
+
+        <div className="col-12 col-md-2 d-flex justify-content-md-end">
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              setPlan(initialForm);
+              setOpen(true);
+            }}
+            fullWidth
+            className="w-100 w-md-auto"
+          >
+            Nuevo
+          </Button>
+        </div>
       </div>
 
       <GenericTable<Plan>
         columns={columns}
-        data={data}
+        data={planes}
         loading={loading}
         emptyText="No hay planes registrados"
         page={page}
         rowsPerPage={rows}
-        total={planes.length}
+        total={total}
         onPageChange={setPage}
         onRowsPerPageChange={(r) => {
           setRows(r);
@@ -88,7 +115,13 @@ export const PlanesPage = () => {
             <IconButton
               color="primary"
               onClick={() => {
-                setPlan(p);
+                setPlan({
+                  nombre: p.nombre,
+                  precio: p.precio,
+                  duracionDias: p.duracionDias,
+                  tipo: p.tipo,
+                  id: p.id,
+                });
                 setView(true);
               }}
             >
@@ -98,14 +131,25 @@ export const PlanesPage = () => {
             <IconButton
               color="info"
               onClick={() => {
-                setPlan(p);
+                setPlan({
+                  nombre: p.nombre,
+                  precio: p.precio,
+                  duracionDias: p.duracionDias,
+                  tipo: p.tipo,
+                  id: p.id,
+                });
                 setOpen(true);
               }}
             >
               <EditIcon />
             </IconButton>
 
-            <IconButton color="error" onClick={() => eliminar(Number(p.id))}>
+            <IconButton
+              color="error"
+              onClick={() =>
+                eliminar(Number(p.id), { page, rows, orderBy, search })
+              }
+            >
               <DeleteIcon />
             </IconButton>
           </>
@@ -114,14 +158,20 @@ export const PlanesPage = () => {
 
       <PlanModal
         open={open}
-        onClose={() => setOpen(false)}
-        onSave={guardar}
+        onClose={() => {
+          setOpen(false);
+          setPlan(initialForm);
+        }}
+        onSave={(p) => guardar(p, { page, rows, orderBy, search })}
         plan={plan}
       />
 
       <PlanModal
         open={view}
-        onClose={() => setView(false)}
+        onClose={() => {
+          setView(false);
+          setPlan(initialForm);
+        }}
         onSave={() => {}}
         plan={plan}
         soloVer

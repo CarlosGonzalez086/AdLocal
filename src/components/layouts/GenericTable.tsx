@@ -10,8 +10,13 @@ import {
   Paper,
   LinearProgress,
   Typography,
+  IconButton,
+  Menu,
+  useMediaQuery,
 } from "@mui/material";
-import type { ReactNode } from "react";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { useTheme } from "@mui/material/styles";
+import { useState, type ReactNode } from "react";
 
 export interface TableColumn<T> {
   key: keyof T | string;
@@ -45,13 +50,32 @@ export function GenericTable<T>({
   onPageChange,
   onRowsPerPageChange,
 }: GenericTableProps<T>) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const visibleColumns = isMobile ? columns.slice(0, 2) : columns;
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedRow, setSelectedRow] = useState<T | null>(null);
+
+  const openMenu = Boolean(anchorEl);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, row: T) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedRow(row);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedRow(null);
+  };
+
   return (
     <TableContainer component={Paper}>
-      <Table className="tabla-davincix">
-        {/* HEADER */}
+      <Table>
         <TableHead>
           <TableRow sx={{ backgroundColor: "#f7ebd1" }}>
-            {columns.map((col) => (
+            {visibleColumns.map((col) => (
               <TableCell
                 key={String(col.key)}
                 align={col.align ?? "left"}
@@ -60,6 +84,7 @@ export function GenericTable<T>({
                 {col.label}
               </TableCell>
             ))}
+
             {actions && (
               <TableCell
                 align="right"
@@ -71,11 +96,10 @@ export function GenericTable<T>({
           </TableRow>
         </TableHead>
 
-        {/* BODY */}
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={columns.length + (actions ? 1 : 0)}>
+              <TableCell colSpan={visibleColumns.length + 1}>
                 <LinearProgress />
                 <Typography
                   variant="body2"
@@ -88,30 +112,33 @@ export function GenericTable<T>({
             </TableRow>
           ) : data.length === 0 ? (
             <TableRow>
-              <TableCell
-                colSpan={columns.length + (actions ? 1 : 0)}
-                align="center"
-              >
+              <TableCell colSpan={visibleColumns.length + 1} align="center">
                 {emptyText}
               </TableCell>
             </TableRow>
           ) : (
             data.map((row, index) => (
               <TableRow key={index} hover>
-                {columns.map((col) => (
-                  <TableCell
-                    key={String(col.key)}
-                    align={col.align ?? "left"}
-                  >
-                    {col.render
-                      ? col.render(row)
-                      : (row as any)[col.key]}
+                {visibleColumns.map((col) => (
+                  <TableCell key={String(col.key)} align={col.align ?? "left"}>
+                    {col.render ? col.render(row) : (row as any)[col.key]}
                   </TableCell>
                 ))}
 
                 {actions && (
                   <TableCell align="right">
-                    {actions(row)}
+                    {isMobile ? (
+                      <>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuOpen(e, row)}
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                      </>
+                    ) : (
+                      actions(row)
+                    )}
                   </TableCell>
                 )}
               </TableRow>
@@ -119,30 +146,46 @@ export function GenericTable<T>({
           )}
         </TableBody>
 
-        {/* FOOTER */}
         <TableFooter>
           <TableRow>
             <TablePagination
-              rowsPerPageOptions={[15, 30, 100, { label: "Todos", value: -1 }]}
+              rowsPerPageOptions={[10, 30, 100]}
               count={total}
               page={page}
               rowsPerPage={rowsPerPage}
               onPageChange={(_, p) => onPageChange(p)}
-              onRowsPerPageChange={(e) =>
-                onRowsPerPageChange(+e.target.value)
-              }
+              onRowsPerPageChange={(e) => onRowsPerPageChange(+e.target.value)}
               labelRowsPerPage="Registros por página"
               labelDisplayedRows={({ from, to, count }) =>
                 `${from} - ${to} de ${count}`
               }
               SelectProps={{
                 native: true,
-                inputProps: { "aria-label": "Filas por página" },
+              }}
+              sx={{
+                borderTop: "1px solid #e0e0e0",
+                marginTop: 1,
+                ".MuiTablePagination-toolbar": {
+                  paddingLeft: 2,
+                  paddingRight: 2,
+                  minHeight: 48,
+                },
+                ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                  {
+                    marginBottom: 0,
+                    fontSize: "0.875rem",
+                  },
               }}
             />
           </TableRow>
         </TableFooter>
       </Table>
+
+      {isMobile && actions && (
+        <Menu anchorEl={anchorEl} open={openMenu} onClose={handleMenuClose}>
+          {selectedRow && actions(selectedRow)}
+        </Menu>
+      )}
     </TableContainer>
   );
 }

@@ -10,7 +10,7 @@ import {
 import { Box } from "@mui/system";
 import { useState } from "react";
 import type { User } from "../../context/UserContext ";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   user: User | null;
@@ -18,6 +18,7 @@ interface HeaderProps {
 
 const Header = ({ user }: HeaderProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const menuItems = [
     { text: "Home", path: "/" },
@@ -33,6 +34,16 @@ const Header = ({ user }: HeaderProps) => {
 
       path: "/historial-suscripciones",
     },
+    {
+      text: "Perfil",
+
+      path: "/perfil",
+    },
+    {
+      text: "Cambiar contraseña",
+
+      path: "/perfil/cambiar-password",
+    },
   ];
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
@@ -40,13 +51,23 @@ const Header = ({ user }: HeaderProps) => {
 
   const handleProfile = () => {
     handleMenuClose();
-    console.log("Ver perfil");
+    navigate("/perfil");
   };
-
   const handleLogout = () => {
     handleMenuClose();
     localStorage.removeItem("token");
     window.location.href = "/login";
+  };
+  const getInitials = (nombre: string) => {
+    if (!nombre) return "";
+
+    const words = nombre.trim().split(" ");
+
+    if (words.length === 1) {
+      return words[0][0].toUpperCase();
+    }
+
+    return words[0][0].toUpperCase() + words[1][0].toUpperCase();
   };
 
   return (
@@ -63,7 +84,7 @@ const Header = ({ user }: HeaderProps) => {
         {user && (
           <Box>
             <IconButton onClick={handleMenuOpen} size="small">
-              <Avatar src={user.nombre}>{user.nombre}</Avatar>
+              <Avatar>{getInitials(user.nombre)}</Avatar>
             </IconButton>
             <Menu
               anchorEl={anchorEl}

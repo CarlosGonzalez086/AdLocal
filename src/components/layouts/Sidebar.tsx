@@ -65,7 +65,7 @@ const Sidebar = ({ drawerWidth }: SidebarProps) => {
       >
         <Box
           component="img"
-          src={LogoAdLocal}
+          src="/images/IMG_6372.png"
           alt="Logo AdLocal"
           sx={{
             width: "100%",

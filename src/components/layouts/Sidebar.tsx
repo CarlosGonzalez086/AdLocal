@@ -14,7 +14,6 @@ import PeopleIcon from "@mui/icons-material/People";
 import PaymentIcon from "@mui/icons-material/Payment";
 import SettingsIcon from "@mui/icons-material/Settings";
 import HistoryIcon from "@mui/icons-material/History";
-import LogoAdLocal from "../../assets/IMG_6372.png";
 
 interface SidebarProps {
   drawerWidth: number;
@@ -65,7 +64,7 @@ const Sidebar = ({ drawerWidth }: SidebarProps) => {
       >
         <Box
           component="img"
-          src={LogoAdLocal}
+          src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
           alt="Logo AdLocal"
           sx={{
             width: "100%",

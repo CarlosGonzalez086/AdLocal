@@ -19,7 +19,7 @@ interface HeaderProps {
 const Header = ({ user }: HeaderProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const menuItems = [
     { text: "Home", path: "/" },
     { text: "Planes", path: "/planes" },
@@ -46,7 +46,7 @@ const Header = ({ user }: HeaderProps) => {
     },
   ];
 
-  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
   const handleProfile = () => {

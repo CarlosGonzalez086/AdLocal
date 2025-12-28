@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 import { useActualizarJwt } from "../hooks/useActualizarJwt";
-import { UserContext, type User } from "../context/UserContext ";
+import { UserContext, type User } from "../context/UserContext";
 
 interface PrivateRouteProps {
   children: ReactElement;
@@ -19,14 +19,7 @@ interface JwtPayload {
 }
 
 const PrivateRoute = ({ children }: PrivateRouteProps) => {
-  const [user, setUser] = useState<User>({
-    sub: "",
-    id: "",
-    nombre: "",
-    rol: "",
-    exp: 0,
-    iss: "",
-  });
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   const { actualizarJwt } = useActualizarJwt();
@@ -52,21 +45,17 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
 
           const nuevoToken = response?.respuesta?.token;
 
-          if (!nuevoToken) {
-            throw new Error("No se pudo refrescar el token");
-          }
+          if (!nuevoToken) throw new Error("No se pudo refrescar el token");
 
           localStorage.setItem("token", nuevoToken);
-
-          const nuevoDecoded = jwtDecode<JwtPayload>(nuevoToken);
-          setUser(nuevoDecoded);
+          setUser(jwtDecode<JwtPayload>(nuevoToken));
         } else {
           setUser(decoded);
         }
       } catch (error) {
         console.error("Sesión inválida", error);
         localStorage.removeItem("token");
-        setUser({ sub: "", id: "", nombre: "", rol: "", exp: 0, iss: "" });
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -76,9 +65,15 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
   }, []);
 
   if (loading) return null;
+
+  // 🔐 AQUÍ ESTÁ LA CLAVE
   if (!user) return <Navigate to="/login" replace />;
 
-  return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
+  return (
+    <UserContext.Provider value={user}>
+      {children}
+    </UserContext.Provider>
+  );
 };
 
 export default PrivateRoute;

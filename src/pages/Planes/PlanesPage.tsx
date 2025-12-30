@@ -164,6 +164,7 @@ export const PlanesPage = () => {
         }}
         onSave={(p) => guardar(p, { page, rows, orderBy, search })}
         plan={plan}
+        loading={loading}
       />
 
       <PlanModal
@@ -172,9 +173,10 @@ export const PlanesPage = () => {
           setView(false);
           setPlan(initialForm);
         }}
-        onSave={() => {}}
+        onSave={async () => {}}
         plan={plan}
         soloVer
+        
       />
     </div>
   );

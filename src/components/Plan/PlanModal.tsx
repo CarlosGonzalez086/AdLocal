@@ -11,12 +11,13 @@ import type { PlanCreateDto, PlanFormErrors } from "../../services/planApi";
 interface Props {
   open: boolean;
   onClose: () => void;
-  onSave: (data: PlanCreateDto) => void;
+  onSave: (data: PlanCreateDto) => Promise<void>;
   plan: PlanCreateDto;
   soloVer?: boolean;
+  loading?:boolean;
 }
 
-export const PlanModal = ({ open, onClose, onSave, plan, soloVer }: Props) => {
+export const PlanModal = ({ open, onClose, onSave, plan, soloVer,loading }: Props) => {
   const initialForm = useMemo(
     () => ({
       nombre: plan.nombre ?? "",
@@ -42,9 +43,10 @@ export const PlanModal = ({ open, onClose, onSave, plan, soloVer }: Props) => {
     return Object.keys(e).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validar()) return;
-    onSave(form);
+
+    await onSave(form);
     onClose();
   };
 
@@ -117,7 +119,7 @@ export const PlanModal = ({ open, onClose, onSave, plan, soloVer }: Props) => {
       <DialogActions>
         <Button onClick={onClose}>Cerrar</Button>
         {!soloVer && (
-          <Button variant="contained" onClick={handleSave}>
+          <Button variant="contained" onClick={handleSave} disabled={loading}>
             Guardar
           </Button>
         )}

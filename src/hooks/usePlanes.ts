@@ -44,10 +44,9 @@ export const usePlanes = () => {
   const guardar = async (
     plan: PlanCreateDto,
     refrescarParams: ListarParams
-  ) => {
+  ): Promise<void> => {
+    setLoading(true);
     try {
-      setLoading(true);
-
       if (plan.id) {
         await planApi.actualizar(plan.id, plan);
         Swal.fire("Actualizado", "Plan actualizado", "success");
@@ -56,10 +55,7 @@ export const usePlanes = () => {
         Swal.fire("Creado", "Plan creado", "success");
       }
 
-      listar(refrescarParams);
-    } catch (error) {
-      console.error(error);
-      Swal.fire("Error", "No se pudo guardar el plan", "error");
+      await listar(refrescarParams);
     } finally {
       setLoading(false);
     }

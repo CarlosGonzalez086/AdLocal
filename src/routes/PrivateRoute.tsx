@@ -66,8 +66,7 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
   }, []);
 
   if (loading) return null;
-
-  // 🔐 AQUÍ ESTÁ LA CLAVE
+  
   if (!user) return <Navigate to="/login" replace />;
 
   return (

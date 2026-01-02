@@ -1,34 +1,42 @@
 import { Paper, Typography, Box, Divider, Button } from "@mui/material";
 import AdminForm from "../components/forms/AdminForm";
 import { adminApi } from "../api/admin.api";
+
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { authApi } from "../api/authApi";
 
-export default function AdminCreate() {
+interface Props {
+  type: "admin" | "user";
+}
+
+export default function RegisterPage({ type }: Props) {
   const navigate = useNavigate();
+
   const handleCreate = async (data: any) => {
     try {
-      const res = await adminApi.crearAdmin(data);
+      const res =
+        type === "admin"
+          ? await adminApi.crearAdmin(data)
+          : await authApi.registroUsuario(data);
+
       Swal.fire({
         icon: "success",
-        title: "Administrador creado",
-        text: res.data.mensaje || "El administrador fue creado correctamente",
-        confirmButtonText: "Continuar",
-        confirmButtonColor: "#111827",
+        title:
+          type === "admin"
+            ? "Administrador creado"
+            : "Cuenta creada",
+        text: res.data.mensaje,
       });
 
-      navigate("/login");
+      navigate(type === "admin" ? "/login/admin" : "/login");
     } catch (error: any) {
-      const message =
-        error?.response?.data?.mensaje ||
-        "Ocurrió un error al crear el administrador";
-
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: message,
-        confirmButtonText: "Aceptar",
-        confirmButtonColor: "#991B1B",
+        text:
+          error?.response?.data?.mensaje ||
+          "Error al crear la cuenta",
       });
     }
   };
@@ -43,18 +51,26 @@ export default function AdminCreate() {
     >
       <Paper elevation={3} sx={{ p: 4, maxWidth: 600, width: "100%" }}>
         <Typography variant="h5" fontWeight="bold" mb={1}>
-          Crear administrador
+          {type === "admin" ? "Crear administrador" : "Crear cuenta"}
         </Typography>
 
         <Typography variant="body2" color="text.secondary" mb={3}>
-          Registra un nuevo administrador del sistema
+          {type === "admin"
+            ? "Registro de administrador del sistema"
+            : "Registro de usuario"}
         </Typography>
 
-        <AdminForm onSubmit={handleCreate} />
+        <AdminForm onSubmit={handleCreate} type={type} />
 
         <Divider sx={{ my: 3 }} />
 
-        <Button variant="outlined" fullWidth onClick={() => navigate("/login")}>
+        <Button
+          variant="outlined"
+          fullWidth
+          onClick={() =>
+            navigate(type === "admin" ? "/login/admin" : "/login")
+          }
+        >
           Iniciar sesión
         </Button>
       </Paper>

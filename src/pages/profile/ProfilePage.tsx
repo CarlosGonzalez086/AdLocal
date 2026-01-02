@@ -35,15 +35,10 @@ const ProfilePage = () => {
         }}
       >
         <CardContent sx={{ p: 3 }}>
-          {/* Header */}
-          <ProfileHeader
-            nombre={profile.nombre}
-            rol={profile.rol}
-          />
+          <ProfileHeader nombre={profile.nombre} rol={profile.rol} />
 
           <Divider sx={{ my: 2 }} />
 
-          {/* Información editable */}
           <Typography variant="subtitle1" fontWeight={600} mb={1}>
             Información personal
           </Typography>
@@ -56,7 +51,6 @@ const ProfilePage = () => {
 
           <Divider sx={{ my: 3 }} />
 
-          {/* Acciones */}
           <Box>
             <ProfileActions />
           </Box>

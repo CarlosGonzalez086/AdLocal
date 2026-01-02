@@ -1,13 +1,12 @@
-import { useState, useEffect, type ReactElement } from "react";
+import { useState, useEffect, useRef, type ReactElement } from "react";
 import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-
 import { useActualizarJwt } from "../hooks/useActualizarJwt";
 import { UserContext, type User } from "../context/UserContext ";
 
-
 interface PrivateRouteProps {
   children: ReactElement;
+  role?: string;
 }
 
 interface JwtPayload {
@@ -19,13 +18,17 @@ interface JwtPayload {
   iss: string;
 }
 
-const PrivateRoute = ({ children }: PrivateRouteProps) => {
+const PrivateRoute = ({ children, role }: PrivateRouteProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   const { actualizarJwt } = useActualizarJwt();
+  const executedRef = useRef(false);
 
   useEffect(() => {
+    if (executedRef.current) return;
+    executedRef.current = true;
+
     const validarToken = async () => {
       const token = localStorage.getItem("token");
 
@@ -35,7 +38,7 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
       }
 
       try {
-        const decoded = jwtDecode<JwtPayload>(token);
+        let decoded = jwtDecode<JwtPayload>(token);
         const now = Math.floor(Date.now() / 1000);
 
         if (decoded.exp < now) {
@@ -45,16 +48,14 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
           });
 
           const nuevoToken = response?.respuesta?.token;
-
           if (!nuevoToken) throw new Error("No se pudo refrescar el token");
 
           localStorage.setItem("token", nuevoToken);
-          setUser(jwtDecode<JwtPayload>(nuevoToken));
-        } else {
-          setUser(decoded);
+          decoded = jwtDecode<JwtPayload>(nuevoToken);
         }
-      } catch (error) {
-        console.error("Sesión inválida", error);
+
+        setUser(decoded);
+      } catch {
         localStorage.removeItem("token");
         setUser(null);
       } finally {
@@ -63,11 +64,17 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
     };
 
     validarToken();
-  }, []);
+  }, [actualizarJwt]);
 
   if (loading) return null;
-  
+
   if (!user) return <Navigate to="/login" replace />;
+
+  if (role && user.rol !== role) {
+    if (user.rol === "Admin") return <Navigate to="/Admin" replace />;
+    if (user.rol === "Comercio") return <Navigate to="/app" replace />;
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <UserContext.Provider value={user}>
@@ -75,5 +82,6 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
     </UserContext.Provider>
   );
 };
+
 
 export default PrivateRoute;

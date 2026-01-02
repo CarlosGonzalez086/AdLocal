@@ -14,3 +14,9 @@ export interface ApiResponse<T = any> {
   mensaje: string;
   respuesta: T;
 }
+
+export interface UsuarioRegistroDto {
+  nombre: string;
+  email: string;
+  password: string;
+}

@@ -9,7 +9,6 @@ export const useConfiguracionSistema = () => {
   const [loading, setLoading] = useState(false);
   const [configuraciones, setConfiguraciones] = useState<any[]>([]);
 
-  // 🔄 Cargar todas las configuraciones (para mapear a formularios)
   const cargar = useCallback(async () => {
     setLoading(true);
     try {
@@ -28,7 +27,6 @@ export const useConfiguracionSistema = () => {
     }
   }, []);
 
-  // 🔐 Guardar Stripe
   const guardarStripe = async (dto: StripeConfiguracionDto) => {
     try {
       setLoading(true);

@@ -1,49 +1,41 @@
 import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { useEffect, useState, type ReactElement } from "react";
+import type { ReactElement } from "react";
 
-interface PublicRouteProps {
+interface Props {
   children: ReactElement;
 }
 
 interface JwtPayload {
   exp: number;
+  rol: "Admin" | "Comercio";
 }
 
-const PublicRoute = ({ children }: PublicRouteProps) => {
-  const [redirect, setRedirect] = useState(false);
-  const [loading, setLoading] = useState(true);
+const PublicRoute = ({ children }: Props) => {
+  const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
+  if (!token) return children;
 
-    if (!token) {
-      setLoading(false);
-      return;
+  try {
+    const decoded = jwtDecode<JwtPayload>(token);
+    // eslint-disable-next-line react-hooks/purity
+    const now = Math.floor(Date.now() / 1000);
+
+    if (decoded.exp > now) {
+      return (
+        <Navigate
+          to={decoded.rol === "Admin" ? "/Admin" : "/app"}
+          replace
+        />
+      );
     }
 
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
-      const now = Math.floor(Date.now() / 1000);
-
-      if (decoded.exp > now) {
-        setRedirect(true);
-      } else {
-        localStorage.removeItem("token");
-      }
-    } catch (error) {
-      console.error("Token inválido", error);
-      localStorage.removeItem("token");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  if (loading) return null;
-
-  if (redirect) return <Navigate to="/" replace />;
-
-  return children;
+    localStorage.removeItem("token");
+    return children;
+  } catch {
+    localStorage.removeItem("token");
+    return children;
+  }
 };
 
 export default PublicRoute;

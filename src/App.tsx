@@ -1,9 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import AdminLogin from "./pages/AdminLogin";
-import AdminCreate from "./pages/AdminCreate";
+
 import PublicRoute from "./routes/PublicRoute";
-import ProtectedLayout from "./components/layouts/ProtectedLayout";
-import { protectedRoutes } from "./routesConfig";
+import PrivateRoute from "./routes/PrivateRoute";
+
+import { adminRoutes } from "./adminRoutes";
+import { userRoutes } from "./userRoutes";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import AdminLayout from "./components/layouts/AdminLayout";
+import UserLayout from "./components/layouts/UserLayout";
 
 export default function App() {
   return (
@@ -14,25 +19,65 @@ export default function App() {
             path="/login"
             element={
               <PublicRoute>
-                <AdminLogin />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/crear-admin"
-            element={
-              <PublicRoute>
-                <AdminCreate />
+                <LoginPage type="user" />
               </PublicRoute>
             }
           />
 
-          <Route element={<ProtectedLayout />}>
-            {protectedRoutes.map((r) => (
+          <Route
+            path="/login/admin"
+            element={
+              <PublicRoute>
+                <LoginPage type="admin" />
+              </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/registro"
+            element={
+              <PublicRoute>
+                <RegisterPage type="user" />
+              </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/crear-admin"
+            element={
+              <PublicRoute>
+                <RegisterPage type="admin" />
+              </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/Admin"
+            element={
+              <PrivateRoute role="Admin">
+                <AdminLayout />
+              </PrivateRoute>
+            }
+          >
+            {adminRoutes.map((r) => (
               <Route key={r.path} path={r.path} element={r.element} />
             ))}
           </Route>
-          <Route path="*" element={<Navigate to="/" />} />
+
+          <Route
+            path="/app"
+            element={
+              <PrivateRoute role="Comercio">
+                <UserLayout />
+              </PrivateRoute>
+            }
+          >
+            {userRoutes.map((r) => (
+              <Route key={r.path} path={r.path} element={r.element} />
+            ))}
+          </Route>
+
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
     </div>

@@ -1,0 +1,39 @@
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: `${import.meta.env.VITE_API_URL}/comercios`,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+api.interceptors.response.use(
+  (r) => r,
+  (e) => {
+    if (e.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(e);
+  }
+);
+
+export interface ComercioDto {
+  id?: number;
+  nombre: string;
+  direccion: string;
+  telefono: string;
+}
+
+export const comercioApi = {
+  getMine: () => api.get("/mine"),  
+  crear: (data: ComercioDto) => api.post("", data),
+  actualizar: (id: number, data: ComercioDto) => api.put(`/${id}`, data),
+  eliminar: (id: number) => api.delete(`/${id}`),
+};

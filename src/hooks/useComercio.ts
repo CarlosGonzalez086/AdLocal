@@ -1,8 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Swal from "sweetalert2";
 import { comercioApi, type ComercioDto } from "../services/comercioApi";
+import { useActualizarJwt } from "./useActualizarJwt";
+import { UserContext } from "../context/UserContext ";
 
 export const useComercio = () => {
+    const user = useContext(UserContext);
+  const { actualizarJwt } = useActualizarJwt();
   const [comercio, setComercio] = useState<ComercioDto | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,14 +30,19 @@ export const useComercio = () => {
         Swal.fire("Actualizado", "Comercio actualizado", "success");
       } else {
         await comercioApi.crear(data);
+        await actualizarJwt({
+          email: user.sub,
+          updateJWT: true,
+        });
+
         Swal.fire("Creado", "Comercio registrado", "success");
       }
+
       await cargar();
     } finally {
       setLoading(false);
     }
   };
-
   const eliminar = async () => {
     if (!comercio?.id) return;
 

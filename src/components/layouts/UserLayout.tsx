@@ -13,16 +13,14 @@ const UserLayout = () => {
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
       <UserSidebar drawerWidth={drawerWidth} />
-
-      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+      <Box sx={{ flexGrow: 1 }}>
         <UserHeader user={user} />
-        <Box sx={{ flexGrow: 1, p: 2 }}>
+        <div className="p-3">
           <Outlet />
-        </Box>
+        </div>
       </Box>
     </Box>
   );
 };
-
 
 export default UserLayout;

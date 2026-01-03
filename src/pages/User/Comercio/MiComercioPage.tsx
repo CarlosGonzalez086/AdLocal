@@ -1,12 +1,20 @@
-import { Button, Card, CardContent, LinearProgress } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  LinearProgress,
+  Avatar,
+  Divider,
+} from "@mui/material";
 import { useState } from "react";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import { useComercio } from "../../../hooks/useComercio";
 import { ComercioForm } from "./ComercioForm";
 
 export const MiComercioPage = () => {
   const { comercio, loading, guardar, eliminar } = useComercio();
-
   const [editando, setEditando] = useState(false);
+  console.log(comercio);
 
   if (loading) {
     return (
@@ -25,12 +33,18 @@ export const MiComercioPage = () => {
     return (
       <Card>
         <CardContent>
-          <h3>Registrar comercio</h3>
+          <h3 className="mb-3">Registrar comercio</h3>
+
           <ComercioForm
             initialData={{
+              id: 0,
               nombre: "",
               direccion: "",
               telefono: "",
+              activo: true,
+              lat: 0,
+              lng: 0,
+              logoBase64: "",
             }}
             loading={loading}
             onSave={guardar}
@@ -43,8 +57,8 @@ export const MiComercioPage = () => {
   if (editando) {
     return (
       <Card>
-        <CardContent>
-          <h3>Editar comercio</h3>
+        <CardContent sx={{ overflow: "visible" }}>
+          <h3 className="mb-3">Editar comercio</h3>
 
           <ComercioForm
             initialData={comercio}
@@ -68,7 +82,19 @@ export const MiComercioPage = () => {
   return (
     <Card>
       <CardContent>
-        <h3>Mi comercio</h3>
+        <h3 className="mb-3">Mi comercio</h3>
+
+        {comercio.logoBase64 && (
+          <div className="d-flex justify-content-center mb-3">
+            <Avatar
+              src={comercio.logoBase64}
+              sx={{ width: 120, height: 120 }}
+              variant="rounded"
+            />
+          </div>
+        )}
+
+        <Divider className="mb-3" />
 
         <p>
           <b>Nombre:</b> {comercio.nombre}
@@ -79,6 +105,23 @@ export const MiComercioPage = () => {
         <p>
           <b>Teléfono:</b> {comercio.telefono}
         </p>
+
+        {comercio.lat !== 0 && comercio.lng !== 0 && (
+          <div className="my-3" style={{ height: 300 }}>
+            <MapContainer
+              center={[comercio.lat, comercio.lng]}
+              zoom={16}
+              style={{ height: "100%", width: "100%" }}
+              scrollWheelZoom={false}
+            >
+              <TileLayer
+                attribution="&copy; OpenStreetMap"
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <Marker position={[comercio.lat, comercio.lng]} />
+            </MapContainer>
+          </div>
+        )}
 
         <div className="d-flex gap-2 mt-3">
           <Button variant="contained" onClick={() => setEditando(true)}>

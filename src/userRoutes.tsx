@@ -1,4 +1,6 @@
 import { MiComercioPage } from "./pages/User/Comercio/MiComercioPage";
+import { UserChangePasswordForm } from "./pages/User/Perfil/UserChangePasswordForm";
+import UserProfilePage from "./pages/User/Perfil/UserProfilePage";
 
 export const userRoutes = [
   {
@@ -28,11 +30,11 @@ export const userRoutes = [
 
   {
     path: "perfil",
-    element: <>User Perfil</>,
+    element: <UserProfilePage />,
   },
 
   {
     path: "perfil/cambiar-password",
-    element: <>User Contraseña</>,
+    element: <UserChangePasswordForm />,
   },
 ];

@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Swal from "sweetalert2";
 import {
   profileUserApi,
   type ProfileUser,
   type ProfileUserUpdateDto,
 } from "../services/userProfileApi ";
+import { UserContext } from "../context/UserContext ";
+import { useActualizarJwt } from "./useActualizarJwt";
 
 export const useUserProfile = () => {
   const [profile, setProfile] = useState<ProfileUser>({
@@ -18,6 +20,8 @@ export const useUserProfile = () => {
     fotoUrl: "",
   });
   const [loading, setLoading] = useState(false);
+  const user = useContext(UserContext);
+  const { actualizarJwt } = useActualizarJwt();
 
   const cargarPerfil = async () => {
     try {
@@ -80,6 +84,10 @@ export const useUserProfile = () => {
 
       Swal.fire("Actualizado", "Foto de perfil actualizada", "success");
       setProfile((prev) => ({ ...prev, fotoUrl: data.respuesta.url }));
+      await actualizarJwt({
+        email: user.sub,
+        updateJWT: true,
+      });
     } catch (error) {
       Swal.fire("Error", "No se pudo subir la foto", "error");
     } finally {

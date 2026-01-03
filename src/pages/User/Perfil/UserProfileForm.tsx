@@ -1,5 +1,4 @@
-import { TextField, Button, Avatar, IconButton } from "@mui/material";
-import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import { TextField, Button} from "@mui/material";
 import type {
   ProfileUser,
   ProfileUserUpdateDto,

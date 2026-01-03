@@ -21,28 +21,28 @@ const Header = ({ user }: HeaderProps) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const menuItems = [
-    { text: "Home", path: "/" },
-    { text: "Planes", path: "/planes" },
-    { text: "Usuarios", path: "/usuarios" },
+    { text: "Home", path: "/Admin" },
+    { text: "Planes", path: "/Admin/planes" },
+    { text: "Usuarios", path: "/Admin/usuarios" },
     {
       text: "Configuraciones",
 
-      path: "/configuraciones",
+      path: "/Admin/configuraciones",
     },
     {
       text: "Historial de suscripciones",
 
-      path: "/historial-suscripciones",
+      path: "/Admin/historial-suscripciones",
     },
     {
       text: "Perfil",
 
-      path: "/perfil",
+      path: "/Admin/perfil",
     },
     {
       text: "Cambiar contraseña",
 
-      path: "/perfil/cambiar-password",
+      path: "/Admin/perfil/cambiar-password",
     },
   ];
 
@@ -51,7 +51,7 @@ const Header = ({ user }: HeaderProps) => {
 
   const handleProfile = () => {
     handleMenuClose();
-    navigate("/perfil");
+    navigate("/Admin/perfil");
   };
   const handleLogout = () => {
     handleMenuClose();

@@ -12,10 +12,12 @@ const AdminLayout = () => {
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
-      <Sidebar drawerWidth={drawerWidth}/>
+      <Sidebar drawerWidth={drawerWidth} />
       <Box sx={{ flexGrow: 1 }}>
         <Header user={user} />
-        <Outlet />
+        <div className="p-3">
+          <Outlet />
+        </div>
       </Box>
     </Box>
   );

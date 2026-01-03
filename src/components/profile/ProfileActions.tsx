@@ -10,7 +10,7 @@ export const ProfileActions = () => {
       <Button
         variant="contained"
         startIcon={<LockIcon />}
-        onClick={() => navigate("/perfil/cambiar-password")}
+        onClick={() => navigate("/Admin/perfil/cambiar-password")}
       >
         Cambiar contraseña
       </Button>

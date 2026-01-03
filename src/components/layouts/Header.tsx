@@ -1,13 +1,13 @@
 import {
   AppBar,
   Avatar,
+  Box,
   IconButton,
   Menu,
   MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
-import { Box } from "@mui/system";
 import { useState } from "react";
 import type { User } from "../../context/UserContext ";
 import { useLocation, useNavigate } from "react-router-dom";

@@ -5,6 +5,7 @@ import type {
   ProfileUserUpdateDto,
 } from "../../../services/userProfileApi ";
 import { useState } from "react";
+import { AvatarUpload } from "../../../components/AvatarUpload";
 
 interface Props {
   profile: ProfileUser;
@@ -27,20 +28,7 @@ export const UserProfileForm = ({
 
   return (
     <div className="row mt-3">
-      <div className="col-12 mb-3 d-flex align-items-center gap-2">
-        <Avatar src={profile.fotoUrl} sx={{ width: 64, height: 64 }} />
-        <IconButton component="label">
-          <input
-            hidden
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              if (e.target.files?.[0]) onUploadPhoto(e.target.files[0]);
-            }}
-          />
-          <PhotoCameraIcon />
-        </IconButton>
-      </div>
+      <AvatarUpload profile={profile} onUploadPhoto={onUploadPhoto} />
 
       <div className="col-12 mb-3">
         <TextField

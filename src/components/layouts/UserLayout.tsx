@@ -13,12 +13,12 @@ const UserLayout = () => {
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
       <UserSidebar drawerWidth={drawerWidth} />
-      <Box sx={{ flexGrow: 1 }}>
+      <div className="w-100 h-100 d-flex flex-column">
         <UserHeader user={user} />
-        <div className="p-3">
+        <div className="flex-grow-1 p-3 overflow-auto">
           <Outlet />
         </div>
-      </Box>
+      </div>
     </Box>
   );
 };

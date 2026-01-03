@@ -7,6 +7,7 @@ export interface User {
   rol: string;
   exp: number;
   iss: string;
+  FotoUrl:string;
 }
 
 export const UserContext = React.createContext<User>({
@@ -16,4 +17,5 @@ export const UserContext = React.createContext<User>({
   rol: "",
   exp: 0,
   iss: "",
+  FotoUrl:"",
 });

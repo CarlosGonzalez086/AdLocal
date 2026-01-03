@@ -3,9 +3,10 @@ import Swal from "sweetalert2";
 import { comercioApi, type ComercioDto } from "../services/comercioApi";
 import { useActualizarJwt } from "./useActualizarJwt";
 import { UserContext } from "../context/UserContext ";
+import type { ComercioCreateDto } from "../schemas/comercioCreate.schema";
 
 export const useComercio = () => {
-    const user = useContext(UserContext);
+  const user = useContext(UserContext);
   const { actualizarJwt } = useActualizarJwt();
   const [comercio, setComercio] = useState<ComercioDto | null>(null);
   const [loading, setLoading] = useState(false);
@@ -13,20 +14,42 @@ export const useComercio = () => {
   const cargar = async () => {
     try {
       setLoading(true);
+
       const { data } = await comercioApi.getMine();
-      setComercio(data.respuesta ?? null);
-    } catch {
+      const c = data.respuesta;
+      console.log(c);
+
+      if (!c) {
+        setComercio(null);
+        return;
+      }
+
+      setComercio({
+        id: c.id,
+        nombre: c.nombre,
+        direccion: c.direccion,
+        telefono: c.telefono,
+        activo: c.activo,
+        logoBase64: c.logoBase64,
+        lat: c.lat,
+        lng: c.lng,
+      });
+    } catch (error) {
+      console.error(error);
       setComercio(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const guardar = async (data: ComercioDto) => {
+  const guardar = async (data: ComercioCreateDto) => {
     setLoading(true);
     try {
       if (comercio?.id) {
-        await comercioApi.actualizar(comercio.id, data);
+        await comercioApi.actualizar(comercio.id, {
+          ...data,
+          activo: comercio.activo,
+        });
         Swal.fire("Actualizado", "Comercio actualizado", "success");
       } else {
         await comercioApi.crear(data);
@@ -34,7 +57,6 @@ export const useComercio = () => {
           email: user.sub,
           updateJWT: true,
         });
-
         Swal.fire("Creado", "Comercio registrado", "success");
       }
 
@@ -43,6 +65,7 @@ export const useComercio = () => {
       setLoading(false);
     }
   };
+
   const eliminar = async () => {
     if (!comercio?.id) return;
 

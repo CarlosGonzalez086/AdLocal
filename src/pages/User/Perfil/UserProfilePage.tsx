@@ -28,9 +28,6 @@ const UserProfilePage = () => {
     <div className="d-flex justify-content-center mt-4 px-2">
       <Card sx={{ maxWidth: 480, width: "100%", borderRadius: 2 }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" mb={2}>
-            Perfil de usuario
-          </Typography>
 
           <UserProfileForm
             profile={profile}

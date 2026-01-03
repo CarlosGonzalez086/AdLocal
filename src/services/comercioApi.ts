@@ -24,16 +24,54 @@ api.interceptors.response.use(
   }
 );
 
-export interface ComercioDto {
-  id?: number;
+export interface ApiResponse<T> {
+  codigo: string;
+  mensaje: string;
+  respuesta: T;
+}
+
+export interface ComercioCreateDto {
   nombre: string;
-  direccion: string;
-  telefono: string;
+  direccion?: string;
+  telefono?: string;
+
+  lat: number;
+  lng: number;
+
+  LogoBase64?: string;
+}
+
+export interface ComercioUpdateDto {
+  nombre: string;
+  direccion?: string;
+  telefono?: string;
+  activo: boolean;
+
+  lat?: number;
+  lng?: number;
+
+  LogoBase64?: string;
+}
+
+export interface ComercioDto {
+  id: number;
+  nombre: string;
+  direccion?: string;
+  telefono?: string;
+  activo: boolean;
+  logoBase64?: string;
+  ubicacion?: {
+    x: number;
+    y: number;
+  } | null;
+  lat: number;
+  lng: number;
 }
 
 export const comercioApi = {
-  getMine: () => api.get("/mine"),  
-  crear: (data: ComercioDto) => api.post("", data),
-  actualizar: (id: number, data: ComercioDto) => api.put(`/${id}`, data),
+  getMine: () => api.get<ApiResponse<ComercioDto>>("/mine"),
+  crear: (data: ComercioCreateDto) => api.post<ComercioDto>("", data),
+  actualizar: (id: number, data: ComercioUpdateDto) =>
+    api.put<ComercioDto>(`/${id}`, data),
   eliminar: (id: number) => api.delete(`/${id}`),
 };

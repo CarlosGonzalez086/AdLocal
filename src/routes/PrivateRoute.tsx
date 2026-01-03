@@ -16,6 +16,7 @@ interface JwtPayload {
   rol: string;
   exp: number;
   iss: string;
+  FotoUrl: string;
 }
 
 const PrivateRoute = ({ children, role }: PrivateRouteProps) => {
@@ -76,12 +77,7 @@ const PrivateRoute = ({ children, role }: PrivateRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  return (
-    <UserContext.Provider value={user}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 };
-
 
 export default PrivateRoute;

@@ -1,13 +1,13 @@
 import {
   AppBar,
   Avatar,
+  Box,
   IconButton,
   Menu,
   MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
-import { Box } from "@mui/system";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { User } from "../../context/UserContext ";
@@ -20,6 +20,11 @@ const UserHeader = ({ user }: UserHeaderProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [imgError, setImgError] = useState(false);
+
+  const handleError = () => setImgError(true);
+
+  const showImage = !!user?.FotoUrl && !imgError;
 
   const menuTitles: Record<string, string> = {
     "/app": "Inicio",
@@ -53,6 +58,8 @@ const UserHeader = ({ user }: UserHeaderProps) => {
       : words[0][0].toUpperCase() + words[1][0].toUpperCase();
   };
 
+  console.log(user);
+
   return (
     <AppBar position="static" sx={{ backgroundColor: "#f5e9cf" }} elevation={0}>
       <Toolbar>
@@ -66,7 +73,12 @@ const UserHeader = ({ user }: UserHeaderProps) => {
         {user && (
           <Box>
             <IconButton onClick={handleMenuOpen} size="small">
-              <Avatar>{getInitials(user.nombre)}</Avatar>
+              <Avatar
+                src={showImage ? user.FotoUrl : undefined}
+                onError={handleError} // Si falla, activamos imgError
+              >
+                {!showImage && getInitials(user.nombre)}
+              </Avatar>
             </IconButton>
 
             <Menu

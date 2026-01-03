@@ -3,38 +3,34 @@ import {
   Drawer,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
-  ListItemButton,
   Box,
   Divider,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-import PeopleIcon from "@mui/icons-material/People";
+import StoreIcon from "@mui/icons-material/Store";
 import PaymentIcon from "@mui/icons-material/Payment";
-import SettingsIcon from "@mui/icons-material/Settings";
 import HistoryIcon from "@mui/icons-material/History";
+import SettingsIcon from "@mui/icons-material/Settings";
 
-interface SidebarProps {
+interface UserSidebarProps {
   drawerWidth: number;
 }
 
-const Sidebar = ({ drawerWidth }: SidebarProps) => {
+const UserSidebar = ({ drawerWidth }: UserSidebarProps) => {
   const location = useLocation();
 
   const menuItems = [
-    { text: "Home", icon: <HomeIcon />, path: "/Admin" },
-    { text: "Planes", icon: <PaymentIcon />, path: "/Admin/planes" },
-    { text: "Usuarios", icon: <PeopleIcon />, path: "/Admin/usuarios" },
+    { text: "Inicio", icon: <HomeIcon />, path: "/app" },
+    { text: "Mi comercio", icon: <StoreIcon />, path: "/app/comercio" },
+    { text: "Mi plan", icon: <PaymentIcon />, path: "/app/plan" },
+    { text: "Pagos", icon: <HistoryIcon />, path: "/app/pagos" },
     {
-      text: "Configuraciones",
+      text: "Configuración",
       icon: <SettingsIcon />,
-      path: "/Admin/configuraciones",
-    },
-    {
-      text: "Historial de suscripciones",
-      icon: <HistoryIcon />,
-      path: "/Admin/historial-suscripciones",
+      path: "/app/configuracion",
     },
   ];
 
@@ -58,7 +54,6 @@ const Sidebar = ({ drawerWidth }: SidebarProps) => {
           justifyContent: "center",
           alignItems: "center",
           p: 1,
-          boxSizing: "border-box",
           backgroundColor: "#f5e9cf",
         }}
       >
@@ -66,17 +61,13 @@ const Sidebar = ({ drawerWidth }: SidebarProps) => {
           component="img"
           src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
           alt="Logo AdLocal"
-          sx={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
+          sx={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
       </Box>
 
       <Divider />
 
-      <List style={{ backgroundColor: "#f5e9cf" }} className="h-100">
+      <List sx={{ backgroundColor: "#f5e9cf", height: "100%" }}>
         {menuItems.map((item) => {
           const isSelected = location.pathname === item.path;
 
@@ -108,4 +99,4 @@ const Sidebar = ({ drawerWidth }: SidebarProps) => {
   );
 };
 
-export default Sidebar;
+export default UserSidebar;

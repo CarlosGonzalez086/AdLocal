@@ -18,9 +18,6 @@ const api = axios.create({
   },
 });
 
-/* =========================
-   REQUEST INTERCEPTOR
-========================= */
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -34,9 +31,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-/* =========================
-   RESPONSE INTERCEPTOR
-========================= */
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -48,9 +42,6 @@ api.interceptors.response.use(
   }
 );
 
-/* =========================
-   PROFILE API
-========================= */
 export const profileApi = {
   getProfile: () => api.get<ApiResponse<Profile>>("/Admin"),
   updateProfile: (data: ProfileUpdateDto) => api.put("/Admin", data),

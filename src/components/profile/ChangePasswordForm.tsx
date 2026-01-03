@@ -23,7 +23,6 @@ export const ChangePasswordForm = () => {
 
   return (
     <div>
-      {/* Header */}
       <div className="d-flex align-items-center mb-3">
         <IconButton onClick={() => navigate(-1)} aria-label="Volver">
           <ArrowBackIcon />
@@ -33,7 +32,6 @@ export const ChangePasswordForm = () => {
         </Typography>
       </div>
 
-      {/* Card centrada */}
       <div className="d-flex justify-content-center">
         <Card
           sx={{
@@ -44,21 +42,12 @@ export const ChangePasswordForm = () => {
             borderRadius: 2,
           }}
         >
-          {/* Título */}
-          <Box
-            display="flex"
-            alignItems="center"
-            gap={1}
-            mb={2}
-          >
+          <Box display="flex" alignItems="center" gap={1} mb={2}>
             <LockIcon color="warning" />
-            <Typography variant="h6">
-              Cambiar contraseña
-            </Typography>
+            <Typography variant="h6">Cambiar contraseña</Typography>
           </Box>
 
           <div className="row">
-            {/* Password actual */}
             <div className="col-12 mb-3">
               <TextField
                 label="Contraseña actual"
@@ -72,7 +61,6 @@ export const ChangePasswordForm = () => {
               />
             </div>
 
-            {/* Nueva password */}
             <div className="col-12 mb-3">
               <TextField
                 label="Nueva contraseña"
@@ -87,7 +75,6 @@ export const ChangePasswordForm = () => {
               />
             </div>
 
-            {/* Acción */}
             <div className="col-12 d-flex justify-content-end">
               <Button
                 variant="contained"

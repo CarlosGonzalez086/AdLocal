@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 interface AdminFormProps {
   onSubmit: (data: any) => Promise<void> | void;
   defaultValues?: any;
+  type: "admin" | "user";
   isEdit?: boolean;
 }
 
@@ -11,6 +12,7 @@ export default function AdminForm({
   onSubmit,
   defaultValues,
   isEdit = false,
+  type,
 }: AdminFormProps) {
   const {
     register,
@@ -19,6 +21,8 @@ export default function AdminForm({
   } = useForm({
     defaultValues,
   });
+
+  const isAdmin = type === "admin";
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} width="100%">
@@ -52,7 +56,9 @@ export default function AdminForm({
             size="large"
             disabled={isSubmitting}
           >
-            {isEdit ? "Actualizar administrador" : "Crear administrador"}
+            {isEdit
+              ? `Actualizar ${isAdmin ? "administrador" : "usuario"}`
+              : `Crear ${isAdmin ? "administrador" : "usuario"}`}
           </Button>
         </Box>
       </Stack>

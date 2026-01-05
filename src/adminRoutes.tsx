@@ -1,13 +1,14 @@
 import { ChangePasswordForm } from "./components/profile/ChangePasswordForm";
-import { ConfiguracionSistemaPage } from "./pages/configuracion/ConfiguracionSistemaPage";
-import DashboardHome from "./pages/DashboardHome";
-import { PlanesPage } from "./pages/Planes/PlanesPage";
-import ProfilePage from "./pages/profile/ProfilePage";
+import { UsersPage } from "./pages/Admin/Users/UsersPage";
+import ProfilePage from "./pages/Admin/profile/ProfilePage";
+import { PlanesPage } from "./pages/Admin/Planes/PlanesPage";
+import DashboardHome from "./pages/Admin/DashboardHome";
+import { ConfiguracionSistemaPage } from "./pages/Admin/configuracion/ConfiguracionSistemaPage";
 
 export const adminRoutes = [
   { path: "", element: <DashboardHome /> },
   { path: "planes", element: <PlanesPage /> },
-  { path: "usuarios", element: <>Usuarios</> },
+  { path: "usuarios", element: <UsersPage /> },
   { path: "configuraciones", element: <ConfiguracionSistemaPage /> },
   { path: "historial-suscripciones", element: <>HistorialSuscripciones</> },
   { path: "perfil", element: <ProfilePage /> },

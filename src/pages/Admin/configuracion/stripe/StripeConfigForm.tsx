@@ -10,7 +10,8 @@ import {
   InputAdornment,
   LinearProgress,
 } from "@mui/material";
-import { useConfiguracionSistema } from "../../../hooks/useConfiguracionSistema";
+import { useConfiguracionSistema } from "../../../../hooks/useConfiguracionSistema";
+
 
 export const StripeConfigForm = () => {
   const { cargar, guardarStripe, configuraciones, loading } =

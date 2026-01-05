@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import type { Profile, ProfileUpdateDto } from "./profile.types";
-import { profileApi } from "../../services/profile.api";
+import { profileApi } from "../../../services/profile.api";
 
 
 export const useProfile = () => {

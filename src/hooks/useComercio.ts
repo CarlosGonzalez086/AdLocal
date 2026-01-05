@@ -14,16 +14,13 @@ export const useComercio = () => {
   const cargar = async () => {
     try {
       setLoading(true);
-
       const { data } = await comercioApi.getMine();
       const c = data.respuesta;
       console.log(c);
-
       if (!c) {
         setComercio(null);
         return;
       }
-
       setComercio({
         id: c.id,
         nombre: c.nombre,
@@ -35,7 +32,6 @@ export const useComercio = () => {
         lng: c.lng,
       });
     } catch (error) {
-      console.error(error);
       setComercio(null);
     } finally {
       setLoading(false);

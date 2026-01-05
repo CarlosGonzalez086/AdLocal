@@ -1,6 +1,6 @@
 import { TextField, Button } from "@mui/material";
 import { useState, useEffect } from "react";
-import type { Profile, ProfileUpdateDto } from "../../pages/profile/profile.types";
+import type { Profile, ProfileUpdateDto } from "../../pages/Admin/profile/profile.types";
 
 
 interface Props {

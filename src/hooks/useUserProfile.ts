@@ -88,6 +88,7 @@ export const useUserProfile = () => {
         email: user.sub,
         updateJWT: true,
       });
+      window.location.reload();
     } catch (error) {
       Swal.fire("Error", "No se pudo subir la foto", "error");
     } finally {

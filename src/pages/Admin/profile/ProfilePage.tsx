@@ -7,9 +7,9 @@ import {
   Box,
 } from "@mui/material";
 import { useProfile } from "./useProfile";
-import { ProfileHeader } from "../../components/profile/ProfileHeader";
-import { ProfileActions } from "../../components/profile/ProfileActions";
-import { ProfileForm } from "../../components/profile/ProfileForm";
+import { ProfileHeader } from "../../../components/profile/ProfileHeader";
+import { ProfileActions } from "../../../components/profile/ProfileActions";
+import { ProfileForm } from "../../../components/profile/ProfileForm";
 
 const ProfilePage = () => {
   const { profile, loading, actualizarPerfil } = useProfile();

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
 import type { ChangePasswordDto } from "./profile.types";
-import { profileApi } from "../../services/profile.api";
+import { profileApi } from "../../../services/profile.api";
 
 
 export const useChangePassword = () => {

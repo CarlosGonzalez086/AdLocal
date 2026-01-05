@@ -10,7 +10,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LockIcon from "@mui/icons-material/Lock";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useChangePassword } from "../../pages/profile/useChangePassword";
+import { useChangePassword } from "../../pages/Admin/profile/useChangePassword";
 
 export const ChangePasswordForm = () => {
   const navigate = useNavigate();

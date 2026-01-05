@@ -1,4 +1,11 @@
-import { Box, Paper, Typography, Divider, Button } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Typography,
+  Divider,
+  Button,
+  Container,
+} from "@mui/material";
 import LoginForm from "../components/forms/LoginForm";
 import { adminApi } from "../api/admin.api";
 import Swal from "sweetalert2";
@@ -40,30 +47,61 @@ export default function LoginPage({ type }: Props) {
 
   return (
     <Box
-      minHeight="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      bgcolor="#f5f5f5"
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "#f5f5f5",
+        display: "flex",
+      }}
     >
-      <Paper elevation={3} sx={{ p: 4, width: 400 }}>
-        <Typography variant="h5" fontWeight="bold" align="center" mb={2}>
-          {type == "admin" ? "Login Administrador" : "Iniciar sesión"}
-        </Typography>
-
-        <LoginForm onSubmit={handleLogin} />
-
-        <Divider sx={{ my: 3 }} />
-        <Button
-          variant="outlined"
-          fullWidth
-          onClick={() =>
-            type == "admin" ? navigate("/crear-admin") : navigate("/registro")
-          }
+      <Container maxWidth="sm">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            mb: 3,
+            mt:3
+          }}
         >
-          {type == "admin" ? "Crear administrador" : "Crear usuario"}
-        </Button>
-      </Paper>
+          <Box
+            component="img"
+            src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
+            alt="AdLocal"
+            sx={{
+              width: { xs: 180, sm: 220 },
+              maxWidth: "100%",
+            }}
+          />
+        </Box>
+
+        <Paper
+          elevation={4}
+          sx={{
+            p: { xs: 3, sm: 4 },
+            borderRadius: 3,
+          }}
+        >
+          <Typography variant="h5" fontWeight="bold" align="center" mb={2}>
+            {type === "admin" ? "Login Administrador" : "Iniciar sesión"}
+          </Typography>
+
+          <LoginForm onSubmit={handleLogin} />
+
+          <Divider sx={{ my: 3 }} />
+
+          <Button
+            variant="outlined"
+            fullWidth
+            size="large"
+            onClick={() =>
+              type === "admin"
+                ? navigate("/crear-admin")
+                : navigate("/registro")
+            }
+          >
+            {type === "admin" ? "Crear administrador" : "Crear usuario"}
+          </Button>
+        </Paper>
+      </Container>
     </Box>
   );
 }

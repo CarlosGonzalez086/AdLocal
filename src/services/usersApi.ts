@@ -1,18 +1,7 @@
 import axios from "axios";
-import type {
-  ChangePasswordDto,
-  Profile,
-  ProfileUpdateDto,
-} from "../pages/Admin/profile/profile.types";
-
-interface ApiResponse<T> {
-  codigo: string;
-  mensaje: string;
-  respuesta: T;
-}
 
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}`,
+  baseURL: `${import.meta.env.VITE_API_URL}/Usuarios`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -42,9 +31,21 @@ api.interceptors.response.use(
   }
 );
 
-export const profileApi = {
-  getProfile: () => api.get<ApiResponse<Profile>>("/Admin"),
-  updateProfile: (data: ProfileUpdateDto) => api.put("/Admin", data),
-  changePassword: (data: ChangePasswordDto) =>
-    api.put("/Admin/cambiar-password", data),
+export interface UserDto {
+  id?: number;
+  nombre: string;
+  email: string;
+  fotoUrl: string;
+  fechaCreacion:string;
+}
+
+export const usersApi = {
+  getAll: (params?: {
+    page?: number;
+    pageSize?: number;
+    orderBy?: string;
+    search?: string;
+  }) => api.get("", { params }),
+  getById: (id: number) => api.get(`/${id}`),
+  eliminar: (id: number) => api.delete(`/${id}`),
 };

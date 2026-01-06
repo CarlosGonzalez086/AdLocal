@@ -42,7 +42,10 @@ export const useTarjetas = () => {
       Swal.fire("Creada", "Tarjeta registrada correctamente", "success");
       await listar();
     } catch (error) {
-      Swal.fire("Error", error.response.data.mensaje, "error");
+      console.error(error);
+      const mensaje =
+        (error as any)?.response?.data?.mensaje ?? "No se pudo crear la tarjeta";
+      Swal.fire("Error", String(mensaje), "error");
     } finally {
       setLoading(false);
     }

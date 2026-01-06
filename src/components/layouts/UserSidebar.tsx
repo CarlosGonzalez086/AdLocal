@@ -14,6 +14,7 @@ import StoreIcon from "@mui/icons-material/Store";
 import PaymentIcon from "@mui/icons-material/Payment";
 import HistoryIcon from "@mui/icons-material/History";
 import SettingsIcon from "@mui/icons-material/Settings";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
 
 interface UserSidebarProps {
   drawerWidth: number;
@@ -27,6 +28,7 @@ const UserSidebar = ({ drawerWidth }: UserSidebarProps) => {
     { text: "Mi comercio", icon: <StoreIcon />, path: "/app/comercio" },
     { text: "Mi plan", icon: <PaymentIcon />, path: "/app/plan" },
     { text: "Pagos", icon: <HistoryIcon />, path: "/app/pagos" },
+    { text: "Tarjetas", icon: <CreditCardIcon />, path: "/app/tarjetas" },
     {
       text: "Configuración",
       icon: <SettingsIcon />,

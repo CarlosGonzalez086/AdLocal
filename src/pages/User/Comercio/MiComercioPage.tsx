@@ -82,7 +82,6 @@ export const MiComercioPage = () => {
   return (
     <Card>
       <CardContent>
-        <h3 className="mb-3">Mi comercio</h3>
 
         {comercio.logoBase64 && (
           <div className="d-flex justify-content-center mb-3">

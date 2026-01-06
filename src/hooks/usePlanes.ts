@@ -11,6 +11,7 @@ interface ListarParams {
 
 export const usePlanes = () => {
   const [planes, setPlanes] = useState<PlanCreateDto[]>([]);
+  const [planesUser, setPlanesUser] = useState<PlanCreateDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
 
@@ -40,6 +41,22 @@ export const usePlanes = () => {
     },
     []
   );
+
+  const listAllPlanesUser = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await planApi.getAllPlanesUser();
+      setPlanesUser(data.respuesta ?? []);
+    } catch (error) {
+      Swal.fire(
+        "Error",
+        "No se pudo cargar la información de los planes",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const guardar = async (
     plan: PlanCreateDto,
@@ -93,5 +110,7 @@ export const usePlanes = () => {
     listar,
     guardar,
     eliminar,
+    listAllPlanesUser,
+    planesUser
   };
 };

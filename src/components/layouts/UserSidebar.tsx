@@ -8,7 +8,11 @@ import {
   ListItemText,
   Box,
   Divider,
+  Tooltip,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
+
 import HomeIcon from "@mui/icons-material/Home";
 import StoreIcon from "@mui/icons-material/Store";
 import PaymentIcon from "@mui/icons-material/Payment";
@@ -18,10 +22,22 @@ import CreditCardIcon from "@mui/icons-material/CreditCard";
 
 interface UserSidebarProps {
   drawerWidth: number;
+  collapsedWidth?: number;
+  collapsed: boolean;
+  mobileOpen: boolean;
+  onCloseMobile: () => void;
 }
 
-const UserSidebar = ({ drawerWidth }: UserSidebarProps) => {
+const UserSidebar = ({
+  drawerWidth,
+  collapsedWidth = 72,
+  collapsed,
+  mobileOpen,
+  onCloseMobile,
+}: UserSidebarProps) => {
   const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const menuItems = [
     { text: "Inicio", icon: <HomeIcon />, path: "/app" },
@@ -36,35 +52,43 @@ const UserSidebar = ({ drawerWidth }: UserSidebarProps) => {
     },
   ];
 
+  const currentWidth = collapsed ? collapsedWidth : drawerWidth;
+
   return (
     <Drawer
-      variant="permanent"
+      variant={isMobile ? "temporary" : "permanent"}
+      open={isMobile ? mobileOpen : true}
+      onClose={onCloseMobile}
       sx={{
-        width: drawerWidth,
+        width: currentWidth,
         flexShrink: 0,
         "& .MuiDrawer-paper": {
-          width: drawerWidth,
+          width: currentWidth,
           boxSizing: "border-box",
+          transition: "width 0.3s",
         },
       }}
     >
       <Box
         sx={{
-          width: "100%",
           height: 160,
           display: "flex",
-          justifyContent: "center",
           alignItems: "center",
-          p: 1,
+          justifyContent: collapsed ? "center" : "space-between",
+          px: 2,
           backgroundColor: "#f5e9cf",
         }}
       >
-        <Box
-          component="img"
-          src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
-          alt="Logo AdLocal"
-          sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
+        {!collapsed && (
+          <Box
+            component="img"
+            src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
+            alt="Logo AdLocal"
+            sx={{ width: "100%", maxHeight: 120, objectFit: "cover" }}
+          />
+        )}
+
+
       </Box>
 
       <Divider />
@@ -73,26 +97,50 @@ const UserSidebar = ({ drawerWidth }: UserSidebarProps) => {
         {menuItems.map((item) => {
           const isSelected = location.pathname === item.path;
 
-          return (
-            <ListItem key={item.text} disablePadding>
-              <ListItemButton
-                component={Link}
-                to={item.path}
+          const button = (
+            <ListItemButton
+              component={Link}
+              to={item.path}
+              onClick={isMobile ? onCloseMobile : undefined}
+              sx={{
+                minHeight: 48,
+                justifyContent: collapsed ? "center" : "flex-start",
+                px: 2.5,
+                backgroundColor: isSelected ? "#D2B48C" : "transparent",
+                color: isSelected ? "#e8692c" : "inherit",
+              }}
+            >
+              <ListItemIcon
                 sx={{
-                  backgroundColor: isSelected ? "#D2B48C" : "transparent",
+                  minWidth: 0,
+                  mr: collapsed ? 0 : 2,
+                  justifyContent: "center",
                   color: isSelected ? "#e8692c" : "inherit",
-                  "&:hover": {
-                    backgroundColor: isSelected ? "#D2B48C" : "#f5f5f5",
-                  },
                 }}
               >
-                <ListItemIcon
-                  sx={{ color: isSelected ? "#e8692c" : "inherit" }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
+                {item.icon}
+              </ListItemIcon>
+
+              <ListItemText
+                primary={item.text}
+                sx={{
+                  opacity: collapsed ? 0 : 1,
+                  width: collapsed ? 0 : "auto",
+                  whiteSpace: "nowrap",
+                }}
+              />
+            </ListItemButton>
+          );
+
+          return (
+            <ListItem key={item.text} disablePadding>
+              {collapsed ? (
+                <Tooltip title={item.text} placement="right">
+                  {button}
+                </Tooltip>
+              ) : (
+                button
+              )}
             </ListItem>
           );
         })}

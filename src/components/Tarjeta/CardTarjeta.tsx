@@ -6,9 +6,11 @@ import {
   Box,
   Button,
   Chip,
+  useMediaQuery,
 } from "@mui/material";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import type { TarjetaDto } from "../../services/tarjetaApi";
+import theme from "../../theme/theme";
 
 interface CardTarjetaProps {
   tarjeta: TarjetaDto;
@@ -23,6 +25,7 @@ export const CardTarjeta: React.FC<CardTarjetaProps> = ({
   onEliminar,
   onEdit,
 }) => {
+    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { brand, last4, expMonth, expYear, cardType, isDefault, id } = tarjeta;
 
   const colors = {
@@ -34,7 +37,7 @@ export const CardTarjeta: React.FC<CardTarjetaProps> = ({
   return (
     <Card
       sx={{
-        width: 320,
+        width: isMobile ? "100%" :320,
         borderRadius: 3,
         background: `linear-gradient(135deg, ${colors.main} 0%, ${colors.dark} 100%)`,
         color: "#fff",

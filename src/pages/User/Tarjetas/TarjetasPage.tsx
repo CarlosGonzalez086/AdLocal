@@ -80,25 +80,23 @@ export const TarjetasPage: React.FC = () => {
           </Button>
         </Box>
 
-        <Box
-          display="grid"
-          gridTemplateColumns="repeat(auto-fill, 320px)"
-          justifyContent="end"         
-          gap={3}
-        >
-          {tarjetas.map((t) => (
-            <CardTarjeta
-              key={t.id}
-              tarjeta={t}
-              onSetDefault={setDefault}
-              onEliminar={eliminar}
-              onEdit={() => {
-                setTarjetaSeleccionada(t);
-                setEditando(true);
-              }}
-            />
-          ))}
-        </Box>
+        <div className="d-flex justify-lg-content-end justify-content-sm-center">
+          <div className="row g-3">
+            {tarjetas.map((t) => (
+              <div key={t.id} className="col-lg-4 col-md-6 col-sm-12">
+                <CardTarjeta
+                  tarjeta={t}
+                  onSetDefault={setDefault}
+                  onEliminar={eliminar}
+                  onEdit={() => {
+                    setTarjetaSeleccionada(t);
+                    setEditando(true);
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       </Box>
 
       <TarjetaModal

@@ -37,12 +37,14 @@ export const ProductoServicioModal = ({
   );
 
   const [form, setForm] = useState<ProductoServicioDto>(initialForm);
-  const [errors, setErrors] = useState<Partial<Record<keyof ProductoServicioDto, string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof ProductoServicioDto, string>>
+  >({});
 
   const validar = (): boolean => {
     const e: typeof errors = {};
     if (!form.nombre) e.nombre = "Requerido";
-    if (form?.precio < 0) e.precio = "Debe ser mayor o igual a 0";
+    if ((form?.precio ?? 0) < 0) e.precio = "Debe ser mayor o igual a 0";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -64,7 +66,13 @@ export const ProductoServicioModal = ({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <div className="w-100 p-3">
-        <h4>{soloVer ? "Detalle del Producto/Servicio" : form.id ? "Editar Producto/Servicio" : "Nuevo Producto/Servicio"}</h4>
+        <h4>
+          {soloVer
+            ? "Detalle del Producto/Servicio"
+            : form.id
+            ? "Editar Producto/Servicio"
+            : "Nuevo Producto/Servicio"}
+        </h4>
         <div className="w-100 row gap-3 mt-4">
           {[
             { id: 1, text: "Nombre", field: "nombre" },

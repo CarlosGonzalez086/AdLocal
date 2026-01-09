@@ -5,6 +5,7 @@ import UserProfilePage from "./pages/User/Perfil/UserProfilePage";
 import PlanesPage from "./pages/User/Plan/MiPlanPage";
 import { TarjetasPage } from "./pages/User/Tarjetas/TarjetasPage";
 import { loadStripe } from "@stripe/stripe-js";
+import { ProductosServiciosPage } from "./pages/User/ProductosServicios/ProductosServiciosPage";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -27,6 +28,10 @@ export const userRoutes = [
   {
     path: "pagos",
     element: <>Pagos</>,
+  },
+  {
+    path: "productos-servicios",
+    element: <ProductosServiciosPage />,
   },
 
   {

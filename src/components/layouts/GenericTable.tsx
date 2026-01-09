@@ -128,16 +128,22 @@ export function GenericTable<T>({
                 {actions && (
                   <TableCell align="right">
                     {isMobile ? (
-                      <>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => handleMenuOpen(e, row)}
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      </>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => handleMenuOpen(e, row)}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
                     ) : (
-                      actions(row)
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        {actions(row)}
+                      </div>
                     )}
                   </TableCell>
                 )}

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/tarjetas`,
+  baseURL: `${import.meta.env.VITE_API_URL}/Suscripciones`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -29,28 +29,27 @@ api.interceptors.response.use(
   }
 );
 
-// DTOs actualizados
-export interface CrearTarjetaDto {
-  paymentMethodId: string;
-  isDefault: boolean;
+export interface SuscripcionCreateDto {
+  planId: number;
+  stripePaymentMethodId: string;
 }
 
-export interface TarjetaDto {
+export interface SuscripcionDto {
   id: number;
-  brand: string;
-  last4: string;
-  expMonth: number;
-  expYear: number;
-  cardType: string;
-  nombre: string;
-  numero: string; 
-  isDefault: boolean;
-  stripePaymentMethodId:string;
+  planId: number;
+  plan: string;
+  monto: number;
+  moneda: string;
+  tipo: string;
+  fechaInicio: string;
+  fechaFin: string;
+  estado: string;
+  activa: boolean;
+  autoRenovacion: boolean;
 }
 
-export const tarjetaApi = {
-  listar: () => api.get(""),
-  crear: (data: CrearTarjetaDto) => api.post("", data),
-  setDefault: (id: number) => api.put(`/${id}/default`),
-  eliminar: (id: number) => api.delete(`/${id}`),
+export const suscripcionApi = {
+  contratar: (data: SuscripcionCreateDto) => api.post("", data),
+  miSuscripcion: () => api.get("/mi-suscripcion"),
+  cancelar: () => api.post("/cancelar"),
 };

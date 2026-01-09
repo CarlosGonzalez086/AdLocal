@@ -1,14 +1,29 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CircularProgress, Typography, Box } from "@mui/material";
 import { usePlanes } from "../../hooks/usePlanes";
 import { PlanCard } from "./PlanCard";
+import { ConfirmarSuscripcionModal } from "./ConfirmarSuscripcionModal";
+import type { PlanCreateDto } from "../../services/planApi";
 
 export const PlanesUserList = () => {
   const { planesUser, loading, listAllPlanesUser } = usePlanes();
+  const [openModal, setOpenModal] = useState(false);
+  const [planSeleccionado, setPlanSeleccionado] =
+    useState<PlanCreateDto | null>(null);
 
   useEffect(() => {
     listAllPlanesUser();
   }, [listAllPlanesUser]);
+
+  const handleSelectPlan = (plan: PlanCreateDto) => {
+    setPlanSeleccionado(plan);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setPlanSeleccionado(null);
+  };
 
   if (loading) {
     return (
@@ -27,23 +42,30 @@ export const PlanesUserList = () => {
   }
 
   return (
-    <div className="container mt-4">
-      {/* Bootstrap ROW */}
-      <div className="row">
-        {planesUser.map((plan) => (
-          <div key={plan.id} className="col-12 col-sm-6 col-lg-4 mb-4">
-            <PlanCard
-              nombre={plan.nombre}
-              tipo={plan.tipo}
-              dias={plan.duracionDias}
-              precio={plan.precio}
-              onSelect={() => {
-                console.log("Plan seleccionado:", plan);
-              }}
-            />
-          </div>
-        ))}
+    <>
+      <div className="container mt-4">
+        <div className="row">
+          {planesUser.map((plan) => (
+            <div key={plan.id} className="col-12 col-sm-6 col-lg-4 mb-4">
+              <PlanCard
+                nombre={plan.nombre}
+                tipo={plan.tipo}
+                dias={plan.duracionDias}
+                precio={plan.precio}
+                onSelect={() => handleSelectPlan(plan)}
+              />
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+
+      {planSeleccionado && (
+        <ConfirmarSuscripcionModal
+          open={openModal}
+          plan={planSeleccionado}
+          onClose={handleCloseModal}
+        />
+      )}
+    </>
   );
 };

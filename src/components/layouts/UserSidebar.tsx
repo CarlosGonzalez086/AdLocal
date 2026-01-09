@@ -15,10 +15,11 @@ import {
 
 import HomeIcon from "@mui/icons-material/Home";
 import StoreIcon from "@mui/icons-material/Store";
-import PaymentIcon from "@mui/icons-material/Payment";
-import HistoryIcon from "@mui/icons-material/History";
-import SettingsIcon from "@mui/icons-material/Settings";
+import EventNoteIcon from "@mui/icons-material/EventNote"; // icono para Plan
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney"; // icono para Pagos
 import CreditCardIcon from "@mui/icons-material/CreditCard";
+import SettingsIcon from "@mui/icons-material/Settings";
+import CategoryIcon from "@mui/icons-material/Category"; // icono para productos y servicios
 
 interface UserSidebarProps {
   drawerWidth: number;
@@ -42,9 +43,14 @@ const UserSidebar = ({
   const menuItems = [
     { text: "Inicio", icon: <HomeIcon />, path: "/app" },
     { text: "Mi comercio", icon: <StoreIcon />, path: "/app/comercio" },
-    { text: "Mi plan", icon: <PaymentIcon />, path: "/app/plan" },
-    { text: "Pagos", icon: <HistoryIcon />, path: "/app/pagos" },
+    { text: "Mi plan", icon: <EventNoteIcon />, path: "/app/plan" },
+    { text: "Pagos", icon: <AttachMoneyIcon />, path: "/app/pagos" },
     { text: "Tarjetas", icon: <CreditCardIcon />, path: "/app/tarjetas" },
+    {
+      text: "Productos y Servicios",
+      icon: <CategoryIcon />,
+      path: "/app/productos-servicios",
+    },
     {
       text: "Configuración",
       icon: <SettingsIcon />,
@@ -79,16 +85,21 @@ const UserSidebar = ({
           backgroundColor: "#f5e9cf",
         }}
       >
-        {!collapsed && (
+        {!collapsed ? (
           <Box
             component="img"
             src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
             alt="Logo AdLocal"
             sx={{ width: "100%", maxHeight: 120, objectFit: "cover" }}
           />
+        ) : (
+          <Box
+            component="img"
+            src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/AZuAXHqalTLlz8th7NMdBA-AZuAXHqaHD92HliWBxJzdA.jpg"
+            alt="Logo AdLocal"
+            sx={{ width: "100%", maxHeight: 120, objectFit: "fill" }}
+          />
         )}
-
-
       </Box>
 
       <Divider />

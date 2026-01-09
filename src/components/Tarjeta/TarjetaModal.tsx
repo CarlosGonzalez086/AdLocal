@@ -25,7 +25,13 @@ const colors = {
   light: "#f5e9cf",
 };
 
-export const TarjetaModal = ({ open, onClose, onSave, loading, tarjeta }: Props) => {
+export const TarjetaModal = ({
+  open,
+  onClose,
+  onSave,
+  loading,
+  tarjeta,
+}: Props) => {
   const stripe = useStripe();
   const elements = useElements();
 
@@ -57,12 +63,11 @@ export const TarjetaModal = ({ open, onClose, onSave, loading, tarjeta }: Props)
   };
 
   const handleSave = async () => {
-    let pmId = tarjeta?.StripePaymentMethodId ?? null;
+    let pmId = tarjeta?.stripePaymentMethodId ?? null;
 
-    // Si es nueva tarjeta o estamos cambiando
     if (!pmId || changingCard) {
       const newPmId = await createPaymentMethod();
-      if (!newPmId) return; // error al crear
+      if (!newPmId) return;
       pmId = newPmId;
     }
 
@@ -81,7 +86,6 @@ export const TarjetaModal = ({ open, onClose, onSave, loading, tarjeta }: Props)
           {tarjeta ? "Editar Tarjeta" : "Nueva Tarjeta"}
         </Typography>
 
-        {/* Mostrar tarjeta existente */}
         {tarjeta && !changingCard && (
           <Box
             mb={3}
@@ -95,8 +99,16 @@ export const TarjetaModal = ({ open, onClose, onSave, loading, tarjeta }: Props)
               overflow: "hidden",
             }}
           >
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="subtitle1" sx={{ fontWeight: "bold", letterSpacing: 1 }}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+            >
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: "bold", letterSpacing: 1 }}
+              >
                 {tarjeta.brand.toUpperCase()}
               </Typography>
               <Box display="flex" flexDirection="column" alignItems="flex-end">
@@ -138,7 +150,8 @@ export const TarjetaModal = ({ open, onClose, onSave, loading, tarjeta }: Props)
               **** **** **** {tarjeta.last4}
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              Exp: {tarjeta.expMonth.toString().padStart(2, "0")}/{tarjeta.expYear}
+              Exp: {tarjeta.expMonth.toString().padStart(2, "0")}/
+              {tarjeta.expYear}
             </Typography>
 
             <Button
@@ -158,9 +171,14 @@ export const TarjetaModal = ({ open, onClose, onSave, loading, tarjeta }: Props)
           </Box>
         )}
 
-        {/* Formulario para nueva tarjeta o cambio */}
         {(!tarjeta || changingCard) && (
-          <Box mb={2} p={2} border="1px solid #ccc" borderRadius={2} bgcolor="#fff">
+          <Box
+            mb={2}
+            p={2}
+            border="1px solid #ccc"
+            borderRadius={2}
+            bgcolor="#fff"
+          >
             <CardElement
               options={{
                 hidePostalCode: true,
@@ -192,7 +210,10 @@ export const TarjetaModal = ({ open, onClose, onSave, loading, tarjeta }: Props)
         <Button onClick={onClose}>Cerrar</Button>
         <Button
           variant="contained"
-          sx={{ backgroundColor: colors.main, "&:hover": { backgroundColor: colors.dark } }}
+          sx={{
+            backgroundColor: colors.main,
+            "&:hover": { backgroundColor: colors.dark },
+          }}
           onClick={handleSave}
           disabled={loading}
         >

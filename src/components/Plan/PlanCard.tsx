@@ -15,6 +15,10 @@ export interface PlanCardProps {
   precio: number;
   moneda?: string;
   onSelect?: () => void;
+
+  esActivo?: boolean;
+  onCancelar?: () => void;
+  onVerDetalle?: () => void;
 }
 
 export const PlanCard = ({
@@ -24,76 +28,63 @@ export const PlanCard = ({
   precio,
   moneda = "$",
   onSelect,
+  esActivo = false,
+  onCancelar,
+  onVerDetalle,
 }: PlanCardProps) => {
+  const coffee = {
+    activo: "#f5e9cf",
+  };
   return (
     <Card
       className="shadow-sm h-100"
       sx={{
         borderRadius: 3,
-        backgroundColor: "primary.light",
-        transition: "0.3s",
-        "&:hover": {
-          transform: "translateY(-6px)",
-          boxShadow: 8,
-        },
+        backgroundColor: esActivo ? coffee.activo : "primary.light",
       }}
     >
       <CardContent>
         <Box className="mb-2">
           <Chip
-            label={tipo}
-            sx={{
-              bgcolor: "primary.main",
-              color: "#fff",
-              fontWeight: "bold",
-            }}
+            label={esActivo ? "PLAN ACTIVO" : tipo}
+            color={esActivo ? "success" : "primary"}
             size="small"
           />
         </Box>
 
-        <Typography
-          variant="h6"
-          fontWeight="bold"
-          sx={{ color: "primary.main" }}
-          gutterBottom
-        >
+        <Typography variant="h6" fontWeight="bold">
           {nombre}
         </Typography>
 
-        <Typography variant="body2" sx={{ color: "#5c4a3d" }} className="mb-3">
+        <Typography variant="body2">
           Duración: <strong>{dias} días</strong>
         </Typography>
 
-        <Typography
-          variant="h4"
-          fontWeight="bold"
-          sx={{ color: "primary.dark" }}
-        >
-          {moneda}
-          {precio.toLocaleString()}
-        </Typography>
-
-        <Typography variant="caption" sx={{ color: "#7a6655" }}>
-          Precio total del plan
+        <Typography variant="h4" fontWeight="bold">
+          ${precio.toLocaleString()} {moneda}
         </Typography>
       </CardContent>
 
       <CardActions className="p-3">
-        <Button
-          fullWidth
-          size="large"
-          onClick={onSelect}
-          sx={{
-            bgcolor: "primary.main",
-            color: "#fff",
-            fontWeight: "bold",
-            "&:hover": {
-              bgcolor: "primary.dark",
-            },
-          }}
-        >
-          Elegir plan
-        </Button>
+        {esActivo ? (
+          <>
+            <Button fullWidth variant="outlined" onClick={onVerDetalle}>
+              Ver detalles
+            </Button>
+            <Button
+              fullWidth
+              color="error"
+              variant="contained"
+              onClick={onCancelar}
+            >
+              Cancelar plan
+            </Button>
+          </>
+        ) : (
+          <Button fullWidth variant="contained" onClick={onSelect}>
+            Elegir plan
+          </Button>
+        )}
       </CardActions>
     </Card>
   );

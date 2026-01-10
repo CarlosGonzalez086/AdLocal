@@ -45,6 +45,7 @@ const UserLayout = () => {
             width: "100%",
             backgroundColor: "#fff",
           }}
+          className="p-3"
         >
           <Outlet />
         </Box>

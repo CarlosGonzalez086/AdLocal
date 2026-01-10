@@ -37,7 +37,15 @@ const UserLayout = () => {
           onToggleCollapse={() => setCollapsed(!collapsed)}
         />
 
-        <Box sx={{ flexGrow: 1, p: 3, overflow: "auto" }}>
+        <Box
+          sx={{
+            flexGrow: 1,
+            minHeight: 0, 
+            overflowY: "auto",
+            width: "100%",
+            backgroundColor: "#fff",
+          }}
+        >
           <Outlet />
         </Box>
       </Box>

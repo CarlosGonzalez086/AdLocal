@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, Divider } from "@mui/material";
 import { useComercio } from "../../../hooks/useComercio";
 import ComercioCard from "../../../components/Comercio/ComercioCard";
 import ComercioDetalle from "../../../components/Comercio/ComercioDetalle";
@@ -13,7 +13,8 @@ export default function PreviewPage() {
   const { comercio, loading } = useComercio();
   const [productos, setProductos] = useState<ProductoServicioDto[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
-  const [selected, setSelected] = useState(false);
+  const [verDetalle, setVerDetalle] = useState(false);
+
   const listarPorComercio = useCallback(async (idComercio: number) => {
     setLoadingProducts(true);
     try {
@@ -21,100 +22,95 @@ export default function PreviewPage() {
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");
-        return [];
+        return;
       }
 
       setProductos(data.respuesta ?? []);
-      return data.respuesta ?? [];
     } catch (error) {
       console.error(error);
       Swal.fire(
         "Error",
-        "Ocurrió un error inesperado al cargar los productos y servicios del comercio",
+        "Ocurrió un error inesperado al cargar los productos y servicios",
         "error"
       );
-      return [];
     } finally {
       setLoadingProducts(false);
     }
   }, []);
 
   useEffect(() => {
-    if (!comercio?.id) return;
-
-    let mounted = true;
-
-    const fetchProductos = async () => {
-      const productosCargados = await listarPorComercio(comercio.id);
-
-      if (mounted) {
-        console.log("Productos cargados:", productosCargados);
-      }
-    };
-
-    fetchProductos();
-
-    return () => {
-      mounted = false;
-    };
+    if (comercio?.id) {
+      listarPorComercio(comercio.id);
+    }
   }, [comercio?.id, listarPorComercio]);
 
+  /** ===============================
+   *  CARGANDO
+   *  =============================== */
   if (loading) {
     return (
-      <Box sx={{ p: 4, textAlign: "center" }}>
-        <Typography>Cargando comercio...</Typography>
+      <Box>
+        <Typography color="text.secondary">Cargando comercio...</Typography>
       </Box>
     );
   }
 
+  /** ===============================
+   *  SIN COMERCIO
+   *  =============================== */
   if (!comercio) {
     return (
-      <Box sx={{ p: 4, textAlign: "center" }}>
-        <Typography variant="h5" fontWeight="bold" mb={2}>
+      <Box>
+        <Typography variant="h5" fontWeight="bold" mb={1}>
           ¡Aún no tienes un comercio registrado!
         </Typography>
-        <Typography>
-          Por favor, da de alta tu comercio o negocio para poder ver la vista
-          previa.
+        <Typography color="text.secondary">
+          Registra tu comercio para poder ver la vista previa.
         </Typography>
       </Box>
     );
   }
 
+  /** ===============================
+   *  VISTA PREVIA
+   *  =============================== */
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" fontWeight="bold" mb={3}>
-        Vista Previa de tu Comercio
+    <Box>
+      <Typography variant="h4" fontWeight="bold" mb={2}>
+        Vista previa de tu comercio
       </Typography>
 
-      {!selected ? (
-        <Box onClick={() => setSelected(true)}>
-          <ComercioCard comercio={comercio} />
-        </Box>
-      ) : (
-        <Box>
-          <Box>
-            <Button
-              variant="text"
-              onClick={() => setSelected(false)}
-              sx={{
-                textTransform: "none",
-                fontWeight: 500,
-                fontSize: "0.9rem",
-                color: "#007AFF",
-                padding: "4px 8px",
-                minWidth: "auto",
-                "&:hover": {
-                  backgroundColor: "rgba(0,122,255,0.1)",
-                },
-              }}
-            >
-              ← Atrás
-            </Button>
-          </Box>
+      <Divider sx={{ mb: 3 }} />
 
-          <ComercioDetalle comercio={comercio} productos={productos} loadingProducts={loadingProducts}/>
-        </Box>
+      {!verDetalle ? (
+        <div className="d-flex justify-content-center p-3">
+          <Box sx={{ cursor: "pointer" }} onClick={() => setVerDetalle(true)}>
+            <ComercioCard comercio={comercio} />
+          </Box>
+        </div>
+      ) : (
+        <>
+          <Button
+            variant="text"
+            onClick={() => setVerDetalle(false)}
+            sx={{
+              textTransform: "none",
+              fontSize: "0.85rem",
+              mb: 1, // 👈 antes estaba muy separado
+              px: 0,
+            }}
+          >
+            ← Atrás
+          </Button>
+
+          <div className="d-flex justify-content-center p-3">
+            <ComercioDetalle
+              comercio={comercio}
+              productos={productos}
+              loadingProducts={loadingProducts}
+            />
+          </div>
+        </>
       )}
     </Box>
   );

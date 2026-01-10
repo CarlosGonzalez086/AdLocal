@@ -1,4 +1,6 @@
 import axios from "axios";
+import type { ApiResponse } from "../api/apiResponse";
+
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/Suscripciones`,
@@ -49,7 +51,12 @@ export interface SuscripcionDto {
 }
 
 export const suscripcionApi = {
-  contratar: (data: SuscripcionCreateDto) => api.post("", data),
-  miSuscripcion: () => api.get("/mi-suscripcion"),
-  cancelar: () => api.post("/cancelar"),
+  contratar: (data: SuscripcionCreateDto) =>
+    api.post<ApiResponse<null>>("", data),
+
+  miSuscripcion: () =>
+    api.get<ApiResponse<SuscripcionDto>>("/mi-suscripcion"),
+
+  cancelar: () =>
+    api.post<ApiResponse<null>>("/cancelar"),
 };

@@ -25,10 +25,10 @@ export const userRoutes = [
     element: <PlanesPage />,
   },
 
-  {
-    path: "pagos",
-    element: <>Pagos</>,
-  },
+  // {
+  //   path: "pagos",
+  //   element: <>Pagos</>,
+  // },
   {
     path: "productos-servicios",
     element: <ProductosServiciosPage />,
@@ -43,10 +43,10 @@ export const userRoutes = [
     ),
   },
 
-  {
-    path: "configuracion",
-    element: <>Configuración</>,
-  },
+  // {
+  //   path: "configuracion",
+  //   element: <>Configuración</>,
+  // },
 
   {
     path: "perfil",

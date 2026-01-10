@@ -15,11 +15,9 @@ import {
 
 import HomeIcon from "@mui/icons-material/Home";
 import StoreIcon from "@mui/icons-material/Store";
-import EventNoteIcon from "@mui/icons-material/EventNote"; // icono para Plan
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney"; // icono para Pagos
+import EventNoteIcon from "@mui/icons-material/EventNote";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
-import SettingsIcon from "@mui/icons-material/Settings";
-import CategoryIcon from "@mui/icons-material/Category"; // icono para productos y servicios
+import CategoryIcon from "@mui/icons-material/Category";
 
 interface UserSidebarProps {
   drawerWidth: number;
@@ -44,18 +42,18 @@ const UserSidebar = ({
     { text: "Inicio", icon: <HomeIcon />, path: "/app" },
     { text: "Mi comercio", icon: <StoreIcon />, path: "/app/comercio" },
     { text: "Mi plan", icon: <EventNoteIcon />, path: "/app/plan" },
-    { text: "Pagos", icon: <AttachMoneyIcon />, path: "/app/pagos" },
+    // { text: "Pagos", icon: <AttachMoneyIcon />, path: "/app/pagos" },
     { text: "Tarjetas", icon: <CreditCardIcon />, path: "/app/tarjetas" },
     {
       text: "Productos y Servicios",
       icon: <CategoryIcon />,
       path: "/app/productos-servicios",
     },
-    {
-      text: "Configuración",
-      icon: <SettingsIcon />,
-      path: "/app/configuracion",
-    },
+    // {
+    //   text: "Configuración",
+    //   icon: <SettingsIcon />,
+    //   path: "/app/configuracion",
+    // },
   ];
 
   const currentWidth = collapsed ? collapsedWidth : drawerWidth;

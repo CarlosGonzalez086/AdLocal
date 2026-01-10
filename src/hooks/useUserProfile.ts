@@ -4,7 +4,7 @@ import {
   profileUserApi,
   type ProfileUser,
   type ProfileUserUpdateDto,
-} from "../services/userProfileApi ";
+} from "../services/userProfileApi";
 import { UserContext } from "../context/UserContext ";
 import { useActualizarJwt } from "./useActualizarJwt";
 
@@ -24,29 +24,52 @@ export const useUserProfile = () => {
   const { actualizarJwt } = useActualizarJwt();
 
   const cargarPerfil = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const { data } = await profileUserApi.getProfile();
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
       setProfile(data.respuesta);
-    } catch {
-      Swal.fire("Error", "No se pudo cargar el perfil", "error");
+    } catch (error) {
+      console.error(error);
+      Swal.fire(
+        "Error",
+        "Ocurrió un error inesperado al cargar el perfil",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const actualizarPerfil = async (dto: ProfileUserUpdateDto) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      await profileUserApi.updateProfile(dto);
-      Swal.fire("Actualizado", "Perfil actualizado correctamente", "success");
+      const { data } = await profileUserApi.updateProfile(dto);
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
+      Swal.fire("Actualizado", data.mensaje, "success");
       await cargarPerfil();
-    } catch {
-      Swal.fire("Error", "No se pudo actualizar el perfil", "error");
+    } catch (error) {
+      console.error(error);
+      Swal.fire(
+        "Error",
+        "Ocurrió un error inesperado al actualizar el perfil",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
   };
+
   const subirFoto = async (file: File) => {
     const tiposPermitidos: Record<string, string[]> = {
       "image/jpeg": ["jpeg"],
@@ -55,7 +78,6 @@ export const useUserProfile = () => {
       "image/webp": ["webp"],
     };
 
-    // Validar tipo de archivo
     if (!tiposPermitidos[file.type]) {
       Swal.fire(
         "Error",
@@ -67,6 +89,7 @@ export const useUserProfile = () => {
 
     try {
       setLoading(true);
+
       const fileToBase64 = (file: File): Promise<string> =>
         new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -82,15 +105,31 @@ export const useUserProfile = () => {
 
       const { data } = await profileUserApi.uploadPhoto({ base64: base64Data });
 
-      Swal.fire("Actualizado", "Foto de perfil actualizada", "success");
-      setProfile((prev) => ({ ...prev, fotoUrl: data.respuesta.url }));
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
+      Swal.fire("Actualizado", data.mensaje, "success");
+
+      setProfile((prev) => ({
+        ...prev,
+        fotoUrl: data.respuesta.url,
+      }));
+
       await actualizarJwt({
         email: user.sub,
         updateJWT: true,
       });
+
       window.location.reload();
     } catch (error) {
-      Swal.fire("Error", "No se pudo subir la foto", "error");
+      console.error(error);
+      Swal.fire(
+        "Error",
+        "Ocurrió un error inesperado al subir la foto",
+        "error"
+      );
     } finally {
       setLoading(false);
     }

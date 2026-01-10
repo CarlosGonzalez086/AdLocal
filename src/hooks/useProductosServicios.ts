@@ -1,6 +1,9 @@
 import { useState, useCallback } from "react";
 import Swal from "sweetalert2";
-import { productosServiciosApi, type ProductoServicioDto } from "../services/productosServiciosApi";
+import {
+  productosServiciosApi,
+  type ProductoServicioDto,
+} from "../services/productosServiciosApi";
 
 interface ListarParams {
   page: number;
@@ -25,17 +28,14 @@ export const useProductosServicios = () => {
           orderBy,
           search,
         });
-        
+
+        if (data.codigo !== "200") {
+          Swal.fire("Error", data.mensaje, "error");
+          return;
+        }
 
         setProductos(data.respuesta.items ?? []);
         setTotal(data.respuesta.totalItems ?? 0);
-      } catch (error) {
-        console.error(error);
-        Swal.fire(
-          "Error",
-          "No se pudo cargar la información de los productos y servicios",
-          "error"
-        );
       } finally {
         setLoading(false);
       }
@@ -48,12 +48,18 @@ export const useProductosServicios = () => {
     setLoading(true);
     try {
       const { data } = await productosServiciosApi.getAllByComercio(idComercio);
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
       setProductos(data.respuesta ?? []);
     } catch (error) {
       console.error(error);
       Swal.fire(
         "Error",
-        "No se pudo cargar los productos y servicios del comercio",
+        "Ocurrió un error inesperado al cargar los productos y servicios del comercio",
         "error"
       );
     } finally {
@@ -65,16 +71,19 @@ export const useProductosServicios = () => {
   const guardar = async (
     producto: ProductoServicioDto,
     refrescarParams?: ListarParams
-  ): Promise<void> => {
+  ) => {
     setLoading(true);
     try {
-      if (producto.id) {
-        await productosServiciosApi.actualizar(producto.id, producto);
-        Swal.fire("Actualizado", "Producto/Servicio actualizado", "success");
-      } else {
-        await productosServiciosApi.crear(producto);
-        Swal.fire("Creado", "Producto/Servicio creado", "success");
+      const { data } = producto.id
+        ? await productosServiciosApi.actualizar(producto.id, producto)
+        : await productosServiciosApi.crear(producto);
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
       }
+
+      Swal.fire("Éxito", data.mensaje, "success");
 
       if (refrescarParams) {
         await listar(refrescarParams);
@@ -92,26 +101,24 @@ export const useProductosServicios = () => {
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
     });
 
     if (!result.isConfirmed) return;
 
+    setLoading(true);
     try {
-      setLoading(true);
-      await productosServiciosApi.eliminar(id);
-      Swal.fire("Eliminado", "Producto/Servicio eliminado", "success");
+      const { data } = await productosServiciosApi.eliminar(id);
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
+      Swal.fire("Éxito", data.mensaje, "success");
 
       if (refrescarParams) {
         await listar(refrescarParams);
       }
-    } catch (error) {
-      console.error(error);
-      Swal.fire(
-        "Error",
-        "No se pudo eliminar el producto/servicio",
-        "error"
-      );
     } finally {
       setLoading(false);
     }
@@ -119,10 +126,16 @@ export const useProductosServicios = () => {
 
   // Desactivar producto/servicio
   const desactivar = async (id: number, refrescarParams?: ListarParams) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      await productosServiciosApi.desactivar(id);
-      Swal.fire("Desactivado", "Producto/Servicio desactivado", "success");
+      const { data } = await productosServiciosApi.desactivar(id);
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
+      Swal.fire("Éxito", data.mensaje, "success");
 
       if (refrescarParams) {
         await listar(refrescarParams);
@@ -131,7 +144,7 @@ export const useProductosServicios = () => {
       console.error(error);
       Swal.fire(
         "Error",
-        "No se pudo desactivar el producto/servicio",
+        "Ocurrió un error inesperado al desactivar el producto/servicio",
         "error"
       );
     } finally {
@@ -144,15 +157,13 @@ export const useProductosServicios = () => {
     setLoading(true);
     try {
       const { data } = await productosServiciosApi.getById(id);
-      return data.respuesta ?? null;
-    } catch (error) {
-      console.error(error);
-      Swal.fire(
-        "Error",
-        "No se pudo obtener la información del producto/servicio",
-        "error"
-      );
-      return null;
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return null;
+      }
+
+      return data.respuesta;
     } finally {
       setLoading(false);
     }

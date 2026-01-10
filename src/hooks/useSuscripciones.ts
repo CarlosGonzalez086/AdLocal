@@ -13,14 +13,20 @@ export const useSuscripciones = () => {
   const contratar = async (dto: SuscripcionCreateDto): Promise<void> => {
     setLoading(true);
     try {
-      await suscripcionApi.contratar(dto);
-      Swal.fire("Éxito", "Suscripción activada correctamente", "success");
+      const { data } = await suscripcionApi.contratar(dto);
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
+      Swal.fire("Éxito", data.mensaje, "success");
       await obtenerMiSuscripcion();
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
       Swal.fire(
         "Error",
-        error?.response?.data?.mensaje ?? "No se pudo contratar el plan",
+        "Ocurrió un error inesperado al contratar la suscripción",
         "error"
       );
     } finally {
@@ -32,8 +38,13 @@ export const useSuscripciones = () => {
     setLoading(true);
     try {
       const { data } = await suscripcionApi.miSuscripcion();
-      console.log(data.respuesta);
-      
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        setSuscripcion(null);
+        return;
+      }
+
       setSuscripcion(data.respuesta ?? null);
     } catch (error) {
       console.error(error);
@@ -42,7 +53,6 @@ export const useSuscripciones = () => {
       setLoading(false);
     }
   }, []);
-
 
   const cancelar = async (): Promise<void> => {
     const result = await Swal.fire({
@@ -58,14 +68,20 @@ export const useSuscripciones = () => {
 
     setLoading(true);
     try {
-      await suscripcionApi.cancelar();
-      Swal.fire("Cancelada", "Tu suscripción fue cancelada", "success");
+      const { data } = await suscripcionApi.cancelar();
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
+      Swal.fire("Cancelada", data.mensaje, "success");
       await obtenerMiSuscripcion();
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
       Swal.fire(
         "Error",
-        error?.response?.data?.mensaje ?? "No se pudo cancelar la suscripción",
+        "Ocurrió un error inesperado al cancelar la suscripción",
         "error"
       );
     } finally {

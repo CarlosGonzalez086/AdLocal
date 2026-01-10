@@ -15,18 +15,26 @@ export const useTarjetas = () => {
     setLoading(true);
     try {
       const { data } = await tarjetaApi.listar();
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
       setTarjetas(data.respuesta ?? []);
     } catch (error) {
       console.error(error);
-      Swal.fire("Error", "No se pudieron cargar las tarjetas", "error");
+      Swal.fire(
+        "Error",
+        "Ocurrió un error inesperado al cargar las tarjetas",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
   }, []);
 
   const crear = async (dto: CrearTarjetaDto) => {
-    console.log(dto);
-
     setLoading(true);
     try {
       const result = tarjetaSchema.safeParse(dto);
@@ -34,18 +42,27 @@ export const useTarjetas = () => {
         const firstError = Object.values(
           result.error.flatten().fieldErrors
         ).flat()[0];
+
         Swal.fire("Error", firstError || "Datos inválidos", "error");
         return;
       }
 
-      await tarjetaApi.crear(dto);
-      Swal.fire("Creada", "Tarjeta registrada correctamente", "success");
+      const { data } = await tarjetaApi.crear(dto);
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
+      Swal.fire("Creada", data.mensaje, "success");
       await listar();
     } catch (error) {
       console.error(error);
-      const mensaje =
-        (error as any)?.response?.data?.mensaje ?? "No se pudo crear la tarjeta";
-      Swal.fire("Error", String(mensaje), "error");
+      Swal.fire(
+        "Error",
+        "Ocurrió un error inesperado al crear la tarjeta",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
@@ -65,12 +82,22 @@ export const useTarjetas = () => {
 
     setLoading(true);
     try {
-      await tarjetaApi.eliminar(id);
-      Swal.fire("Eliminada", "Tarjeta eliminada correctamente", "success");
+      const { data } = await tarjetaApi.eliminar(id);
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
+      Swal.fire("Eliminada", data.mensaje, "success");
       await listar();
     } catch (error) {
       console.error(error);
-      Swal.fire("Error", "No se pudo eliminar la tarjeta", "error");
+      Swal.fire(
+        "Error",
+        "Ocurrió un error inesperado al eliminar la tarjeta",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
@@ -79,12 +106,22 @@ export const useTarjetas = () => {
   const setDefault = async (id: number) => {
     setLoading(true);
     try {
-      await tarjetaApi.setDefault(id);
-      Swal.fire("Actualizada", "Tarjeta establecida como principal", "success");
+      const { data } = await tarjetaApi.setDefault(id);
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
+      Swal.fire("Actualizada", data.mensaje, "success");
       await listar();
     } catch (error) {
       console.error(error);
-      Swal.fire("Error", "No se pudo actualizar la tarjeta", "error");
+      Swal.fire(
+        "Error",
+        "Ocurrió un error inesperado al actualizar la tarjeta",
+        "error"
+      );
     } finally {
       setLoading(false);
     }

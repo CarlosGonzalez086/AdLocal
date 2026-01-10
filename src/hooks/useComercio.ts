@@ -12,15 +12,22 @@ export const useComercio = () => {
   const [loading, setLoading] = useState(false);
 
   const cargar = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const { data } = await comercioApi.getMine();
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        setComercio(null);
+        return;
+      }
+
       const c = data.respuesta;
-      console.log(c);
       if (!c) {
         setComercio(null);
         return;
       }
+
       setComercio({
         id: c.id,
         nombre: c.nombre,
@@ -32,6 +39,7 @@ export const useComercio = () => {
         lng: c.lng,
       });
     } catch (error) {
+      console.error(error);
       setComercio(null);
     } finally {
       setLoading(false);
@@ -42,18 +50,31 @@ export const useComercio = () => {
     setLoading(true);
     try {
       if (comercio?.id) {
-        await comercioApi.actualizar(comercio.id, {
+        const { data: resp } = await comercioApi.actualizar(comercio.id, {
           ...data,
           activo: comercio.activo,
         });
-        Swal.fire("Actualizado", "Comercio actualizado", "success");
+
+        if (resp.codigo !== "200") {
+          Swal.fire("Error", resp.mensaje, "error");
+          return;
+        }
+
+        Swal.fire("Actualizado", resp.mensaje, "success");
       } else {
-        await comercioApi.crear(data);
+        const { data: resp } = await comercioApi.crear(data);
+
+        if (resp.codigo !== "200") {
+          Swal.fire("Error", resp.mensaje, "error");
+          return;
+        }
+
         await actualizarJwt({
           email: user.sub,
           updateJWT: true,
         });
-        Swal.fire("Creado", "Comercio registrado", "success");
+
+        Swal.fire("Creado", resp.mensaje, "success");
       }
 
       await cargar();
@@ -75,10 +96,21 @@ export const useComercio = () => {
 
     if (!r.isConfirmed) return;
 
-    await comercioApi.eliminar(comercio.id);
-    Swal.fire("Eliminado", "Comercio eliminado", "success");
-    window.location.reload();
-    setComercio(null);
+    setLoading(true);
+    try {
+      const { data } = await comercioApi.eliminar(comercio.id);
+
+      if (data.codigo !== "200") {
+        Swal.fire("Error", data.mensaje, "error");
+        return;
+      }
+
+      Swal.fire("Eliminado", data.mensaje, "success");
+      setComercio(null);
+      window.location.reload();
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

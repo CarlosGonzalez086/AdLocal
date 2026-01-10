@@ -27,17 +27,7 @@ export const useComercio = () => {
         setComercio(null);
         return;
       }
-
-      setComercio({
-        id: c.id,
-        nombre: c.nombre,
-        direccion: c.direccion,
-        telefono: c.telefono,
-        activo: c.activo,
-        logoBase64: c.logoBase64,
-        lat: c.lat,
-        lng: c.lng,
-      });
+      setComercio(c);
     } catch (error) {
       console.error(error);
       setComercio(null);

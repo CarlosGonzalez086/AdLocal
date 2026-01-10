@@ -30,34 +30,62 @@ export interface ComercioCreateDto {
   nombre: string;
   direccion?: string;
   telefono?: string;
+  email?: string;
+  descripcion?: string;
+
+  // 🖼️ Logo principal (base64 o url)
+  logoBase64?: string;
+
+  // 🖼️ Galería de imágenes
+  imagenes?: string[];
+
   lat: number;
   lng: number;
-  LogoBase64?: string;
+
+  // 🎨 Colores
+  colorPrimario?: string;
+  colorSecundario?: string;
+
+  activo?: boolean;
 }
 
 export interface ComercioUpdateDto {
   nombre: string;
   direccion?: string;
   telefono?: string;
-  activo: boolean;
+  email?: string;
+  descripcion?: string;
+
+  logoBase64?: string;
+  imagenes?: string[];
+
   lat?: number;
   lng?: number;
-  LogoBase64?: string;
+
+  colorPrimario?: string;
+  colorSecundario?: string;
+
+  activo: boolean;
 }
 
 export interface ComercioDto {
   id: number;
   nombre: string;
-  direccion?: string;
-  telefono?: string;
-  activo: boolean;
-  logoBase64?: string;
-  ubicacion?: {
-    x: number;
-    y: number;
-  } | null;
+  direccion: string;
+  telefono: string;
+  email: string;
+  descripcion: string;
+
+  logoBase64: string;
+  imagenes: string[];
+
   lat: number;
   lng: number;
+
+  colorPrimario: string;
+  colorSecundario: string;
+
+  activo: boolean;
 }
 
 export const comercioApi = {

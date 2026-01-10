@@ -5,6 +5,7 @@ import {
   LinearProgress,
   Avatar,
   Divider,
+  Box,
 } from "@mui/material";
 import { useState } from "react";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
@@ -14,7 +15,8 @@ import { ComercioForm } from "./ComercioForm";
 export const MiComercioPage = () => {
   const { comercio, loading, guardar, eliminar } = useComercio();
   const [editando, setEditando] = useState(false);
-  console.log(comercio);
+  const imagenes = comercio?.imagenes ?? [];
+  
 
   if (loading) {
     return (
@@ -29,6 +31,9 @@ export const MiComercioPage = () => {
     );
   }
 
+  /** ===============================
+   *  REGISTRAR COMERCIO
+   *  =============================== */
   if (!comercio) {
     return (
       <Card>
@@ -41,10 +46,15 @@ export const MiComercioPage = () => {
               nombre: "",
               direccion: "",
               telefono: "",
+              email: "",
+              descripcion: "",
               activo: true,
               lat: 0,
               lng: 0,
               logoBase64: "",
+              imagenes: [],
+              colorPrimario: "#000000",
+              colorSecundario: "#FFFFFF",
             }}
             loading={loading}
             onSave={guardar}
@@ -54,6 +64,9 @@ export const MiComercioPage = () => {
     );
   }
 
+  /** ===============================
+   *  EDITAR COMERCIO
+   *  =============================== */
   if (editando) {
     return (
       <Card>
@@ -67,9 +80,7 @@ export const MiComercioPage = () => {
               await guardar(data);
               setEditando(false);
             }}
-            setEditando={() => {
-              setEditando(false);
-            }}
+            setEditando={() => setEditando(false)}
             soloVer={true}
           />
         </CardContent>
@@ -77,9 +88,13 @@ export const MiComercioPage = () => {
     );
   }
 
+  /** ===============================
+   *  VER COMERCIO
+   *  =============================== */
   return (
     <Card>
       <CardContent>
+        {/* LOGO */}
         {comercio.logoBase64 && (
           <div className="d-flex justify-content-center mb-3">
             <Avatar
@@ -92,6 +107,7 @@ export const MiComercioPage = () => {
 
         <Divider className="mb-3" />
 
+        {/* INFO BÁSICA */}
         <p>
           <b>Nombre:</b> {comercio.nombre}
         </p>
@@ -101,7 +117,70 @@ export const MiComercioPage = () => {
         <p>
           <b>Teléfono:</b> {comercio.telefono}
         </p>
+        <p>
+          <b>Email:</b> {comercio.email}
+        </p>
 
+        {comercio.descripcion && (
+          <p>
+            <b>Descripción:</b> {comercio.descripcion}
+          </p>
+        )}
+
+        {/* COLORES */}
+        <Divider className="my-3" />
+        <h5>Colores del comercio</h5>
+
+        <Box className="d-flex gap-3 align-items-center">
+          <Box>
+            <small>Primario</small>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                backgroundColor: comercio.colorPrimario,
+                borderRadius: 1,
+                border: "1px solid #ccc",
+              }}
+            />
+            <small>{comercio.colorPrimario}</small>
+          </Box>
+
+          <Box>
+            <small>Secundario</small>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                backgroundColor: comercio.colorSecundario,
+                borderRadius: 1,
+                border: "1px solid #ccc",
+              }}
+            />
+            <small>{comercio.colorSecundario}</small>
+          </Box>
+        </Box>
+
+        {/* IMÁGENES */}
+        {imagenes.length > 0 && (
+          <>
+            <Divider className="my-3" />
+            <h5>Imágenes</h5>
+
+            <Box className="d-flex flex-wrap gap-2">
+              {imagenes.map((img, index) => (
+                <Avatar
+                  key={index}
+                  src={img}
+                  variant="rounded"
+                  sx={{ width: 100, height: 100 }}
+                />
+              ))}
+            </Box>
+          </>
+        )}
+
+        {/* MAPA */}
         {comercio.lat !== 0 && comercio.lng !== 0 && (
           <div className="my-3" style={{ height: 300 }}>
             <MapContainer
@@ -119,6 +198,7 @@ export const MiComercioPage = () => {
           </div>
         )}
 
+        {/* ACCIONES */}
         <div className="d-flex gap-2 mt-3">
           <Button variant="contained" onClick={() => setEditando(true)}>
             Editar

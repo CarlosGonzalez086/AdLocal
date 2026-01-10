@@ -21,8 +21,6 @@ export default function ComercioDetalle({
   productos,
   loadingProducts,
 }: Props) {
-
-  
   return (
     <Box
       sx={{
@@ -213,6 +211,10 @@ export default function ComercioDetalle({
             "&:hover": {
               opacity: 0.9,
             },
+          }}
+          onClick={() => {
+            const url = `https://www.google.com/maps?q=${comercio.lat},${comercio.lng}`;
+            window.open(url, "_blank"); 
           }}
         >
           Ver ubicación

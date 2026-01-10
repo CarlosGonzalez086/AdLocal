@@ -24,40 +24,56 @@ export default function ComercioDetalle({
   return (
     <Box
       sx={{
+        width: "100%",
+        maxWidth: 900, // 👈 límite en desktop
+        mx: "auto", // 👈 centrado
         borderRadius: 4,
         boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
         overflow: "hidden",
-        maxWidth: 800,
-        mx: "auto",
-        my: 4,
-        backgroundColor: "#fff",
+        backgroundColor: "#fff", // ❌ quita el rojo
       }}
     >
       <Box
         sx={{
           background: `linear-gradient(135deg, ${comercio.colorPrimario}, ${comercio.colorSecundario})`,
-          p: 5,
+          px: { xs: 2, sm: 4 },
+          py: { xs: 3, sm: 5 },
           textAlign: "center",
-          position: "relative",
         }}
       >
         <Avatar
           src={comercio.logoBase64}
           sx={{
-            width: 120,
-            height: 120,
+            width: { xs: 80, sm: 120 },
+            height: { xs: 80, sm: 120 },
             mx: "auto",
-            mb: 2,
+            mb: 1.5,
             border: "3px solid #fff",
             boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
           }}
         />
-        <Typography variant="h4" fontWeight="bold" color="#fff">
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          color="#fff"
+          sx={{
+            fontSize: { xs: "1.4rem", sm: "2rem" },
+            lineHeight: 1.2,
+          }}
+        >
           {comercio.nombre}
         </Typography>
-        <Typography variant="subtitle1" color="#f5f5f5" sx={{ mt: 1 }}>
-          {comercio.descripcion}
-        </Typography>
+        {comercio.descripcion && (
+          <Typography
+            color="#f5f5f5"
+            sx={{
+              mt: 1,
+              fontSize: { xs: "0.9rem", sm: "1rem" },
+            }}
+          >
+            {comercio.descripcion}
+          </Typography>
+        )}
       </Box>
 
       {comercio.imagenes && comercio.imagenes.length > 0 && (
@@ -214,7 +230,7 @@ export default function ComercioDetalle({
           }}
           onClick={() => {
             const url = `https://www.google.com/maps?q=${comercio.lat},${comercio.lng}`;
-            window.open(url, "_blank"); 
+            window.open(url, "_blank");
           }}
         >
           Ver ubicación

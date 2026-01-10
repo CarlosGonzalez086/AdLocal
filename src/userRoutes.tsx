@@ -6,13 +6,14 @@ import PlanesPage from "./pages/User/Plan/MiPlanPage";
 import { TarjetasPage } from "./pages/User/Tarjetas/TarjetasPage";
 import { loadStripe } from "@stripe/stripe-js";
 import { ProductosServiciosPage } from "./pages/User/ProductosServicios/ProductosServiciosPage";
+import PreviewPage from "./pages/User/Preview/PreviewPage";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 export const userRoutes = [
   {
     path: "",
-    element: <>Inicio Usuario</>,
+    element: <PreviewPage />,
   },
 
   {

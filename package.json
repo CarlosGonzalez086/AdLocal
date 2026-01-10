@@ -26,6 +26,8 @@
     "react-hook-form": "^7.69.0",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.11.0",
+    "react-slick": "^0.31.0",
+    "slick-carousel": "^1.8.1",
     "sweetalert2": "^11.26.17",
     "zod": "^4.2.1",
     "zustand": "^5.0.9"
@@ -37,6 +39,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@types/react-slick": "^0.23.13",
     "@vitejs/plugin-react-swc": "^4.2.2",
     "autoprefixer": "^10.4.23",
     "eslint": "^9.39.1",

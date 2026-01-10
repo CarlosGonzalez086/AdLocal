@@ -95,8 +95,8 @@ export const comercioApi = {
   crear: (data: ComercioCreateDto) =>
     api.post<ApiResponse<ComercioDto>>("", data),
 
-  actualizar: (id: number, data: ComercioUpdateDto) =>
-    api.put<ApiResponse<ComercioDto>>(`/${id}`, data),
+  actualizar: (data: ComercioUpdateDto) =>
+    api.put<ApiResponse<ComercioDto>>("", data),
 
   eliminar: (id: number) =>
     api.delete<ApiResponse<null>>(`/${id}`),

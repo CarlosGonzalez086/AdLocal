@@ -40,7 +40,7 @@ export const useComercio = () => {
     setLoading(true);
     try {
       if (comercio?.id) {
-        const { data: resp } = await comercioApi.actualizar(comercio.id, {
+        const { data: resp } = await comercioApi.actualizar({
           ...data,
           activo: comercio.activo,
         });

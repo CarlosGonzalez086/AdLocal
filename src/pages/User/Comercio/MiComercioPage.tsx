@@ -67,13 +67,11 @@ export const MiComercioPage = () => {
               await guardar(data);
               setEditando(false);
             }}
+            setEditando={() => {
+              setEditando(false);
+            }}
+            soloVer={true}
           />
-
-          <div className="mt-3">
-            <Button variant="outlined" onClick={() => setEditando(false)}>
-              Cancelar
-            </Button>
-          </div>
         </CardContent>
       </Card>
     );
@@ -82,7 +80,6 @@ export const MiComercioPage = () => {
   return (
     <Card>
       <CardContent>
-
         {comercio.logoBase64 && (
           <div className="d-flex justify-content-center mb-3">
             <Avatar

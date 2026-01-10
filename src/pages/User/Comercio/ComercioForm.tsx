@@ -18,6 +18,7 @@ interface Props {
   loading?: boolean;
   onSave: (data: ComercioDto) => void;
   soloVer?: boolean;
+  setEditando?: () => void;
 }
 
 export const ComercioForm = ({
@@ -25,6 +26,7 @@ export const ComercioForm = ({
   loading = false,
   onSave,
   soloVer = false,
+  setEditando,
 }: Props) => {
   const [form, setForm] = useState<ComercioDto>(initialData);
   const [preview, setPreview] = useState<string | null>(
@@ -89,7 +91,7 @@ export const ComercioForm = ({
             src={preview ?? undefined}
             sx={{ width: 120, height: 120, mb: 2 }}
           />
-          {!soloVer && (
+          {soloVer && (
             <Button variant="outlined" component="label">
               Subir logo
               <input
@@ -111,7 +113,7 @@ export const ComercioForm = ({
                 onChange={handleChange("nombre")}
                 fullWidth
                 required
-                disabled={soloVer}
+                disabled={!soloVer}
               />
             </div>
 
@@ -121,7 +123,7 @@ export const ComercioForm = ({
                 value={form.direccion ?? ""}
                 onChange={handleChange("direccion")}
                 fullWidth
-                disabled={soloVer}
+                disabled={!soloVer}
               />
             </div>
 
@@ -131,7 +133,7 @@ export const ComercioForm = ({
                 value={form.telefono ?? ""}
                 onChange={handleChange("telefono")}
                 fullWidth
-                disabled={soloVer}
+                disabled={!soloVer}
                 inputProps={{
                   maxLength: 10,
                   inputMode: "numeric",
@@ -144,7 +146,7 @@ export const ComercioForm = ({
               <div style={{ height: 300, borderRadius: 8, overflow: "hidden" }}>
                 <MapContainer
                   center={[form.lat || 19.4326, form.lng || -99.1332]}
-                  zoom={14}
+                  zoom={soloVer ? 20 : 14}
                   style={{ height: "100%", width: "100%" }}
                 >
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -154,11 +156,41 @@ export const ComercioForm = ({
             </div>
 
             {!soloVer && (
-              <div className="col-12 d-flex justify-content-end">
-                <Button type="submit" variant="contained" disabled={loading}>
-                  {loading ? <CircularProgress size={24} /> : "Guardar"}
-                </Button>
-              </div>
+              <>
+                <div className="row col-12 d-flex justify-content-end mt-3">
+                  <div className="col-6">
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={loading}
+                      fullWidth
+                    >
+                      {loading ? <CircularProgress size={24} /> : "Guardar"}
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+            {soloVer && (
+              <>
+                <div className="row col-12 d-flex justify-content-end mt-3">
+                  <div className="col-6">
+                    <Button variant="outlined" onClick={setEditando} fullWidth>
+                      Cancelar
+                    </Button>
+                  </div>
+                  <div className="col-6">
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={loading}
+                      fullWidth
+                    >
+                      {loading ? <CircularProgress size={24} /> : "Guardar"}
+                    </Button>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </form>

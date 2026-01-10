@@ -22,6 +22,8 @@ export const ProductosServiciosPage = () => {
     descripcion: "",
     precio: 0,
     activo: true,
+    stock: 0,
+    imagenBase64: "",
   };
 
   const { productos, total, loading, listar, guardar, eliminar, desactivar } =
@@ -114,6 +116,8 @@ export const ProductosServiciosPage = () => {
               color="primary"
               size="small"
               onClick={() => {
+                console.log(p);
+
                 setProducto(p);
                 setView(true);
               }}
@@ -156,6 +160,7 @@ export const ProductosServiciosPage = () => {
       />
 
       <ProductoServicioModal
+        key={`edit-${producto?.id ?? "new"}`}
         open={open}
         onClose={() => {
           setOpen(false);
@@ -167,6 +172,7 @@ export const ProductosServiciosPage = () => {
       />
 
       <ProductoServicioModal
+        key={`view-${producto?.id ?? "view"}`}
         open={view}
         onClose={() => {
           setView(false);

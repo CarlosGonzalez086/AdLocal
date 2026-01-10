@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { ApiResponse } from "../api/apiResponse";
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/ProductosServicios`,
@@ -7,16 +8,13 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => response,
@@ -32,33 +30,39 @@ api.interceptors.response.use(
 export interface ProductoServicioDto {
   id?: number;
   nombre: string;
-  descripcion?: string;
-  precio?: number;
-  activo?: boolean;
+  descripcion: string;
+  precio: number;
+  activo: boolean;
+  stock: number;
+  imagenBase64?: string;
 }
 
-export type ProductoServicioFormErrors = Partial<
-  Record<keyof ProductoServicioDto, string>
->;
+export interface PagedResponse<T> {
+  items: T[];
+  totalItems: number;
+}
 
 export const productosServiciosApi = {
-  crear: (data: ProductoServicioDto) => api.post("", data),
+  crear: (data: ProductoServicioDto) =>
+    api.post<ApiResponse<ProductoServicioDto>>("", data),
 
   actualizar: (id: number, data: ProductoServicioDto) =>
-    api.put(`/${id}`, data),
+    api.put<ApiResponse<ProductoServicioDto>>(`/${id}`, data),
 
-  eliminar: (id: number) => api.delete(`/${id}`),
+  eliminar: (id: number) => api.delete<ApiResponse<null>>(`/${id}`),
 
-  desactivar: (id: number) => api.patch(`desactivar/${id}`),
+  desactivar: (id: number) => api.put<ApiResponse<null>>(`desactivar/${id}`),
 
-  getById: (id: number) => api.get(`/${id}`),
+  getById: (id: number) => api.get<ApiResponse<ProductoServicioDto>>(`/${id}`),
 
   getAllPaged: (params?: {
     page?: number;
     pageSize?: number;
     orderBy?: string;
     search?: string;
-  }) => api.get("", { params }),
+  }) =>
+    api.get<ApiResponse<PagedResponse<ProductoServicioDto>>>("", { params }),
 
-  getAllByComercio: (idComercio: number) => api.get(`/${idComercio}`),
+  getAllByComercio: (idComercio: number) =>
+    api.get<ApiResponse<ProductoServicioDto[]>>(`/comercio/${idComercio}`),
 };

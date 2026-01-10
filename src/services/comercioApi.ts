@@ -1,4 +1,6 @@
 import axios from "axios";
+import type { ApiResponse } from "../api/apiResponse";
+
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/comercios`,
@@ -24,20 +26,12 @@ api.interceptors.response.use(
   }
 );
 
-export interface ApiResponse<T> {
-  codigo: string;
-  mensaje: string;
-  respuesta: T;
-}
-
 export interface ComercioCreateDto {
   nombre: string;
   direccion?: string;
   telefono?: string;
-
   lat: number;
   lng: number;
-
   LogoBase64?: string;
 }
 
@@ -46,10 +40,8 @@ export interface ComercioUpdateDto {
   direccion?: string;
   telefono?: string;
   activo: boolean;
-
   lat?: number;
   lng?: number;
-
   LogoBase64?: string;
 }
 
@@ -69,9 +61,15 @@ export interface ComercioDto {
 }
 
 export const comercioApi = {
-  getMine: () => api.get<ApiResponse<ComercioDto>>("/mine"),
-  crear: (data: ComercioCreateDto) => api.post<ComercioDto>("", data),
+  getMine: () =>
+    api.get<ApiResponse<ComercioDto>>("/mine"),
+
+  crear: (data: ComercioCreateDto) =>
+    api.post<ApiResponse<ComercioDto>>("", data),
+
   actualizar: (id: number, data: ComercioUpdateDto) =>
-    api.put<ComercioDto>(`/${id}`, data),
-  eliminar: (id: number) => api.delete(`/${id}`),
+    api.put<ApiResponse<ComercioDto>>(`/${id}`, data),
+
+  eliminar: (id: number) =>
+    api.delete<ApiResponse<null>>(`/${id}`),
 };

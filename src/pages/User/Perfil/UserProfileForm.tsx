@@ -2,7 +2,7 @@ import { TextField, Button} from "@mui/material";
 import type {
   ProfileUser,
   ProfileUserUpdateDto,
-} from "../../../services/userProfileApi ";
+} from "../../../services/userProfileApi";
 import { useState } from "react";
 import { AvatarUpload } from "../../../components/AvatarUpload";
 

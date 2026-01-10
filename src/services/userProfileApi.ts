@@ -1,10 +1,6 @@
 import axios from "axios";
+import type { ApiResponse } from "../api/apiResponse";
 
-interface ApiResponse<T> {
-  codigo: string;
-  mensaje: string;
-  respuesta: T;
-}
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}`,
@@ -68,13 +64,18 @@ export const initialProfile: ProfileUser = {
 };
 
 export const profileUserApi = {
-  getProfile: () => api.get<ApiResponse<ProfileUser>>("/Auth"),
+  getProfile: () =>
+    api.get<ApiResponse<ProfileUser>>("/Auth"),
 
-  updateProfile: (data: ProfileUserUpdateDto) => api.put("/Auth", data),
+  updateProfile: (data: ProfileUserUpdateDto) =>
+    api.put<ApiResponse<ProfileUser>>("/Auth", data),
 
   changePassword: (data: ChangeUserPasswordDto) =>
-    api.put("/Auth/cambiar-password", data),
+    api.put<ApiResponse<null>>("/Auth/cambiar-password", data),
 
-uploadPhoto: (base64Data: { base64: string }) =>
-  api.post<ApiResponse<{ url: string }>>("/Auth/upload-photo", base64Data),
+  uploadPhoto: (base64Data: { base64: string }) =>
+    api.post<ApiResponse<{ url: string }>>(
+      "/Auth/upload-photo",
+      base64Data
+    ),
 };

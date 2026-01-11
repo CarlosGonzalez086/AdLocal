@@ -1,7 +1,15 @@
-import { Box, Typography, Avatar, Stack, Button, Divider } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Avatar,
+  Stack,
+  Button,
+  Divider,
+  Link,
+} from "@mui/material";
 
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import PhoneIcon from "@mui/icons-material/Phone";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import EmailIcon from "@mui/icons-material/Email";
 
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
@@ -25,12 +33,12 @@ export default function ComercioDetalle({
     <Box
       sx={{
         width: "100%",
-        maxWidth: 900, // 👈 límite en desktop
-        mx: "auto", // 👈 centrado
+        maxWidth: 900,
+        mx: "auto",
         borderRadius: 4,
         boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
         overflow: "hidden",
-        backgroundColor: "#fff", // ❌ quita el rojo
+        backgroundColor: "#fff",
       }}
     >
       <Box
@@ -157,13 +165,29 @@ export default function ComercioDetalle({
         </Stack>
 
         <Stack direction="row" spacing={1} alignItems="center">
-          <PhoneIcon sx={{ color: comercio.colorPrimario }} />
-          <Typography>{comercio.telefono}</Typography>
+          <WhatsAppIcon sx={{ color: "#25D366" }} />
+
+          <Link
+            href={`https://wa.me/${comercio.telefono}`}
+            target="_blank"
+            rel="noopener"
+            underline="none"
+            sx={{ color: "inherit", cursor: "pointer" }}
+          >
+            <Typography>{comercio.telefono}</Typography>
+          </Link>
         </Stack>
 
         <Stack direction="row" spacing={1} alignItems="center">
           <EmailIcon sx={{ color: comercio.colorPrimario }} />
-          <Typography>{comercio.email}</Typography>
+
+          <Link
+            href={`mailto:${comercio.email}`}
+            underline="none"
+            sx={{ color: "inherit", cursor: "pointer" }}
+          >
+            <Typography>{comercio.email}</Typography>
+          </Link>
         </Stack>
 
         <Divider />

@@ -6,6 +6,7 @@ import {
   Avatar,
   Divider,
   Box,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
@@ -16,24 +17,50 @@ export const MiComercioPage = () => {
   const { comercio, loading, guardar, eliminar } = useComercio();
   const [editando, setEditando] = useState(false);
   const imagenes = comercio?.imagenes ?? [];
-  
 
   if (loading) {
     return (
-      <Card>
+      <Card
+        elevation={3}
+        sx={{
+          borderRadius: 3,
+        }}
+      >
         <CardContent>
-          <p className="mb-2 text-muted">
-            Cargando información del comercio...
-          </p>
-          <LinearProgress />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1.5,
+            }}
+          >
+            <Typography
+              sx={{
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                color: "text.secondary",
+              }}
+            >
+              Cargando información del comercio
+            </Typography>
+
+            <LinearProgress
+              sx={{
+                height: 6,
+                borderRadius: 999,
+                backgroundColor: "#e5e7eb",
+                "& .MuiLinearProgress-bar": {
+                  borderRadius: 999,
+                  background: "linear-gradient(90deg, #6F4E37, #f5e9cf)",
+                },
+              }}
+            />
+          </Box>
         </CardContent>
       </Card>
     );
   }
 
-  /** ===============================
-   *  REGISTRAR COMERCIO
-   *  =============================== */
   if (!comercio) {
     return (
       <Card>
@@ -64,9 +91,6 @@ export const MiComercioPage = () => {
     );
   }
 
-  /** ===============================
-   *  EDITAR COMERCIO
-   *  =============================== */
   if (editando) {
     return (
       <Card>
@@ -88,13 +112,9 @@ export const MiComercioPage = () => {
     );
   }
 
-  /** ===============================
-   *  VER COMERCIO
-   *  =============================== */
   return (
     <Card>
       <CardContent>
-        {/* LOGO */}
         {comercio.logoBase64 && (
           <div className="d-flex justify-content-center mb-3">
             <Avatar
@@ -107,7 +127,6 @@ export const MiComercioPage = () => {
 
         <Divider className="mb-3" />
 
-        {/* INFO BÁSICA */}
         <p>
           <b>Nombre:</b> {comercio.nombre}
         </p>
@@ -127,7 +146,6 @@ export const MiComercioPage = () => {
           </p>
         )}
 
-        {/* COLORES */}
         <Divider className="my-3" />
         <h5>Colores del comercio</h5>
 
@@ -161,7 +179,6 @@ export const MiComercioPage = () => {
           </Box>
         </Box>
 
-        {/* IMÁGENES */}
         {imagenes.length > 0 && (
           <>
             <Divider className="my-3" />
@@ -180,7 +197,6 @@ export const MiComercioPage = () => {
           </>
         )}
 
-        {/* MAPA */}
         {comercio.lat !== 0 && comercio.lng !== 0 && (
           <div className="my-3" style={{ height: 300 }}>
             <MapContainer
@@ -198,7 +214,6 @@ export const MiComercioPage = () => {
           </div>
         )}
 
-        {/* ACCIONES */}
         <div className="d-flex gap-2 mt-3">
           <Button variant="contained" onClick={() => setEditando(true)}>
             Editar

@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { Box, Button, Typography, Divider } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  Divider,
+  CircularProgress,
+} from "@mui/material";
 import { useComercio } from "../../../hooks/useComercio";
 import ComercioCard from "../../../components/Comercio/ComercioCard";
 import ComercioDetalle from "../../../components/Comercio/ComercioDetalle";
@@ -44,20 +50,52 @@ export default function PreviewPage() {
     }
   }, [comercio?.id, listarPorComercio]);
 
-  /** ===============================
-   *  CARGANDO
-   *  =============================== */
   if (loading) {
     return (
-      <Box>
-        <Typography color="text.secondary">Cargando comercio...</Typography>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 2,
+          background: "linear-gradient(135deg, #f9fafb, #eef2f7)",
+        }}
+      >
+        <CircularProgress
+          size={60}
+          thickness={4.5}
+          sx={{
+            color: "#6F4E37",
+          }}
+        />
+
+        <Typography
+          sx={{
+            fontWeight: 600,
+            fontSize: "1.1rem",
+            color: "text.secondary",
+            letterSpacing: "0.3px",
+            animation: "pulse 1.5s ease-in-out infinite",
+          }}
+        >
+          Cargando comercio...
+        </Typography>
+
+        <style>
+          {`
+          @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+          }
+        `}
+        </style>
       </Box>
     );
   }
 
-  /** ===============================
-   *  SIN COMERCIO
-   *  =============================== */
   if (!comercio) {
     return (
       <Box>
@@ -71,9 +109,6 @@ export default function PreviewPage() {
     );
   }
 
-  /** ===============================
-   *  VISTA PREVIA
-   *  =============================== */
   return (
     <Box>
       <Typography variant="h4" fontWeight="bold" mb={2}>
@@ -96,7 +131,7 @@ export default function PreviewPage() {
             sx={{
               textTransform: "none",
               fontSize: "0.85rem",
-              mb: 1, // 👈 antes estaba muy separado
+              mb: 1,
               px: 0,
             }}
           >

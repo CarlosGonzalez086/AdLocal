@@ -2,10 +2,11 @@ import {
   Button,
   Card,
   CardContent,
-  LinearProgress,
   Avatar,
   Divider,
   Box,
+  Typography,
+  CircularProgress,
 } from "@mui/material";
 import { useState } from "react";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
@@ -16,24 +17,53 @@ export const MiComercioPage = () => {
   const { comercio, loading, guardar, eliminar } = useComercio();
   const [editando, setEditando] = useState(false);
   const imagenes = comercio?.imagenes ?? [];
-  
 
   if (loading) {
     return (
-      <Card>
-        <CardContent>
-          <p className="mb-2 text-muted">
-            Cargando información del comercio...
-          </p>
-          <LinearProgress />
-        </CardContent>
-      </Card>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 2,
+          background: "linear-gradient(135deg, #f9fafb, #eef2f7)",
+        }}
+      >
+        <CircularProgress
+          size={60}
+          thickness={4.5}
+          sx={{
+            color: "#6F4E37",
+          }}
+        />
+
+        <Typography
+          sx={{
+            fontWeight: 600,
+            fontSize: "1.1rem",
+            color: "text.secondary",
+            letterSpacing: "0.3px",
+            animation: "pulse 1.5s ease-in-out infinite",
+          }}
+        >
+          Cargando comercio...
+        </Typography>
+
+        <style>
+          {`
+          @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+          }
+        `}
+        </style>
+      </Box>
     );
   }
 
-  /** ===============================
-   *  REGISTRAR COMERCIO
-   *  =============================== */
   if (!comercio) {
     return (
       <Card>
@@ -64,9 +94,6 @@ export const MiComercioPage = () => {
     );
   }
 
-  /** ===============================
-   *  EDITAR COMERCIO
-   *  =============================== */
   if (editando) {
     return (
       <Card>
@@ -88,13 +115,9 @@ export const MiComercioPage = () => {
     );
   }
 
-  /** ===============================
-   *  VER COMERCIO
-   *  =============================== */
   return (
     <Card>
       <CardContent>
-        {/* LOGO */}
         {comercio.logoBase64 && (
           <div className="d-flex justify-content-center mb-3">
             <Avatar
@@ -107,7 +130,6 @@ export const MiComercioPage = () => {
 
         <Divider className="mb-3" />
 
-        {/* INFO BÁSICA */}
         <p>
           <b>Nombre:</b> {comercio.nombre}
         </p>
@@ -127,7 +149,6 @@ export const MiComercioPage = () => {
           </p>
         )}
 
-        {/* COLORES */}
         <Divider className="my-3" />
         <h5>Colores del comercio</h5>
 
@@ -161,7 +182,6 @@ export const MiComercioPage = () => {
           </Box>
         </Box>
 
-        {/* IMÁGENES */}
         {imagenes.length > 0 && (
           <>
             <Divider className="my-3" />
@@ -180,7 +200,6 @@ export const MiComercioPage = () => {
           </>
         )}
 
-        {/* MAPA */}
         {comercio.lat !== 0 && comercio.lng !== 0 && (
           <div className="my-3" style={{ height: 300 }}>
             <MapContainer
@@ -198,7 +217,6 @@ export const MiComercioPage = () => {
           </div>
         )}
 
-        {/* ACCIONES */}
         <div className="d-flex gap-2 mt-3">
           <Button variant="contained" onClick={() => setEditando(true)}>
             Editar

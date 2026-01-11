@@ -2,7 +2,6 @@ import {
   Button,
   Card,
   CardContent,
-  LinearProgress,
   Avatar,
   Divider,
   Box,

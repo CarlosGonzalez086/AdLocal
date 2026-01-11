@@ -7,6 +7,7 @@ import {
   Divider,
   Box,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import { useState } from "react";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
@@ -20,44 +21,47 @@ export const MiComercioPage = () => {
 
   if (loading) {
     return (
-      <Card
-        elevation={3}
+      <Box
         sx={{
-          borderRadius: 3,
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 2,
+          background: "linear-gradient(135deg, #f9fafb, #eef2f7)",
         }}
       >
-        <CardContent>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1.5,
-            }}
-          >
-            <Typography
-              sx={{
-                fontWeight: 600,
-                fontSize: "0.95rem",
-                color: "text.secondary",
-              }}
-            >
-              Cargando información del comercio
-            </Typography>
+        <CircularProgress
+          size={60}
+          thickness={4.5}
+          sx={{
+            color: "#6F4E37",
+          }}
+        />
 
-            <LinearProgress
-              sx={{
-                height: 6,
-                borderRadius: 999,
-                backgroundColor: "#e5e7eb",
-                "& .MuiLinearProgress-bar": {
-                  borderRadius: 999,
-                  background: "linear-gradient(90deg, #6F4E37, #f5e9cf)",
-                },
-              }}
-            />
-          </Box>
-        </CardContent>
-      </Card>
+        <Typography
+          sx={{
+            fontWeight: 600,
+            fontSize: "1.1rem",
+            color: "text.secondary",
+            letterSpacing: "0.3px",
+            animation: "pulse 1.5s ease-in-out infinite",
+          }}
+        >
+          Cargando comercio...
+        </Typography>
+
+        <style>
+          {`
+          @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+          }
+        `}
+        </style>
+      </Box>
     );
   }
 

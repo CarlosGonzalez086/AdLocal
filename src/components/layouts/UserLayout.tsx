@@ -44,6 +44,7 @@ const UserLayout = () => {
             overflowY: "auto",
             width: "100%",
             backgroundColor: "#fff",
+            padding: "16px",
           }}
         >
           <Outlet />

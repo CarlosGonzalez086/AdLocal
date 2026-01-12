@@ -248,7 +248,27 @@ export const ComercioForm = ({
               multiline
               rows={3}
               disabled={!soloVer}
+              sx={{ mb: 2 }}
             />
+            <div className="d-flex gap-3">
+              <TextField
+                label="Color primario"
+                type="color"
+                value={form.colorPrimario ?? "#000000"}
+                onChange={handleChange("colorPrimario")}
+                fullWidth
+                disabled={!soloVer}
+              />
+
+              <TextField
+                label="Color secundario"
+                type="color"
+                value={form.colorSecundario ?? "#ffffff"}
+                onChange={handleChange("colorSecundario")}
+                fullWidth
+                disabled={!soloVer}
+              />
+            </div>
           </TabPanel>
           <TabPanel value={tab} index={1}>
             <Button

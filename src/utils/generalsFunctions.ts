@@ -1,3 +1,5 @@
+import type { ComercioDto } from "../services/comercioApi";
+
 export const utcToLocal = (utcDate: string | Date): string => {
   if (!utcDate) return "";
 
@@ -26,4 +28,23 @@ export const calcularDiasEntreFechas = (
   const dias = Math.ceil(diferenciaMs / (1000 * 60 * 60 * 24));
 
   return dias;
+};
+
+export const estaAbiertoAhora = (
+  horarios: ComercioDto["horarios"] | undefined
+) => {
+  if (!horarios) return false;
+
+  const ahora = new Date();
+  const diaHoy = ahora.getDay();
+  const horaActual = ahora.toTimeString().slice(0, 5); // HH:mm
+
+  const horarioHoy = horarios.find((h) => h.dia === diaHoy);
+
+  if (!horarioHoy || !horarioHoy.abierto) return false;
+
+  return (
+    horarioHoy.horaApertura! <= horaActual &&
+    horaActual <= horarioHoy.horaCierre!
+  );
 };

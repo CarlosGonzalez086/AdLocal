@@ -7,7 +7,7 @@ import {
   Chip,
   Box,
 } from "@mui/material";
-import PhoneIcon from "@mui/icons-material/Phone";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import type { ComercioDto } from "../../services/comercioApi";
 
 interface Props {
@@ -19,23 +19,24 @@ export default function ComercioCard({ comercio }: Props) {
     <Card
       sx={{
         cursor: "pointer",
-        borderRadius: 3, 
+        borderRadius: 4,
         overflow: "hidden",
         position: "relative",
         transition: "all 0.3s ease",
-        background: "rgba(255,255,255,0.85)", 
-        backdropFilter: "blur(10px)", 
+        background: "rgba(255,255,255,0.9)",
+        backdropFilter: "blur(12px)",
         boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
         "&:hover": {
-          transform: "translateY(-5px)",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
+          transform: "translateY(-6px)",
+          boxShadow: "0 14px 32px rgba(0,0,0,0.15)",
         },
       }}
     >
+      {/* HEADER CON GRADIENTE */}
       <Box
         sx={{
-          height: 100,
-          background: `linear-gradient(135deg, ${comercio.colorPrimario}, ${comercio.colorSecundario})`, // transparente al 20%
+          height: 110,
+          background: `linear-gradient(135deg, ${comercio.colorPrimario}, ${comercio.colorSecundario})`,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -44,21 +45,26 @@ export default function ComercioCard({ comercio }: Props) {
         <Avatar
           src={comercio.logoBase64}
           sx={{
-            width: 80,
-            height: 80,
-            border: "2px solid #fff",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+            width: 82,
+            height: 82,
+            border: "3px solid #fff",
+            backgroundColor: "#fff",
+            boxShadow: "0 6px 14px rgba(0,0,0,0.25)",
           }}
         />
       </Box>
 
-      <CardContent sx={{ pt: 2 }}>
-        <Stack spacing={0.5} alignItems="center">
+      {/* CONTENIDO */}
+      <CardContent sx={{ pt: 2.5 }}>
+        <Stack spacing={1} alignItems="center">
           <Typography
             variant="h6"
-            fontWeight={600}
+            fontWeight={700}
             textAlign="center"
-            sx={{ color: comercio.colorPrimario }}
+            sx={{
+              color: comercio.colorPrimario,
+              lineHeight: 1.2,
+            }}
           >
             {comercio.nombre}
           </Typography>
@@ -67,23 +73,33 @@ export default function ComercioCard({ comercio }: Props) {
             variant="body2"
             color="text.secondary"
             textAlign="center"
-            sx={{ mb: 1 }}
+            sx={{
+              px: 1,
+              lineHeight: 1.4,
+            }}
           >
             {comercio.direccion}
           </Typography>
 
+          {/* CTA */}
           <Chip
-            icon={<PhoneIcon />}
-            label={comercio.telefono}
+            label="Ver más detalles"
+            icon={<ArrowForwardIosIcon fontSize="small" />}
             sx={{
+              mt: 1.5,
+              px: 2,
+              py: 1,
+              fontWeight: 600,
+              fontSize: "0.8rem",
+              borderRadius: 50,
               backgroundColor: comercio.colorSecundario,
               color: "#fff",
-              fontWeight: 500,
-              px: 2,
-              py: 0.5,
-              borderRadius: 2,
-              fontSize: "0.8rem",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+              boxShadow: "0 3px 8px rgba(0,0,0,0.2)",
+              transition: "all 0.25s ease",
+              "&:hover": {
+                opacity: 0.9,
+                transform: "scale(1.05)",
+              },
             }}
           />
         </Stack>

@@ -6,17 +6,25 @@ import {
   Button,
   Divider,
   Link,
+  Chip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import EmailIcon from "@mui/icons-material/Email";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 
 import type { ComercioDto } from "../../services/comercioApi";
 import type { ProductoServicioDto } from "../../services/productosServiciosApi";
 import ProductoCard from "../ProductosServicios/ProductoCard";
+import { diasSemana } from "../../utils/constantes";
+import { estaAbiertoAhora } from "../../utils/generalsFunctions";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 interface Props {
   comercio: ComercioDto;
@@ -29,6 +37,9 @@ export default function ComercioDetalle({
   productos,
   loadingProducts,
 }: Props) {
+  const hoy = new Date().getDay();
+  const abiertoAhora = estaAbiertoAhora(comercio.horarios);
+
   return (
     <Box
       sx={{
@@ -41,6 +52,7 @@ export default function ComercioDetalle({
         backgroundColor: "#fff",
       }}
     >
+      {/* HEADER */}
       <Box
         sx={{
           background: `linear-gradient(135deg, ${comercio.colorPrimario}, ${comercio.colorSecundario})`,
@@ -60,105 +72,42 @@ export default function ComercioDetalle({
             boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
           }}
         />
+
         <Typography
           variant="h4"
           fontWeight="bold"
           color="#fff"
-          sx={{
-            fontSize: { xs: "1.4rem", sm: "2rem" },
-            lineHeight: 1.2,
-          }}
+          sx={{ fontSize: { xs: "1.4rem", sm: "2rem" } }}
         >
           {comercio.nombre}
         </Typography>
+
         {comercio.descripcion && (
-          <Typography
-            color="#f5f5f5"
-            sx={{
-              mt: 1,
-              fontSize: { xs: "0.9rem", sm: "1rem" },
-            }}
-          >
+          <Typography color="#f5f5f5" mt={1}>
             {comercio.descripcion}
           </Typography>
         )}
+
+        {/* ESTADO ACTUAL */}
+        {comercio.horarios && (
+          <Chip
+            icon={<AccessTimeIcon />}
+            label={abiertoAhora ? "Abierto ahora" : "Cerrado ahora"}
+            sx={{
+              mt: 2,
+              px: 2,
+              py: 1,
+              fontWeight: "bold",
+              borderRadius: 50,
+              backgroundColor: abiertoAhora ? "#4caf50" : "#f44336",
+              color: "#fff",
+            }}
+          />
+        )}
       </Box>
 
-      {comercio.imagenes && comercio.imagenes.length > 0 && (
-        <Box
-          sx={{
-            mt: 6,
-            mx: 3,
-            borderRadius: 3,
-            overflow: "hidden",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-          }}
-        >
-          <div
-            id="carouselComercio"
-            className="carousel slide"
-            data-bs-ride="carousel"
-          >
-            <div className="carousel-indicators">
-              {comercio.imagenes.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  data-bs-target="#carouselComercio"
-                  data-bs-slide-to={idx}
-                  className={idx === 0 ? "active" : ""}
-                  aria-current={idx === 0 ? "true" : undefined}
-                  aria-label={`Slide ${idx + 1}`}
-                ></button>
-              ))}
-            </div>
-
-            <div className="carousel-inner">
-              {comercio.imagenes.map((img, idx) => (
-                <div
-                  key={idx}
-                  className={`carousel-item ${idx === 0 ? "active" : ""}`}
-                  style={{ height: 250 }}
-                >
-                  <img
-                    src={img}
-                    className="d-block w-100"
-                    alt={`Imagen ${idx + 1}`}
-                    style={{ objectFit: "cover", height: "100%" }}
-                  />
-                </div>
-              ))}
-            </div>
-
-            <button
-              className="carousel-control-prev"
-              type="button"
-              data-bs-target="#carouselComercio"
-              data-bs-slide="prev"
-            >
-              <span
-                className="carousel-control-prev-icon"
-                aria-hidden="true"
-              ></span>
-              <span className="visually-hidden">Previous</span>
-            </button>
-            <button
-              className="carousel-control-next"
-              type="button"
-              data-bs-target="#carouselComercio"
-              data-bs-slide="next"
-            >
-              <span
-                className="carousel-control-next-icon"
-                aria-hidden="true"
-              ></span>
-              <span className="visually-hidden">Next</span>
-            </button>
-          </div>
-        </Box>
-      )}
-
       <Stack spacing={2} mt={3} px={4} pb={4}>
+        {/* CONTACTO */}
         <Stack direction="row" spacing={1} alignItems="center">
           <LocationOnIcon sx={{ color: comercio.colorPrimario }} />
           <Typography>{comercio.direccion}</Typography>
@@ -166,40 +115,108 @@ export default function ComercioDetalle({
 
         <Stack direction="row" spacing={1} alignItems="center">
           <WhatsAppIcon sx={{ color: "#25D366" }} />
-
           <Link
             href={`https://wa.me/${comercio.telefono}`}
             target="_blank"
-            rel="noopener"
             underline="none"
-            sx={{ color: "inherit", cursor: "pointer" }}
+            sx={{ color: "inherit" }}
           >
-            <Typography>{comercio.telefono}</Typography>
+            {comercio.telefono}
           </Link>
         </Stack>
 
         <Stack direction="row" spacing={1} alignItems="center">
           <EmailIcon sx={{ color: comercio.colorPrimario }} />
-
           <Link
             href={`mailto:${comercio.email}`}
             underline="none"
-            sx={{ color: "inherit", cursor: "pointer" }}
+            sx={{ color: "inherit" }}
           >
-            <Typography>{comercio.email}</Typography>
+            {comercio.email}
           </Link>
         </Stack>
 
+        {/* HORARIOS */}
         <Divider />
-        {!loadingProducts && (
-          <>
-            {" "}
-            {/* LISTADO DE PRODUCTOS / SERVICIOS */}
-            <Typography variant="h6" fontWeight="bold" mt={3} mb={1}>
-              Productos y Servicios
-            </Typography>
-            {productos.length === 0 ? (
-              <Typography>No hay productos o servicios disponibles.</Typography>
+        <Accordion
+          sx={{
+            borderRadius: 3,
+            boxShadow: "none",
+            border: "1px solid #e0e0e0",
+            "&:before": { display: "none" },
+          }}
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <AccessTimeIcon />
+              <Typography fontWeight="bold">Horarios de atención</Typography>
+
+              <Chip
+                label={abiertoAhora ? "Abierto ahora" : "Cerrado ahora"}
+                size="small"
+                sx={{
+                  ml: 1,
+                  borderRadius: 50,
+                  backgroundColor: abiertoAhora ? "#4caf50" : "#f44336",
+                  color: "#fff",
+                }}
+              />
+            </Stack>
+          </AccordionSummary>
+
+          <AccordionDetails>
+            <Stack spacing={1}>
+              {comercio.horarios?.map((h, idx) => (
+                <Box
+                  key={idx}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    px: 2,
+                    py: 1,
+                    borderRadius: 2,
+                    border: "1px solid #e0e0e0",
+                    backgroundColor:
+                      h.dia === hoy ? "rgba(0,0,0,0.05)" : "#fafafa",
+                  }}
+                >
+                  <Typography fontWeight={600}>{diasSemana[h.dia]}</Typography>
+
+                  {h.abierto ? (
+                    <Typography color="success.main" fontWeight={600}>
+                      {h.horaApertura} – {h.horaCierre}
+                    </Typography>
+                  ) : (
+                    <Typography color="text.secondary" fontStyle="italic">
+                      Cerrado
+                    </Typography>
+                  )}
+                </Box>
+              ))}
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* PRODUCTOS */}
+        <Divider />
+        <Accordion
+          sx={{
+            borderRadius: 3,
+            boxShadow: "none",
+            border: "1px solid #e0e0e0",
+            "&:before": { display: "none" },
+          }}
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography fontWeight="bold">Productos y servicios</Typography>
+          </AccordionSummary>
+
+          <AccordionDetails>
+            {loadingProducts ? (
+              <Typography>Cargando...</Typography>
+            ) : productos.length === 0 ? (
+              <Typography>No hay productos o servicios.</Typography>
             ) : (
               <Stack spacing={2}>
                 {productos.map((prod) => (
@@ -207,10 +224,10 @@ export default function ComercioDetalle({
                 ))}
               </Stack>
             )}
-          </>
-        )}
+          </AccordionDetails>
+        </Accordion>
 
-        <Divider />
+        {/* MAPA */}
         {comercio.lat !== 0 && comercio.lng !== 0 && (
           <Box
             sx={{
@@ -225,7 +242,13 @@ export default function ComercioDetalle({
               center={[comercio.lat, comercio.lng]}
               zoom={16}
               style={{ height: "100%", width: "100%" }}
+              dragging={false}
               scrollWheelZoom={false}
+              doubleClickZoom={false}
+              zoomControl={false}
+              touchZoom={false}
+              keyboard={false}
+              boxZoom={false}
             >
               <TileLayer
                 attribution="&copy; OpenStreetMap"
@@ -236,9 +259,8 @@ export default function ComercioDetalle({
           </Box>
         )}
 
-        {/* BOTÓN DESTACADO */}
+        {/* BOTÓN */}
         <Button
-          variant="contained"
           fullWidth
           sx={{
             mt: 3,
@@ -248,14 +270,13 @@ export default function ComercioDetalle({
             borderRadius: 3,
             background: `linear-gradient(90deg, ${comercio.colorPrimario}, ${comercio.colorSecundario})`,
             color: "#fff",
-            "&:hover": {
-              opacity: 0.9,
-            },
           }}
-          onClick={() => {
-            const url = `https://www.google.com/maps?q=${comercio.lat},${comercio.lng}`;
-            window.open(url, "_blank");
-          }}
+          onClick={() =>
+            window.open(
+              `https://www.google.com/maps?q=${comercio.lat},${comercio.lng}`,
+              "_blank"
+            )
+          }
         >
           Ver ubicación
         </Button>

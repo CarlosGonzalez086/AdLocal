@@ -7,11 +7,21 @@ import {
   Box,
   Typography,
   CircularProgress,
+  Stack,
+  Chip,
 } from "@mui/material";
 import { useState } from "react";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import { useComercio } from "../../../hooks/useComercio";
 import { ComercioForm } from "./ComercioForm";
+import { DIAS_SEMANA_MAP } from "../../../utils/constantes";
+import {
+  LocationOn,
+  Phone,
+  Email,
+  AccessTime,
+  Palette,
+} from "@mui/icons-material";
 
 export const MiComercioPage = () => {
   const { comercio, loading, guardar, eliminar } = useComercio();
@@ -85,6 +95,7 @@ export const MiComercioPage = () => {
               imagenes: [],
               colorPrimario: "#000000",
               colorSecundario: "#FFFFFF",
+              horarios: [],
             }}
             loading={loading}
             onSave={guardar}
@@ -116,71 +127,89 @@ export const MiComercioPage = () => {
   }
 
   return (
-    <Card>
+    <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
       <CardContent>
-        {comercio.logoBase64 && (
-          <div className="d-flex justify-content-center mb-3">
-            <Avatar
-              src={comercio.logoBase64}
-              sx={{ width: 120, height: 120 }}
-              variant="rounded"
-            />
-          </div>
-        )}
+        <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+          <Avatar
+            src={comercio.logoBase64 || undefined}
+            variant="rounded"
+            sx={{
+              width: 130,
+              height: 130,
+              mb: 1,
+              boxShadow: 2,
+            }}
+          />
 
-        <Divider className="mb-3" />
+          <Typography variant="h5" fontWeight={600}>
+            {comercio.nombre}
+          </Typography>
 
-        <p>
-          <b>Nombre:</b> {comercio.nombre}
-        </p>
-        <p>
-          <b>Dirección:</b> {comercio.direccion}
-        </p>
-        <p>
-          <b>Teléfono:</b> {comercio.telefono}
-        </p>
-        <p>
-          <b>Email:</b> {comercio.email}
-        </p>
-
-        {comercio.descripcion && (
-          <p>
-            <b>Descripción:</b> {comercio.descripcion}
-          </p>
-        )}
-
-        <Divider className="my-3" />
-        <h5>Colores del comercio</h5>
-
-        <Box className="d-flex gap-3 align-items-center">
-          <Box>
-            <small>Primario</small>
-            <Box
-              sx={{
-                width: 40,
-                height: 40,
-                backgroundColor: comercio.colorPrimario,
-                borderRadius: 1,
-                border: "1px solid #ccc",
-              }}
-            />
-            <small>{comercio.colorPrimario}</small>
-          </Box>
-
-          <Box>
-            <small>Secundario</small>
-            <Box
-              sx={{
-                width: 40,
-                height: 40,
-                backgroundColor: comercio.colorSecundario,
-                borderRadius: 1,
-                border: "1px solid #ccc",
-              }}
-            />
-            <small>{comercio.colorSecundario}</small>
-          </Box>
+          {comercio.descripcion && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              textAlign="center"
+              mt={0.5}
+            >
+              {comercio.descripcion}
+            </Typography>
+          )}
         </Box>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Stack spacing={1.2}>
+          {comercio.direccion && (
+            <Box display="flex" gap={1} alignItems="center">
+              <LocationOn fontSize="small" color="action" />
+              <Typography variant="body2">{comercio.direccion}</Typography>
+            </Box>
+          )}
+
+          {comercio.telefono && (
+            <Box display="flex" gap={1} alignItems="center">
+              <Phone fontSize="small" color="action" />
+              <Typography variant="body2">{comercio.telefono}</Typography>
+            </Box>
+          )}
+
+          {comercio.email && (
+            <Box display="flex" gap={1} alignItems="center">
+              <Email fontSize="small" color="action" />
+              <Typography variant="body2">{comercio.email}</Typography>
+            </Box>
+          )}
+        </Stack>
+
+        <Divider sx={{ my: 3 }} />
+        <Box display="flex" alignItems="center" gap={1} mb={1}>
+          <Palette fontSize="small" />
+          <Typography fontWeight={600}>Colores</Typography>
+        </Box>
+
+        <Stack direction="row" spacing={2}>
+          <Chip
+            sx={{
+              backgroundColor: comercio.colorPrimario,
+              color: "#000",
+              border: "1px solid #ccc",
+              borderRadius: 2,
+              px: 1.5,
+              fontWeight: 500,
+            }}
+          />
+          <Chip
+            sx={{
+              backgroundColor: comercio.colorSecundario,
+              color: "#000",
+              border: "1px solid #ccc",
+              borderRadius: 2,
+              px: 1.5,
+              fontWeight: 500,
+            }}
+          />
+        </Stack>
 
         {imagenes.length > 0 && (
           <>
@@ -200,13 +229,65 @@ export const MiComercioPage = () => {
           </>
         )}
 
+        {comercio.horarios?.length > 0 && (
+          <>
+            <Divider sx={{ my: 3 }} />
+            <Box display="flex" alignItems="center" gap={1} mb={1}>
+              <AccessTime fontSize="small" />
+              <Typography fontWeight={600}>Horarios de atención</Typography>
+            </Box>
+
+            <Stack spacing={1}>
+              {comercio.horarios
+                .sort((a, b) => a.dia - b.dia)
+                .map((h) => (
+                  <Box
+                    key={h.dia}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      borderRadius: 2,
+                      backgroundColor: h.abierto ? "#f5f7fa" : "#fafafa",
+                      border: "1px solid #e0e0e0",
+                    }}
+                  >
+                    <Typography fontWeight={500}>
+                      {DIAS_SEMANA_MAP[h.dia]}
+                    </Typography>
+
+                    {h.abierto ? (
+                      <Typography variant="body2">
+                        {h.horaApertura} – {h.horaCierre}
+                      </Typography>
+                    ) : (
+                      <Chip
+                        label="Cerrado"
+                        size="small"
+                        color="default"
+                        variant="outlined"
+                      />
+                    )}
+                  </Box>
+                ))}
+            </Stack>
+          </>
+        )}
         {comercio.lat !== 0 && comercio.lng !== 0 && (
-          <div className="my-3" style={{ height: 300 }}>
+          <Box mt={3} sx={{ height: 300, borderRadius: 2, overflow: "hidden" }}>
             <MapContainer
               center={[comercio.lat, comercio.lng]}
               zoom={16}
               style={{ height: "100%", width: "100%" }}
+              dragging={false}
               scrollWheelZoom={false}
+              doubleClickZoom={false}
+              zoomControl={false}
+              touchZoom={false}
+              keyboard={false}
+              boxZoom={false}
             >
               <TileLayer
                 attribution="&copy; OpenStreetMap"
@@ -214,18 +295,22 @@ export const MiComercioPage = () => {
               />
               <Marker position={[comercio.lat, comercio.lng]} />
             </MapContainer>
-          </div>
+          </Box>
         )}
-
-        <div className="d-flex gap-2 mt-3">
-          <Button variant="contained" onClick={() => setEditando(true)}>
+        <Divider sx={{ my: 3 }} />
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={() => setEditando(true)}
+          >
             Editar
           </Button>
 
-          <Button variant="outlined" color="error" onClick={eliminar}>
-            Eliminar comercio
+          <Button variant="outlined" color="error" fullWidth onClick={eliminar}>
+            Eliminar
           </Button>
-        </div>
+        </Stack>
       </CardContent>
     </Card>
   );

@@ -1,7 +1,6 @@
 import axios from "axios";
 import type { ApiResponse } from "../api/apiResponse";
 
-
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/comercios`,
   headers: {
@@ -26,27 +25,27 @@ api.interceptors.response.use(
   }
 );
 
+export interface HorarioComercioDto {
+  dia: number;
+  abierto: boolean;
+  horaApertura?: string;
+  horaCierre?: string;
+}
+
 export interface ComercioCreateDto {
   nombre: string;
   direccion?: string;
   telefono?: string;
   email?: string;
   descripcion?: string;
-
-  // 🖼️ Logo principal (base64 o url)
   logoBase64?: string;
-
-  // 🖼️ Galería de imágenes
   imagenes?: string[];
-
   lat: number;
   lng: number;
-
-  // 🎨 Colores
   colorPrimario?: string;
   colorSecundario?: string;
-
   activo?: boolean;
+  horarios?: HorarioComercioDto[];
 }
 
 export interface ComercioUpdateDto {
@@ -55,17 +54,14 @@ export interface ComercioUpdateDto {
   telefono?: string;
   email?: string;
   descripcion?: string;
-
   logoBase64?: string;
   imagenes?: string[];
-
   lat?: number;
   lng?: number;
-
   colorPrimario?: string;
   colorSecundario?: string;
-
   activo: boolean;
+  horarios?: HorarioComercioDto[];
 }
 
 export interface ComercioDto {
@@ -75,22 +71,18 @@ export interface ComercioDto {
   telefono: string;
   email: string;
   descripcion: string;
-
   logoBase64: string;
   imagenes: string[];
-
   lat: number;
   lng: number;
-
   colorPrimario: string;
   colorSecundario: string;
-
   activo: boolean;
+  horarios: HorarioComercioDto[];
 }
 
 export const comercioApi = {
-  getMine: () =>
-    api.get<ApiResponse<ComercioDto>>("/mine"),
+  getMine: () => api.get<ApiResponse<ComercioDto>>("/mine"),
 
   crear: (data: ComercioCreateDto) =>
     api.post<ApiResponse<ComercioDto>>("", data),
@@ -98,6 +90,5 @@ export const comercioApi = {
   actualizar: (data: ComercioUpdateDto) =>
     api.put<ApiResponse<ComercioDto>>("", data),
 
-  eliminar: (id: number) =>
-    api.delete<ApiResponse<null>>(`/${id}`),
+  eliminar: (id: number) => api.delete<ApiResponse<null>>(`/${id}`),
 };

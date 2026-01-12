@@ -1,8 +1,26 @@
-import { TextField, Button, CircularProgress, Avatar } from "@mui/material";
+import {
+  TextField,
+  Button,
+  CircularProgress,
+  Avatar,
+  Box,
+  Typography,
+  FormControlLabel,
+  Switch,
+  Tabs,
+  Tab,
+} from "@mui/material";
 import { useEffect, useState } from "react";
-import type { ComercioDto } from "../../../services/comercioApi";
+import type {
+  ComercioDto,
+  HorarioComercioDto,
+} from "../../../services/comercioApi";
 import L from "leaflet";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { DIAS_SEMANA } from "../../../utils/constantes";
+import { TimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -11,6 +29,32 @@ L.Icon.Default.mergeOptions({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
+
+const normalizarHorarios = (horarios: any[] = []) =>
+  DIAS_SEMANA.map((d) => {
+    const existente = horarios.find((h) => h.dia === d.dia);
+    return (
+      existente ?? {
+        dia: d.dia,
+        abierto: false,
+        horaApertura: undefined,
+        horaCierre: undefined,
+      }
+    );
+  });
+
+const TabPanel = ({
+  value,
+  index,
+  children,
+}: {
+  value: number;
+  index: number;
+  children: React.ReactNode;
+}) => {
+  if (value !== index) return null;
+  return <Box sx={{ mt: 3 }}>{children}</Box>;
+};
 
 interface Props {
   initialData: ComercioDto;
@@ -27,12 +71,17 @@ export const ComercioForm = ({
   soloVer = false,
   setEditando,
 }: Props) => {
-  const [form, setForm] = useState<ComercioDto>(initialData);
+  const [tab, setTab] = useState(0);
+
+  const [form, setForm] = useState<ComercioDto>({
+    ...initialData,
+    horarios: normalizarHorarios(initialData.horarios),
+  });
+
   const [preview, setPreview] = useState<string | null>(
     initialData.logoBase64 ?? null
   );
   const [galeria, setGaleria] = useState<string[]>(initialData.imagenes ?? []);
-
   const handleChange =
     (field: keyof ComercioDto) => (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value;
@@ -44,6 +93,15 @@ export const ComercioForm = ({
 
       setForm({ ...form, [field]: value });
     };
+
+  const updateHorario = (dia: number, changes: Partial<HorarioComercioDto>) => {
+    setForm((prev) => ({
+      ...prev,
+      horarios: prev.horarios.map((h) =>
+        h.dia === dia ? { ...h, ...changes } : h
+      ),
+    }));
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,13 +121,10 @@ export const ComercioForm = ({
     if (!files.length) return;
 
     const disponibles = 3 - galeria.length;
-    const seleccionadas = files.slice(0, disponibles);
-
-    seleccionadas.forEach((file) => {
+    files.slice(0, disponibles).forEach((file) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = () =>
         setGaleria((prev) => [...prev, reader.result as string]);
-      };
       reader.readAsDataURL(file);
     });
 
@@ -90,20 +145,15 @@ export const ComercioForm = ({
       setGaleria(copia);
     };
     reader.readAsDataURL(file);
-
-    e.target.value = "";
   };
 
   const LocationPicker = () => {
     useMapEvents({
       click(e) {
-        setForm({
-          ...form,
-          lat: e.latlng.lat,
-          lng: e.latlng.lng,
-        });
+        setForm({ ...form, lat: e.latlng.lat, lng: e.latlng.lng });
       },
     });
+
     return form.lat && form.lng ? (
       <Marker position={[form.lat, form.lng]} />
     ) : null;
@@ -111,223 +161,288 @@ export const ComercioForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
-      ...form,
-      imagenes: galeria,
-    });
+    onSave({ ...form, imagenes: galeria });
   };
 
   useEffect(() => {
-    setForm(initialData);
+    setForm({
+      ...initialData,
+      horarios: normalizarHorarios(initialData.horarios),
+    });
     setPreview(initialData.logoBase64 ?? null);
     setGaleria(initialData.imagenes ?? []);
   }, [initialData]);
-
   return (
-    <div className="d-flex justify-content-center mt-4">
-      <div className="col-12 col-md-8 col-lg-6">
-        <div className="d-flex flex-column align-items-center mb-4">
-          <Avatar
-            src={preview ?? undefined}
-            sx={{ width: 120, height: 120, mb: 2 }}
-          />
-          {soloVer && (
-            <Button variant="outlined" component="label">
-              Subir logo
+    <Box className="d-flex justify-content-center mt-4">
+      <Box className="col-12 col-md-8 col-lg-6">
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ mb: 2 }}
+        >
+          <Tab label="General" />
+          <Tab label="Galería" />
+          <Tab label="Horarios" />
+          <Tab label="Ubicación" />
+        </Tabs>
+
+        <form onSubmit={handleSubmit}>
+          <TabPanel value={tab} index={0}>
+            <Box className="d-flex flex-column align-items-center mb-3">
+              <Avatar
+                src={preview ?? undefined}
+                sx={{ width: 120, height: 120 }}
+              />
+              {soloVer && (
+                <Button component="label" variant="outlined" sx={{ mt: 2 }}>
+                  Subir logo
+                  <input
+                    hidden
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </Button>
+              )}
+            </Box>
+
+            <TextField
+              label="Nombre"
+              value={form.nombre}
+              onChange={handleChange("nombre")}
+              fullWidth
+              disabled={!soloVer}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label="Dirección"
+              value={form.direccion ?? ""}
+              onChange={handleChange("direccion")}
+              fullWidth
+              disabled={!soloVer}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label="Teléfono"
+              value={form.telefono ?? ""}
+              onChange={handleChange("telefono")}
+              fullWidth
+              disabled={!soloVer}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label="Email"
+              value={form.email ?? ""}
+              onChange={handleChange("email")}
+              fullWidth
+              disabled={!soloVer}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label="Descripción"
+              value={form.descripcion ?? ""}
+              onChange={handleChange("descripcion")}
+              fullWidth
+              multiline
+              rows={3}
+              disabled={!soloVer}
+            />
+          </TabPanel>
+          <TabPanel value={tab} index={1}>
+            <Button
+              variant="outlined"
+              component="label"
+              disabled={!soloVer || galeria.length >= 3}
+              fullWidth
+            >
+              Subir imágenes ({galeria.length}/3)
               <input
                 hidden
                 type="file"
                 accept="image/*"
-                onChange={handleImageChange}
+                multiple
+                onChange={handleGaleriaChange}
               />
             </Button>
-          )}
-        </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="row g-3">
-            <div className="col-12">
-              <TextField
-                label="Nombre del comercio"
-                value={form.nombre}
-                onChange={handleChange("nombre")}
-                fullWidth
-                required
-                disabled={!soloVer}
-              />
-            </div>
-
-            <div className="col-12">
-              <TextField
-                label="Dirección"
-                value={form.direccion ?? ""}
-                onChange={handleChange("direccion")}
-                fullWidth
-                disabled={!soloVer}
-              />
-            </div>
-
-            <div className="col-12 col-md-6">
-              <TextField
-                label="Teléfono"
-                value={form.telefono ?? ""}
-                onChange={handleChange("telefono")}
-                fullWidth
-                disabled={!soloVer}
-                inputProps={{
-                  maxLength: 10,
-                  inputMode: "numeric",
-                  pattern: "[0-9]*",
-                }}
-              />
-            </div>
-
-            <div className="col-12 col-md-6">
-              <TextField
-                label="Email"
-                type="email"
-                value={form.email ?? ""}
-                onChange={handleChange("email")}
-                fullWidth
-                disabled={!soloVer}
-              />
-            </div>
-
-            <div className="col-12">
-              <TextField
-                label="Descripción"
-                value={form.descripcion ?? ""}
-                onChange={handleChange("descripcion")}
-                fullWidth
-                multiline
-                rows={3}
-                disabled={!soloVer}
-              />
-            </div>
-
-            {/* 🎨 Colores */}
-            <div className="col-6">
-              <TextField
-                label="Color primario"
-                type="color"
-                value={form.colorPrimario ?? "#000000"}
-                onChange={handleChange("colorPrimario")}
-                fullWidth
-                disabled={!soloVer}
-              />
-            </div>
-
-            <div className="col-6">
-              <TextField
-                label="Color secundario"
-                type="color"
-                value={form.colorSecundario ?? "#ffffff"}
-                onChange={handleChange("colorSecundario")}
-                fullWidth
-                disabled={!soloVer}
-              />
-            </div>
-
-            {/* 🖼️ Galería */}
-            <div className="col-12">
-              <Button
-                variant="outlined"
-                component="label"
-                disabled={!soloVer || galeria.length >= 3}
-                fullWidth
-              >
-                Subir imágenes ({galeria.length}/3)
-                <input
-                  hidden
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleGaleriaChange}
-                />
-              </Button>
-
-              <div className="d-flex justify-content-center gap-3 mt-3 flex-wrap">
-                {galeria.map((img, i) => (
-                  <div
+            <Box className="d-flex justify-content-center gap-3 mt-3 flex-wrap">
+              {galeria.map((img, i) => (
+                <>
+                  <Avatar
                     key={i}
-                    style={{
-                      width: 110,
-                      padding: 8,
-                      borderRadius: 10,
-                      border: "1px solid #e0e0e0",
+                    src={img}
+                    variant="rounded"
+                    sx={{ width: 100, height: 100 }}
+                  />
+                  {soloVer && (
+                    <div className="d-flex gap-1 w-100">
+                      {/* 🔄 Reemplazar */}
+                      <Button
+                        size="small"
+                        component="label"
+                        variant="outlined"
+                        sx={{ fontSize: 10, flex: 1 }}
+                      >
+                        Reemplazar
+                        <input
+                          hidden
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleReplaceImage(i, e)}
+                        />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ))}
+            </Box>
+          </TabPanel>
+          <TabPanel value={tab} index={2}>
+            {DIAS_SEMANA.map((d) => {
+              const horario = form.horarios.find((h) => h.dia === d.dia)!;
+
+              return (
+                <Box
+                  key={d.dia}
+                  sx={{
+                    mb: 2,
+                    p: 2,
+                    borderRadius: 2,
+                    border: "1px solid #e0e0e0",
+                    backgroundColor: "#fafafa",
+                  }}
+                >
+                  <Box
+                    sx={{
                       display: "flex",
-                      flexDirection: "column",
+                      justifyContent: "space-between",
                       alignItems: "center",
-                      gap: 8,
+                      mb: 1.5,
                     }}
                   >
-                    <Avatar
-                      src={img}
-                      variant="rounded"
-                      sx={{ width: 90, height: 90 }}
+                    <Typography fontWeight={600}>{d.label}</Typography>
+
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={horario.abierto}
+                          disabled={!soloVer}
+                          onChange={(e) =>
+                            updateHorario(d.dia, {
+                              abierto: e.target.checked,
+                              ...(e.target.checked
+                                ? {}
+                                : {
+                                    horaApertura: undefined,
+                                    horaCierre: undefined,
+                                  }),
+                            })
+                          }
+                        />
+                      }
+                      label={horario.abierto ? "Abierto" : "Cerrado"}
+                      sx={{
+                        ".MuiFormControlLabel-label": {
+                          fontWeight: 500,
+                          color: horario.abierto
+                            ? "success.main"
+                            : "text.secondary",
+                        },
+                      }}
                     />
+                  </Box>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 2,
+                        justifyContent: "center",
+                      }}
+                    >
+                      <TimePicker
+                        label="Apertura"
+                        ampm={false}
+                        disabled={!soloVer || !horario.abierto}
+                        value={
+                          horario.horaApertura
+                            ? dayjs(`2000-01-01T${horario.horaApertura}`)
+                            : null
+                        }
+                        onChange={(v) =>
+                          updateHorario(d.dia, {
+                            horaApertura: v?.format("HH:mm"),
+                          })
+                        }
+                        slotProps={{
+                          textField: {
+                            size: "small",
+                            fullWidth: true,
+                          },
+                        }}
+                      />
 
-                    {soloVer && (
-                      <div className="d-flex gap-1 w-100">
-                        {/* 🔄 Reemplazar */}
-                        <Button
-                          size="small"
-                          component="label"
-                          variant="outlined"
-                          sx={{ fontSize: 10, flex: 1 }}
-                        >
-                          Reemplazar
-                          <input
-                            hidden
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleReplaceImage(i, e)}
-                          />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 📍 Mapa */}
-            <div className="col-12">
-              <div style={{ height: 300, borderRadius: 8, overflow: "hidden" }}>
-                <MapContainer
-                  center={[form.lat || 19.4326, form.lng || -99.1332]}
-                  zoom={soloVer ? 20 : 14}
-                  style={{ height: "100%", width: "100%" }}
-                >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <LocationPicker />
-                </MapContainer>
-              </div>
-            </div>
-
-            {/* Botones */}
-            <div className="row col-12 d-flex justify-content-end mt-3">
-              {soloVer && (
-                <div className="col-6">
-                  <Button variant="outlined" onClick={setEditando} fullWidth>
-                    Cancelar
-                  </Button>
-                </div>
-              )}
-              <div className="col-6">
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={loading}
-                  fullWidth
-                >
-                  {loading ? <CircularProgress size={24} /> : "Guardar"}
-                </Button>
-              </div>
-            </div>
-          </div>
+                      <TimePicker
+                        label="Cierre"
+                        ampm={false}
+                        disabled={!soloVer || !horario.abierto}
+                        value={
+                          horario.horaCierre
+                            ? dayjs(`2000-01-01T${horario.horaCierre}`)
+                            : null
+                        }
+                        onChange={(v) =>
+                          updateHorario(d.dia, {
+                            horaCierre: v?.format("HH:mm"),
+                          })
+                        }
+                        slotProps={{
+                          textField: {
+                            size: "small",
+                            fullWidth: true,
+                          },
+                        }}
+                      />
+                    </Box>
+                  </LocalizationProvider>
+                  {!horario.abierto && (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block", mt: 1, textAlign: "center" }}
+                    >
+                      Este día el comercio permanece cerrado
+                    </Typography>
+                  )}
+                </Box>
+              );
+            })}
+          </TabPanel>
+          <TabPanel value={tab} index={3}>
+            <Box sx={{ height: 300 }}>
+              <MapContainer
+                center={[form.lat || 19.4326, form.lng || -99.1332]}
+                zoom={15}
+                style={{ height: "100%", width: "100%" }}
+              >
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <LocationPicker />
+              </MapContainer>
+            </Box>
+          </TabPanel>
+          <Box className="d-flex justify-content-end gap-2 mt-4">
+            {soloVer && (
+              <Button variant="outlined" onClick={setEditando}>
+                Cancelar
+              </Button>
+            )}
+            <Button type="submit" variant="contained" disabled={loading}>
+              {loading ? <CircularProgress size={24} /> : "Guardar"}
+            </Button>
+          </Box>
         </form>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };

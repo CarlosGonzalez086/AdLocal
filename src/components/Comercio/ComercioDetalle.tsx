@@ -25,6 +25,7 @@ import ProductoCard from "../ProductosServicios/ProductoCard";
 import { diasSemana } from "../../utils/constantes";
 import { estaAbiertoAhora } from "../../utils/generalsFunctions";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import dayjs from "dayjs";
 
 interface Props {
   comercio: ComercioDto;
@@ -136,7 +137,6 @@ export default function ComercioDetalle({
           </Link>
         </Stack>
 
-        {/* HORARIOS */}
         <Divider />
         <Accordion
           sx={{
@@ -185,7 +185,8 @@ export default function ComercioDetalle({
 
                   {h.abierto ? (
                     <Typography color="success.main" fontWeight={600}>
-                      {h.horaApertura} – {h.horaCierre}
+                      {dayjs(h.horaApertura, "HH:mm:ss").format("HH:mm")} –{" "}
+                      {dayjs(h.horaCierre, "HH:mm:ss").format("HH:mm")}
                     </Typography>
                   ) : (
                     <Typography color="text.secondary" fontStyle="italic">
@@ -198,7 +199,6 @@ export default function ComercioDetalle({
           </AccordionDetails>
         </Accordion>
 
-        {/* PRODUCTOS */}
         <Divider />
         <Accordion
           sx={{
@@ -227,7 +227,6 @@ export default function ComercioDetalle({
           </AccordionDetails>
         </Accordion>
 
-        {/* MAPA */}
         {comercio.lat !== 0 && comercio.lng !== 0 && (
           <Box
             sx={{
@@ -259,7 +258,6 @@ export default function ComercioDetalle({
           </Box>
         )}
 
-        {/* BOTÓN */}
         <Button
           fullWidth
           sx={{

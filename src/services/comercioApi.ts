@@ -45,7 +45,7 @@ export interface ComercioCreateDto {
   colorPrimario?: string;
   colorSecundario?: string;
   activo?: boolean;
-  horarios: HorarioComercioDto[];
+  horarios?: HorarioComercioDto[];
 }
 
 export interface ComercioUpdateDto {
@@ -61,7 +61,7 @@ export interface ComercioUpdateDto {
   colorPrimario?: string;
   colorSecundario?: string;
   activo: boolean;
-  horarios: HorarioComercioDto[];
+  horarios?: HorarioComercioDto[];
 }
 
 export interface ComercioDto {

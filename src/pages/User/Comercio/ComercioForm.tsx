@@ -30,7 +30,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-const normalizarHorarios = (horarios: any[] = []) =>
+const normalizarHorarios = (horarios: HorarioComercioDto[] = []) =>
   DIAS_SEMANA.map((d) => {
     const existente = horarios.find((h) => h.dia === d.dia);
     return (

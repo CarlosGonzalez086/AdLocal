@@ -137,6 +137,86 @@ export default function ComercioDetalle({
           </Link>
         </Stack>
 
+        {comercio.imagenes && comercio.imagenes.length > 0 && (
+          <>
+            <Divider />
+            <Typography variant="h6" fontWeight="bold" mt={3} mb={1}>
+              Imágenes del negocio
+            </Typography>
+            <Box
+              sx={{
+                mt: 6,
+                mx: 3,
+                borderRadius: 3,
+                overflow: "hidden",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              }}
+            >
+              <div
+                id="carouselComercio"
+                className="carousel slide"
+                data-bs-ride="carousel"
+              >
+                <div className="carousel-indicators">
+                  {comercio.imagenes.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      data-bs-target="#carouselComercio"
+                      data-bs-slide-to={idx}
+                      className={idx === 0 ? "active" : ""}
+                      aria-current={idx === 0 ? "true" : undefined}
+                      aria-label={`Slide ${idx + 1}`}
+                    ></button>
+                  ))}
+                </div>
+
+                <div className="carousel-inner">
+                  {comercio.imagenes.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className={`carousel-item ${idx === 0 ? "active" : ""}`}
+                      style={{ height: 250 }}
+                    >
+                      <img
+                        src={img}
+                        className="d-block w-100"
+                        alt={`Imagen ${idx + 1}`}
+                        style={{ objectFit: "cover", height: "100%" }}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  className="carousel-control-prev"
+                  type="button"
+                  data-bs-target="#carouselComercio"
+                  data-bs-slide="prev"
+                >
+                  <span
+                    className="carousel-control-prev-icon"
+                    aria-hidden="true"
+                  ></span>
+                  <span className="visually-hidden">Previous</span>
+                </button>
+                <button
+                  className="carousel-control-next"
+                  type="button"
+                  data-bs-target="#carouselComercio"
+                  data-bs-slide="next"
+                >
+                  <span
+                    className="carousel-control-next-icon"
+                    aria-hidden="true"
+                  ></span>
+                  <span className="visually-hidden">Next</span>
+                </button>
+              </div>
+            </Box>
+          </>
+        )}
+
         <Divider />
         <Accordion
           sx={{

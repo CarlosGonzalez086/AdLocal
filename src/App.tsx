@@ -9,6 +9,8 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AdminLayout from "./components/layouts/AdminLayout";
 import UserLayout from "./components/layouts/UserLayout";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 export default function App() {
   return (
@@ -22,6 +24,19 @@ export default function App() {
                 <LoginPage type="user" />
               </PublicRoute>
             }
+          />
+
+          <Route
+            path="/recuperar-contrasena"
+            element={
+              <PublicRoute>
+                <ForgotPasswordPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/cambiar-contrasena/:token"
+            element={<ResetPasswordPage />}
           />
 
           <Route

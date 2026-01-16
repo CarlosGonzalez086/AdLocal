@@ -59,7 +59,7 @@ export default function LoginPage({ type }: Props) {
             display: "flex",
             justifyContent: "center",
             mb: 3,
-            mt:3
+            mt: 3,
           }}
         >
           <Box
@@ -99,6 +99,16 @@ export default function LoginPage({ type }: Props) {
             }
           >
             {type === "admin" ? "Crear administrador" : "Crear usuario"}
+          </Button>
+          <Divider sx={{ my: 3 }} />
+
+          <Button
+            variant="outlined"
+            fullWidth
+            size="large"
+            onClick={() => navigate("/recuperar-contrasena")}
+          >
+            Restablecer contraseña
           </Button>
         </Paper>
       </Container>

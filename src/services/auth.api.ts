@@ -1,7 +1,8 @@
 import axios from "axios";
+import type { ApiResponse } from "../api/apiResponse";
 
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/Usuarios`,
+  baseURL: `${import.meta.env.VITE_API_URL}/Auth`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -39,14 +40,22 @@ export interface UserDto {
   fechaCreacion: string;
 }
 
+export interface NewPasswordDto {
+  passwordNueva: string;
+  codigo: string;
+}
 
-export const usersApi = {
-  getAll: (params?: {
-    page?: number;
-    pageSize?: number;
-    orderBy?: string;
-    search?: string;
-  }) => api.get("", { params }),
-  getById: (id: number) => api.get(`/${id}`),
-  eliminar: (id: number) => api.delete(`/${id}`),
+export interface EmailDto {
+  email: string;
+}
+
+export const authApi = {
+  forgetPassword: (data: EmailDto) =>
+    api.post<ApiResponse<null>>("/forget-password", data),
+  newPassword: (data: NewPasswordDto) =>
+    api.post<ApiResponse<null>>("/new-password", data),
+  checkToken: (token: string) =>
+    api.post<ApiResponse<null>>("/check-token", null, {
+      params: { token },
+    }),
 };

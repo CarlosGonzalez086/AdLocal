@@ -1,4 +1,3 @@
-import type { ComercioCreateDto } from "../schemas/comercioCreate.schema";
 import type { ComercioDto, HorarioComercioDto } from "../services/comercioApi";
 
 export const utcToLocal = (utcDate: string | Date): string => {

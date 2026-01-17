@@ -9,11 +9,6 @@ import {
   Switch,
   Tabs,
   Tab,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  type SelectChangeEvent,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import type {
@@ -26,8 +21,7 @@ import { DIAS_SEMANA } from "../../../utils/constantes";
 import { TimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import { useLocations } from "../../../hooks/useLocations";
-import type { MunicipalityDto } from "../../../services/locations.api";
+
 import { SelectEstadoAutocomplete } from "../../../components/Locations/SelectEstadoAutocomplete";
 import { SelectMunicipioAutocomplete } from "../../../components/Locations/SelectMunicipioAutocomplete";
 

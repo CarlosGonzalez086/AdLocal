@@ -99,7 +99,7 @@ export const MiComercioPage = () => {
               estadoId: 0,
               municipioId: 0,
               estadoNombre: "",
-              MunicipioNombre: "",
+              municipioNombre: "",
             }}
             loading={loading}
             onSave={guardar}

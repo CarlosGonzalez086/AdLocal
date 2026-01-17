@@ -78,7 +78,12 @@ export default function ComercioCard({ comercio }: Props) {
               lineHeight: 1.4,
             }}
           >
-            {comercio.direccion}
+            {comercio.direccion +
+              "," +
+              comercio.municipioNombre +
+              "," +
+              comercio.estadoNombre +
+              "."}
           </Typography>
 
           {/* CTA */}

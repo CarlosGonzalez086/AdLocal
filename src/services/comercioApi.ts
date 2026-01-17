@@ -22,14 +22,14 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
     return Promise.reject(e);
-  }
+  },
 );
 
 export interface HorarioComercioDto {
   dia: number;
   abierto: boolean;
-  horaApertura?: string;
-  horaCierre?: string;
+  horaApertura?: string | null;
+  horaCierre?: string | null;
 }
 
 export interface ComercioCreateDto {
@@ -46,22 +46,26 @@ export interface ComercioCreateDto {
   colorSecundario?: string;
   activo?: boolean;
   horarios?: HorarioComercioDto[];
+  estadoId?: number;
+  municipioId?: number;
 }
 
 export interface ComercioUpdateDto {
-  nombre: string;
-  direccion?: string;
-  telefono?: string;
-  email?: string;
-  descripcion?: string;
-  logoBase64?: string;
-  imagenes?: string[];
-  lat?: number;
-  lng?: number;
-  colorPrimario?: string;
-  colorSecundario?: string;
-  activo: boolean;
-  horarios?: HorarioComercioDto[];
+  nombre?: string | null;
+  direccion?: string | null;
+  telefono?: string | null;
+  email?: string | null;
+  descripcion?: string | null;
+  logoBase64?: string | null;
+  imagenes?: string[] | null;
+  lat?: number | null;
+  lng?: number | null;
+  colorPrimario?: string | null;
+  colorSecundario?: string | null;
+  activo?: boolean | null;
+  horarios?: HorarioComercioDto[] | null;
+  estadoId?: number | null;
+  municipioId?: number | null;
 }
 
 export interface ComercioDto {
@@ -79,6 +83,10 @@ export interface ComercioDto {
   colorSecundario: string;
   activo: boolean;
   horarios: HorarioComercioDto[];
+  estadoId: number;
+  municipioId: number;
+  estadoNombre: string;
+  municipioNombre: string;
 }
 
 export const comercioApi = {

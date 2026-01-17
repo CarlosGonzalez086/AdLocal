@@ -9,6 +9,11 @@ import {
   Switch,
   Tabs,
   Tab,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  type SelectChangeEvent,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import type {
@@ -21,6 +26,10 @@ import { DIAS_SEMANA } from "../../../utils/constantes";
 import { TimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import { useLocations } from "../../../hooks/useLocations";
+import type { MunicipalityDto } from "../../../services/locations.api";
+import { SelectEstadoAutocomplete } from "../../../components/Locations/SelectEstadoAutocomplete";
+import { SelectMunicipioAutocomplete } from "../../../components/Locations/SelectMunicipioAutocomplete";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -79,12 +88,14 @@ export const ComercioForm = ({
   });
 
   const [preview, setPreview] = useState<string | null>(
-    initialData.logoBase64 ?? null
+    initialData.logoBase64 ?? null,
   );
   const [galeria, setGaleria] = useState<string[]>(initialData.imagenes ?? []);
+
   const handleChange =
     (field: keyof ComercioDto) => (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value;
+      console.log(e);
 
       if (field === "telefono") {
         value = value.replace(/\D/g, "");
@@ -98,7 +109,7 @@ export const ComercioForm = ({
     setForm((prev) => ({
       ...prev,
       horarios: prev.horarios.map((h) =>
-        h.dia === dia ? { ...h, ...changes } : h
+        h.dia === dia ? { ...h, ...changes } : h,
       ),
     }));
   };
@@ -133,7 +144,7 @@ export const ComercioForm = ({
 
   const handleReplaceImage = (
     index: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -172,9 +183,19 @@ export const ComercioForm = ({
     setPreview(initialData.logoBase64 ?? null);
     setGaleria(initialData.imagenes ?? []);
   }, [initialData]);
+
+  console.log(form);
+
   return (
-    <Box className="d-flex justify-content-center mt-4">
-      <Box className="col-12 col-md-8 col-lg-6">
+    <Box
+      className="d-flex justify-content-center mt-4"
+      sx={{ px: { xs: 2, sm: 3, md: 0 } }} // padding horizontal en pantallas pequeñas
+    >
+      <Box
+        sx={{
+          width: { xs: "100%", sm: "90%", md: "70%", lg: "50%" },
+        }}
+      >
         <Tabs
           value={tab}
           onChange={(_, v) => setTab(v)}
@@ -189,8 +210,16 @@ export const ComercioForm = ({
         </Tabs>
 
         <form onSubmit={handleSubmit}>
+          {/* ===== Tab General ===== */}
           <TabPanel value={tab} index={0}>
-            <Box className="d-flex flex-column align-items-center mb-3">
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
               <Avatar
                 src={preview ?? undefined}
                 sx={{ width: 120, height: 120 }}
@@ -250,7 +279,29 @@ export const ComercioForm = ({
               disabled={!soloVer}
               sx={{ mb: 2 }}
             />
-            <div className="d-flex gap-3">
+
+            <SelectEstadoAutocomplete
+              value={form.estadoId}
+              onChange={(estadoId) =>
+                setForm((prev) => ({ ...prev, estadoId, municipioId: 0 }))
+              }
+            />
+            <SelectMunicipioAutocomplete
+              estadoId={form.estadoId}
+              value={form.municipioId}
+              onChange={(id) =>
+                setForm((prev) => ({ ...prev, municipioId: id }))
+              }
+            />
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 2,
+                mt: 2,
+              }}
+            >
               <TextField
                 label="Color primario"
                 type="color"
@@ -259,7 +310,6 @@ export const ComercioForm = ({
                 fullWidth
                 disabled={!soloVer}
               />
-
               <TextField
                 label="Color secundario"
                 type="color"
@@ -268,8 +318,10 @@ export const ComercioForm = ({
                 fullWidth
                 disabled={!soloVer}
               />
-            </div>
+            </Box>
           </TabPanel>
+
+          {/* ===== Tab Galería ===== */}
           <TabPanel value={tab} index={1}>
             <Button
               variant="outlined"
@@ -287,42 +339,54 @@ export const ComercioForm = ({
               />
             </Button>
 
-            <Box className="d-flex justify-content-center gap-3 mt-3 flex-wrap">
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                flexWrap: "wrap",
+                gap: 2,
+                mt: 3,
+              }}
+            >
               {galeria.map((img, i) => (
-                <>
+                <Box
+                  key={i}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
                   <Avatar
-                    key={i}
                     src={img}
                     variant="rounded"
                     sx={{ width: 100, height: 100 }}
                   />
                   {soloVer && (
-                    <div className="d-flex gap-1 w-100">
-                      {/* 🔄 Reemplazar */}
-                      <Button
-                        size="small"
-                        component="label"
-                        variant="outlined"
-                        sx={{ fontSize: 10, flex: 1 }}
-                      >
-                        Reemplazar
-                        <input
-                          hidden
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleReplaceImage(i, e)}
-                        />
-                      </Button>
-                    </div>
+                    <Button
+                      size="small"
+                      component="label"
+                      variant="outlined"
+                      sx={{ fontSize: 10, mt: 1 }}
+                    >
+                      Reemplazar
+                      <input
+                        hidden
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleReplaceImage(i, e)}
+                      />
+                    </Button>
                   )}
-                </>
+                </Box>
               ))}
             </Box>
           </TabPanel>
+
+          {/* ===== Tab Horarios ===== */}
           <TabPanel value={tab} index={2}>
             {DIAS_SEMANA.map((d) => {
               const horario = form.horarios.find((h) => h.dia === d.dia)!;
-
               return (
                 <Box
                   key={d.dia}
@@ -340,10 +404,10 @@ export const ComercioForm = ({
                       justifyContent: "space-between",
                       alignItems: "center",
                       mb: 1.5,
+                      flexWrap: "wrap",
                     }}
                   >
                     <Typography fontWeight={600}>{d.label}</Typography>
-
                     <FormControlLabel
                       control={
                         <Switch
@@ -373,10 +437,12 @@ export const ComercioForm = ({
                       }}
                     />
                   </Box>
+
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <Box
                       sx={{
                         display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
                         gap: 2,
                         justifyContent: "center",
                       }}
@@ -396,13 +462,9 @@ export const ComercioForm = ({
                           })
                         }
                         slotProps={{
-                          textField: {
-                            size: "small",
-                            fullWidth: true,
-                          },
+                          textField: { size: "small", fullWidth: true },
                         }}
                       />
-
                       <TimePicker
                         label="Cierre"
                         ampm={false}
@@ -418,14 +480,12 @@ export const ComercioForm = ({
                           })
                         }
                         slotProps={{
-                          textField: {
-                            size: "small",
-                            fullWidth: true,
-                          },
+                          textField: { size: "small", fullWidth: true },
                         }}
                       />
                     </Box>
                   </LocalizationProvider>
+
                   {!horario.abierto && (
                     <Typography
                       variant="caption"
@@ -439,8 +499,10 @@ export const ComercioForm = ({
               );
             })}
           </TabPanel>
+
+          {/* ===== Tab Ubicación ===== */}
           <TabPanel value={tab} index={3}>
-            <Box sx={{ height: 300 }}>
+            <Box sx={{ height: { xs: 250, sm: 300, md: 400 } }}>
               <MapContainer
                 center={[form.lat || 19.4326, form.lng || -99.1332]}
                 zoom={15}
@@ -451,7 +513,17 @@ export const ComercioForm = ({
               </MapContainer>
             </Box>
           </TabPanel>
-          <Box className="d-flex justify-content-end gap-2 mt-4">
+
+          {/* ===== Botones ===== */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 2,
+              mt: 4,
+              flexWrap: "wrap",
+            }}
+          >
             {soloVer && (
               <Button variant="outlined" onClick={setEditando}>
                 Cancelar

@@ -3,7 +3,12 @@ import Swal from "sweetalert2";
 import { comercioApi, type ComercioDto } from "../services/comercioApi";
 import { useActualizarJwt } from "./useActualizarJwt";
 import { UserContext } from "../context/UserContext ";
-import type { ComercioCreateDto } from "../schemas/comercioCreate.schema";
+import {
+  comercioCreateSchema,
+  comercioUpdateSchema,
+  type ComercioCreateDto,
+} from "../schemas/comercioCreate.schema";
+import { normalizeComercioData } from "../utils/generalsFunctions";
 
 export const useComercio = () => {
   const user = useContext(UserContext);
@@ -38,12 +43,26 @@ export const useComercio = () => {
 
   const guardar = async (data: ComercioCreateDto) => {
     setLoading(true);
+
     try {
+      const normalizedData = normalizeComercioData(data);
+
       if (comercio?.id) {
-        const { data: resp } = await comercioApi.actualizar({
-          ...data,
+        const result = comercioUpdateSchema.safeParse({
+          ...normalizedData,
           activo: comercio.activo,
         });
+
+        if (!result.success) {
+          Swal.fire(
+            "Validación",
+            result.error.issues.map((e) => e.message).join("\n"),
+            "warning",
+          );
+          return;
+        }
+
+        const { data: resp } = await comercioApi.actualizar(result.data);
 
         if (resp.codigo !== "200") {
           Swal.fire("Error", resp.mensaje, "error");
@@ -51,8 +70,22 @@ export const useComercio = () => {
         }
 
         Swal.fire("Actualizado", resp.mensaje, "success");
-      } else {
-        const { data: resp } = await comercioApi.crear(data);
+      }
+
+      // 🔥 CREATE
+      else {
+        const result = comercioCreateSchema.safeParse(normalizedData);
+
+        if (!result.success) {
+          Swal.fire(
+            "Validación",
+            result.error.issues.map((e) => e.message).join("\n"),
+            "warning",
+          );
+          return;
+        }
+
+        const { data: resp } = await comercioApi.crear(result.data);
 
         if (resp.codigo !== "200") {
           Swal.fire("Error", resp.mensaje, "error");

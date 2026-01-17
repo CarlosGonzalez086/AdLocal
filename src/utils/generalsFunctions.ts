@@ -1,12 +1,9 @@
-import type { ComercioDto } from "../services/comercioApi";
+import type { ComercioDto, HorarioComercioDto } from "../services/comercioApi";
 
 export const utcToLocal = (utcDate: string | Date): string => {
   if (!utcDate) return "";
 
-  const date =
-    typeof utcDate === "string"
-      ? new Date(utcDate)
-      : utcDate;
+  const date = typeof utcDate === "string" ? new Date(utcDate) : utcDate;
 
   if (isNaN(date.getTime())) return "";
 
@@ -19,7 +16,7 @@ export const utcToLocal = (utcDate: string | Date): string => {
 
 export const calcularDiasEntreFechas = (
   fechaInicio: string,
-  fechaFin: string
+  fechaFin: string,
 ): number => {
   const inicio = new Date(fechaInicio);
   const fin = new Date(fechaFin);
@@ -31,7 +28,7 @@ export const calcularDiasEntreFechas = (
 };
 
 export const estaAbiertoAhora = (
-  horarios: ComercioDto["horarios"] | undefined
+  horarios: ComercioDto["horarios"] | undefined,
 ) => {
   if (!horarios) return false;
 
@@ -48,3 +45,37 @@ export const estaAbiertoAhora = (
     horaActual <= horarioHoy.horaCierre!
   );
 };
+
+export function removeNulls<T extends object>(obj: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, value]) => value !== null),
+  ) as Partial<T>;
+}
+
+export const normalizeComercioData = (data: any) => ({
+  ...data,
+
+  nombre: data.nombre ?? "",
+  direccion: data.direccion ?? "",
+  telefono: data.telefono ?? "",
+  email: data.email ?? "",
+  descripcion: data.descripcion ?? "",
+
+  logoBase64: data.logoBase64?.startsWith("data:image/")
+    ? data.logoBase64
+    : undefined,
+
+  imagenes: data.imagenes?.filter((img: string) =>
+    img.startsWith("data:image/"),
+  ),
+
+  horarios: data.horarios?.map((h: HorarioComercioDto) => ({
+    dia: h.dia,
+    abierto: h.abierto,
+    horaApertura: h.abierto ? h.horaApertura : undefined,
+    horaCierre: h.abierto ? h.horaCierre : undefined,
+  })),
+
+  estadoId: data.estadoId > 0 ? data.estadoId : undefined,
+  municipioId: data.municipioId > 0 ? data.municipioId : undefined,
+});

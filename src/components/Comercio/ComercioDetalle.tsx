@@ -85,7 +85,12 @@ export default function ComercioDetalle({
 
         {comercio.descripcion && (
           <Typography color="#f5f5f5" mt={1}>
-            {comercio.descripcion}
+            {comercio.direccion +
+              "," +
+              comercio.municipioNombre +
+              "," +
+              comercio.estadoNombre +
+              "."}
           </Typography>
         )}
 
@@ -352,7 +357,7 @@ export default function ComercioDetalle({
           onClick={() =>
             window.open(
               `https://www.google.com/maps?q=${comercio.lat},${comercio.lng}`,
-              "_blank"
+              "_blank",
             )
           }
         >

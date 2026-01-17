@@ -96,6 +96,10 @@ export const MiComercioPage = () => {
               colorPrimario: "#000000",
               colorSecundario: "#FFFFFF",
               horarios: [],
+              estadoId: 0,
+              municipioId: 0,
+              estadoNombre: "",
+              municipioNombre: "",
             }}
             loading={loading}
             onSave={guardar}
@@ -163,7 +167,14 @@ export const MiComercioPage = () => {
           {comercio.direccion && (
             <Box display="flex" gap={1} alignItems="center">
               <LocationOn fontSize="small" color="action" />
-              <Typography variant="body2">{comercio.direccion}</Typography>
+              <Typography variant="body2">
+                {comercio.direccion +
+                  "," +
+                  comercio.municipioNombre +
+                  "," +
+                  comercio.estadoNombre +
+                  "."}
+              </Typography>
             </Box>
           )}
 

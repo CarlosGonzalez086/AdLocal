@@ -1,12 +1,16 @@
 import {
   Dialog,
   DialogActions,
+  DialogTitle,
+  DialogContent,
   TextField,
   Button,
   InputAdornment,
   Avatar,
+  Stack,
+  Divider,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ProductoServicioDto } from "../../services/productosServiciosApi";
 
 interface Props {
@@ -18,6 +22,12 @@ interface Props {
   loading?: boolean;
 }
 
+const iosColors = {
+  primary: "#007AFF",
+  background: "#F9FAFB",
+  border: "#E5E7EB",
+};
+
 export const ProductoServicioModal = ({
   open,
   onClose,
@@ -27,27 +37,41 @@ export const ProductoServicioModal = ({
   loading,
 }: Props) => {
   const [form, setForm] = useState<ProductoServicioDto>({
-    nombre: producto.nombre ?? "",
-    descripcion: producto.descripcion ?? "",
-    precio: producto.precio ?? 0,
-    activo: producto.activo ?? true,
-    stock: producto.stock ?? 0,
-    id: producto.id,
-    imagenBase64: producto.imagenBase64,
+    nombre: "",
+    descripcion: "",
+    precio: 0,
+    activo: true,
+    stock: 0,
+    id: undefined,
+    imagenBase64: "",
   });
 
-  const [preview, setPreview] = useState<string | null>(
-    producto.imagenBase64 ?? null
-  );
+  const [preview, setPreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<
     Partial<Record<keyof ProductoServicioDto, string>>
   >({});
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setForm({
+      nombre: producto.nombre ?? "",
+      descripcion: producto.descripcion ?? "",
+      precio: producto.precio ?? 0,
+      activo: producto.activo ?? true,
+      stock: producto.stock ?? 0,
+      id: producto.id,
+      imagenBase64: producto.imagenBase64,
+    });
+
+    setPreview(producto.imagenBase64 ?? null);
+    setErrors({});
+  }, [producto, open]);
+
   const validar = (): boolean => {
     const e: typeof errors = {};
-    if (!form.nombre) e.nombre = "Requerido";
-    if ((form?.precio ?? 0) < 0) e.precio = "Debe ser mayor o igual a 0";
-    if ((form?.stock ?? 0) < 0) e.stock = "Debe ser mayor o igual a 0";
+    if (!form.nombre) e.nombre = "El nombre es obligatorio";
+    if (form.precio < 0) e.precio = "Debe ser mayor o igual a 0";
+    if (form.stock < 0) e.stock = "Debe ser mayor o igual a 0";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -72,78 +96,132 @@ export const ProductoServicioModal = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <div className="w-100 p-3">
-        <h4>
-          {soloVer
-            ? "Detalle del Producto/Servicio"
-            : form.id
-            ? "Editar Producto/Servicio"
-            : "Nuevo Producto/Servicio"}
-        </h4>
-        <div className="d-flex flex-column align-items-center mb-4">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 4,
+          backgroundColor: iosColors.background,
+        },
+      }}
+    >
+      <DialogTitle sx={{ fontWeight: 600 }}>
+        {soloVer
+          ? "Detalle del producto"
+          : form.id
+            ? "Editar producto"
+            : "Nuevo producto"}
+      </DialogTitle>
+
+      <DialogContent>
+        <Stack alignItems="center" spacing={2} mb={3}>
           <Avatar
             src={preview ?? undefined}
-            sx={{ width: 120, height: 120, mb: 2 }}
+            sx={{
+              width: 130,
+              height: 130,
+              borderRadius: 4,
+              boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+            }}
           />
 
-          <Button variant="outlined" component="label">
-            Cargar Imagen
-            <input
-              hidden
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-          </Button>
-        </div>
-        <div className="w-100 row gap-3 mt-4">
-          {[
-            { id: 1, text: "Nombre", field: "nombre" },
-            { id: 2, text: "Descripción", field: "descripcion" },
-            { id: 3, text: "Precio", field: "precio" },
-            { id: 4, text: "Stock", field: "stock" },
-          ].map((item) => (
-            <div className="col-12 w-100" key={item.id}>
-              <TextField
-                label={item.text}
-                type={
-                  item.field === "precio" || item.field === "stock"
-                    ? "number"
-                    : "text"
-                }
-                fullWidth
-                size="small"
-                value={form[item.field as keyof ProductoServicioDto]}
-                multiline={item.field == "descripcion" ? true : false}
-                error={!!errors[item.field as keyof ProductoServicioDto]}
-                helperText={errors[item.field as keyof ProductoServicioDto]}
-                disabled={soloVer}
-                InputProps={{
-                  startAdornment:
-                    item.field === "precio" ? (
-                      <InputAdornment position="start">$</InputAdornment>
-                    ) : undefined,
-                }}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    [item.field]:
-                      item.field === "precio" || item.field === "stock"
-                        ? Number(e.target.value)
-                        : e.target.value,
-                  })
-                }
+          {!soloVer && (
+            <Button
+              variant="outlined"
+              component="label"
+              sx={{
+                textTransform: "none",
+                borderRadius: 3,
+              }}
+            >
+              Cambiar imagen
+              <input
+                hidden
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
               />
-            </div>
-          ))}
-        </div>
-      </div>
+            </Button>
+          )}
+        </Stack>
 
-      <DialogActions>
-        <Button onClick={onClose}>Cerrar</Button>
+        <Divider sx={{ mb: 3 }} />
+
+        <Stack spacing={2}>
+          <TextField
+            label="Nombre"
+            value={form.nombre}
+            error={!!errors.nombre}
+            helperText={errors.nombre}
+            disabled={soloVer}
+            fullWidth
+            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+          />
+
+          <TextField
+            label="Descripción"
+            value={form.descripcion}
+            multiline
+            minRows={3}
+            disabled={soloVer}
+            fullWidth
+            onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+          />
+
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+            <TextField
+              label="Precio"
+              type="number"
+              value={form.precio}
+              error={!!errors.precio}
+              helperText={errors.precio}
+              disabled={soloVer}
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">$</InputAdornment>
+                ),
+              }}
+              onChange={(e) =>
+                setForm({ ...form, precio: Number(e.target.value) })
+              }
+            />
+
+            <TextField
+              label="Stock"
+              type="number"
+              value={form.stock}
+              error={!!errors.stock}
+              helperText={errors.stock}
+              disabled={soloVer}
+              fullWidth
+              onChange={(e) =>
+                setForm({ ...form, stock: Number(e.target.value) })
+              }
+            />
+          </Stack>
+        </Stack>
+      </DialogContent>
+
+      <DialogActions sx={{ p: 2 }}>
+        <Button onClick={onClose} sx={{ textTransform: "none" }}>
+          Cerrar
+        </Button>
+
         {!soloVer && (
-          <Button variant="contained" onClick={handleSave} disabled={loading}>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={loading}
+            sx={{
+              textTransform: "none",
+              borderRadius: 3,
+              backgroundColor: iosColors.primary,
+            }}
+          >
             Guardar
           </Button>
         )}

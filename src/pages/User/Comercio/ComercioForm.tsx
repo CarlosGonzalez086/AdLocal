@@ -9,6 +9,7 @@ import {
   Switch,
   Tabs,
   Tab,
+  Stack,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import type {
@@ -54,10 +55,7 @@ const TabPanel = ({
   value: number;
   index: number;
   children: React.ReactNode;
-}) => {
-  if (value !== index) return null;
-  return <Box sx={{ mt: 3 }}>{children}</Box>;
-};
+}) => (value === index ? <Box sx={{ mt: 3 }}>{children}</Box> : null);
 
 interface Props {
   initialData: ComercioDto;
@@ -75,12 +73,10 @@ export const ComercioForm = ({
   setEditando,
 }: Props) => {
   const [tab, setTab] = useState(0);
-
   const [form, setForm] = useState<ComercioDto>({
     ...initialData,
     horarios: normalizarHorarios(initialData.horarios),
   });
-
   const [preview, setPreview] = useState<string | null>(
     initialData.logoBase64 ?? null,
   );
@@ -89,34 +85,27 @@ export const ComercioForm = ({
   const handleChange =
     (field: keyof ComercioDto) => (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value;
-      console.log(e);
-
       if (field === "telefono") {
-        value = value.replace(/\D/g, "");
-        if (value.length > 10) return;
+        value = value.replace(/\D/g, "").slice(0, 10);
       }
-
       setForm({ ...form, [field]: value });
     };
 
-  const updateHorario = (dia: number, changes: Partial<HorarioComercioDto>) => {
+  const updateHorario = (dia: number, changes: Partial<HorarioComercioDto>) =>
     setForm((prev) => ({
       ...prev,
       horarios: prev.horarios.map((h) =>
         h.dia === dia ? { ...h, ...changes } : h,
       ),
     }));
-  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64 = reader.result as string;
-      setPreview(base64);
-      setForm({ ...form, logoBase64: base64 });
+      setPreview(reader.result as string);
+      setForm({ ...form, logoBase64: reader.result as string });
     };
     reader.readAsDataURL(file);
   };
@@ -124,7 +113,6 @@ export const ComercioForm = ({
   const handleGaleriaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
-
     const disponibles = 3 - galeria.length;
     files.slice(0, disponibles).forEach((file) => {
       const reader = new FileReader();
@@ -132,7 +120,6 @@ export const ComercioForm = ({
         setGaleria((prev) => [...prev, reader.result as string]);
       reader.readAsDataURL(file);
     });
-
     e.target.value = "";
   };
 
@@ -142,7 +129,6 @@ export const ComercioForm = ({
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onloadend = () => {
       const copia = [...galeria];
@@ -158,7 +144,6 @@ export const ComercioForm = ({
         setForm({ ...form, lat: e.latlng.lat, lng: e.latlng.lng });
       },
     });
-
     return form.lat && form.lng ? (
       <Marker position={[form.lat, form.lng]} />
     ) : null;
@@ -178,24 +163,29 @@ export const ComercioForm = ({
     setGaleria(initialData.imagenes ?? []);
   }, [initialData]);
 
-  console.log(form);
-
   return (
     <Box
-      className="d-flex justify-content-center mt-4"
-      sx={{ px: { xs: 2, sm: 3, md: 0 } }} // padding horizontal en pantallas pequeñas
+      sx={{
+        px: { xs: 2, sm: 3, md: 0 },
+        mt: 4,
+        display: "flex",
+        justifyContent: "center",
+      }}
     >
-      <Box
-        sx={{
-          width: { xs: "100%", sm: "90%", md: "70%", lg: "50%" },
-        }}
-      >
+      <Box sx={{ width: { xs: "100%", sm: "90%", md: "70%", lg: "50%" } }}>
         <Tabs
           value={tab}
           onChange={(_, v) => setTab(v)}
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ mb: 2 }}
+          sx={{
+            mb: 3,
+            ".MuiTabs-indicator": {
+              backgroundColor: "#007AFF",
+              height: 3,
+              borderRadius: 3,
+            },
+          }}
         >
           <Tab label="General" />
           <Tab label="Galería" />
@@ -204,7 +194,6 @@ export const ComercioForm = ({
         </Tabs>
 
         <form onSubmit={handleSubmit}>
-          {/* ===== Tab General ===== */}
           <TabPanel value={tab} index={0}>
             <Box
               sx={{
@@ -216,10 +205,18 @@ export const ComercioForm = ({
             >
               <Avatar
                 src={preview ?? undefined}
-                sx={{ width: 120, height: 120 }}
+                sx={{
+                  width: 120,
+                  height: 120,
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                }}
               />
               {soloVer && (
-                <Button component="label" variant="outlined" sx={{ mt: 2 }}>
+                <Button
+                  component="label"
+                  variant="outlined"
+                  sx={{ mt: 2, textTransform: "none" }}
+                >
                   Subir logo
                   <input
                     hidden
@@ -231,48 +228,45 @@ export const ComercioForm = ({
               )}
             </Box>
 
-            <TextField
-              label="Nombre"
-              value={form.nombre}
-              onChange={handleChange("nombre")}
-              fullWidth
-              disabled={!soloVer}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label="Dirección"
-              value={form.direccion ?? ""}
-              onChange={handleChange("direccion")}
-              fullWidth
-              disabled={!soloVer}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label="Teléfono"
-              value={form.telefono ?? ""}
-              onChange={handleChange("telefono")}
-              fullWidth
-              disabled={!soloVer}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label="Email"
-              value={form.email ?? ""}
-              onChange={handleChange("email")}
-              fullWidth
-              disabled={!soloVer}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label="Descripción"
-              value={form.descripcion ?? ""}
-              onChange={handleChange("descripcion")}
-              fullWidth
-              multiline
-              rows={3}
-              disabled={!soloVer}
-              sx={{ mb: 2 }}
-            />
+            <Stack spacing={2}>
+              <TextField
+                label="Nombre"
+                value={form.nombre}
+                onChange={handleChange("nombre")}
+                fullWidth
+                disabled={!soloVer}
+              />
+              <TextField
+                label="Dirección"
+                value={form.direccion ?? ""}
+                onChange={handleChange("direccion")}
+                fullWidth
+                disabled={!soloVer}
+              />
+              <TextField
+                label="Teléfono"
+                value={form.telefono ?? ""}
+                onChange={handleChange("telefono")}
+                fullWidth
+                disabled={!soloVer}
+              />
+              <TextField
+                label="Email"
+                value={form.email ?? ""}
+                onChange={handleChange("email")}
+                fullWidth
+                disabled={!soloVer}
+              />
+              <TextField
+                label="Descripción"
+                value={form.descripcion ?? ""}
+                onChange={handleChange("descripcion")}
+                fullWidth
+                multiline
+                rows={3}
+                disabled={!soloVer}
+              />
+            </Stack>
 
             <SelectEstadoAutocomplete
               value={form.estadoId}
@@ -297,17 +291,17 @@ export const ComercioForm = ({
               }}
             >
               <TextField
-                label="Color primario"
                 type="color"
-                value={form.colorPrimario ?? "#000000"}
+                label="Color primario"
+                value={form.colorPrimario ?? "#007AFF"}
                 onChange={handleChange("colorPrimario")}
                 fullWidth
                 disabled={!soloVer}
               />
               <TextField
-                label="Color secundario"
                 type="color"
-                value={form.colorSecundario ?? "#ffffff"}
+                label="Color secundario"
+                value={form.colorSecundario ?? "#FF9500"}
                 onChange={handleChange("colorSecundario")}
                 fullWidth
                 disabled={!soloVer}
@@ -315,13 +309,13 @@ export const ComercioForm = ({
             </Box>
           </TabPanel>
 
-          {/* ===== Tab Galería ===== */}
           <TabPanel value={tab} index={1}>
             <Button
               variant="outlined"
               component="label"
               disabled={!soloVer || galeria.length >= 3}
               fullWidth
+              sx={{ mb: 2, textTransform: "none" }}
             >
               Subir imágenes ({galeria.length}/3)
               <input
@@ -336,10 +330,9 @@ export const ComercioForm = ({
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "center",
                 flexWrap: "wrap",
+                justifyContent: "center",
                 gap: 2,
-                mt: 3,
               }}
             >
               {galeria.map((img, i) => (
@@ -354,14 +347,20 @@ export const ComercioForm = ({
                   <Avatar
                     src={img}
                     variant="rounded"
-                    sx={{ width: 100, height: 100 }}
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                      transition: "transform 0.3s",
+                      "&:hover": { transform: "scale(1.05)" },
+                    }}
                   />
                   {soloVer && (
                     <Button
                       size="small"
                       component="label"
                       variant="outlined"
-                      sx={{ fontSize: 10, mt: 1 }}
+                      sx={{ fontSize: 10, mt: 1, textTransform: "none" }}
                     >
                       Reemplazar
                       <input
@@ -377,126 +376,132 @@ export const ComercioForm = ({
             </Box>
           </TabPanel>
 
-          {/* ===== Tab Horarios ===== */}
           <TabPanel value={tab} index={2}>
-            {DIAS_SEMANA.map((d) => {
-              const horario = form.horarios.find((h) => h.dia === d.dia)!;
-              return (
-                <Box
-                  key={d.dia}
-                  sx={{
-                    mb: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    border: "1px solid #e0e0e0",
-                    backgroundColor: "#fafafa",
-                  }}
-                >
+            <Stack spacing={2}>
+              {DIAS_SEMANA.map((d) => {
+                const horario = form.horarios.find((h) => h.dia === d.dia)!;
+                return (
                   <Box
+                    key={d.dia}
                     sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mb: 1.5,
-                      flexWrap: "wrap",
+                      p: 2,
+                      borderRadius: 3,
+                      backgroundColor: "#f9f9f9",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
                     }}
                   >
-                    <Typography fontWeight={600}>{d.label}</Typography>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={horario.abierto}
-                          disabled={!soloVer}
-                          onChange={(e) =>
-                            updateHorario(d.dia, {
-                              abierto: e.target.checked,
-                              ...(e.target.checked
-                                ? {}
-                                : {
-                                    horaApertura: undefined,
-                                    horaCierre: undefined,
-                                  }),
-                            })
-                          }
-                        />
-                      }
-                      label={horario.abierto ? "Abierto" : "Cerrado"}
-                      sx={{
-                        ".MuiFormControlLabel-label": {
-                          fontWeight: 500,
-                          color: horario.abierto
-                            ? "success.main"
-                            : "text.secondary",
-                        },
-                      }}
-                    />
-                  </Box>
-
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <Box
                       sx={{
                         display: "flex",
-                        flexDirection: { xs: "column", sm: "row" },
-                        gap: 2,
-                        justifyContent: "center",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 1.5,
+                        flexWrap: "wrap",
                       }}
                     >
-                      <TimePicker
-                        label="Apertura"
-                        ampm={false}
-                        disabled={!soloVer || !horario.abierto}
-                        value={
-                          horario.horaApertura
-                            ? dayjs(`2000-01-01T${horario.horaApertura}`)
-                            : null
+                      <Typography fontWeight={600}>{d.label}</Typography>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={horario.abierto}
+                            disabled={!soloVer}
+                            onChange={(e) =>
+                              updateHorario(d.dia, {
+                                abierto: e.target.checked,
+                                ...(e.target.checked
+                                  ? {}
+                                  : {
+                                      horaApertura: undefined,
+                                      horaCierre: undefined,
+                                    }),
+                              })
+                            }
+                          />
                         }
-                        onChange={(v) =>
-                          updateHorario(d.dia, {
-                            horaApertura: v?.format("HH:mm"),
-                          })
-                        }
-                        slotProps={{
-                          textField: { size: "small", fullWidth: true },
-                        }}
-                      />
-                      <TimePicker
-                        label="Cierre"
-                        ampm={false}
-                        disabled={!soloVer || !horario.abierto}
-                        value={
-                          horario.horaCierre
-                            ? dayjs(`2000-01-01T${horario.horaCierre}`)
-                            : null
-                        }
-                        onChange={(v) =>
-                          updateHorario(d.dia, {
-                            horaCierre: v?.format("HH:mm"),
-                          })
-                        }
-                        slotProps={{
-                          textField: { size: "small", fullWidth: true },
+                        label={horario.abierto ? "Abierto" : "Cerrado"}
+                        sx={{
+                          ".MuiFormControlLabel-label": {
+                            fontWeight: 500,
+                            color: horario.abierto
+                              ? "success.main"
+                              : "text.secondary",
+                          },
                         }}
                       />
                     </Box>
-                  </LocalizationProvider>
 
-                  {!horario.abierto && (
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block", mt: 1, textAlign: "center" }}
-                    >
-                      Este día el comercio permanece cerrado
-                    </Typography>
-                  )}
-                </Box>
-              );
-            })}
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: { xs: "column", sm: "row" },
+                          gap: 2,
+                          justifyContent: "center",
+                        }}
+                      >
+                        <TimePicker
+                          label="Apertura"
+                          ampm={false}
+                          disabled={!soloVer || !horario.abierto}
+                          value={
+                            horario.horaApertura
+                              ? dayjs(`2000-01-01T${horario.horaApertura}`)
+                              : null
+                          }
+                          onChange={(v) =>
+                            updateHorario(d.dia, {
+                              horaApertura: v?.format("HH:mm"),
+                            })
+                          }
+                          slotProps={{
+                            textField: { size: "small", fullWidth: true },
+                          }}
+                        />
+                        <TimePicker
+                          label="Cierre"
+                          ampm={false}
+                          disabled={!soloVer || !horario.abierto}
+                          value={
+                            horario.horaCierre
+                              ? dayjs(`2000-01-01T${horario.horaCierre}`)
+                              : null
+                          }
+                          onChange={(v) =>
+                            updateHorario(d.dia, {
+                              horaCierre: v?.format("HH:mm"),
+                            })
+                          }
+                          slotProps={{
+                            textField: { size: "small", fullWidth: true },
+                          }}
+                        />
+                      </Box>
+                    </LocalizationProvider>
+
+                    {!horario.abierto && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: "block", mt: 1, textAlign: "center" }}
+                      >
+                        Este día el comercio permanece cerrado
+                      </Typography>
+                    )}
+                  </Box>
+                );
+              })}
+            </Stack>
           </TabPanel>
 
-          {/* ===== Tab Ubicación ===== */}
           <TabPanel value={tab} index={3}>
-            <Box sx={{ height: { xs: 250, sm: 300, md: 400 } }}>
+            <Box
+              sx={{
+                height: { xs: 250, sm: 300, md: 400 },
+                borderRadius: 3,
+                overflow: "hidden",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+              }}
+            >
               <MapContainer
                 center={[form.lat || 19.4326, form.lng || -99.1332]}
                 zoom={15}
@@ -508,7 +513,6 @@ export const ComercioForm = ({
             </Box>
           </TabPanel>
 
-          {/* ===== Botones ===== */}
           <Box
             sx={{
               display: "flex",
@@ -519,11 +523,20 @@ export const ComercioForm = ({
             }}
           >
             {soloVer && (
-              <Button variant="outlined" onClick={setEditando}>
+              <Button
+                variant="outlined"
+                onClick={setEditando}
+                sx={{ textTransform: "none" }}
+              >
                 Cancelar
               </Button>
             )}
-            <Button type="submit" variant="contained" disabled={loading}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              sx={{ textTransform: "none", py: 1.5, px: 3, borderRadius: 3 }}
+            >
               {loading ? <CircularProgress size={24} /> : "Guardar"}
             </Button>
           </Box>

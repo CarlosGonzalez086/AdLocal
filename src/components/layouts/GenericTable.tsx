@@ -12,6 +12,8 @@ import {
   Typography,
   IconButton,
   Menu,
+  Box,
+  Fade,
   useMediaQuery,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -60,8 +62,8 @@ export function GenericTable<T>({
 
   const openMenu = Boolean(anchorEl);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, row: T) => {
-    setAnchorEl(event.currentTarget);
+  const handleMenuOpen = (e: React.MouseEvent<HTMLElement>, row: T) => {
+    setAnchorEl(e.currentTarget);
     setSelectedRow(row);
   };
 
@@ -71,15 +73,35 @@ export function GenericTable<T>({
   };
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer
+      component={Paper}
+      elevation={0}
+      sx={{
+        borderRadius: 3,
+        border: "1px solid rgba(0,0,0,0.08)",
+        overflow: "hidden",
+        backgroundColor: "#fff",
+      }}
+    >
       <Table>
         <TableHead>
-          <TableRow sx={{ backgroundColor: "#f7ebd1" }}>
+          <TableRow
+            sx={{
+              background:
+                "linear-gradient(180deg, rgba(248,249,250,1), rgba(240,242,244,1))",
+            }}
+          >
             {visibleColumns.map((col) => (
               <TableCell
                 key={String(col.key)}
                 align={col.align ?? "left"}
-                sx={{ color: "#008c82", fontWeight: "bold" }}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: 13,
+                  color: "text.secondary",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
+                }}
               >
                 {col.label}
               </TableCell>
@@ -88,7 +110,11 @@ export function GenericTable<T>({
             {actions && (
               <TableCell
                 align="right"
-                sx={{ color: "#008c82", fontWeight: "bold" }}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: 13,
+                  color: "text.secondary",
+                }}
               >
                 Acciones
               </TableCell>
@@ -96,58 +122,80 @@ export function GenericTable<T>({
           </TableRow>
         </TableHead>
 
+        {/* BODY */}
         <TableBody>
           {loading ? (
             <TableRow>
               <TableCell colSpan={visibleColumns.length + 1}>
-                <LinearProgress />
-                <Typography
-                  variant="body2"
-                  align="center"
-                  sx={{ mt: 1, color: "text.secondary" }}
-                >
-                  Cargando información...
-                </Typography>
+                <Box py={2}>
+                  <LinearProgress />
+                  <Typography
+                    mt={1.5}
+                    fontSize={13}
+                    color="text.secondary"
+                    textAlign="center"
+                  >
+                    Cargando información…
+                  </Typography>
+                </Box>
               </TableCell>
             </TableRow>
           ) : data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={visibleColumns.length + 1} align="center">
-                {emptyText}
+              <TableCell colSpan={visibleColumns.length + 1}>
+                <Box py={4} textAlign="center">
+                  <Typography fontWeight={600}>{emptyText}</Typography>
+                  <Typography fontSize={13} color="text.secondary">
+                    Intenta ajustar los filtros
+                  </Typography>
+                </Box>
               </TableCell>
             </TableRow>
           ) : (
             data.map((row, index) => (
-              <TableRow key={index} hover>
-                {visibleColumns.map((col) => (
-                  <TableCell key={String(col.key)} align={col.align ?? "left"}>
-                    {col.render ? col.render(row) : (row as any)[col.key]}
-                  </TableCell>
-                ))}
+              <Fade in key={index}>
+                <TableRow
+                  hover
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "rgba(0,0,0,0.03)",
+                    },
+                  }}
+                >
+                  {visibleColumns.map((col) => (
+                    <TableCell
+                      key={String(col.key)}
+                      align={col.align ?? "left"}
+                      sx={{ fontSize: 14 }}
+                    >
+                      {col.render ? col.render(row) : (row as any)[col.key]}
+                    </TableCell>
+                  ))}
 
-                {actions && (
-                  <TableCell align="right">
-                    {isMobile ? (
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleMenuOpen(e, row)}
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                    ) : (
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          justifyContent: "flex-end",
-                        }}
-                      >
-                        {actions(row)}
-                      </div>
-                    )}
-                  </TableCell>
-                )}
-              </TableRow>
+                  {actions && (
+                    <TableCell align="right">
+                      {isMobile ? (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuOpen(e, row)}
+                          sx={{
+                            bgcolor: "rgba(0,0,0,0.04)",
+                            "&:hover": {
+                              bgcolor: "rgba(0,0,0,0.08)",
+                            },
+                          }}
+                        >
+                          <MoreVertIcon fontSize="small" />
+                        </IconButton>
+                      ) : (
+                        <Box display="flex" gap={1} justifyContent="flex-end">
+                          {actions(row)}
+                        </Box>
+                      )}
+                    </TableCell>
+                  )}
+                </TableRow>
+              </Fade>
             ))
           )}
         </TableBody>
@@ -160,27 +208,52 @@ export function GenericTable<T>({
               page={page}
               rowsPerPage={rowsPerPage}
               onPageChange={(_, p) => onPageChange(p)}
-              onRowsPerPageChange={(e) => onRowsPerPageChange(+e.target.value)}
-              labelRowsPerPage="Registros por página"
-              labelDisplayedRows={({ from, to, count }) =>
-                `${from} - ${to} de ${count}`
+              onRowsPerPageChange={(e) =>
+                onRowsPerPageChange(Number(e.target.value))
               }
-              SelectProps={{
-                native: true,
-              }}
+              labelRowsPerPage="Filas"
+              labelDisplayedRows={({ from, to, count }) =>
+                `${from}-${to} de ${count}`
+              }
+              SelectProps={{ native: true }}
               sx={{
-                borderTop: "1px solid #e0e0e0",
-                marginTop: 1,
+                borderTop: "1px solid rgba(0,0,0,0.08)",
+
                 ".MuiTablePagination-toolbar": {
-                  paddingLeft: 2,
-                  paddingRight: 2,
-                  minHeight: 48,
+                  minHeight: 52,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 2,
+                  px: 2,
                 },
-                ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                  {
-                    marginBottom: 0,
-                    fontSize: "0.875rem",
-                  },
+
+                ".MuiTablePagination-displayedRows": {
+                  fontSize: 13,
+                  margin: 0,
+                  display: "flex",
+                  alignItems: "center",
+                },
+
+                ".MuiTablePagination-selectLabel": {
+                  fontSize: 13,
+                  marginTop:"1rem"
+
+                },
+
+                ".MuiTablePagination-select": {
+                  fontSize: 13,
+                  display: "flex",
+                  alignItems: "center",
+                  paddingTop: "4px",
+                  paddingBottom: "4px",
+                },
+
+                ".MuiTablePagination-actions": {
+                  display: "flex",
+                  alignItems: "center",
+                  marginLeft: 1,
+                },
               }}
             />
           </TableRow>
@@ -188,7 +261,17 @@ export function GenericTable<T>({
       </Table>
 
       {isMobile && actions && (
-        <Menu anchorEl={anchorEl} open={openMenu} onClose={handleMenuClose}>
+        <Menu
+          anchorEl={anchorEl}
+          open={openMenu}
+          onClose={handleMenuClose}
+          PaperProps={{
+            sx: {
+              borderRadius: 2,
+              minWidth: 160,
+            },
+          }}
+        >
           {selectedRow && actions(selectedRow)}
         </Menu>
       )}

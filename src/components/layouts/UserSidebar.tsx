@@ -42,18 +42,12 @@ const UserSidebar = ({
     { text: "Inicio", icon: <HomeIcon />, path: "/app" },
     { text: "Mi comercio", icon: <StoreIcon />, path: "/app/comercio" },
     { text: "Mi plan", icon: <EventNoteIcon />, path: "/app/plan" },
-    // { text: "Pagos", icon: <AttachMoneyIcon />, path: "/app/pagos" },
     { text: "Tarjetas", icon: <CreditCardIcon />, path: "/app/tarjetas" },
     {
       text: "Productos y Servicios",
       icon: <CategoryIcon />,
       path: "/app/productos-servicios",
     },
-    // {
-    //   text: "Configuración",
-    //   icon: <SettingsIcon />,
-    //   path: "/app/configuracion",
-    // },
   ];
 
   const currentWidth = collapsed ? collapsedWidth : drawerWidth;
@@ -69,40 +63,46 @@ const UserSidebar = ({
         "& .MuiDrawer-paper": {
           width: currentWidth,
           boxSizing: "border-box",
-          transition: "width 0.3s",
+          transition: "width 0.3s ease",
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.92), rgba(245,233,207,0.95))",
+          backdropFilter: "blur(14px)",
+          borderRight: "1px solid rgba(0,0,0,0.08)",
         },
       }}
     >
+      {/* HEADER */}
       <Box
         sx={{
-          height: 160,
+          height: 140,
           display: "flex",
           alignItems: "center",
-          justifyContent: collapsed ? "center" : "space-between",
+          justifyContent: "center",
           px: 2,
-          backgroundColor: "#f5e9cf",
         }}
       >
-        {!collapsed ? (
-          <Box
-            component="img"
-            src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
-            alt="Logo AdLocal"
-            sx={{ width: "100%", maxHeight: 120, objectFit: "cover" }}
-          />
-        ) : (
-          <Box
-            component="img"
-            src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/AZuAXHqalTLlz8th7NMdBA-AZuAXHqaHD92HliWBxJzdA.jpg"
-            alt="Logo AdLocal"
-            sx={{ width: "100%", maxHeight: 120, objectFit: "fill" }}
-          />
-        )}
+        <Box
+          component="img"
+          src={
+            collapsed
+              ? "https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/AZuAXHqalTLlz8th7NMdBA-AZuAXHqaHD92HliWBxJzdA.jpg"
+              : "https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
+          }
+          alt="Logo AdLocal"
+          sx={{
+            width: collapsed ? 44 : "100%",
+            maxHeight: collapsed ? 44 : 100,
+            borderRadius: collapsed ? "50%" : 3,
+            objectFit:"contain",
+            transition: "all 0.3s ease",
+          }}
+        />
       </Box>
 
-      <Divider />
+      <Divider sx={{ opacity: 0.5 }} />
 
-      <List sx={{ backgroundColor: "#f5e9cf", height: "100%" }}>
+      {/* MENU */}
+      <List sx={{ px: 1, py: 1 }}>
         {menuItems.map((item) => {
           const isSelected = location.pathname === item.path;
 
@@ -113,10 +113,20 @@ const UserSidebar = ({
               onClick={isMobile ? onCloseMobile : undefined}
               sx={{
                 minHeight: 48,
+                borderRadius: 2,
+                mb: 0.5,
                 justifyContent: collapsed ? "center" : "flex-start",
-                px: 2.5,
-                backgroundColor: isSelected ? "#D2B48C" : "transparent",
-                color: isSelected ? "#e8692c" : "inherit",
+                px: collapsed ? 1.5 : 2.5,
+                transition: "all 0.25s ease",
+                backgroundColor: isSelected
+                  ? "rgba(232,105,44,0.15)"
+                  : "transparent",
+                color: isSelected ? "#e8692c" : "#3A2419",
+                "&:hover": {
+                  backgroundColor: isSelected
+                    ? "rgba(232,105,44,0.2)"
+                    : "rgba(0,0,0,0.04)",
+                },
               }}
             >
               <ListItemIcon
@@ -124,7 +134,7 @@ const UserSidebar = ({
                   minWidth: 0,
                   mr: collapsed ? 0 : 2,
                   justifyContent: "center",
-                  color: isSelected ? "#e8692c" : "inherit",
+                  color: "inherit",
                 }}
               >
                 {item.icon}
@@ -134,8 +144,8 @@ const UserSidebar = ({
                 primary={item.text}
                 sx={{
                   opacity: collapsed ? 0 : 1,
-                  width: collapsed ? 0 : "auto",
                   whiteSpace: "nowrap",
+                  transition: "opacity 0.2s ease",
                 }}
               />
             </ListItemButton>

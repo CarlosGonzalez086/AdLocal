@@ -10,6 +10,7 @@ import {
   Radio,
   CircularProgress,
   Stack,
+  Fade,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { PlanCreateDto } from "../../services/planApi";
@@ -34,8 +35,11 @@ interface Tarjeta {
   stripePaymentMethodId: string;
 }
 
-const primaryColor = "#6F4E37";
-const bgColor = "#f5e9cf";
+const colors = {
+  primary: "#6F4E37",
+  bg: "#f7f8fa",
+  card: "#ffffff",
+};
 
 export const ConfirmarSuscripcionModal = ({ open, onClose, plan }: Props) => {
   const [step, setStep] = useState<Step>("confirmar");
@@ -51,9 +55,9 @@ export const ConfirmarSuscripcionModal = ({ open, onClose, plan }: Props) => {
 
   useEffect(() => {
     if (step === "tarjeta" && tarjetas.length && !tarjetaSeleccionada) {
-      const tarjetaDefault = tarjetas.find(t => t.isDefault);
+      const def = tarjetas.find((t) => t.isDefault);
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (tarjetaDefault) setTarjetaSeleccionada(tarjetaDefault);
+      if (def) setTarjetaSeleccionada(def);
     }
   }, [tarjetas, step, tarjetaSeleccionada]);
 
@@ -78,123 +82,123 @@ export const ConfirmarSuscripcionModal = ({ open, onClose, plan }: Props) => {
     step === "confirmar"
       ? "Confirmar suscripción"
       : step === "tarjeta"
-      ? "Selecciona un método de pago"
-      : "Resumen del pago";
+        ? "Método de pago"
+        : "Resumen";
 
   return (
-    <Dialog open={open} onClose={cerrar} maxWidth="sm" fullWidth>
-      <DialogTitle
-        sx={{
-          backgroundColor: primaryColor,
-          color: "#fff",
-          fontWeight: "bold",
-        }}
-      >
-        {titulo}
+    <Dialog
+      open={open}
+      onClose={cerrar}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: { borderRadius: 4, overflow: "hidden" },
+      }}
+    >
+      <DialogTitle sx={{ pb: 1.5 }}>
+        <Typography variant="h6" fontWeight={700}>
+          {titulo}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {plan.nombre}
+        </Typography>
       </DialogTitle>
 
-      <DialogContent sx={{ backgroundColor: bgColor, py: 3 }}>
-        {/* PASO 1 */}
-        {step === "confirmar" && (
-          <Stack spacing={1.5}>
-            <Typography variant="h6">{plan.nombre}</Typography>
-            <Divider />
-            <InfoRow label="Tipo" value={plan.tipo} />
-            <InfoRow label="Duración" value={`${plan.duracionDias} días`} />
-            <InfoRow label="Precio" value={`$${plan.precio}`} />
+      <Divider />
 
-            <Typography color="text.secondary" mt={2}>
-              Revisa la información y continúa para seleccionar tu método de pago.
-            </Typography>
-          </Stack>
-        )}
+      <DialogContent sx={{ backgroundColor: colors.bg, py: 3 }}>
+        <Fade in>
+          <Box>
+            {step === "confirmar" && (
+              <Stack spacing={2}>
+                <InfoRow label="Tipo" value={plan.tipo} />
+                <InfoRow label="Duración" value={`${plan.duracionDias} días`} />
+                <InfoRow label="Precio" value={`$${plan.precio}`} />
 
-        {/* PASO 2 */}
-        {step === "tarjeta" && (
-          <Stack spacing={2}>
-            {loading && (
-              <Box display="flex" justifyContent="center" py={4}>
-                <CircularProgress />
-              </Box>
+                <Typography variant="body2" color="text.secondary">
+                  Continúa para seleccionar tu método de pago.
+                </Typography>
+              </Stack>
             )}
 
-            {!loading && !tarjetas.length && (
-              <Typography color="text.secondary">
-                No tienes tarjetas registradas.
-              </Typography>
-            )}
-
-            {!loading &&
-              tarjetas.map(t => {
-                const selected = tarjetaSeleccionada?.id === t.id;
-
-                return (
-                  <Box
-                    key={t.id}
-                    onClick={() => setTarjetaSeleccionada(t)}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      border: selected
-                        ? `2px solid ${primaryColor}`
-                        : "1px solid #ddd",
-                      backgroundColor: "#fff",
-                      cursor: "pointer",
-                      transition: "all .2s",
-                      "&:hover": {
-                        borderColor: primaryColor,
-                      },
-                    }}
-                  >
-                    <Box display="flex" justifyContent="space-between">
-                      <Box>
-                        <Typography fontWeight="bold">
-                          **** **** **** {t.last4}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {t.brand} · Exp {t.expMonth}/{t.expYear}
-                          {t.isDefault && " · Principal"}
-                        </Typography>
-                      </Box>
-                      <Radio checked={selected} sx={{ color: primaryColor }} />
-                    </Box>
+            {step === "tarjeta" && (
+              <Stack spacing={2}>
+                {loading && (
+                  <Box py={4} display="flex" justifyContent="center">
+                    <CircularProgress />
                   </Box>
-                );
-              })}
-          </Stack>
-        )}
+                )}
 
-        {/* PASO 3 */}
-        {step === "resumen" && tarjetaSeleccionada && (
-          <Stack spacing={2}>
-            <Typography variant="h6">Resumen</Typography>
-            <Divider />
+                {!loading && !tarjetas.length && (
+                  <Typography color="text.secondary">
+                    No tienes tarjetas registradas.
+                  </Typography>
+                )}
 
-            <Typography fontWeight="bold">{plan.nombre}</Typography>
-            <Typography variant="body2" color="text.secondary">
-              {plan.tipo} · {plan.duracionDias} días
-            </Typography>
+                {!loading &&
+                  tarjetas.map((t) => {
+                    const selected = tarjetaSeleccionada?.id === t.id;
 
-            <Divider />
+                    return (
+                      <Box
+                        key={t.id}
+                        onClick={() => setTarjetaSeleccionada(t)}
+                        sx={{
+                          p: 2,
+                          borderRadius: 3,
+                          backgroundColor: colors.card,
+                          border: selected
+                            ? `2px solid ${colors.primary}`
+                            : "1px solid #e0e0e0",
+                          cursor: "pointer",
+                          boxShadow: selected
+                            ? "0 8px 24px rgba(0,0,0,0.12)"
+                            : "0 2px 6px rgba(0,0,0,0.05)",
+                          transition: "all .25s",
+                        }}
+                      >
+                        <Box display="flex" justifyContent="space-between">
+                          <Box>
+                            <Typography fontWeight={700}>
+                              •••• •••• •••• {t.last4}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {t.brand} · Exp {t.expMonth}/{t.expYear}
+                              {t.isDefault && " · Principal"}
+                            </Typography>
+                          </Box>
+                          <Radio checked={selected} />
+                        </Box>
+                      </Box>
+                    );
+                  })}
+              </Stack>
+            )}
 
-            <Typography fontWeight="bold">Método de pago</Typography>
-            <Typography variant="body2">
-              **** **** **** {tarjetaSeleccionada.last4}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {tarjetaSeleccionada.brand} · Exp {tarjetaSeleccionada.expMonth}/
-              {tarjetaSeleccionada.expYear}
-            </Typography>
+            {step === "resumen" && tarjetaSeleccionada && (
+              <Stack spacing={2}>
+                <Typography fontWeight={700}>Plan</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {plan.nombre} · {plan.tipo}
+                </Typography>
 
-            <Divider />
+                <Divider />
 
-            <PriceRow label="Subtotal" value={plan.precio} />
-            <PriceRow label="Total" value={plan.precio} bold />
-          </Stack>
-        )}
+                <Typography fontWeight={700}>Pago</Typography>
+                <Typography variant="body2">
+                  •••• {tarjetaSeleccionada.last4}
+                </Typography>
+
+                <Divider />
+
+                <PriceRow label="Total" value={plan.precio} bold />
+              </Stack>
+            )}
+          </Box>
+        </Fade>
       </DialogContent>
 
-      <DialogActions sx={{ backgroundColor: bgColor, px: 3, pb: 2 }}>
+      <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={cerrar} disabled={loadingSuscripcion}>
           Cancelar
         </Button>
@@ -224,8 +228,6 @@ export const ConfirmarSuscripcionModal = ({ open, onClose, plan }: Props) => {
   );
 };
 
-/* ================== COMPONENTES AUX ================== */
-
 const InfoRow = ({ label, value }: { label: string; value: string }) => (
   <Typography variant="body2">
     <strong>{label}:</strong> {value}
@@ -242,8 +244,10 @@ const PriceRow = ({
   bold?: boolean;
 }) => (
   <Box display="flex" justifyContent="space-between">
-    <Typography fontWeight={bold ? "bold" : "normal"}>{label}</Typography>
-    <Typography fontWeight={bold ? "bold" : "normal"}>${value}</Typography>
+    <Typography fontWeight={bold ? 700 : 400}>{label}</Typography>
+    <Typography fontWeight={bold ? 700 : 400}>
+      ${value.toLocaleString()}
+    </Typography>
   </Box>
 );
 
@@ -254,9 +258,14 @@ const PrimaryButton = ({
   <Button
     variant="contained"
     sx={{
-      backgroundColor: primaryColor,
       px: 3,
-      "&:hover": { backgroundColor: "#e8692c" },
+      borderRadius: 3,
+      backgroundColor: colors.primary,
+      textTransform: "none",
+      fontWeight: 600,
+      "&:hover": {
+        backgroundColor: "#5c3f2d",
+      },
     }}
     {...props}
   >

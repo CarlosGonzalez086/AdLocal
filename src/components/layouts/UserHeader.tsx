@@ -9,6 +9,7 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Divider,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -37,7 +38,6 @@ const UserHeader = ({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [imgError, setImgError] = useState(false);
 
-  const handleError = () => setImgError(true);
   const showImage = !!user?.FotoUrl && !imgError;
 
   const menuTitles: Record<string, string> = {
@@ -47,6 +47,8 @@ const UserHeader = ({
     "/app/pagos": "Pagos",
     "/app/configuracion": "Configuración",
     "/app/perfil": "Mi perfil",
+    "/app/productos-servicios": "Productos y Servicios",
+    "/app/tarjetas" : "Tarjetas",
   };
 
   const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) =>
@@ -73,12 +75,33 @@ const UserHeader = ({
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#f5e9cf" }} elevation={0}>
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        backdropFilter: "blur(14px)",
+        background: "rgba(245,233,207,0.85)",
+        borderBottom: "1px solid rgba(0,0,0,0.08)",
+        color: "#3A2419",
+      }}
+    >
+      <Toolbar
+        sx={{
+          minHeight: 64,
+          px: { xs: 1.5, md: 2.5 },
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        {/* LEFT */}
+        <Box display="flex" alignItems="center" gap={1}>
           <IconButton
-            edge="start"
             onClick={isMobile ? onMenuClick : onToggleCollapse}
+            sx={{
+              bgcolor: "rgba(0,0,0,0.05)",
+              "&:hover": { bgcolor: "rgba(0,0,0,0.1)" },
+              borderRadius: 2,
+            }}
           >
             {isMobile ? (
               <MenuIcon />
@@ -90,19 +113,31 @@ const UserHeader = ({
           </IconButton>
 
           <Typography
-            variant="h6"
-            sx={{ fontWeight: "bold", color: "#008989" }}
+            fontWeight={700}
+            sx={{
+              fontSize: { xs: "1rem", md: "1.15rem" },
+              color: "#008989",
+              whiteSpace: "nowrap",
+            }}
           >
             {menuTitles[location.pathname] ?? ""}
           </Typography>
         </Box>
 
+        {/* RIGHT */}
         {user && (
           <Box>
-            <IconButton onClick={handleMenuOpen} size="small">
+            <IconButton onClick={handleMenuOpen}>
               <Avatar
                 src={showImage ? user.FotoUrl : undefined}
-                onError={handleError}
+                onError={() => setImgError(true)}
+                sx={{
+                  width: 36,
+                  height: 36,
+                  fontWeight: 600,
+                  bgcolor: "#e8692c",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                }}
               >
                 {!showImage && getInitials(user.nombre)}
               </Avatar>
@@ -114,9 +149,27 @@ const UserHeader = ({
               onClose={handleMenuClose}
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               transformOrigin={{ vertical: "top", horizontal: "right" }}
+              PaperProps={{
+                sx: {
+                  borderRadius: 3,
+                  mt: 1,
+                  minWidth: 180,
+                  boxShadow: "0 12px 32px rgba(0,0,0,0.18)",
+                },
+              }}
             >
-              <MenuItem onClick={handleProfile}>Mi perfil</MenuItem>
-              <MenuItem onClick={handleLogout}>Cerrar sesión</MenuItem>
+              <MenuItem onClick={handleProfile} sx={{ fontWeight: 500 }}>
+                Mi perfil
+              </MenuItem>
+
+              <Divider />
+
+              <MenuItem
+                onClick={handleLogout}
+                sx={{ color: "error.main", fontWeight: 500 }}
+              >
+                Cerrar sesión
+              </MenuItem>
             </Menu>
           </Box>
         )}

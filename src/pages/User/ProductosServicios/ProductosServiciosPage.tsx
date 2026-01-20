@@ -1,5 +1,14 @@
-import { IconButton, Button } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import {
+  IconButton,
+  Button,
+  Box,
+  Paper,
+  Tooltip,
+  Chip,
+  Stack,
+  Typography,
+} from "@mui/material";
+
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -33,9 +42,7 @@ export const ProductosServiciosPage = () => {
   const [rows, setRows] = useState(10);
   const [orderBy, setOrderBy] = useState("recent");
   const [search, setSearch] = useState("");
-
   const [open, setOpen] = useState(false);
-  const [view, setView] = useState(false);
   const [producto, setProducto] = useState<ProductoServicioDto>(initialForm);
 
   useEffect(() => {
@@ -43,35 +50,68 @@ export const ProductosServiciosPage = () => {
   }, [page, rows, orderBy, search]);
 
   const columns: TableColumn<ProductoServicioDto>[] = [
-    { key: "nombre", label: "Nombre" },
-    { key: "descripcion", label: "Descripción" },
+    {
+      key: "nombre",
+      label: "Nombre",
+    },
+    {
+      key: "descripcion",
+      label: "Descripción",
+    },
     {
       key: "precio",
       label: "Precio",
-      render: (p) => `$${p.precio}`,
+      render: (p) => (
+        <Typography fontWeight={500}>
+          ${p.precio.toLocaleString()}
+        </Typography>
+      ),
     },
     {
       key: "activo",
       label: "Estado",
-      render: (p) => (p.activo ? "Activo" : "Inactivo"),
+      render: (p) => (
+        <Chip
+          label={p.activo ? "Activo" : "Inactivo"}
+          size="small"
+          sx={{
+            borderRadius: 1.5,
+            fontWeight: 500,
+            bgcolor: p.activo ? "#E9F7EF" : "#F2F2F7",
+            color: p.activo ? "#1E7F4F" : "#666",
+          }}
+        />
+      ),
     },
   ];
 
   return (
-    <div>
-      <div className="row align-items-center mb-3">
-        <div className="col-12 col-md-7 mb-2 mb-md-0">
+    <Box>
+      <Paper
+        elevation={0}
+        sx={{
+          mb: 3,
+          p: 2.5,
+          borderRadius: 3,
+          border: "1px solid rgba(0,0,0,0.08)",
+          background:
+            "linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)",
+        }}
+      >
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={2}
+          alignItems={{ md: "center" }}
+        >
           <SearchInput
             value={search}
-            placeholder="Buscar producto o servicio..."
+            placeholder="Buscar producto o servicio…"
             onChange={(value) => {
               setSearch(value);
               setPage(0);
             }}
           />
-        </div>
 
-        <div className="col-12 col-md-3 mb-2 mb-md-0">
           <OrderSelect
             value={orderBy}
             onChange={(value) => {
@@ -79,9 +119,7 @@ export const ProductosServiciosPage = () => {
               setPage(0);
             }}
           />
-        </div>
 
-        <div className="col-12 col-md-2 d-flex justify-content-md-end">
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -89,76 +127,103 @@ export const ProductosServiciosPage = () => {
               setProducto(initialForm);
               setOpen(true);
             }}
-            fullWidth
-            className="w-100 w-md-auto"
+            sx={{
+              ml: "auto",
+              px: 3,
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+              background:
+                "linear-gradient(135deg, #007AFF 0%, #005FCC 100%)",
+              boxShadow: "0 6px 16px rgba(0,122,255,0.3)",
+              "&:hover": {
+                boxShadow: "0 8px 20px rgba(0,122,255,0.4)",
+              },
+            }}
           >
             Nuevo
           </Button>
-        </div>
-      </div>
+        </Stack>
+      </Paper>
 
-      <GenericTable<ProductoServicioDto>
-        columns={columns}
-        data={productos}
-        loading={loading}
-        emptyText="No hay productos o servicios registrados"
-        page={page}
-        rowsPerPage={rows}
-        total={total}
-        onPageChange={setPage}
-        onRowsPerPageChange={(r) => {
-          setRows(r);
-          setPage(0);
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 3,
+          border: "1px solid rgba(0,0,0,0.08)",
+          overflow: "hidden",
         }}
-        actions={(p) => (
-          <>
-            <IconButton
-              color="primary"
-              size="small"
-              onClick={() => {
-                console.log(p);
+      >
+        <GenericTable<ProductoServicioDto>
+          columns={columns}
+          data={productos}
+          loading={loading}
+          emptyText="No hay productos o servicios registrados"
+          page={page}
+          rowsPerPage={rows}
+          total={total}
+          onPageChange={setPage}
+          onRowsPerPageChange={(r) => {
+            setRows(r);
+            setPage(0);
+          }}
+          actions={(p) => (
+            <Stack direction="row" spacing={0.5} className="p-1">
+              <Tooltip title="Editar">
+                <IconButton
+                  size="small"
+                  sx={{
+                    bgcolor: "#F2F2F7",
+                    "&:hover": { bgcolor: "#E5E5EA" },
+                  }}
+                  onClick={() => {
+                    setProducto(p);
+                    setOpen(true);
+                  }}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
 
-                setProducto(p);
-                setView(true);
-              }}
-            >
-              <VisibilityIcon />
-            </IconButton>
+              <Tooltip title="Eliminar">
+                <IconButton
+                  size="small"
+                  sx={{
+                    bgcolor: "#FDECEA",
+                    color: "#D93025",
+                    "&:hover": { bgcolor: "#FAD2CF" },
+                  }}
+                  onClick={() =>
+                    eliminar(Number(p.id), { page, rows, orderBy, search })
+                  }
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
 
-            <IconButton
-              color="info"
-              size="small"
-              onClick={() => {
-                setProducto(p);
-                setOpen(true);
-              }}
-            >
-              <EditIcon />
-            </IconButton>
-
-            <IconButton
-              color="error"
-              size="small"
-              onClick={() =>
-                eliminar(Number(p.id), { page, rows, orderBy, search })
-              }
-            >
-              <DeleteIcon />
-            </IconButton>
-
-            <IconButton
-              color={p.activo ? "success" : "default"}
-              size="small"
-              onClick={() =>
-                desactivar(Number(p.id), { page, rows, orderBy, search })
-              }
-            >
-              {p.activo ? <ToggleOnIcon /> : <ToggleOffIcon />}
-            </IconButton>
-          </>
-        )}
-      />
-
+              <Tooltip title={p.activo ? "Desactivar" : "Activar"}>
+                <IconButton
+                  size="small"
+                  sx={{
+                    bgcolor: p.activo ? "#E9F7EF" : "#F2F2F7",
+                    color: p.activo ? "#1E7F4F" : "#666",
+                  }}
+                  onClick={() =>
+                    desactivar(Number(p.id), { page, rows, orderBy, search })
+                  }
+                >
+                  {p.activo ? (
+                    <ToggleOnIcon fontSize="small" />
+                  ) : (
+                    <ToggleOffIcon fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          )}
+        />
+      </Paper>
+      
       <ProductoServicioModal
         key={`edit-${producto?.id ?? "new"}`}
         open={open}
@@ -170,18 +235,6 @@ export const ProductosServiciosPage = () => {
         producto={producto}
         loading={loading}
       />
-
-      <ProductoServicioModal
-        key={`view-${producto?.id ?? "view"}`}
-        open={view}
-        onClose={() => {
-          setView(false);
-          setProducto(initialForm);
-        }}
-        onSave={async () => {}}
-        producto={producto}
-        soloVer
-      />
-    </div>
+    </Box>
   );
 };

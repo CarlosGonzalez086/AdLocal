@@ -1,4 +1,4 @@
-import { TextField, Button} from "@mui/material";
+import { TextField, Button } from "@mui/material";
 import type {
   ProfileUser,
   ProfileUserUpdateDto,
@@ -11,6 +11,7 @@ interface Props {
   onSave: (data: ProfileUserUpdateDto) => void;
   onUploadPhoto: (file: File) => void;
   loading?: boolean;
+  onFocus?: () => void;
 }
 
 export const UserProfileForm = ({
@@ -18,6 +19,7 @@ export const UserProfileForm = ({
   onSave,
   onUploadPhoto,
   loading,
+  onFocus,
 }: Props) => {
   const [form, setForm] = useState<ProfileUserUpdateDto>({
     nombre: profile.nombre,
@@ -35,6 +37,7 @@ export const UserProfileForm = ({
           fullWidth
           size="small"
           value={form.nombre}
+          onFocus={onFocus}
           onChange={(e) => setForm({ ...form, nombre: e.target.value })}
         />
       </div>
@@ -45,6 +48,7 @@ export const UserProfileForm = ({
           fullWidth
           size="small"
           value={form.email}
+          onFocus={onFocus}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
       </div>

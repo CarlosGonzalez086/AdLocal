@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, LinearProgress, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  LinearProgress,
+  Typography,
+  Paper,
+  Stack,
+} from "@mui/material";
 import type { CrearTarjetaDto, TarjetaDto } from "../../../services/tarjetaApi";
 import { useTarjetas } from "../../../hooks/useTarjetas";
 import { CardTarjeta } from "../../../components/Tarjeta/CardTarjeta";
@@ -7,6 +14,7 @@ import { TarjetaModal } from "../../../components/Tarjeta/TarjetaModal";
 
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
+import AddIcon from "@mui/icons-material/Add";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -30,73 +38,124 @@ export const TarjetasPage: React.FC = () => {
     setTarjetaSeleccionada(null);
   };
 
+  /* 🔹 Loading */
   if (loading) {
     return (
       <Box>
         <Typography variant="body2" color="text.secondary" mb={1}>
-          Cargando tarjetas...
+          Cargando tarjetas…
         </Typography>
-        <LinearProgress />
+        <LinearProgress sx={{ borderRadius: 1 }} />
       </Box>
-    );
-  }
-
-  if (tarjetas.length === 0) {
-    return (
-      <Elements stripe={stripePromise}>
-        <Box>
-          <Typography variant="h6" mb={2}>
-            No tienes tarjetas registradas
-          </Typography>
-
-          <Button variant="contained" onClick={() => setCreando(true)}>
-            Agregar tarjeta
-          </Button>
-        </Box>
-
-        <TarjetaModal
-          open={creando}
-          onClose={() => setCreando(false)}
-          onSave={handleSave}
-          loading={loading}
-        />
-      </Elements>
     );
   }
 
   return (
     <Elements stripe={stripePromise}>
       <Box>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={3}
+        <Paper
+          elevation={0}
+          sx={{
+            mb: 3,
+            p: 2.5,
+            borderRadius: 3,
+            border: "1px solid rgba(0,0,0,0.08)",
+            background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)",
+          }}
         >
-          <Typography variant="h5">Mis tarjetas</Typography>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ sm: "center" }}
+            spacing={2}
+          >
+            <Box>
+              <Typography variant="h5" fontWeight={600}>
+                Mis tarjetas
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Administra tus métodos de pago
+              </Typography>
+            </Box>
 
-          <Button variant="contained" onClick={() => setCreando(true)}>
-            Agregar tarjeta
-          </Button>
-        </Box>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setCreando(true)}
+              sx={{
+                ml: "auto",
+                px: 3,
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 600,
+                background: "linear-gradient(135deg, #007AFF 0%, #005FCC 100%)",
+                boxShadow: "0 6px 16px rgba(0,122,255,0.3)",
+                "&:hover": {
+                  boxShadow: "0 8px 20px rgba(0,122,255,0.4)",
+                },
+              }}
+            >
+              Agregar tarjeta
+            </Button>
+          </Stack>
+        </Paper>
 
-        <div className="d-flex justify-lg-content-end justify-content-sm-center">
-          <div className="row g-3">
+        {tarjetas.length === 0 ? (
+          <Paper
+            elevation={0}
+            sx={{
+              p: 4,
+              textAlign: "center",
+              borderRadius: 3,
+              border: "1px dashed rgba(0,0,0,0.15)",
+            }}
+          >
+            <Typography variant="h6" mb={1}>
+              No tienes tarjetas registradas
+            </Typography>
+            <Typography variant="body2" color="text.secondary" mb={3}>
+              Agrega una tarjeta para comenzar a realizar pagos
+            </Typography>
+
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setCreando(true)}
+              sx={{
+                px: 3,
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+            >
+              Agregar tarjeta
+            </Button>
+          </Paper>
+        ) : (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, 1fr)",
+                lg: "repeat(3, 1fr)",
+              },
+              gap: 3,
+            }}
+          >
             {tarjetas.map((t) => (
-              <div key={t.id} className="col-lg-4 col-md-6 col-sm-12">
-                <CardTarjeta
-                  tarjeta={t}
-                  onSetDefault={setDefault}
-                  onEliminar={eliminar}
-                  onEdit={() => {
-                    setTarjetaSeleccionada(t);
-                    setEditando(true);
-                  }}
-                />
-              </div>
+              <CardTarjeta
+                key={t.id}
+                tarjeta={t}
+                onSetDefault={setDefault}
+                onEliminar={eliminar}
+                onEdit={() => {
+                  setTarjetaSeleccionada(t);
+                  setEditando(true);
+                }}
+              />
             ))}
-          </div>
-        </div>
+          </Box>
+        )}
       </Box>
 
       <TarjetaModal

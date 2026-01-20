@@ -7,6 +7,7 @@ import {
   Button,
   Chip,
   useMediaQuery,
+  Stack,
 } from "@mui/material";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import type { TarjetaDto } from "../../services/tarjetaApi";
@@ -25,29 +26,30 @@ export const CardTarjeta: React.FC<CardTarjetaProps> = ({
   onEliminar,
   onEdit,
 }) => {
-    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { brand, last4, expMonth, expYear, cardType, isDefault, id } = tarjeta;
-
-  const colors = {
-    main: "#6F4E37",
-    dark: "#e8692c",
-    light: "#f5e9cf",
-  };
 
   return (
     <Card
       sx={{
-        width: isMobile ? "100%" :320,
-        borderRadius: 3,
-        background: `linear-gradient(135deg, ${colors.main} 0%, ${colors.dark} 100%)`,
+        width: "100%",
+        maxWidth: 360,
+        borderRadius: 4,
+        background: "linear-gradient(145deg, #1C1C1E 0%, #3A3A3C 100%)",
         color: "#fff",
-        position: "relative",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-        transition: "transform 0.2s",
-        "&:hover": { transform: "translateY(-4px)" },
+        boxShadow: "0 18px 40px rgba(0,0,0,0.35)",
+        transition: "all .3s ease",
+        ...(isMobile
+          ? {}
+          : {
+              "&:hover": {
+                transform: "translateY(-6px)",
+                boxShadow: "0 28px 60px rgba(0,0,0,0.45)",
+              },
+            }),
       }}
     >
-      <CardContent>
+      <CardContent sx={{ p: 3 }}>
         <Box
           display="flex"
           justifyContent="space-between"
@@ -55,76 +57,93 @@ export const CardTarjeta: React.FC<CardTarjetaProps> = ({
           mb={2}
         >
           <Typography
-            variant="subtitle1"
-            sx={{ fontWeight: "bold", letterSpacing: 1 }}
+            fontWeight={700}
+            letterSpacing={1.2}
+            sx={{ textTransform: "uppercase" }}
           >
-            {brand.toUpperCase()}
+            {brand}
           </Typography>
 
-          <Box display="flex" flexDirection="column" alignItems="flex-end">
-            <CreditCardIcon fontSize="large" sx={{ opacity: 0.85 }} />
+          <Stack direction="row" spacing={1} alignItems="center">
             {isDefault && (
               <Chip
                 label="Principal"
                 size="small"
                 sx={{
-                  mt: 1,
-                  fontWeight: "bold",
-                  color: colors.main,
-                  backgroundColor: colors.light,
+                  fontWeight: 700,
+                  bgcolor: "#fff",
+                  color: "#000",
+                  borderRadius: 2,
                 }}
               />
             )}
-          </Box>
+            <CreditCardIcon sx={{ opacity: 0.85 }} />
+          </Stack>
         </Box>
 
         <Typography
           variant="h6"
-          sx={{ letterSpacing: 3, mt: 1, mb: 1, fontFamily: "monospace" }}
+          sx={{
+            letterSpacing: 4,
+            fontFamily: "SF Mono, monospace",
+            mb: 2.5,
+          }}
         >
-          **** **** **** {last4}
+          •••• •••• •••• {last4}
         </Typography>
 
-        <Box display="flex" justifyContent="space-between" mt={1}>
-          <Typography variant="body2" sx={{ color: colors.light }}>
+        <Box display="flex" justifyContent="space-between" mb={3}>
+          <Typography variant="body2" sx={{ opacity: 0.85 }}>
             Exp: {expMonth.toString().padStart(2, "0")}/{expYear}
           </Typography>
-          <Typography variant="body2" sx={{ color: colors.light }}>
-            {cardType.toLocaleUpperCase()}
+          <Typography
+            variant="body2"
+            sx={{ opacity: 0.85, textTransform: "uppercase" }}
+          >
+            {cardType}
           </Typography>
         </Box>
 
-        <Box display="flex" justifyContent="space-between" mt={3} gap={1}>
+        <Stack
+          direction={isMobile ? "column" : "row"}
+          spacing={1}
+          justifyContent="space-between"
+        >
           {onSetDefault && !isDefault && (
             <Button
               size="small"
-              variant="contained"
+              onClick={() => onSetDefault(id)}
               sx={{
-                backgroundColor: colors.light,
-                color: colors.main,
-                fontWeight: "bold",
+                borderRadius: 2,
+                fontWeight: 600,
+                textTransform: "none",
+                bgcolor: "#fff",
+                color: "#000",
                 "&:hover": {
-                  backgroundColor: colors.main,
-                  color: colors.light,
+                  bgcolor: "#E5E5EA",
                 },
               }}
-              onClick={() => onSetDefault(id)}
+              fullWidth={isMobile}
             >
-              Hacer Default
+              Hacer principal
             </Button>
           )}
 
           {onEdit && (
             <Button
               size="small"
-              variant="outlined"
-              sx={{
-                borderColor: colors.light,
-                color: colors.light,
-                fontWeight: "bold",
-                "&:hover": { backgroundColor: "rgba(255,255,255,0.2)" },
-              }}
               onClick={() => onEdit(tarjeta)}
+              sx={{
+                borderRadius: 2,
+                fontWeight: 600,
+                textTransform: "none",
+                color: "#fff",
+                border: "1px solid rgba(255,255,255,0.6)",
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                },
+              }}
+              fullWidth={isMobile}
             >
               Editar
             </Button>
@@ -133,19 +152,23 @@ export const CardTarjeta: React.FC<CardTarjetaProps> = ({
           {onEliminar && (
             <Button
               size="small"
-              variant="outlined"
-              sx={{
-                borderColor: colors.light,
-                color: colors.light,
-                fontWeight: "bold",
-                "&:hover": { backgroundColor: "rgba(232,105,44,0.2)" },
-              }}
               onClick={() => onEliminar(id)}
+              sx={{
+                borderRadius: 2,
+                fontWeight: 600,
+                textTransform: "none",
+                color: "#FF453A",
+                border: "1px solid rgba(255,69,58,0.6)",
+                "&:hover": {
+                  backgroundColor: "rgba(255,69,58,0.15)",
+                },
+              }}
+              fullWidth={isMobile}
             >
               Eliminar
             </Button>
           )}
-        </Box>
+        </Stack>
       </CardContent>
     </Card>
   );

@@ -24,7 +24,7 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export interface ProductoServicioDto {
@@ -35,6 +35,7 @@ export interface ProductoServicioDto {
   activo: boolean;
   stock: number;
   imagenBase64?: string;
+  idComercio?: number;
 }
 
 export interface PagedResponse<T> {
@@ -60,6 +61,7 @@ export const productosServiciosApi = {
     pageSize?: number;
     orderBy?: string;
     search?: string;
+    idComercio?: number;
   }) =>
     api.get<ApiResponse<PagedResponse<ProductoServicioDto>>>("", { params }),
 

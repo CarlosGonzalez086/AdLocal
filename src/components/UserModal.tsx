@@ -1,9 +1,13 @@
 import {
   Dialog,
   DialogActions,
+  DialogTitle,
+  DialogContent,
   TextField,
   Button,
   Avatar,
+  Stack,
+  Divider,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import type { UserDto } from "../services/usersApi";
@@ -14,6 +18,11 @@ interface Props {
   usuario: UserDto;
   soloVer?: boolean;
 }
+
+const iosColors = {
+  primary: "#007AFF",
+  background: "#F9FAFB",
+};
 
 export const UserModal = ({ open, onClose, usuario, soloVer }: Props) => {
   const initialForm = useMemo(
@@ -26,6 +35,7 @@ export const UserModal = ({ open, onClose, usuario, soloVer }: Props) => {
     }),
     [usuario]
   );
+
   const [form, setForm] = useState<UserDto>(initialForm);
 
   useEffect(() => {
@@ -36,36 +46,79 @@ export const UserModal = ({ open, onClose, usuario, soloVer }: Props) => {
   }, [initialForm, open]);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <div className="w-100 p-3">
-        <h4> {soloVer ? "Informacion del usuario" : ""}</h4>
-        <div className="d-flex justify-content-center mb-3">
-          <Avatar
-            src={form.fotoUrl}
-            sx={{ width: 120, height: 120 }}
-            variant="circular"
-          />
-        </div>
-        <div className="w-100 row gap-3 mt-4">
-          {[
-            { id: 1, text: "Nombre", field: "nombre" },
-            { id: 2, text: "Correo", field: "email" },
-          ].map((item) => (
-            <div className="col-12 w-100" key={item.id}>
-              <TextField
-                label={item.text}
-                fullWidth
-                size="small"
-                value={form[item.field as keyof UserDto]}
-                disabled={soloVer}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 4,
+          backgroundColor: iosColors.background,
+        },
+      }}
+    >
+      <DialogTitle sx={{ fontWeight: 600 }}>
+        {soloVer ? "Información del usuario" : "Editar usuario"}
+      </DialogTitle>
 
-      <DialogActions>
-        <Button onClick={onClose}>Cerrar</Button>
+      <DialogContent>
+        {/* ===== AVATAR ===== */}
+        <Stack alignItems="center" spacing={2} mb={3}>
+          <Avatar
+            src={form.fotoUrl || undefined}
+            sx={{
+              width: 130,
+              height: 130,
+              borderRadius: "50%",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+              bgcolor: "#e8692c",
+              fontSize: 36,
+              fontWeight: 600,
+            }}
+          >
+            {!form.fotoUrl && form.nombre?.charAt(0).toUpperCase()}
+          </Avatar>
+        </Stack>
+
+        <Divider sx={{ mb: 3 }} />
+
+        {/* ===== FORM ===== */}
+        <Stack spacing={2}>
+          <TextField
+            label="Nombre"
+            value={form.nombre}
+            disabled
+            fullWidth
+          />
+
+          <TextField
+            label="Correo electrónico"
+            value={form.email}
+            disabled
+            fullWidth
+          />
+
+          {form.fechaCreacion && (
+            <TextField
+              label="Fecha de creación"
+              value={new Date(form.fechaCreacion).toLocaleDateString()}
+              disabled
+              fullWidth
+            />
+          )}
+        </Stack>
+      </DialogContent>
+
+      <DialogActions sx={{ p: 2 }}>
+        <Button
+          onClick={onClose}
+          sx={{
+            textTransform: "none",
+          }}
+        >
+          Cerrar
+        </Button>
       </DialogActions>
     </Dialog>
   );

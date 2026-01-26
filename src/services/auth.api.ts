@@ -49,6 +49,35 @@ export interface EmailDto {
   email: string;
 }
 
+export interface JwtClaims {
+  sub: string;    
+  id: string;             
+  nombre: string;
+  rol: string;
+
+  comercioId?: string;
+  fotoUrl?: string;
+
+  planId?: string;
+  planTipo?: string;
+  nivelVisibilidad?: string;
+
+  maxNegocios?: string;
+  maxProductos?: string;
+  maxFotos?: number;
+
+  esatdo?:string;
+
+  permiteCatalogo?: string;
+  tieneAnalytics?: string;
+
+  badge?: string;
+
+  exp: number;
+  iat: number;
+}
+
+
 export const authApi = {
   forgetPassword: (data: EmailDto) =>
     api.post<ApiResponse<null>>("/forget-password", data),

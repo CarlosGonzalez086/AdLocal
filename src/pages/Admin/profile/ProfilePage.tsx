@@ -5,6 +5,7 @@ import {
   Typography,
   Divider,
   Box,
+  Container,
 } from "@mui/material";
 import { useProfile } from "./useProfile";
 import { ProfileHeader } from "../../../components/profile/ProfileHeader";
@@ -13,33 +14,42 @@ import { ProfileForm } from "../../../components/profile/ProfileForm";
 
 const ProfilePage = () => {
   const { profile, loading, actualizarPerfil } = useProfile();
-
   if (loading && !profile) {
     return (
-      <div className="d-flex justify-content-center mt-5">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
         <CircularProgress />
-      </div>
+      </Box>
     );
   }
 
   if (!profile) return null;
-
   return (
-    <div className="d-flex justify-content-center mt-4 px-2">
+    <Container
+      maxWidth="sm"
+      sx={{
+        mt: { xs: 2, sm: 4 },
+        px: { xs: 1, sm: 2 },
+      }}
+    >
       <Card
+        elevation={3}
         sx={{
-          maxWidth: 480,
-          width: "100%",
           borderRadius: 2,
-          boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
         }}
       >
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
           <ProfileHeader nombre={profile.nombre} rol={profile.rol} />
 
           <Divider sx={{ my: 2 }} />
 
-          <Typography variant="subtitle1" fontWeight={600} mb={1}>
+          <Typography variant="subtitle1" fontWeight={600} gutterBottom>
             Información personal
           </Typography>
 
@@ -51,12 +61,10 @@ const ProfilePage = () => {
 
           <Divider sx={{ my: 3 }} />
 
-          <Box>
-            <ProfileActions />
-          </Box>
+          <ProfileActions />
         </CardContent>
       </Card>
-    </div>
+    </Container>
   );
 };
 

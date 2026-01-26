@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { ApiResponse } from "../api/apiResponse";
+import type { PagedResponse } from "./productosServiciosApi";
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/comercios`,
@@ -30,6 +31,8 @@ export interface HorarioComercioDto {
   abierto: boolean;
   horaApertura?: string | null;
   horaCierre?: string | null;
+  horaAperturaFormateada?: string;
+  horaCierreFormateada?: string;
 }
 
 export interface ComercioCreateDto {
@@ -51,6 +54,7 @@ export interface ComercioCreateDto {
 }
 
 export interface ComercioUpdateDto {
+  id: number;
   nombre?: string | null;
   direccion?: string | null;
   telefono?: string | null;
@@ -87,10 +91,58 @@ export interface ComercioDto {
   municipioId: number;
   estadoNombre: string;
   municipioNombre: string;
+  promedioCalificacion: number;
+  calificacion?: number;
+  badge?: string;
+}
+
+export const comercioDtoDefault: ComercioDto = {
+  id: 0,
+  nombre: "",
+  direccion: "",
+  telefono: "",
+  email: "",
+  descripcion: "",
+  logoBase64: "",
+  imagenes: [],
+  lat: 19.4326,
+  lng: -99.1332,
+  colorPrimario: "#007AFF",
+  colorSecundario: "#FF9500",
+  activo: true,
+  horarios: [],
+  estadoId: 0,
+  municipioId: 0,
+  estadoNombre: "",
+  municipioNombre: "",
+  promedioCalificacion: 0,
+};
+
+export interface ComercioDtoListItem {
+  id: number;
+  nombre: string;
+  idUsuario: number;
+  descripcion?: string;
+  telefono?: string;
+  email?: string;
+  direccion?: string;
+  logoUrl?: string;
+  lat?: number;
+  lng?: number;
+  colorPrimario?: string;
+  colorSecundario?: string;
+  activo: boolean;
+  fechaCreacion: string;
+  estadoNombre: string;
+  municipioNombre: string;
+  promedioCalificacion: number;
+  badge: string;
 }
 
 export const comercioApi = {
   getMine: () => api.get<ApiResponse<ComercioDto>>("/mine"),
+  getTotalComerciosByIdUsuario: () =>
+    api.get<ApiResponse<object>>("/getTotalComerciosByIdUsuario"),
 
   crear: (data: ComercioCreateDto) =>
     api.post<ApiResponse<ComercioDto>>("", data),
@@ -99,4 +151,12 @@ export const comercioApi = {
     api.put<ApiResponse<ComercioDto>>("", data),
 
   eliminar: (id: number) => api.delete<ApiResponse<null>>(`/${id}`),
+  getAllComerciosByUser: (page = 1, pageSize = 10) =>
+    api.get<ApiResponse<PagedResponse<ComercioDtoListItem>>>(
+      "/getAllComerciosByUser",
+      {
+        params: { page, pageSize },
+      },
+    ),
+  getById: (id: number) => api.get<ApiResponse<ComercioDto>>(`/${id}`),
 };

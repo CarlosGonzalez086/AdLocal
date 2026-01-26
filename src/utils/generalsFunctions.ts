@@ -54,7 +54,7 @@ export function removeNulls<T extends object>(obj: T): Partial<T> {
 
 export const normalizeComercioData = (data: any) => ({
   ...data,
-
+  id: data.id ?? 0,
   nombre: data.nombre ?? "",
   direccion: data.direccion ?? "",
   telefono: data.telefono ?? "",

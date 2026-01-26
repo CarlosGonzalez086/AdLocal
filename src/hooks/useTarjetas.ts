@@ -27,7 +27,7 @@ export const useTarjetas = () => {
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al cargar las tarjetas",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);
@@ -40,7 +40,7 @@ export const useTarjetas = () => {
       const result = tarjetaSchema.safeParse(dto);
       if (!result.success) {
         const firstError = Object.values(
-          result.error.flatten().fieldErrors
+          result.error.flatten().fieldErrors,
         ).flat()[0];
 
         Swal.fire("Error", firstError || "Datos inválidos", "error");
@@ -61,7 +61,7 @@ export const useTarjetas = () => {
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al crear la tarjeta",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);
@@ -76,6 +76,7 @@ export const useTarjetas = () => {
       showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
+      reverseButtons: true,
     });
 
     if (!result.isConfirmed) return;
@@ -96,7 +97,7 @@ export const useTarjetas = () => {
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al eliminar la tarjeta",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);
@@ -104,6 +105,17 @@ export const useTarjetas = () => {
   };
 
   const setDefault = async (id: number) => {
+    const result = await Swal.fire({
+      title: "¿Establecer tarjeta como predeterminada?",
+      text: "Esta tarjeta se usará por defecto para pagos.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sí, establecer",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) return;
     setLoading(true);
     try {
       const { data } = await tarjetaApi.setDefault(id);
@@ -120,7 +132,7 @@ export const useTarjetas = () => {
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al actualizar la tarjeta",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);

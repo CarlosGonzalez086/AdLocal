@@ -13,7 +13,12 @@ export const CheckoutRedirectPage = () => {
     checkoutApi
       .crearSesion(state)
       .then((res) => {
-        window.location.href = res.data.url;
+        const url = (res as any)?.data?.url ?? (res as any)?.url;
+        if (url) {
+          window.location.href = url;
+        } else {
+          console.error("No URL returned from crearSesion:", res);
+        }
       })
       .catch((err) => {
         console.error("Error al crear sesión de Stripe:", err);

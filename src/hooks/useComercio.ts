@@ -314,7 +314,7 @@ export const useComercio = () => {
         setTotalByUser(0);
         return;
       }
-      setTotalByUser(c);
+      setTotalByUser(Number(c));
     } catch (error) {
       console.error(error);
       setTotalByUser(0);

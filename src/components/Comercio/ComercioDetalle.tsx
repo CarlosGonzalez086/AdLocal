@@ -23,7 +23,6 @@ import ProductoCard from "../ProductosServicios/ProductoCard";
 import { DIAS_SEMANA_MAP } from "../../utils/constantes";
 import { estaAbiertoAhora } from "../../utils/generalsFunctions";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ButtonBack from "../ButtonBack";
 import StarIcon from "@mui/icons-material/Star";
 
 interface Props {

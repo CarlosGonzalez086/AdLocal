@@ -1,10 +1,15 @@
-import { IconButton, Button } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Typography,
+  Stack,
+  IconButton,
+  Tooltip,
+  Avatar,
+} from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
-
 import { useEffect, useState } from "react";
+
 import { useUsers } from "../../../hooks/useUsers";
 import type { UserDto } from "../../../services/usersApi";
 import {
@@ -25,7 +30,7 @@ export const UsersPage = () => {
     fechaCreacion: "",
   };
 
-  const { total, loading, listar, eliminar, users } = useUsers();
+  const { total, loading, listar, users } = useUsers();
 
   const [page, setPage] = useState(0);
   const [rows, setRows] = useState(10);
@@ -34,39 +39,71 @@ export const UsersPage = () => {
   const [view, setView] = useState(false);
   const [user, setUser] = useState<UserDto>(initialForm);
 
-  const columns: TableColumn<UserDto>[] = [
-    {
-      key: "fechaCreacion",
-      label: "Fecha Registro",
-      render: (row: UserDto) => utcToLocal(row.fechaCreacion),
-    },
-
-    { key: "nombre", label: "Nombre" },
-    {
-      key: "email",
-      label: "Correo",
-    },
-  ];
-
   useEffect(() => {
     listar({ page, rows, orderBy, search });
   }, [page, rows, orderBy, search]);
 
+  const columns: TableColumn<UserDto>[] = [
+    {
+      key: "fechaCreacion",
+      label: "Registro",
+      render: (row) => (
+        <Typography fontSize={13} color="text.secondary">
+          {utcToLocal(row.fechaCreacion)}
+        </Typography>
+      ),
+    },
+    {
+      key: "nombre",
+      label: "Usuario",
+      render: (row) => (
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Avatar
+            src={row.fotoUrl}
+            sx={{ width: 32, height: 32 }}
+          />
+          <Typography fontWeight={600}>{row.nombre}</Typography>
+        </Stack>
+      ),
+    },
+    {
+      key: "email",
+      label: "Correo",
+      render: (row) => (
+        <Typography fontSize={14}>{row.email}</Typography>
+      ),
+    },
+  ];
+
   return (
-    <div>
-      <div className="row align-items-center mb-3">
-        <div className="col-12 col-md-7 mb-2 mb-md-0">
+    <Box>
+      {/* Header */}
+      <Paper
+        elevation={0}
+        sx={{
+          mb: 3,
+          p: 2.5,
+          borderRadius: 3,
+          border: "1px solid rgba(0,0,0,0.08)",
+          background:
+            "linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)",
+        }}
+      >
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={2}
+          alignItems={{ md: "center" }}
+        >
+
           <SearchInput
             value={search}
-            placeholder="Buscar plan..."
+            placeholder="Buscar usuario…"
             onChange={(value) => {
               setSearch(value);
               setPage(0);
             }}
           />
-        </div>
 
-        <div className="col-12 col-md-3 mb-2 mb-md-0">
           <OrderSelect
             value={orderBy}
             onChange={(value) => {
@@ -74,67 +111,52 @@ export const UsersPage = () => {
               setPage(0);
             }}
           />
-        </div>
+        </Stack>
+      </Paper>
 
-        <div className="col-12 col-md-2 d-flex justify-content-md-end">
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              setUser(initialForm);
-              setView(true);
-            }}
-            fullWidth
-            className="w-100 w-md-auto"
-          >
-            Nuevo
-          </Button>
-        </div>
-      </div>
-
-      <GenericTable<UserDto>
-        columns={columns}
-        data={users}
-        loading={loading}
-        emptyText="No hay usuarios registrados"
-        page={page}
-        rowsPerPage={rows}
-        total={total}
-        onPageChange={setPage}
-        onRowsPerPageChange={(r) => {
-          setRows(r);
-          setPage(0);
+      {/* Tabla */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 3,
+          border: "1px solid rgba(0,0,0,0.08)",
+          overflow: "hidden",
         }}
-        actions={(p) => (
-          <>
-            <IconButton
-              color="primary"
-              onClick={() => {
-                setUser({
-                  nombre: p.nombre,
-                  email: p.email,
-                  fotoUrl: p.fotoUrl,
-                  id: p.id,
-                  fechaCreacion: p.fechaCreacion,
-                });
-                setView(true);
-              }}
-            >
-              <VisibilityIcon />
-            </IconButton>
+      >
+        <GenericTable<UserDto>
+          columns={columns}
+          data={users}
+          loading={loading}
+          emptyText="No hay usuarios registrados"
+          page={page}
+          rowsPerPage={rows}
+          total={total}
+          onPageChange={setPage}
+          onRowsPerPageChange={(r) => {
+            setRows(r);
+            setPage(0);
+          }}
+          actions={(p) => (
+            <Tooltip title="Ver usuario">
+              <IconButton
+                size="small"
+                sx={{
+                  bgcolor: "#F2F2F7",
+                  "&:hover": { bgcolor: "#E5E5EA" },
+                }}
+                onClick={() => {
+                  setUser(p);
+                  setView(true);
+                }}
+              >
+                <VisibilityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        />
+      </Paper>
 
-            <IconButton
-              color="error"
-              onClick={() =>
-                eliminar(Number(p.id), { page, rows, orderBy, search })
-              }
-            >
-              <DeleteIcon />
-            </IconButton>
-          </>
-        )}
-      />
-
+      {/* Modal */}
       <UserModal
         open={view}
         onClose={() => {
@@ -144,6 +166,6 @@ export const UsersPage = () => {
         usuario={user}
         soloVer
       />
-    </div>
+    </Box>
   );
 };

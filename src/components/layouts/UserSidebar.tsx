@@ -18,6 +18,8 @@ import StoreIcon from "@mui/icons-material/Store";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import CategoryIcon from "@mui/icons-material/Category";
+import type { JwtClaims } from "../../services/auth.api";
+import { jwtDecode } from "jwt-decode";
 
 interface UserSidebarProps {
   drawerWidth: number;
@@ -29,7 +31,7 @@ interface UserSidebarProps {
 
 const UserSidebar = ({
   drawerWidth,
-  collapsedWidth = 72,
+  collapsedWidth = 76,
   collapsed,
   mobileOpen,
   onCloseMobile,
@@ -37,17 +39,27 @@ const UserSidebar = ({
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const dataJwt = localStorage.getItem("token");
+  const claims: JwtClaims | null = dataJwt
+    ? jwtDecode<JwtClaims>(dataJwt)
+    : null;
 
   const menuItems = [
     { text: "Inicio", icon: <HomeIcon />, path: "/app" },
     { text: "Mi comercio", icon: <StoreIcon />, path: "/app/comercio" },
     { text: "Mi plan", icon: <EventNoteIcon />, path: "/app/plan" },
     { text: "Tarjetas", icon: <CreditCardIcon />, path: "/app/tarjetas" },
-    {
-      text: "Productos y Servicios",
-      icon: <CategoryIcon />,
-      path: "/app/productos-servicios",
-    },
+    claims?.planTipo == "PRO" || claims?.planTipo == "BUSINESS"
+      ? {
+          text: "Productos y servicios",
+          icon: <CategoryIcon />,
+          path: "/app/productos-servicios/comercios",
+        }
+      : {
+          text: "Productos y servicios",
+          icon: <CategoryIcon />,
+          path: "/app/productos-servicios",
+        },
   ];
 
   const currentWidth = collapsed ? collapsedWidth : drawerWidth;
@@ -62,19 +74,18 @@ const UserSidebar = ({
         flexShrink: 0,
         "& .MuiDrawer-paper": {
           width: currentWidth,
-          boxSizing: "border-box",
-          transition: "width 0.3s ease",
+          transition: "width .35s cubic-bezier(.4,0,.2,1)",
           background:
-            "linear-gradient(180deg, rgba(255,255,255,0.92), rgba(245,233,207,0.95))",
-          backdropFilter: "blur(14px)",
-          borderRight: "1px solid rgba(0,0,0,0.08)",
+            "linear-gradient(180deg, rgba(255,255,255,.92), rgba(250,245,238,.96))",
+          backdropFilter: "blur(18px)",
+          borderRight: "1px solid rgba(0,0,0,.06)",
         },
       }}
     >
-      {/* HEADER */}
+      {/* LOGO */}
       <Box
         sx={{
-          height: 140,
+          height: 130,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -88,44 +99,48 @@ const UserSidebar = ({
               ? "https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/AZuAXHqalTLlz8th7NMdBA-AZuAXHqaHD92HliWBxJzdA.jpg"
               : "https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
           }
-          alt="Logo AdLocal"
+          alt="AdLocal"
           sx={{
-            width: collapsed ? 44 : "100%",
-            maxHeight: collapsed ? 44 : 100,
+            width: collapsed ? 48 : "100%",
+            maxHeight: collapsed ? 48 : 90,
             borderRadius: collapsed ? "50%" : 3,
-            objectFit:"contain",
-            transition: "all 0.3s ease",
+            objectFit: "contain",
+            transition: "all .35s ease",
+            boxShadow: collapsed ? "0 8px 24px rgba(0,0,0,.15)" : "none",
           }}
         />
       </Box>
 
-      <Divider sx={{ opacity: 0.5 }} />
+      <Divider sx={{ opacity: 0.4 }} />
 
       {/* MENU */}
-      <List sx={{ px: 1, py: 1 }}>
+      <List sx={{ px: 1.2, py: 1.2 }}>
         {menuItems.map((item) => {
           const isSelected = location.pathname === item.path;
 
-          const button = (
+          const content = (
             <ListItemButton
               component={Link}
               to={item.path}
               onClick={isMobile ? onCloseMobile : undefined}
               sx={{
-                minHeight: 48,
-                borderRadius: 2,
-                mb: 0.5,
+                minHeight: 52,
+                mb: 0.8,
+                px: collapsed ? 1.6 : 2.4,
+                borderRadius: 999,
                 justifyContent: collapsed ? "center" : "flex-start",
-                px: collapsed ? 1.5 : 2.5,
-                transition: "all 0.25s ease",
-                backgroundColor: isSelected
-                  ? "rgba(232,105,44,0.15)"
+                transition: "all .25s ease",
+                background: isSelected
+                  ? "linear-gradient(135deg, rgba(232,105,44,.22), rgba(232,105,44,.12))"
                   : "transparent",
-                color: isSelected ? "#e8692c" : "#3A2419",
+                color: isSelected ? "#E8692C" : "#3A2419",
+                boxShadow: isSelected
+                  ? "0 6px 18px rgba(232,105,44,.25)"
+                  : "none",
                 "&:hover": {
-                  backgroundColor: isSelected
-                    ? "rgba(232,105,44,0.2)"
-                    : "rgba(0,0,0,0.04)",
+                  background: isSelected
+                    ? "linear-gradient(135deg, rgba(232,105,44,.3), rgba(232,105,44,.15))"
+                    : "rgba(0,0,0,.04)",
                 },
               }}
             >
@@ -133,8 +148,8 @@ const UserSidebar = ({
                 sx={{
                   minWidth: 0,
                   mr: collapsed ? 0 : 2,
-                  justifyContent: "center",
                   color: "inherit",
+                  fontSize: 22,
                 }}
               >
                 {item.icon}
@@ -142,10 +157,15 @@ const UserSidebar = ({
 
               <ListItemText
                 primary={item.text}
+                primaryTypographyProps={{
+                  fontSize: 14,
+                  fontWeight: isSelected ? 700 : 600,
+                  letterSpacing: ".2px",
+                }}
                 sx={{
                   opacity: collapsed ? 0 : 1,
+                  transition: "opacity .2s ease",
                   whiteSpace: "nowrap",
-                  transition: "opacity 0.2s ease",
                 }}
               />
             </ListItemButton>
@@ -155,10 +175,10 @@ const UserSidebar = ({
             <ListItem key={item.text} disablePadding>
               {collapsed ? (
                 <Tooltip title={item.text} placement="right">
-                  {button}
+                  {content}
                 </Tooltip>
               ) : (
-                button
+                content
               )}
             </ListItem>
           );

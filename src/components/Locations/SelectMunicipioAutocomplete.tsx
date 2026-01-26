@@ -13,9 +13,6 @@ export const SelectMunicipioAutocomplete = ({
   value,
   onChange,
 }: Props) => {
-    console.log(estadoId);
-    console.log(value);
-    
   const { municipalities, loading, getMunicipalitiesByState } = useLocations();
 
   useEffect(() => {
@@ -23,8 +20,6 @@ export const SelectMunicipioAutocomplete = ({
   }, [estadoId]);
 
   const selected = municipalities.find((m) => m.id === value) ?? null;
-  console.log(selected);
-
   return (
     <Autocomplete
       fullWidth

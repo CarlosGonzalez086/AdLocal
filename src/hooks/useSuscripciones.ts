@@ -1,13 +1,17 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useContext } from "react";
 import Swal from "sweetalert2";
 import {
   suscripcionApi,
   type SuscripcionCreateDto,
   type SuscripcionDto,
 } from "../services/suscripcionApi";
+import { UserContext } from "../context/UserContext ";
+import { useActualizarJwt } from "./useActualizarJwt";
 
 export const useSuscripciones = () => {
   const [suscripcion, setSuscripcion] = useState<SuscripcionDto | null>(null);
+  const user = useContext(UserContext);
+  const { actualizarJwt } = useActualizarJwt();
   const [loading, setLoading] = useState(false);
 
   const contratar = async (dto: SuscripcionCreateDto): Promise<void> => {
@@ -21,13 +25,17 @@ export const useSuscripciones = () => {
       }
 
       Swal.fire("Éxito", data.mensaje, "success");
-      await obtenerMiSuscripcion();
+      await actualizarJwt({
+        email: user.sub,
+        updateJWT: true,
+      });
+      window.location.reload();
     } catch (error) {
       console.error(error);
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al contratar la suscripción",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);
@@ -62,6 +70,7 @@ export const useSuscripciones = () => {
       showCancelButton: true,
       confirmButtonText: "Sí, cancelar",
       cancelButtonText: "No",
+      reverseButtons: true,
     });
 
     if (!result.isConfirmed) return;
@@ -82,7 +91,7 @@ export const useSuscripciones = () => {
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al cancelar la suscripción",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);

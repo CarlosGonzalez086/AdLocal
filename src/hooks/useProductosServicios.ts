@@ -10,6 +10,7 @@ interface ListarParams {
   rows: number;
   orderBy: string;
   search: string;
+  idComercio: number;
 }
 
 export const useProductosServicios = () => {
@@ -19,7 +20,7 @@ export const useProductosServicios = () => {
 
   // Listar paginados
   const listar = useCallback(
-    async ({ page, rows, orderBy, search }: ListarParams) => {
+    async ({ page, rows, orderBy, search, idComercio }: ListarParams) => {
       setLoading(true);
       try {
         const { data } = await productosServiciosApi.getAllPaged({
@@ -27,6 +28,7 @@ export const useProductosServicios = () => {
           pageSize: rows,
           orderBy,
           search,
+          idComercio,
         });
 
         if (data.codigo !== "200") {
@@ -40,7 +42,7 @@ export const useProductosServicios = () => {
         setLoading(false);
       }
     },
-    []
+    [],
   );
 
   // Listar todos de un comercio específico
@@ -60,7 +62,7 @@ export const useProductosServicios = () => {
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al cargar los productos y servicios del comercio",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);
@@ -70,7 +72,7 @@ export const useProductosServicios = () => {
   // Crear o actualizar producto/servicio
   const guardar = async (
     producto: ProductoServicioDto,
-    refrescarParams?: ListarParams
+    refrescarParams?: ListarParams,
   ) => {
     setLoading(true);
     try {
@@ -101,6 +103,7 @@ export const useProductosServicios = () => {
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
+      reverseButtons: true,
     });
 
     if (!result.isConfirmed) return;
@@ -126,6 +129,17 @@ export const useProductosServicios = () => {
 
   // Desactivar producto/servicio
   const desactivar = async (id: number, refrescarParams?: ListarParams) => {
+    const result = await Swal.fire({
+      title: "¿Desactivar/Activar producto/servicio?",
+      text: "El producto/servicio dejará de estar activo, pero no se eliminará.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, desactivar/activar",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) return;
     setLoading(true);
     try {
       const { data } = await productosServiciosApi.desactivar(id);
@@ -145,7 +159,7 @@ export const useProductosServicios = () => {
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al desactivar el producto/servicio",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);

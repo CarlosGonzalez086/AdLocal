@@ -44,6 +44,7 @@ export const ProductoServicioModal = ({
     stock: 0,
     id: undefined,
     imagenBase64: "",
+    idComercio: 0,
   });
 
   const [preview, setPreview] = useState<string | null>(null);
@@ -61,6 +62,7 @@ export const ProductoServicioModal = ({
       stock: producto.stock ?? 0,
       id: producto.id,
       imagenBase64: producto.imagenBase64,
+      idComercio: producto.idComercio,
     });
 
     setPreview(producto.imagenBase64 ?? null);
@@ -94,6 +96,9 @@ export const ProductoServicioModal = ({
     };
     reader.readAsDataURL(file);
   };
+
+  console.log(form);
+  
 
   return (
     <Dialog
@@ -137,7 +142,8 @@ export const ProductoServicioModal = ({
                 borderRadius: 3,
               }}
             >
-              Cambiar imagen
+              {form.id ? "Cambiar imagen" : "Subir imagen"}
+
               <input
                 hidden
                 type="file"

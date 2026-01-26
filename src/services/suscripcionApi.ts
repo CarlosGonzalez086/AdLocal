@@ -36,23 +36,43 @@ export interface SuscripcionCreateDto {
   stripePaymentMethodId: string;
 }
 
+export interface PlanDto {
+  nombre: string;
+  precio: number;
+  duracionDias: number;
+  tipo: string;
+
+  maxNegocios: number;
+  maxProductos: number;
+  maxFotos: number;
+
+  nivelVisibilidad: number;
+  permiteCatalogo: boolean;
+  coloresPersonalizados: boolean;
+
+  tieneBadge: boolean;
+  badgeTexto?: string;
+  tieneAnalytics: boolean;
+}
+
 export interface SuscripcionDto {
   id: number;
-  planId: number;
-  plan: string;
+
+  plan: PlanDto;
+
   monto: number;
   moneda: string;
-  tipo: string;
+
   fechaInicio: string;
   fechaFin: string;
+
   estado: string;
   activa: boolean;
-  autoRenovacion: boolean;
 }
 
 export const suscripcionApi = {
   contratar: (data: SuscripcionCreateDto) =>
-    api.post<ApiResponse<null>>("", data),
+    api.post<ApiResponse<null>>("/crear", data),
 
   miSuscripcion: () =>
     api.get<ApiResponse<SuscripcionDto>>("/mi-suscripcion"),

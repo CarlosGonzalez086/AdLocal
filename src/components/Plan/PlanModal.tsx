@@ -1,11 +1,18 @@
 import {
   Dialog,
   DialogActions,
+  DialogTitle,
+  DialogContent,
   TextField,
   Button,
   InputAdornment,
+  Stack,
+  Divider,
+  Switch,
+  FormControlLabel,
+  MenuItem,
 } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useState, useEffect } from "react";
 import type { PlanCreateDto, PlanFormErrors } from "../../services/planApi";
 
 interface Props {
@@ -14,30 +21,57 @@ interface Props {
   onSave: (data: PlanCreateDto) => Promise<void>;
   plan: PlanCreateDto;
   soloVer?: boolean;
-  loading?:boolean;
+  loading?: boolean;
 }
 
-export const PlanModal = ({ open, onClose, onSave, plan, soloVer,loading }: Props) => {
-  const initialForm = useMemo(
-    () => ({
-      nombre: plan.nombre ?? "",
-      precio: plan.precio ?? 0,
-      duracionDias: plan.duracionDias ?? 0,
-      tipo: plan.tipo ?? "",
-      id: plan.id,
-    }),
-    [plan]
-  );
-  const [form, setForm] = useState<PlanCreateDto>(initialForm);
+const iosColors = {
+  primary: "#007AFF",
+  background: "#F9FAFB",
+};
+
+const defaultForm: PlanCreateDto = {
+  nombre: "",
+  precio: 0,
+  duracionDias: 30,
+  tipo: "FREE",
+
+  maxNegocios: 1,
+  maxProductos: 0,
+  maxFotos: 1,
+
+  nivelVisibilidad: 0,
+  permiteCatalogo: false,
+  coloresPersonalizados: false,
+  tieneBadge: false,
+  badgeTexto: null,
+  tieneAnalytics: false,
+};
+
+export const PlanModal = ({
+  open,
+  onClose,
+  onSave,
+  plan,
+  soloVer,
+  loading,
+}: Props) => {
+  const [form, setForm] = useState<PlanCreateDto>(defaultForm);
   const [errors, setErrors] = useState<PlanFormErrors>({});
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setForm({ ...defaultForm, ...plan });
+    setErrors({});
+  }, [plan, open]);
 
   const validar = (): boolean => {
     const e: PlanFormErrors = {};
 
-    if (!form.nombre) e.nombre = "Requerido";
-    if (form.precio <= 0) e.precio = "Mayor a 0";
-    if (form.duracionDias <= 0) e.duracionDias = "Mayor a 0";
-    if (!form.tipo) e.tipo = "Requerido";
+    if (!form.nombre) e.nombre = "El nombre es obligatorio";
+    if (form.precio < 0) e.precio = "No puede ser negativo";
+    if (form.duracionDias <= 0) e.duracionDias = "Debe ser mayor a 0";
+    if (form.nivelVisibilidad < 0 || form.nivelVisibilidad > 100)
+      e.nivelVisibilidad = "Debe estar entre 0 y 100";
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -45,82 +79,231 @@ export const PlanModal = ({ open, onClose, onSave, plan, soloVer,loading }: Prop
 
   const handleSave = async () => {
     if (!validar()) return;
-
     await onSave(form);
     onClose();
   };
 
-  useEffect(() => {
-    if (open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setForm(initialForm);
-      setErrors({});
-    }
-  }, [initialForm, open]);
-
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <div className="w-100 p-3">
-        <h4>
-          {" "}
-          {soloVer
-            ? "Detalle del Plan"
-            : form.id
-            ? "Editar Plan"
-            : "Nuevo Plan"}
-        </h4>
-        <div className="w-100 row gap-3 mt-4">
-          {[
-            { id: 1, text: "Nombre", field: "nombre" },
-            { id: 2, text: "Precio", field: "precio" },
-            { id: 3, text: "Duracion de dias", field: "duracionDias" },
-            { id: 4, text: "Tipo", field: "tipo" },
-          ].map((item) => (
-            <div className="col-12 w-100" key={item.id}>
-              <TextField
-                label={item.text}
-                type={
-                  item.field !== "nombre" && item.field !== "tipo"
-                    ? "number"
-                    : "text"
-                }
-                fullWidth
-                size="small"
-                value={form[item.field as keyof PlanCreateDto]}
-                error={!!errors[item.field as keyof PlanCreateDto]}
-                helperText={errors[item.field as keyof PlanCreateDto]}
-                disabled={soloVer}
-                InputProps={{
-                  startAdornment:
-                    item.field === "precio" ? (
-                      <InputAdornment position="start">$</InputAdornment>
-                    ) : undefined,
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: { borderRadius: 4, backgroundColor: iosColors.background },
+      }}
+    >
+      <DialogTitle sx={{ fontWeight: 600 }}>
+        {soloVer ? "Detalle del plan" : form.id ? "Editar plan" : "Nuevo plan"}
+      </DialogTitle>
 
-                  endAdornment:
-                    item.field === "duracionDias" ? (
-                      <InputAdornment position="end">días</InputAdornment>
-                    ) : undefined,
-                }}
+      <DialogContent>
+        <Stack spacing={2} mt={1}>
+          {/* Básico */}
+          <TextField
+            label="Nombre"
+            value={form.nombre}
+            error={!!errors.nombre}
+            helperText={errors.nombre}
+            disabled={soloVer}
+            onChange={(e) =>
+              setForm({ ...form, nombre: e.target.value })
+            }
+          />
+
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+            <TextField
+              label="Precio"
+              type="number"
+              value={form.precio}
+              disabled={soloVer}
+              error={!!errors.precio}
+              helperText={errors.precio}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">$</InputAdornment>
+                ),
+              }}
+              onChange={(e) =>
+                setForm({ ...form, precio: Number(e.target.value) })
+              }
+            />
+
+            <TextField
+              label="Duración"
+              type="number"
+              value={form.duracionDias}
+              disabled={soloVer}
+              error={!!errors.duracionDias}
+              helperText={errors.duracionDias}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">días</InputAdornment>
+                ),
+              }}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  duracionDias: Number(e.target.value),
+                })
+              }
+            />
+          </Stack>
+
+          <TextField
+            select
+            label="Tipo de plan"
+            value={form.tipo}
+            disabled={soloVer}
+            onChange={(e) =>
+              setForm({ ...form, tipo: e.target.value as any })
+            }
+          >
+            <MenuItem value="FREE">Free</MenuItem>
+            <MenuItem value="BASIC">Básico</MenuItem>
+            <MenuItem value="PRO">Pro</MenuItem>
+            <MenuItem value="BUSINESS">Business</MenuItem>
+          </TextField>
+
+          <Divider />
+
+          {/* Capacidades */}
+          <Stack direction="row" spacing={2}>
+            <TextField
+              label="Max. negocios"
+              type="number"
+              value={form.maxNegocios}
+              disabled={soloVer}
+              onChange={(e) =>
+                setForm({ ...form, maxNegocios: Number(e.target.value) })
+              }
+            />
+            <TextField
+              label="Max. productos"
+              type="number"
+              value={form.maxProductos}
+              disabled={soloVer}
+              onChange={(e) =>
+                setForm({ ...form, maxProductos: Number(e.target.value) })
+              }
+            />
+            <TextField
+              label="Max. fotos"
+              type="number"
+              value={form.maxFotos}
+              disabled={soloVer}
+              onChange={(e) =>
+                setForm({ ...form, maxFotos: Number(e.target.value) })
+              }
+            />
+          </Stack>
+
+          <Divider />
+
+          {/* Features */}
+          <TextField
+            label="Nivel de visibilidad (0-100)"
+            type="number"
+            value={form.nivelVisibilidad}
+            error={!!errors.nivelVisibilidad}
+            helperText={errors.nivelVisibilidad}
+            disabled={soloVer}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                nivelVisibilidad: Number(e.target.value),
+              })
+            }
+          />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.permiteCatalogo}
+                disabled={soloVer}
                 onChange={(e) =>
                   setForm({
                     ...form,
-                    [item.field]:
-                      item.field === "precio" || item.field === "duracionDias"
-                        ? Number(e.target.value)
-                        : e.target.value,
+                    permiteCatalogo: e.target.checked,
                   })
                 }
               />
-            </div>
-          ))}
-        </div>
-      </div>
+            }
+            label="Permite catálogo"
+          />
 
-      <DialogActions>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.coloresPersonalizados}
+                disabled={soloVer}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    coloresPersonalizados: e.target.checked,
+                  })
+                }
+              />
+            }
+            label="Colores personalizados"
+          />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.tieneBadge}
+                disabled={soloVer}
+                onChange={(e) =>
+                  setForm({ ...form, tieneBadge: e.target.checked })
+                }
+              />
+            }
+            label="Tiene badge"
+          />
+
+          {form.tieneBadge && (
+            <TextField
+              label="Texto del badge"
+              value={form.badgeTexto ?? ""}
+              disabled={soloVer}
+              onChange={(e) =>
+                setForm({ ...form, badgeTexto: e.target.value })
+              }
+            />
+          )}
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.tieneAnalytics}
+                disabled={soloVer}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    tieneAnalytics: e.target.checked,
+                  })
+                }
+              />
+            }
+            label="Analytics"
+          />
+        </Stack>
+      </DialogContent>
+
+      <DialogActions sx={{ p: 2 }}>
         <Button onClick={onClose}>Cerrar</Button>
+
         {!soloVer && (
-          <Button variant="contained" onClick={handleSave} disabled={loading}>
-            Guardar
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={loading}
+            sx={{
+              borderRadius: 3,
+              backgroundColor: iosColors.primary,
+            }}
+          >
+            {loading ? "Guardando..." : "Guardar"}
           </Button>
         )}
       </DialogActions>

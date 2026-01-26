@@ -7,21 +7,32 @@ import {
   Chip,
   Box,
   Stack,
+  Divider,
   useMediaQuery,
 } from "@mui/material";
 import theme from "../../theme/theme";
+import { Feature } from "../Feature";
+import type { JwtClaims } from "../../services/auth.api";
 
 export interface PlanCardProps {
   nombre: string;
   tipo: string;
   dias: number;
   precio: number;
-  moneda?: string;
-  onSelect?: () => void;
 
+  // Features
+  maxNegocios: number;
+  maxProductos: number;
+  maxFotos: number;
+  permiteCatalogo: boolean;
+  tieneAnalytics: boolean;
+  coloresPersonalizados: boolean;
+  soportePrioritario: boolean;
+  onSelect?: () => void;
   esActivo?: boolean;
   onCancelar?: () => void;
   onVerDetalle?: () => void;
+  claims?: JwtClaims | null;
 }
 
 export const PlanCard = ({
@@ -29,44 +40,60 @@ export const PlanCard = ({
   tipo,
   dias,
   precio,
-  moneda = "$",
+  maxNegocios,
+  maxProductos,
+  maxFotos,
+  permiteCatalogo,
+  tieneAnalytics,
+  coloresPersonalizados,
+  soportePrioritario,
   onSelect,
   esActivo = false,
   onCancelar,
   onVerDetalle,
+  claims,
 }: PlanCardProps) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const features = [
+    { label: `Hasta ${maxNegocios} negocios`, active: true },
+    { label: `Hasta ${maxProductos} productos por negocio`, active: true },
+    { label: `Hasta ${maxFotos} fotos por negocio`, active: true },
+    { label: "Catálogo público", active: permiteCatalogo },
+    { label: "Analytics", active: tieneAnalytics },
+    { label: "Colores personalizados", active: coloresPersonalizados },
+    { label: "Soporte prioritario", active: soportePrioritario },
+  ];
 
   return (
     <Card
       sx={{
         height: "100%",
         borderRadius: 5,
-        px: 0.5,
         background: esActivo
           ? "linear-gradient(180deg, #ffffff 0%, #f6f7fb 100%)"
           : "#ffffff",
         boxShadow: esActivo
-          ? "0 12px 35px rgba(0,0,0,0.15)"
-          : "0 8px 25px rgba(0,0,0,0.08)",
-        transition: "all .3s ease",
+          ? "0 14px 40px rgba(0,0,0,0.18)"
+          : "0 10px 30px rgba(0,0,0,0.1)",
+        transition: "all .35s ease",
         ...(isMobile
           ? {}
           : {
               "&:hover": {
                 transform: esActivo ? "none" : "translateY(-6px)",
-                boxShadow: "0 16px 45px rgba(0,0,0,0.18)",
+                boxShadow: "0 18px 50px rgba(0,0,0,0.25)",
               },
             }),
       }}
     >
-      <CardContent sx={{ pb: 2 }}>
-        <Box mb={1.5}>
+      <CardContent>
+        <Box mb={2}>
           <Chip
             label={esActivo ? "PLAN ACTIVO" : tipo}
             size="small"
             sx={{
-              fontWeight: 700,
+              fontWeight: 800,
               letterSpacing: 0.6,
               bgcolor: esActivo ? "#E8F0FF" : "#F1F3F7",
               color: esActivo ? "#2563EB" : "#374151",
@@ -74,15 +101,7 @@ export const PlanCard = ({
           />
         </Box>
 
-        <Typography
-          variant="h6"
-          fontWeight={800}
-          sx={{
-            mb: 0.5,
-            lineHeight: 1.2,
-            letterSpacing: -0.3,
-          }}
-        >
+        <Typography variant="h6" fontWeight={900} mb={0.5}>
           {nombre}
         </Typography>
 
@@ -90,84 +109,120 @@ export const PlanCard = ({
           Duración: <strong>{dias} días</strong>
         </Typography>
 
-        <Box mt={3}>
-          <Typography
-            variant="h3"
-            fontWeight={900}
-            sx={{
-              lineHeight: 1,
-              letterSpacing: -1,
-            }}
-          >
-            $
-            {precio.toLocaleString()} {""}
-            {moneda}
+        <Box mt={3} mb={2}>
+          <Typography variant="h3" fontWeight={900} sx={{ letterSpacing: -1 }}>
+            ${precio.toLocaleString()} MXN
           </Typography>
 
-          <Typography
-            variant="caption"
-            sx={{ color: "text.secondary", mt: 0.5 }}
-          >
+          <Typography variant="caption" color="text.secondary">
             IVA incluido
           </Typography>
         </Box>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Stack spacing={1.2}>
+          {features.map((feature) => (
+            <Feature
+              key={feature.label}
+              label={feature.label}
+              active={feature.active}
+            />
+          ))}
+        </Stack>
       </CardContent>
 
       <CardActions sx={{ px: 2, pb: 2 }}>
         {esActivo ? (
-          <Stack spacing={1.2} width="100%">
+          <Stack spacing={1.4} width="100%">
             <Button
               variant="outlined"
               onClick={onVerDetalle}
               fullWidth
               sx={{
                 borderRadius: 3,
-                fontWeight: 600,
+                fontWeight: 700,
                 textTransform: "none",
-                borderColor: "#CBD5E1",
               }}
             >
               Ver detalles
             </Button>
 
-            <Button
-              variant="contained"
-              color="error"
-              onClick={onCancelar}
-              fullWidth
-              sx={{
-                borderRadius: 3,
-                fontWeight: 700,
-                textTransform: "none",
-                boxShadow: "none",
-                "&:hover": {
-                  boxShadow: "0 6px 18px rgba(239,68,68,0.4)",
-                },
-              }}
-            >
-              Cancelar plan
-            </Button>
+            {/* ESTADO CANCELADA */}
+            {claims?.esatdo === "cancelada" ? (
+              <Box>
+                <Box
+                  sx={{
+                    mb: 1,
+                    px: 2,
+                    py: 0.7,
+                    borderRadius: 99,
+                    background: "rgba(255,59,48,.12)",
+                    color: "#FF3B30",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    textAlign: "center",
+                  }}
+                >
+                  Suscripción cancelada
+                </Box>
+
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  textAlign="center"
+                >
+                  Tu plan seguirá activo hasta el final de tu periodo
+                </Typography>
+              </Box>
+            ) : /* CANCELAR PLAN */
+            claims?.planTipo == "FREE" ? (
+              <></>
+            ) : (
+              <>
+                {" "}
+                <Button
+                  variant="contained"
+                  onClick={onCancelar}
+                  fullWidth
+                  sx={{
+                    py: 1.2,
+                    borderRadius: 4,
+                    fontWeight: 800,
+                    textTransform: "none",
+                    background: "linear-gradient(135deg, #FF3B30, #D70015)",
+                    boxShadow: "0 10px 25px rgba(255,59,48,.35)",
+                    "&:hover": {
+                      background: "linear-gradient(135deg, #D70015, #B00010)",
+                    },
+                  }}
+                >
+                  Cancelar plan
+                </Button>
+              </>
+            )}
           </Stack>
-        ) : (
+        ) : claims?.planTipo === tipo ? null : (
           <Button
             variant="contained"
             size="large"
             onClick={onSelect}
             fullWidth
             sx={{
-              borderRadius: 3,
-              py: 1.3,
-              fontWeight: 800,
+              borderRadius: 4,
+              py: 1.4,
+              fontWeight: 900,
               textTransform: "none",
-              fontSize: "1rem",
-              background: "linear-gradient(135deg, #2563EB 0%, #4F46E5 100%)",
-              boxShadow: "0 10px 25px rgba(37,99,235,0.4)",
+              background: "linear-gradient(135deg, #007AFF, #005BBB)",
+              boxShadow: "0 14px 30px rgba(0,122,255,.45)",
               "&:hover": {
-                boxShadow: "0 14px 35px rgba(37,99,235,0.55)",
+                background: "linear-gradient(135deg, #005BBB, #004799)",
               },
             }}
           >
-            Elegir plan
+            {claims?.esatdo === "cancelada"
+              ? "Reactivar suscripción"
+              : "Cambiar mi plan"}
           </Button>
         )}
       </CardActions>

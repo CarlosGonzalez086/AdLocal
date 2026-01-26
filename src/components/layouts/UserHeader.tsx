@@ -42,28 +42,19 @@ const UserHeader = ({
 
   const menuTitles: Record<string, string> = {
     "/app": "Inicio",
-    "/app/comercio": "Mi comercio",
+    "/app/comercio": "Mis comercios",
     "/app/plan": "Mi plan",
     "/app/pagos": "Pagos",
     "/app/configuracion": "Configuración",
     "/app/perfil": "Mi perfil",
-    "/app/productos-servicios": "Productos y Servicios",
-    "/app/tarjetas" : "Tarjetas",
-  };
-
-  const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) =>
-    setAnchorEl(e.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
-
-  const handleProfile = () => {
-    handleMenuClose();
-    navigate("/app/perfil");
-  };
-
-  const handleLogout = () => {
-    handleMenuClose();
-    localStorage.removeItem("token");
-    window.location.href = "/login";
+    "/app/productos-servicios": "Productos y servicios",
+    "/app/productos-servicios/comercios":
+      "Productos y servicios de los comercios",
+    "/app/productos-servicios/comercios/comercio":
+      "Productos y servicios del comercio",
+    "/app/tarjetas": "Tarjetas",
+    "/app/comercio/nuevo": "Nuevo",
+    "/app/comercio/editar": "Editar",
   };
 
   const getInitials = (nombre?: string) => {
@@ -74,69 +65,86 @@ const UserHeader = ({
       : words[0][0].toUpperCase() + words[1][0].toUpperCase();
   };
 
+  const path = location.pathname;
+  const basePath = path.split("/").slice(0, -1).join("/");
+  const isEditar = location.pathname.includes("/editar");
+
+  const basePathPSC = path.split("/").slice(0, -1).join("/");
+  const isPSC = location.pathname.includes("/comercios/comercio");
+
   return (
     <AppBar
       position="sticky"
       elevation={0}
       sx={{
-        backdropFilter: "blur(14px)",
-        background: "rgba(245,233,207,0.85)",
-        borderBottom: "1px solid rgba(0,0,0,0.08)",
+        backdropFilter: "blur(18px)",
+        background:
+          "linear-gradient(180deg, rgba(255,255,255,.88), rgba(245,233,207,.85))",
+        borderBottom: "1px solid rgba(0,0,0,.06)",
         color: "#3A2419",
       }}
     >
       <Toolbar
         sx={{
-          minHeight: 64,
-          px: { xs: 1.5, md: 2.5 },
+          minHeight: 68,
+          px: { xs: 1.5, md: 3 },
           display: "flex",
           justifyContent: "space-between",
         }}
       >
         {/* LEFT */}
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box display="flex" alignItems="center" gap={1.5}>
           <IconButton
             onClick={isMobile ? onMenuClick : onToggleCollapse}
             sx={{
-              bgcolor: "rgba(0,0,0,0.05)",
-              "&:hover": { bgcolor: "rgba(0,0,0,0.1)" },
-              borderRadius: 2,
+              width: 42,
+              height: 42,
+              borderRadius: 3,
+              bgcolor: "rgba(0,0,0,.05)",
+              boxShadow: "inset 0 0 0 1px rgba(0,0,0,.05)",
+              transition: "all .2s ease",
+              "&:hover": {
+                bgcolor: "rgba(0,0,0,.1)",
+                transform: "scale(1.05)",
+              },
             }}
           >
-            {isMobile ? (
-              <MenuIcon />
-            ) : collapsed ? (
-              <MenuIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
+            {isMobile || collapsed ? <MenuIcon /> : <ChevronLeftIcon />}
           </IconButton>
 
           <Typography
-            fontWeight={700}
             sx={{
-              fontSize: { xs: "1rem", md: "1.15rem" },
+              fontSize: { xs: "1rem", md: "1.2rem" },
+              fontWeight: 800,
+              letterSpacing: ".3px",
               color: "#008989",
               whiteSpace: "nowrap",
             }}
           >
-            {menuTitles[location.pathname] ?? ""}
+            {isPSC
+              ? menuTitles[basePathPSC]
+              : isEditar
+                ? menuTitles[basePath]
+                : (menuTitles[location.pathname] ?? "")}
           </Typography>
         </Box>
 
         {/* RIGHT */}
         {user && (
           <Box>
-            <IconButton onClick={handleMenuOpen}>
+            <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
               <Avatar
                 src={showImage ? user.FotoUrl : undefined}
                 onError={() => setImgError(true)}
                 sx={{
-                  width: 36,
-                  height: 36,
-                  fontWeight: 600,
-                  bgcolor: "#e8692c",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  width: 38,
+                  height: 38,
+                  fontWeight: 700,
+                  bgcolor: "#E8692C",
+                  boxShadow:
+                    "0 6px 18px rgba(232,105,44,.45), inset 0 0 0 2px rgba(255,255,255,.6)",
+                  transition: "transform .2s ease",
+                  "&:hover": { transform: "scale(1.05)" },
                 }}
               >
                 {!showImage && getInitials(user.nombre)}
@@ -146,27 +154,40 @@ const UserHeader = ({
             <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
+              onClose={() => setAnchorEl(null)}
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               transformOrigin={{ vertical: "top", horizontal: "right" }}
               PaperProps={{
                 sx: {
-                  borderRadius: 3,
+                  borderRadius: 4,
                   mt: 1,
-                  minWidth: 180,
-                  boxShadow: "0 12px 32px rgba(0,0,0,0.18)",
+                  minWidth: 200,
+                  backdropFilter: "blur(12px)",
+                  background:
+                    "linear-gradient(180deg, rgba(255,255,255,.95), rgba(245,233,207,.95))",
+                  boxShadow: "0 18px 40px rgba(0,0,0,.25)",
                 },
               }}
             >
-              <MenuItem onClick={handleProfile} sx={{ fontWeight: 500 }}>
+              <MenuItem
+                onClick={() => {
+                  setAnchorEl(null);
+                  navigate("/app/perfil");
+                }}
+                sx={{ fontWeight: 600 }}
+              >
                 Mi perfil
               </MenuItem>
 
-              <Divider />
+              <Divider sx={{ my: 0.5 }} />
 
               <MenuItem
-                onClick={handleLogout}
-                sx={{ color: "error.main", fontWeight: 500 }}
+                onClick={() => {
+                  setAnchorEl(null);
+                  localStorage.removeItem("token");
+                  window.location.href = "/login";
+                }}
+                sx={{ color: "error.main", fontWeight: 700 }}
               >
                 Cerrar sesión
               </MenuItem>

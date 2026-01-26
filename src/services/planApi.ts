@@ -17,7 +17,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(
@@ -28,15 +28,30 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export interface PlanCreateDto {
   id?: number;
+
+  // Básico
   nombre: string;
   precio: number;
   duracionDias: number;
-  tipo: string;
+  tipo: "FREE" | "BASIC" | "PRO" | "BUSINESS";
+
+  // Capacidades
+  maxNegocios: number;
+  maxProductos: number;
+  maxFotos: number;
+
+  // Features
+  nivelVisibilidad: number; // 0 - 100
+  permiteCatalogo: boolean;
+  coloresPersonalizados: boolean;
+  tieneBadge: boolean;
+  badgeTexto?: string | null;
+  tieneAnalytics: boolean;
 }
 
 export type PlanFormErrors = Partial<Record<keyof PlanCreateDto, string>>;
@@ -50,8 +65,12 @@ export const planApi = {
   }) => api.get("", { params }),
 
   getAllPlanesUser: () => api.get("/AllPlanesUser"),
+
   getById: (id: number) => api.get(`/${id}`),
+
   crear: (data: PlanCreateDto) => api.post("", data),
+
   actualizar: (id: number, data: PlanCreateDto) => api.put(`/${id}`, data),
+
   eliminar: (id: number) => api.delete(`/${id}`),
 };

@@ -14,9 +14,16 @@ import {
   type ProductoServicioDto,
 } from "../../../services/productosServiciosApi";
 import Swal from "sweetalert2";
+import type { JwtClaims } from "../../../services/auth.api";
+import { jwtDecode } from "jwt-decode";
+import ComercioCardBasico from "../../../components/Comercio/ComercioCardBasico";
 
 export default function PreviewPage() {
-  const { comercio, loading } = useComercio();
+  const dataJwt = localStorage.getItem("token");
+  const claims: JwtClaims | null = dataJwt
+    ? jwtDecode<JwtClaims>(dataJwt)
+    : null;
+  const { comercio, loading, comercios, getAllComerciosByUser } = useComercio();
   const [productos, setProductos] = useState<ProductoServicioDto[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [verDetalle, setVerDetalle] = useState(false);
@@ -37,7 +44,7 @@ export default function PreviewPage() {
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al cargar los productos y servicios",
-        "error"
+        "error",
       );
     } finally {
       setLoadingProducts(false);
@@ -49,6 +56,18 @@ export default function PreviewPage() {
       listarPorComercio(comercio.id);
     }
   }, [comercio?.id, listarPorComercio]);
+
+  const page = 0;
+  const rows = Number(claims?.maxNegocios);
+
+  useEffect(() => {
+    if (
+      claims?.rol == "Comercio" &&
+      (claims?.planTipo == "PRO" || claims?.planTipo == "BUSINESS")
+    ) {
+      getAllComerciosByUser(page, rows);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -80,7 +99,7 @@ export default function PreviewPage() {
             animation: "pulse 1.5s ease-in-out infinite",
           }}
         >
-          Cargando comercio...
+          Cargando comercios...
         </Typography>
 
         <style>
@@ -98,53 +117,96 @@ export default function PreviewPage() {
 
   if (!comercio) {
     return (
-      <Box>
-        <Typography variant="h5" fontWeight="bold" mb={1}>
-          ¡Aún no tienes un comercio registrado!
-        </Typography>
-        <Typography color="text.secondary">
-          Registra tu comercio para poder ver la vista previa.
-        </Typography>
-      </Box>
+      <>
+        {claims?.rol == "Comercio" &&
+        (claims?.planTipo == "PRO" || claims?.planTipo == "BUSINESS") ? (
+          <>
+            <Box>
+              <Typography variant="h5" fontWeight="bold" mb={1}>
+                Todavía no hay comercios por aquí
+              </Typography>
+              <Typography color="text.secondary">
+                Agrega tu primer comercio y descubre cómo se verá en la
+                plataforma.
+              </Typography>
+            </Box>
+          </>
+        ) : (
+          <>
+            <Box>
+              <Typography variant="h5" fontWeight="bold" mb={1}>
+                ¡Aún no tienes un comercio registrado!
+              </Typography>
+              <Typography color="text.secondary">
+                Registra tu comercio para poder ver la vista previa.
+              </Typography>
+            </Box>
+          </>
+        )}
+      </>
     );
   }
 
   return (
     <Box>
-      <Typography variant="h4" fontWeight="bold" mb={2}>
-        Vista previa de tu comercio
-      </Typography>
-
-      <Divider sx={{ mb: 3 }} />
-
-      {!verDetalle ? (
-        <div className="d-flex justify-content-center p-3">
-          <Box sx={{ cursor: "pointer" }} onClick={() => setVerDetalle(true)}>
-            <ComercioCard comercio={comercio} />
-          </Box>
-        </div>
+      {claims?.rol == "Comercio" &&
+      (claims?.planTipo == "PRO" || claims?.planTipo == "BUSINESS") ? (
+        <>
+          {" "}
+          <div className="container-fluid">
+            <div className="row g-4 align-items-stretch">
+              {comercios.map((c) => (
+                <div
+                  key={c.id}
+                  className="col-12 col-sm-6 col-md-4 col-lg-3 d-flex"
+                >
+                  <ComercioCard
+                    comercio={c}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
       ) : (
         <>
-          <Button
-            variant="text"
-            onClick={() => setVerDetalle(false)}
-            sx={{
-              textTransform: "none",
-              fontSize: "0.85rem",
-              mb: 1,
-              px: 0,
-            }}
-          >
-            ← Atrás
-          </Button>
+          <Typography variant="h4" fontWeight="bold" mb={2}>
+            Vista previa de tu comercio
+          </Typography>
+          <Divider sx={{ mb: 3 }} />
+          {!verDetalle ? (
+            <div className="d-flex justify-content-center p-3">
+              <Box
+                sx={{ cursor: "pointer" }}
+                onClick={() => setVerDetalle(true)}
+              >
+                <ComercioCardBasico comercio={comercio} />
+              </Box>
+            </div>
+          ) : (
+            <>
+              <Button
+                variant="text"
+                onClick={() => setVerDetalle(false)}
+                sx={{
+                  textTransform: "none",
+                  fontSize: "0.85rem",
+                  mb: 1,
+                  px: 0,
+                }}
+              >
+                ← Atrás
+              </Button>
 
-          <div className="d-flex justify-content-center p-3">
-            <ComercioDetalle
-              comercio={comercio}
-              productos={productos}
-              loadingProducts={loadingProducts}
-            />
-          </div>
+              <div className="d-flex justify-content-center p-3">
+                <ComercioDetalle
+                  comercio={comercio}
+                  productos={productos}
+                  loadingProducts={loadingProducts}
+                />
+              </div>
+            </>
+          )}
         </>
       )}
     </Box>

@@ -2,11 +2,17 @@ import { useEffect, useState } from "react";
 import { CircularProgress, Typography, Box, Fade } from "@mui/material";
 import { usePlanes } from "../../hooks/usePlanes";
 import { PlanCard } from "./PlanCard";
-import { ConfirmarSuscripcionModal } from "./ConfirmarSuscripcionModal";
 import type { PlanCreateDto } from "../../services/planApi";
+import { ConfirmarSuscripcionModalV3 } from "../../pages/User/Plan/ConfirmarSuscripcionModalV3";
+import { jwtDecode } from "jwt-decode";
+import type { JwtClaims } from "../../services/auth.api";
 
 export const PlanesUserList = () => {
   const { planesUser, loading, listAllPlanesUser } = usePlanes();
+  const dataJwt = localStorage.getItem("token");
+  const claims: JwtClaims | null = dataJwt
+    ? jwtDecode<JwtClaims>(dataJwt)
+    : null;
 
   const [openModal, setOpenModal] = useState(false);
   const [planSeleccionado, setPlanSeleccionado] =
@@ -72,23 +78,34 @@ export const PlanesUserList = () => {
               gap: 3,
             }}
           >
-            {planesUser.map((plan) => (
-              <Box key={plan.id}>
-                <PlanCard
-                  nombre={plan.nombre}
-                  tipo={plan.tipo}
-                  dias={plan.duracionDias}
-                  precio={plan.precio}
-                  onSelect={() => handleSelectPlan(plan)}
-                />
-              </Box>
-            ))}
+            {planesUser
+              .filter((plan) => plan.tipo != "FREE")
+              .sort((a, b) => a.precio - b.precio)
+              .map((plan) => (
+                <Box key={plan.id}>
+                  <PlanCard
+                    nombre={plan.nombre}
+                    tipo={plan.tipo}
+                    dias={plan.duracionDias}
+                    precio={plan.precio}
+                    maxNegocios={plan.maxNegocios}
+                    maxProductos={plan.maxProductos}
+                    maxFotos={plan.maxFotos}
+                    permiteCatalogo={plan.permiteCatalogo}
+                    tieneAnalytics={plan.tieneAnalytics}
+                    coloresPersonalizados={plan.coloresPersonalizados}
+                    soportePrioritario={plan.tieneBadge}
+                    onSelect={() => handleSelectPlan(plan)}
+                    claims={claims}
+                  />
+                </Box>
+              ))}
           </Box>
         </Box>
       </Fade>
 
       {planSeleccionado && (
-        <ConfirmarSuscripcionModal
+        <ConfirmarSuscripcionModalV3
           open={openModal}
           plan={planSeleccionado}
           onClose={handleCloseModal}

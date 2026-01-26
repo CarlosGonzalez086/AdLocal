@@ -1,33 +1,35 @@
+import { useParams } from "react-router-dom";
+import type { JwtClaims } from "../../../services/auth.api";
+import { jwtDecode } from "jwt-decode";
+import type { ProductoServicioDto } from "../../../services/productosServiciosApi";
+import { useProductosServicios } from "../../../hooks/useProductosServicios";
+import { useEffect, useState } from "react";
 import {
-  IconButton,
-  Button,
+  GenericTable,
+  type TableColumn,
+} from "../../../components/layouts/GenericTable";
+import {
   Box,
-  Paper,
-  Tooltip,
+  Button,
   Chip,
+  IconButton,
+  Paper,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
-
+import { SearchInput } from "../../../components/SearchInput";
+import { OrderSelect } from "../../../components/OrderSelect";
+import { ProductoServicioModal } from "../../../components/ProductosServicios/ProductoServicioModal";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import ToggleOffIcon from "@mui/icons-material/ToggleOff";
-import { useEffect, useState } from "react";
-import type { ProductoServicioDto } from "../../../services/productosServiciosApi";
-import { useProductosServicios } from "../../../hooks/useProductosServicios";
-import {
-  GenericTable,
-  type TableColumn,
-} from "../../../components/layouts/GenericTable";
-import { SearchInput } from "../../../components/SearchInput";
-import { OrderSelect } from "../../../components/OrderSelect";
-import { ProductoServicioModal } from "../../../components/ProductosServicios/ProductoServicioModal";
-import type { JwtClaims } from "../../../services/auth.api";
-import { jwtDecode } from "jwt-decode";
+import ButtonBack from "../../../components/ButtonBack";
 
-export const ProductosServiciosPage = () => {
+export function ProductosServicioComercio() {
+  const { id } = useParams();
   const dataJwt = localStorage.getItem("token");
   const claims: JwtClaims | null = dataJwt
     ? jwtDecode<JwtClaims>(dataJwt)
@@ -39,6 +41,7 @@ export const ProductosServiciosPage = () => {
     activo: true,
     stock: 0,
     imagenBase64: "",
+    idComercio: Number(id),
   };
 
   const { productos, total, loading, listar, guardar, eliminar, desactivar } =
@@ -52,8 +55,8 @@ export const ProductosServiciosPage = () => {
   const [producto, setProducto] = useState<ProductoServicioDto>(initialForm);
 
   useEffect(() => {
-    listar({ page, rows, orderBy, search, idComercio: 0 });
-  }, [page, rows, orderBy, search]);
+    listar({ page, rows, orderBy, search, idComercio: Number(id) });
+  }, [page, rows, orderBy, search, id]);
 
   const columns: TableColumn<ProductoServicioDto>[] = [
     {
@@ -91,6 +94,10 @@ export const ProductosServiciosPage = () => {
 
   return (
     <Box>
+      <div className="pb-3">
+        <ButtonBack route="/app/productos-servicios/comercios" />
+      </div>
+
       <Paper
         elevation={0}
         sx={{
@@ -240,7 +247,7 @@ export const ProductosServiciosPage = () => {
                       rows,
                       orderBy,
                       search,
-                      idComercio: 0,
+                      idComercio: Number(id),
                     })
                   }
                 >
@@ -261,7 +268,7 @@ export const ProductosServiciosPage = () => {
                       rows,
                       orderBy,
                       search,
-                      idComercio: 0,
+                      idComercio: Number(id),
                     })
                   }
                 >
@@ -285,11 +292,11 @@ export const ProductosServiciosPage = () => {
           setProducto(initialForm);
         }}
         onSave={(p) =>
-          guardar(p, { page, rows, orderBy, search, idComercio: 0 })
+          guardar(p, { page, rows, orderBy, search, idComercio: Number(id) })
         }
         producto={producto}
         loading={loading}
       />
     </Box>
   );
-};
+}

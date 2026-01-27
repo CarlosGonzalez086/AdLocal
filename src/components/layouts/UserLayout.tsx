@@ -6,14 +6,12 @@ import UserSidebar from "./UserSidebar";
 import UserHeader from "./UserHeader";
 import { UserContext } from "../../context/UserContext ";
 import "../../styles/styles.css";
-import { MobileContext } from "../../context/MobileContext";
 
 const drawerWidth = 240;
 const collapsedWidth = 76;
 
 const UserLayout = () => {
   const user = useContext(UserContext);
-  const { isMobile } = useContext(MobileContext);
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);

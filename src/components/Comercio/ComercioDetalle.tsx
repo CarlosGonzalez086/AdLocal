@@ -117,7 +117,6 @@ export default function ComercioDetalle({
 
   return (
     <>
- 
       <Box
         sx={{
           position: "relative",
@@ -699,7 +698,7 @@ export default function ComercioDetalle({
                 border: "1px solid rgba(255,255,255,0.6)",
                 overflow: "hidden",
 
-                height: { xs: 220, sm: 280 }, 
+                height: { xs: 220, sm: 280 },
               }}
             >
               <MapContainer

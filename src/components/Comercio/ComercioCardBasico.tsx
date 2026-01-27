@@ -34,7 +34,8 @@ export default function ComercioCardBasico({ comercio }: Props) {
         },
         width: "100%",
         maxWidth: { xs: "100%", sm: 320 },
-        height: 300,
+        minHeight: 300,
+        height: "auto",
         display: "flex",
         flexDirection: "column",
         mx: "auto",
@@ -42,7 +43,7 @@ export default function ComercioCardBasico({ comercio }: Props) {
     >
       <Box
         sx={{
-          height: 110,
+          height: { xs: 95, sm: 110 },
           background: `linear-gradient(135deg, ${comercio.colorPrimario}, ${comercio.colorSecundario})`,
           display: "flex",
           justifyContent: "center",
@@ -54,32 +55,32 @@ export default function ComercioCardBasico({ comercio }: Props) {
         <Avatar
           src={comercio.logoBase64}
           sx={{
-            width: 84,
-            height: 84,
+            width: { xs: 72, sm: 84 },
+            height: { xs: 72, sm: 84 },
             border: "3px solid #fff",
             backgroundColor: "#fff",
             boxShadow: "0 6px 16px rgba(0,0,0,0.22)",
             position: "absolute",
-            bottom: -42,
+            bottom: { xs: -36, sm: -42 },
           }}
         />
       </Box>
 
-      <CardContent sx={{ pt: 2.5 }}>
-        <Stack spacing={1} alignItems="center">
+      <CardContent sx={{ pt: { xs: 5, sm: 6 }, pb: 3 }}>
+        <Stack spacing={1.4} alignItems="center">
           <Typography
-            variant="h6"
             fontWeight={700}
             textAlign="center"
             sx={{
               color: comercio.colorPrimario,
-              lineHeight: 1.2,
+              lineHeight: 1.3,
+              letterSpacing: "0.2px",
+              fontSize: { xs: "0.95rem", sm: "1.05rem", md: "1.1rem" },
             }}
           >
             {comercio.nombre}
           </Typography>
-
-          <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Stack direction="row" alignItems="center" spacing={0.4}>
             <Rating
               value={comercio.promedioCalificacion ?? 0}
               precision={0.5}
@@ -87,52 +88,49 @@ export default function ComercioCardBasico({ comercio }: Props) {
               size="small"
               icon={<StarIcon fontSize="inherit" />}
               emptyIcon={<StarIcon fontSize="inherit" />}
-              sx={{
-                color: "#F5B301",
-              }}
+              sx={{ color: "#F5B301" }}
             />
             <Typography
-              className="mt-1"
-              sx={{ fontSize: "0.72rem", color: "text.secondary" }}
+              sx={{
+                fontSize: "0.68rem",
+                color: "text.secondary",
+                mt: "2px",
+              }}
             >
               ({comercio.promedioCalificacion ?? 0})
             </Typography>
           </Stack>
 
           <Typography
-            variant="body2"
             color="text.secondary"
             textAlign="center"
             sx={{
-              px: 1,
-              lineHeight: 1.4,
+              px: 1.5,
+              maxWidth: 260,
+              lineHeight: 1.45,
+              fontSize: "0.75rem",
             }}
           >
-            {comercio.direccion +
-              "," +
-              comercio.municipioNombre +
-              "," +
-              comercio.estadoNombre +
-              "."}
+            {`${comercio.direccion}, ${comercio.municipioNombre}, ${comercio.estadoNombre}.`}
           </Typography>
 
           <Chip
             label="Ver más detalles"
             icon={<ArrowForwardIosIcon fontSize="small" />}
             sx={{
-              mt: 1.5,
-              height: 34,
-              px: 2,
+              mt: 2,
+              height: 36,
+              px: 2.5,
               fontWeight: 600,
-              fontSize: "0.75rem",
+              fontSize: "0.74rem",
               borderRadius: 999,
               backgroundColor: comercio.colorPrimario,
               color: "#fff",
-              boxShadow: "0 3px 10px rgba(0,0,0,0.18)",
-              transition: "all 0.25s ease",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.22)",
+              transition: "all 0.25s cubic-bezier(.4,0,.2,1)",
               "&:hover": {
-                transform: "scale(1.06)",
-                boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
+                transform: "scale(1.05)",
+                boxShadow: "0 8px 20px rgba(0,0,0,0.28)",
               },
             }}
           />

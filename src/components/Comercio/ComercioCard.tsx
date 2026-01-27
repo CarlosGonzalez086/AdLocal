@@ -205,7 +205,7 @@ export default function ComercioCard({
             to={
               isProductOrServiceCreation
                 ? `comercio/${comercio.id}`
-                : `app/vistaprevia/${comercio.id}`
+                : `vistaprevia/${comercio.id}`
             }
             style={{ textDecoration: "none" }}
             className="w-100 d-flex justify-content-center"

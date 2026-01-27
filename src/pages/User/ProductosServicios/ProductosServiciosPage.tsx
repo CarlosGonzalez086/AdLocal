@@ -256,7 +256,7 @@ export const ProductosServiciosPage = () => {
                     color: p.activo ? "#1E7F4F" : "#666",
                   }}
                   onClick={() =>
-                    desactivar(Number(p.id), {
+                    desactivar(Number(p.id),p.activo, {
                       page,
                       rows,
                       orderBy,

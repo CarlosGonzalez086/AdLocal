@@ -59,9 +59,9 @@ const TabPanel = ({
   value === index ? (
     <Box
       sx={{
-        mt: { xs: 2, sm: 3 },
-        px: { xs: 0, sm: 1 },
         width: "100%",
+        mt: { xs: 1.5, sm: 2.5, md: 3 },
+        px: { xs: 0, sm: 1, md: 2 },
         boxSizing: "border-box",
       }}
     >
@@ -182,8 +182,9 @@ export const ComercioForm = ({
   return (
     <Box
       sx={{
-        px: { xs: 1.5, sm: 3 },
-        mt: 4,
+        width: "100%",
+        px: { xs: 1, sm: 2, md: 3 },
+        mt: { xs: 2, sm: 3, md: 4 },
         display: "flex",
         justifyContent: "center",
       }}
@@ -191,22 +192,32 @@ export const ComercioForm = ({
       <Box
         sx={{
           width: "100%",
-          maxWidth: "900px",
-          mx: "auto",
+          maxWidth: { xs: "100%", md: 900 },
         }}
       >
         <Tabs
           value={tab}
           onChange={(_, v) => setTab(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           allowScrollButtonsMobile
           sx={{
-            mb: 3,
-            ".MuiTab-root": {
-              minHeight: 44,
-              fontSize: { xs: 12, sm: 14 },
+            mb: { xs: 2, sm: 3 },
+
+            minHeight: { xs: 40, sm: 48 },
+
+            ".MuiTabs-flexContainer": {
+              gap: { xs: 1, sm: 2 },
             },
+
+            ".MuiTab-root": {
+              textTransform: "none",
+              fontSize: { xs: 13, sm: 14, md: 15 },
+              minHeight: { xs: 40, sm: 48 },
+              px: { xs: 1.5, sm: 2 },
+              borderRadius: 2,
+            },
+
             ".MuiTabs-indicator": {
               backgroundColor: "#007AFF",
               height: 3,

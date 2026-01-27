@@ -263,7 +263,7 @@ export function ProductosServicioComercio() {
                     color: p.activo ? "#1E7F4F" : "#666",
                   }}
                   onClick={() =>
-                    desactivar(Number(p.id), {
+                    desactivar(Number(p.id), Boolean(p.activo), {
                       page,
                       rows,
                       orderBy,

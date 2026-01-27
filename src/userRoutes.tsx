@@ -28,7 +28,7 @@ export const userRoutes = [
     element: <PreviewPage />,
   },
   {
-    path: "app/vistaprevia/:id",
+    path: "vistaprevia/:id",
     element: <PreviewNegocio />,
   },
   {

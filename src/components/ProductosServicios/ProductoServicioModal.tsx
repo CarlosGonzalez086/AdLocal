@@ -98,7 +98,6 @@ export const ProductoServicioModal = ({
   };
 
   console.log(form);
-  
 
   return (
     <Dialog
@@ -174,7 +173,17 @@ export const ProductoServicioModal = ({
             minRows={3}
             disabled={soloVer}
             fullWidth
-            onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+            inputProps={{
+              maxLength: 250,
+            }}
+            helperText={`${form.descripcion.length}/250`}
+            onChange={(e) => {
+              const value = e.target.value;
+
+              if (value.length > 250) return;
+
+              setForm({ ...form, descripcion: value });
+            }}
           />
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
@@ -186,14 +195,22 @@ export const ProductoServicioModal = ({
               helperText={errors.precio}
               disabled={soloVer}
               fullWidth
+              inputProps={{
+                min: 0,
+                step: "any",
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">$</InputAdornment>
                 ),
               }}
-              onChange={(e) =>
-                setForm({ ...form, precio: Number(e.target.value) })
-              }
+              onChange={(e) => {
+                const value = Number(e.target.value);
+
+                if (value < 0) return;
+
+                setForm({ ...form, precio: value });
+              }}
             />
 
             <TextField
@@ -204,9 +221,17 @@ export const ProductoServicioModal = ({
               helperText={errors.stock}
               disabled={soloVer}
               fullWidth
-              onChange={(e) =>
-                setForm({ ...form, stock: Number(e.target.value) })
-              }
+              inputProps={{
+                min: 0,
+                step: 1,
+              }}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+
+                if (value < 0) return;
+
+                setForm({ ...form, stock: value });
+              }}
             />
           </Stack>
         </Stack>

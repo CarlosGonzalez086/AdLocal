@@ -16,6 +16,7 @@ export const CheckoutSuccessPage = () => {
       email: user.sub,
       updateJWT: true,
     });
+    window.location.reload();
   }, []);
 
   return (

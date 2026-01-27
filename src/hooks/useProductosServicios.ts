@@ -18,7 +18,6 @@ export const useProductosServicios = () => {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
 
-  // Listar paginados
   const listar = useCallback(
     async ({ page, rows, orderBy, search, idComercio }: ListarParams) => {
       setLoading(true);
@@ -45,7 +44,6 @@ export const useProductosServicios = () => {
     [],
   );
 
-  // Listar todos de un comercio específico
   const listarPorComercio = useCallback(async (idComercio: number) => {
     setLoading(true);
     try {
@@ -69,7 +67,6 @@ export const useProductosServicios = () => {
     }
   }, []);
 
-  // Crear o actualizar producto/servicio
   const guardar = async (
     producto: ProductoServicioDto,
     refrescarParams?: ListarParams,
@@ -95,14 +92,14 @@ export const useProductosServicios = () => {
     }
   };
 
-  // Eliminar producto/servicio
   const eliminar = async (id: number, refrescarParams?: ListarParams) => {
     const result = await Swal.fire({
-      title: "¿Eliminar producto/servicio?",
-      text: "Esta acción no se puede deshacer",
+      title: "Eliminar producto o servicio",
+      text: "Esta acción eliminará el producto o servicio de forma permanente y no se puede deshacer.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
       reverseButtons: true,
     });
 
@@ -127,14 +124,21 @@ export const useProductosServicios = () => {
     }
   };
 
-  // Desactivar producto/servicio
-  const desactivar = async (id: number, refrescarParams?: ListarParams) => {
+  const desactivar = async (
+    id: number,
+    activo: boolean,
+    refrescarParams?: ListarParams,
+  ) => {
     const result = await Swal.fire({
-      title: "¿Desactivar/Activar producto/servicio?",
-      text: "El producto/servicio dejará de estar activo, pero no se eliminará.",
+      title: activo
+        ? "Desactivar producto o servicio"
+        : "Activar producto o servicio",
+      text: activo
+        ? "Este producto o servicio dejará de estar visible para los clientes, pero no se eliminará."
+        : "Este producto o servicio volverá a estar disponible para los clientes.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sí, desactivar/activar",
+      confirmButtonText: activo ? "Sí, desactivar" : "Sí, activar",
       cancelButtonText: "Cancelar",
       reverseButtons: true,
     });
@@ -166,7 +170,6 @@ export const useProductosServicios = () => {
     }
   };
 
-  // Obtener producto/servicio por ID
   const obtenerPorId = useCallback(async (id: number) => {
     setLoading(true);
     try {

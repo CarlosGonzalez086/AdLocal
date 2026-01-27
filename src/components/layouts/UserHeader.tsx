@@ -22,6 +22,7 @@ interface UserHeaderProps {
   onMenuClick: () => void;
   onToggleCollapse: () => void;
   collapsed: boolean;
+  sidebarWidth: number;
 }
 
 const UserHeader = ({
@@ -29,6 +30,7 @@ const UserHeader = ({
   onMenuClick,
   onToggleCollapse,
   collapsed,
+  sidebarWidth,
 }: UserHeaderProps) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -55,26 +57,23 @@ const UserHeader = ({
     "/app/tarjetas": "Tarjetas",
     "/app/comercio/nuevo": "Nuevo",
     "/app/comercio/editar": "Editar",
-  };
-
-  const getInitials = (nombre?: string) => {
-    if (!nombre) return "";
-    const words = nombre.trim().split(" ");
-    return words.length === 1
-      ? words[0][0].toUpperCase()
-      : words[0][0].toUpperCase() + words[1][0].toUpperCase();
+    "/app/vistaprevia": "Vista previa",
   };
 
   const path = location.pathname;
+  
   const basePath = path.split("/").slice(0, -1).join("/");
   const isEditar = location.pathname.includes("/editar");
 
   const basePathPSC = path.split("/").slice(0, -1).join("/");
   const isPSC = location.pathname.includes("/comercios/comercio");
 
+  const basePathPV = path.split("/").slice(0, -1).join("/");
+  const isPV = location.pathname.includes("/app/vistaprevia");
+
   return (
     <AppBar
-      position="sticky"
+      position="fixed"
       elevation={0}
       sx={{
         backdropFilter: "blur(18px)",
@@ -82,6 +81,18 @@ const UserHeader = ({
           "linear-gradient(180deg, rgba(255,255,255,.88), rgba(245,233,207,.85))",
         borderBottom: "1px solid rgba(0,0,0,.06)",
         color: "#3A2419",
+
+        width: {
+          xs: "100%",
+          md: `calc(100% - ${sidebarWidth}px)`,
+        },
+        ml: {
+          xs: 0,
+          md: `${sidebarWidth}px`,
+        },
+
+        transition: "all .35s cubic-bezier(.4,0,.2,1)",
+        zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
       <Toolbar
@@ -92,7 +103,6 @@ const UserHeader = ({
           justifyContent: "space-between",
         }}
       >
-        {/* LEFT */}
         <Box display="flex" alignItems="center" gap={1.5}>
           <IconButton
             onClick={isMobile ? onMenuClick : onToggleCollapse}
@@ -101,12 +111,7 @@ const UserHeader = ({
               height: 42,
               borderRadius: 3,
               bgcolor: "rgba(0,0,0,.05)",
-              boxShadow: "inset 0 0 0 1px rgba(0,0,0,.05)",
-              transition: "all .2s ease",
-              "&:hover": {
-                bgcolor: "rgba(0,0,0,.1)",
-                transform: "scale(1.05)",
-              },
+              "&:hover": { bgcolor: "rgba(0,0,0,.1)" },
             }}
           >
             {isMobile || collapsed ? <MenuIcon /> : <ChevronLeftIcon />}
@@ -116,20 +121,19 @@ const UserHeader = ({
             sx={{
               fontSize: { xs: "1rem", md: "1.2rem" },
               fontWeight: 800,
-              letterSpacing: ".3px",
               color: "#008989",
-              whiteSpace: "nowrap",
             }}
           >
-            {isPSC
-              ? menuTitles[basePathPSC]
-              : isEditar
-                ? menuTitles[basePath]
-                : (menuTitles[location.pathname] ?? "")}
+            {isPV
+              ? menuTitles[basePathPV]
+              : isPSC
+                ? menuTitles[basePathPSC]
+                : isEditar
+                  ? menuTitles[basePath]
+                  : (menuTitles[location.pathname] ?? "")}
           </Typography>
         </Box>
 
-        {/* RIGHT */}
         {user && (
           <Box>
             <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
@@ -141,13 +145,9 @@ const UserHeader = ({
                   height: 38,
                   fontWeight: 700,
                   bgcolor: "#E8692C",
-                  boxShadow:
-                    "0 6px 18px rgba(232,105,44,.45), inset 0 0 0 2px rgba(255,255,255,.6)",
-                  transition: "transform .2s ease",
-                  "&:hover": { transform: "scale(1.05)" },
                 }}
               >
-                {!showImage && getInitials(user.nombre)}
+                {!showImage && user.nombre?.[0]}
               </Avatar>
             </IconButton>
 

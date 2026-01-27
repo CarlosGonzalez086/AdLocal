@@ -5,47 +5,49 @@ import { Outlet } from "react-router-dom";
 import UserSidebar from "./UserSidebar";
 import UserHeader from "./UserHeader";
 import { UserContext } from "../../context/UserContext ";
+import "../../styles/styles.css";
+import { MobileContext } from "../../context/MobileContext";
 
 const drawerWidth = 240;
+const collapsedWidth = 76;
 
 const UserLayout = () => {
   const user = useContext(UserContext);
+  const { isMobile } = useContext(MobileContext);
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
+  const sidebarWidth = collapsed ? collapsedWidth : drawerWidth;
+
   return (
-    <Box sx={{ display: "flex", height: "100vh" }}>
-      <UserSidebar
-        drawerWidth={drawerWidth}
-        mobileOpen={mobileOpen}
-        onCloseMobile={() => setMobileOpen(false)}
+    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+      <UserHeader
+        user={user}
+        onMenuClick={() => setMobileOpen(true)}
         collapsed={collapsed}
+        onToggleCollapse={() => setCollapsed(!collapsed)}
+        sidebarWidth={sidebarWidth}
       />
 
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <UserHeader
-          user={user}
-          onMenuClick={() => setMobileOpen(true)}
+      <Box sx={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
+        <UserSidebar
+          drawerWidth={drawerWidth}
+          collapsedWidth={collapsedWidth}
+          mobileOpen={mobileOpen}
+          onCloseMobile={() => setMobileOpen(false)}
           collapsed={collapsed}
-          onToggleCollapse={() => setCollapsed(!collapsed)}
         />
 
         <Box
+          component="main"
           sx={{
             flexGrow: 1,
-            minHeight: 0, 
+            mt: "68px",
             overflowY: "auto",
-            width: "100%",
-            backgroundColor: "#fff",
-            padding: "16px",
+            px: { xs: 1.5, md: 3 },
           }}
+          className="p-3"
         >
           <Outlet />
         </Box>

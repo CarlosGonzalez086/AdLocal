@@ -82,14 +82,16 @@ const UserSidebar = ({
         },
       }}
     >
-      {/* LOGO */}
       <Box
         sx={{
-          height: 130,
+          height: isMobile ? 250 : 130,
           display: "flex",
           alignItems: "center",
+          alignContent: "center",
           justifyContent: "center",
           px: 2,
+          padding: isMobile ? "16px" : "0px",
+          mt: isMobile ? "20px" : "0px",
         }}
       >
         <Box
@@ -101,9 +103,9 @@ const UserSidebar = ({
           }
           alt="AdLocal"
           sx={{
-            width: collapsed ? 48 : "100%",
-            maxHeight: collapsed ? 48 : 90,
-            borderRadius: collapsed ? "50%" : 3,
+            width: isMobile ? "100%" : collapsed ? 48 : "100%",
+            maxHeight: isMobile ? 150 : collapsed ? 48 : 90,
+            borderRadius: isMobile ? 10 : collapsed ? "50%" : 3,
             objectFit: "contain",
             transition: "all .35s ease",
             boxShadow: collapsed ? "0 8px 24px rgba(0,0,0,.15)" : "none",
@@ -113,7 +115,6 @@ const UserSidebar = ({
 
       <Divider sx={{ opacity: 0.4 }} />
 
-      {/* MENU */}
       <List sx={{ px: 1.2, py: 1.2 }}>
         {menuItems.map((item) => {
           const isSelected = location.pathname === item.path;

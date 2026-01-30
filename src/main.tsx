@@ -8,6 +8,8 @@ import "leaflet/dist/leaflet.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={theme}>
     <CssBaseline />
-    <App />
-  </ThemeProvider>
+    <div style={{ height: "100vh", width: "100vw" }}>
+      <App />
+    </div>
+  </ThemeProvider>,
 );

@@ -18,10 +18,11 @@ interface Props {
 
 export default function LoginPage({ type }: Props) {
   const navigate = useNavigate();
+
   const handleLogin = async (data: any) => {
     try {
       const res =
-        type == "admin"
+        type === "admin"
           ? await adminApi.loginAdmin(data)
           : await authApi.login(data);
 
@@ -34,13 +35,14 @@ export default function LoginPage({ type }: Props) {
         showConfirmButton: false,
       });
 
-      window.location.href = type == "admin" ? "/Admin" : "/app";
+      window.location.href = type === "admin" ? "/Admin" : "/app";
     } catch (error: any) {
       Swal.fire({
         icon: "error",
         title: "Error",
         text:
-          error?.response?.data?.mensaje || "Correo o contraseña incorrectos",
+          error?.response?.data?.mensaje ||
+          "Correo o contraseña incorrectos",
       });
     }
   };
@@ -48,18 +50,21 @@ export default function LoginPage({ type }: Props) {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        bgcolor: "#f5f5f5",
+        bgcolor: "#F2F2F7",
         display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        height: "100%",
       }}
+      padding={3}
     >
       <Container maxWidth="sm">
+        {/* Logo */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "center",
-            mb: 3,
-            mt: 3,
+            mb: 4,
           }}
         >
           <Box
@@ -67,49 +72,107 @@ export default function LoginPage({ type }: Props) {
             src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
             alt="AdLocal"
             sx={{
-              width: { xs: 180, sm: 220 },
-              maxWidth: "100%",
+              width: { xs: 160, sm: 200 },
+              borderRadius: 3,
             }}
           />
         </Box>
 
+        {/* Card Login */}
         <Paper
-          elevation={4}
+          elevation={0}
           sx={{
             p: { xs: 3, sm: 4 },
-            borderRadius: 3,
+            borderRadius: 4,
+            bgcolor: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(14px)",
+            boxShadow:
+              "0 20px 40px rgba(0,0,0,0.08)",
           }}
         >
-          <Typography variant="h5" fontWeight="bold" align="center" mb={2}>
-            {type === "admin" ? "Login Administrador" : "Iniciar sesión"}
+          <Typography
+            fontSize={22}
+            fontWeight={800}
+            align="center"
+            mb={1}
+          >
+            {type === "admin"
+              ? "Acceso administrador"
+              : "Inicia sesión"}
+          </Typography>
+
+          <Typography
+            fontSize={14}
+            color="text.secondary"
+            align="center"
+            mb={3}
+          >
+            Accede a tu cuenta para continuar
           </Typography>
 
           <LoginForm onSubmit={handleLogin} />
 
           <Divider sx={{ my: 3 }} />
 
-          <Button
-            variant="outlined"
-            fullWidth
-            size="large"
-            onClick={() =>
-              type === "admin"
-                ? navigate("/crear-admin")
-                : navigate("/registro")
-            }
-          >
-            {type === "admin" ? "Crear administrador" : "Crear usuario"}
-          </Button>
-          <Divider sx={{ my: 3 }} />
+          {/* Acciones */}
+          <Box display="flex" flexDirection="column" gap={1.5}>
+            <Button
+              fullWidth
+              size="large"
+              onClick={() =>
+                type === "admin"
+                  ? navigate("/crear-admin")
+                  : navigate("/registro")
+              }
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#007AFF",
+                color: "#007AFF",
+                "&:hover": {
+                  bgcolor: "rgba(0,122,255,0.08)",
+                },
+              }}
+              variant="outlined"
+            >
+              {type === "admin"
+                ? "Crear administrador"
+                : "Crear cuenta"}
+            </Button>
 
-          <Button
-            variant="outlined"
-            fullWidth
-            size="large"
-            onClick={() => navigate("/recuperar-contrasena")}
-          >
-            Restablecer contraseña
-          </Button>
+            <Button
+              fullWidth
+              size="large"
+              onClick={() =>
+                navigate("/recuperar-contrasena")
+              }
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+              variant="text"
+            >
+              ¿Olvidaste tu contraseña?
+            </Button>
+
+            <Divider sx={{ my: 1 }} />
+
+            <Button
+              fullWidth
+              size="large"
+              onClick={() => navigate("/planes")}
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+              variant="text"
+            >
+              Ver planes disponibles
+            </Button>
+          </Box>
         </Paper>
       </Container>
     </Box>

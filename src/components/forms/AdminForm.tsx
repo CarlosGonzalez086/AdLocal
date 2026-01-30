@@ -6,6 +6,7 @@ interface AdminFormProps {
   defaultValues?: any;
   type: "admin" | "user";
   isEdit?: boolean;
+  isFormCode?: boolean;
 }
 
 export default function AdminForm({
@@ -13,6 +14,7 @@ export default function AdminForm({
   defaultValues,
   isEdit = false,
   type,
+  isFormCode = false,
 }: AdminFormProps) {
   const {
     register,
@@ -46,6 +48,14 @@ export default function AdminForm({
             type="password"
             fullWidth
             {...register("password", { required: true })}
+          />
+        )}
+        {isFormCode && (
+          <TextField
+            label="¿Tienes un código de referido? Escríbelo aquí"
+            type="text"
+            fullWidth
+            {...register("codigoReferenciado")}
           />
         )}
 

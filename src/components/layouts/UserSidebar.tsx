@@ -20,6 +20,7 @@ import CreditCardIcon from "@mui/icons-material/CreditCard";
 import CategoryIcon from "@mui/icons-material/Category";
 import type { JwtClaims } from "../../services/auth.api";
 import { jwtDecode } from "jwt-decode";
+import type { JSX } from "react";
 
 interface UserSidebarProps {
   drawerWidth: number;
@@ -43,24 +44,46 @@ const UserSidebar = ({
   const claims: JwtClaims | null = dataJwt
     ? jwtDecode<JwtClaims>(dataJwt)
     : null;
+  const esRutaComercios =
+    (claims?.planTipo == "PRO" && claims?.rol == "Comercio") ||
+    (claims?.planTipo == "BUSINESS" && claims?.rol == "Comercio");
+  console.log(claims);
+
+  const esRutaBasica =
+    claims?.rol == "Colaborador" ||
+    (claims?.planTipo == "BASIC" && claims?.rol == "Comercio");
 
   const menuItems = [
     { text: "Inicio", icon: <HomeIcon />, path: "/app" },
+
     { text: "Mi comercio", icon: <StoreIcon />, path: "/app/comercio" },
-    { text: "Mi plan", icon: <EventNoteIcon />, path: "/app/plan" },
-    { text: "Tarjetas", icon: <CreditCardIcon />, path: "/app/tarjetas" },
-    claims?.planTipo == "PRO" || claims?.planTipo == "BUSINESS"
-      ? {
-          text: "Productos y servicios",
-          icon: <CategoryIcon />,
-          path: "/app/productos-servicios/comercios",
-        }
-      : {
-          text: "Productos y servicios",
-          icon: <CategoryIcon />,
-          path: "/app/productos-servicios",
-        },
-  ];
+
+    claims?.rol !== "Colaborador" && {
+      text: "Mi plan",
+      icon: <EventNoteIcon />,
+      path: "/app/plan",
+    },
+
+    claims?.rol !== "Colaborador" && {
+      text: "Tarjetas",
+      icon: <CreditCardIcon />,
+      path: "/app/tarjetas",
+    },
+
+    esRutaComercios && {
+      text: "Productos y servicios",
+      icon: <CategoryIcon />,
+      path: "/app/productos-servicios/comercios",
+    },
+esRutaBasica &&
+    {
+      text: "Productos y servicios",
+      icon: <CategoryIcon />,
+      path: "/app/productos-servicios",
+    },
+  ].filter((x): x is { text: string; icon: JSX.Element; path: string } =>
+    Boolean(x),
+  );
 
   const currentWidth = collapsed ? collapsedWidth : drawerWidth;
 
@@ -117,6 +140,8 @@ const UserSidebar = ({
 
       <List sx={{ px: 1.2, py: 1.2 }}>
         {menuItems.map((item) => {
+          if (!item?.path) return null;
+
           const isSelected = location.pathname === item.path;
 
           const content = (

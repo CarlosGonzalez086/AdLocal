@@ -679,7 +679,7 @@ export default function ComercioDetalle({
             </AccordionDetails>
           </Accordion>
 
-          {comercio.lat && comercio.lng && (
+          {comercio.lat !== 19.4326 && comercio.lng !== -99.1332 && (
             <Box
               sx={{
                 mt: { xs: 2.5, sm: 3.5 },

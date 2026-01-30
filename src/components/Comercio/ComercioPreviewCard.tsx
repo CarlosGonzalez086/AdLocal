@@ -23,8 +23,8 @@ import {
 import { DIAS_SEMANA_MAP } from "../../utils/constantes";
 
 interface Props {
-  comercio: ComercioDto | null;
-  claims: JwtClaims | null;
+  comercio: ComercioDto;
+  claims: JwtClaims;
   imagenes: string[];
   eliminar: () => void;
   setEditando: React.Dispatch<React.SetStateAction<boolean>>;
@@ -48,7 +48,7 @@ export function ComercioPreviewCard({
         }}
       >
         <Avatar
-          src={comercio?.logoBase64}
+          src={comercio.logoBase64}
           variant="rounded"
           sx={{
             width: 140,
@@ -60,38 +60,38 @@ export function ComercioPreviewCard({
           }}
         />
         <Typography variant="h5" fontWeight={700} color="#333">
-          {comercio?.nombre}
+          {comercio.nombre}
         </Typography>
-        {comercio?.descripcion && (
+        {comercio.descripcion && (
           <Typography
             variant="body2"
             color="text.secondary"
             mt={1}
             px={{ xs: 2, md: 10 }}
           >
-            {comercio?.descripcion}
+            {comercio.descripcion}
           </Typography>
         )}
       </Box>
 
       <CardContent>
         <Stack spacing={1.5} mb={3}>
-          {comercio?.direccion && (
+          {comercio.direccion && (
             <InfoRow
               icon={<LocationOn sx={{ color: "#007AFF" }} />}
-              text={`${comercio?.direccion}, ${comercio?.municipioNombre}, ${comercio?.estadoNombre}`}
+              text={`${comercio.direccion}, ${comercio.municipioNombre}, ${comercio.estadoNombre}`}
             />
           )}
-          {comercio?.telefono && (
+          {comercio.telefono && (
             <InfoRow
               icon={<Phone sx={{ color: "#34C759" }} />}
-              text={comercio?.telefono}
+              text={comercio.telefono}
             />
           )}
-          {comercio?.email && (
+          {comercio.email && (
             <InfoRow
               icon={<Email sx={{ color: "#FF3B30" }} />}
-              text={comercio?.email}
+              text={comercio.email}
             />
           )}
         </Stack>
@@ -108,7 +108,7 @@ export function ComercioPreviewCard({
               <Chip
                 label="Primario"
                 sx={{
-                  backgroundColor: comercio?.colorPrimario,
+                  backgroundColor: comercio.colorPrimario,
                   color: "#fff",
                   px: 2,
                   fontWeight: 600,
@@ -118,7 +118,7 @@ export function ComercioPreviewCard({
               <Chip
                 label="Secundario"
                 sx={{
-                  backgroundColor: comercio?.colorSecundario,
+                  backgroundColor: comercio.colorSecundario,
                   color: "#fff",
                   px: 2,
                   fontWeight: 600,
@@ -175,14 +175,14 @@ export function ComercioPreviewCard({
               )}
             </div>
             <div className="col-lg-6 col-md-6 col-sm-12">
-              {Number(comercio?.horarios.length) > 0 && (
+              {Number(comercio.horarios.length) > 0 && (
                 <>
                   <SectionTitle
                     icon={<AccessTime sx={{ color: "#5856D6" }} />}
                     text="Horarios"
                   />
                   <Stack spacing={1}>
-                    {comercio?.horarios
+                    {comercio.horarios
                       .sort((a, b) => a.dia - b.dia)
                       .map((h) => (
                         <Paper
@@ -216,12 +216,12 @@ export function ComercioPreviewCard({
           </div>
         </div>
 
-        {comercio?.lat !== 0 && comercio?.lng !== 0 && (
+        {comercio.lat !== 19.4326 && comercio.lng !== -99.1332 && (
           <>
             <Divider sx={{ my: 3 }} />
             <Box sx={{ height: 300, borderRadius: 3, overflow: "hidden" }}>
               <MapContainer
-                center={[Number(comercio?.lat), Number(comercio?.lng)]}
+                center={[Number(comercio.lat), Number(comercio.lng)]}
                 zoom={16}
                 style={{ height: "100%", width: "100%" }}
                 dragging={false}
@@ -229,7 +229,7 @@ export function ComercioPreviewCard({
               >
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <Marker
-                  position={[Number(comercio?.lat), Number(comercio?.lng)]}
+                  position={[Number(comercio.lat), Number(comercio?.lng)]}
                 />
               </MapContainer>
             </Box>
@@ -251,18 +251,25 @@ export function ComercioPreviewCard({
           >
             Editar
           </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={eliminar}
-            sx={{
-              py: 1.5,
-              borderRadius: 3,
-              textTransform: "none",
-            }}
-          >
-            Eliminar
-          </Button>
+          {claims?.rol === "Colaborador" ? (
+            <></>
+          ) : (
+            <>
+              {" "}
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={eliminar}
+                sx={{
+                  py: 1.5,
+                  borderRadius: 3,
+                  textTransform: "none",
+                }}
+              >
+                Eliminar
+              </Button>
+            </>
+          )}
         </Stack>
       </CardContent>
     </Card>

@@ -35,7 +35,7 @@ export interface ProductoServicioDto {
   activo: boolean;
   stock: number;
   imagenBase64?: string;
-  idComercio?: number;
+  idComercio: number;
 }
 
 export interface PagedResponse<T> {
@@ -50,9 +50,11 @@ export const productosServiciosApi = {
   actualizar: (id: number, data: ProductoServicioDto) =>
     api.put<ApiResponse<ProductoServicioDto>>(`/${id}`, data),
 
-  eliminar: (id: number) => api.delete<ApiResponse<null>>(`/${id}`),
+  eliminar: (id: number, idComercio: number) =>
+    api.delete<ApiResponse<null>>(`/${id}/idComercio/${idComercio}`),
 
-  desactivar: (id: number) => api.put<ApiResponse<null>>(`desactivar/${id}`),
+  desactivar: (id: number, idComercio: number) =>
+    api.put<ApiResponse<null>>(`desactivar/${id}/idComercio/${idComercio}`),
 
   getById: (id: number) => api.get<ApiResponse<ProductoServicioDto>>(`/${id}`),
 

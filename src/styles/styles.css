@@ -14,3 +14,7 @@
   overflow-y: auto;
   height: calc(100vh - 68px);
 }
+.swal2-container {
+  z-index: 2000 !important;
+}
+

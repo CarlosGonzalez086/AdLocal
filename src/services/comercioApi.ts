@@ -1,6 +1,7 @@
 import axios from "axios";
 import type { ApiResponse } from "../api/apiResponse";
 import type { PagedResponse } from "./productosServiciosApi";
+import type { ProfileUser } from "./userProfileApi";
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/comercios`,
@@ -139,6 +140,12 @@ export interface ComercioDtoListItem {
   badge: string;
 }
 
+export interface ColaborarDto {
+  idComercio: number;
+  nombre: string;
+  correo: string;
+}
+
 export const comercioApi = {
   getMine: () => api.get<ApiResponse<ComercioDto>>("/mine"),
   getTotalComerciosByIdUsuario: () =>
@@ -159,4 +166,24 @@ export const comercioApi = {
       },
     ),
   getById: (id: number) => api.get<ApiResponse<ComercioDto>>(`/${id}`),
+  guardarColaborador: (data: ColaborarDto) =>
+    api.post<ApiResponse<object>>("/guardarColaborador", data),
+  getAllColaboradores: (idComercio = 0, page = 1, pageSize = 10) =>
+    api.get<ApiResponse<PagedResponse<ProfileUser>>>("/getAllColaboradores", {
+      params: { idComercio, page, pageSize },
+    }),
+  toggleAccesoColaborador: (idColaborador: number, idComercio: number) =>
+    api.put<ApiResponse<object>>(`toggleAccesoColaborador`, null, {
+      params: {
+        idColaborador,
+        idComercio,
+      },
+    }),
+  eliminarColaborador: (idColaborador: number, idComercio: number) =>
+    api.delete<ApiResponse<object>>(`eliminarColaborador`, {
+      params: {
+        idColaborador,
+        idComercio,
+      },
+    }),
 };

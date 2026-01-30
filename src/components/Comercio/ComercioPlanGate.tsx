@@ -8,7 +8,7 @@ interface Props {
 
 export function ComercioPlanGate({ claims, children, fallback }: Props) {
   const permitido =
-    claims?.rol === "Comercio" &&
+    claims?.rol !== "Colaborador" &&
     (claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS");
 
   return <>{permitido ? children : fallback}</>;

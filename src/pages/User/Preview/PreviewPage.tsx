@@ -23,6 +23,7 @@ import {
   type ProductoServicioDto,
 } from "../../../services/productosServiciosApi";
 import type { JwtClaims } from "../../../services/auth.api";
+import CodigoReferido from "../../../components/User/CodigoReferido";
 
 export default function PreviewPage() {
   const dataJwt = localStorage.getItem("token");
@@ -98,7 +99,7 @@ export default function PreviewPage() {
     );
   }
 
-  if (!comercio) {
+  if (comercio.id == 0) {
     return (
       <Box p={{ xs: 2, sm: 4 }}>
         <Typography variant="h5" fontWeight={700}>
@@ -111,11 +112,23 @@ export default function PreviewPage() {
     );
   }
 
+  
+
   return (
     <Box>
-      {claims?.rol === "Comercio" &&
-        (claims.planTipo === "PRO" || claims.planTipo === "BUSINESS") && (
-          <Box mb={6}>
+      {claims?.codigoReferido ? (
+        <>
+          {" "}
+          <CodigoReferido codigoReferido={claims?.codigoReferido ?? ""} />
+          <Divider />
+        </>
+      ) : (
+        <></>
+      )}
+
+      {claims?.rol !== "Colaborador" &&
+        (claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS") && (
+          <Box mb={6} mt={3}>
             <div className="row g-3 d-flex justify-content-center">
               {comercios.map((c) => (
                 <div
@@ -129,45 +142,48 @@ export default function PreviewPage() {
           </Box>
         )}
 
-      {(claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS") && (
-        <>
-          <Divider />
-          <Box mt={6}>
-            <Typography fontSize={{ xs: 22, sm: 26 }} fontWeight={800} mb={2}>
-              Estadísticas de visitas
-            </Typography>
-
-            <ComercioSelector
-              comercios={comercios}
-              value={selectedId ?? 0}
-              onChange={setSelectedId}
-            />
-
-            {loadingStats && (
-              <Box textAlign="center" mt={4}>
-                <CircularProgress />
-              </Box>
-            )}
-
-            {statsError && (
-              <Typography color="error" mt={2}>
-                {statsError}
+      {(claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS") &&
+        claims?.rol !== "Colaborador" && (
+          <>
+            <Divider />
+            <Box mt={6}>
+              <Typography fontSize={{ xs: 22, sm: 26 }} fontWeight={800} mb={2}>
+                Estadísticas de visitas
               </Typography>
-            )}
 
-            {stats && (
-              <Box mt={4}>
-                <ComercioVisitasCharts
-                  ultimaSemana={stats.ultimaSemana}
-                  ultimosTresMeses={stats.ultimosTresMeses}
-                />
-              </Box>
-            )}
-          </Box>
-        </>
-      )}
+              <ComercioSelector
+                comercios={comercios}
+                value={selectedId ?? 0}
+                onChange={setSelectedId}
+              />
 
-      {(claims?.planTipo === "FREE" || claims?.planTipo === "BASIC") && (
+              {loadingStats && (
+                <Box textAlign="center" mt={4}>
+                  <CircularProgress />
+                </Box>
+              )}
+
+              {statsError && (
+                <Typography color="error" mt={2}>
+                  {statsError}
+                </Typography>
+              )}
+
+              {stats && (
+                <Box mt={4}>
+                  <ComercioVisitasCharts
+                    ultimaSemana={stats.ultimaSemana}
+                    ultimosTresMeses={stats.ultimosTresMeses}
+                  />
+                </Box>
+              )}
+            </Box>
+          </>
+        )}
+
+      {(claims?.planTipo === "FREE" ||
+        claims?.planTipo === "BASIC" ||
+        claims?.rol === "Colaborador") && (
         <>
           <Typography fontSize={{ xs: 22, sm: 26 }} fontWeight={800} mb={1}>
             Vista previa

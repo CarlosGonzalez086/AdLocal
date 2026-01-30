@@ -93,6 +93,7 @@ export const PlanesUserList = () => {
                     maxFotos={plan.maxFotos}
                     permiteCatalogo={plan.permiteCatalogo}
                     tieneAnalytics={plan.tieneAnalytics}
+                    isMultiUsuario={plan.isMultiUsuario}
                     coloresPersonalizados={plan.coloresPersonalizados}
                     soportePrioritario={plan.tieneBadge}
                     onSelect={() => handleSelectPlan(plan)}

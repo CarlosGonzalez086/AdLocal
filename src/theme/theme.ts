@@ -44,6 +44,18 @@ const theme = createTheme({
       },
     },
   },
+  typography: {
+    fontFamily: `
+      -apple-system,
+      BlinkMacSystemFont,
+      "SF Pro Display",
+      "Segoe UI",
+      Roboto,
+      Inter,
+      Arial,
+      sans-serif
+    `,
+  },
 });
 
 export default theme;

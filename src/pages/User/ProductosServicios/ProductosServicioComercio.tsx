@@ -41,7 +41,7 @@ export function ProductosServicioComercio() {
     activo: true,
     stock: 0,
     imagenBase64: "",
-    idComercio: Number(id),
+    idComercio: id ? Number(id) : 0,
   };
 
   const { productos, total, loading, listar, guardar, eliminar, desactivar } =
@@ -225,7 +225,16 @@ export function ProductosServicioComercio() {
                     "&:hover": { bgcolor: "#E5E5EA" },
                   }}
                   onClick={() => {
-                    setProducto(p);
+                    setProducto({
+                      id: p.id,
+                      idComercio: producto.idComercio,
+                      imagenBase64: p.imagenBase64,
+                      precio: p.precio,
+                      nombre: p.nombre,
+                      stock: p.stock,
+                      descripcion: p.descripcion,
+                      activo: p.activo,
+                    });
                     setOpen(true);
                   }}
                 >
@@ -242,7 +251,7 @@ export function ProductosServicioComercio() {
                     "&:hover": { bgcolor: "#FAD2CF" },
                   }}
                   onClick={() =>
-                    eliminar(Number(p.id), {
+                    eliminar(Number(p.id), Number(id), {
                       page,
                       rows,
                       orderBy,
@@ -263,7 +272,7 @@ export function ProductosServicioComercio() {
                     color: p.activo ? "#1E7F4F" : "#666",
                   }}
                   onClick={() =>
-                    desactivar(Number(p.id), Boolean(p.activo), {
+                    desactivar(Number(p.id), Number(id), Boolean(p.activo), {
                       page,
                       rows,
                       orderBy,
@@ -283,20 +292,30 @@ export function ProductosServicioComercio() {
           )}
         />
       </Paper>
-
-      <ProductoServicioModal
-        key={`edit-${producto?.id ?? "new"}`}
-        open={open}
-        onClose={() => {
-          setOpen(false);
-          setProducto(initialForm);
-        }}
-        onSave={(p) =>
-          guardar(p, { page, rows, orderBy, search, idComercio: Number(id) })
-        }
-        producto={producto}
-        loading={loading}
-      />
+      {open && (
+        <>
+          {" "}
+          <ProductoServicioModal
+            key={`edit-${producto?.id ?? "new"}`}
+            open={open}
+            onClose={() => {
+              setOpen(false);
+              setProducto(initialForm);
+            }}
+            onSave={(p) =>
+              guardar(p, {
+                page,
+                rows,
+                orderBy,
+                search,
+                idComercio: Number(id),
+              })
+            }
+            producto={producto}
+            loading={loading}
+          />
+        </>
+      )}
     </Box>
   );
 }

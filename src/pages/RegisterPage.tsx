@@ -8,7 +8,6 @@ import {
 } from "@mui/material";
 import AdminForm from "../components/forms/AdminForm";
 import { adminApi } from "../api/admin.api";
-
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { authApi, sendWelcomeEmail } from "../api/authApi";
@@ -25,20 +24,19 @@ export default function RegisterPage({ type }: Props) {
 
     try {
       const res =
-        type == "admin"
+        type === "admin"
           ? await adminApi.crearAdmin(data)
           : await authApi.registroUsuario(data);
 
       isCreated = true;
-      if (type != "admin") {
+
+      if (type !== "admin") {
         try {
           await sendWelcomeEmail(
             res.data.respuesta.nombre,
-            res.data.respuesta.email
+            res.data.respuesta.email,
           );
-        } catch (emailError) {
-          console.error("Error al enviar correo de bienvenida:", emailError);
-
+        } catch {
           Swal.fire({
             icon: "warning",
             title: "Cuenta creada",
@@ -72,18 +70,21 @@ export default function RegisterPage({ type }: Props) {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        bgcolor: "#f5f5f5",
+        bgcolor: "#F2F2F7",
         display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        height: "100%",
       }}
+      padding={3}
     >
       <Container maxWidth="sm">
+        {/* Logo */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "center",
-            mb: 3,
-            mt: 3,
+            mb: 4,
           }}
         >
           <Box
@@ -91,48 +92,83 @@ export default function RegisterPage({ type }: Props) {
             src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
             alt="AdLocal"
             sx={{
-              width: { xs: 180, sm: 220 },
-              maxWidth: "100%",
+              width: { xs: 160, sm: 200 },
+              borderRadius: 3,
             }}
           />
         </Box>
 
+        {/* Card Registro */}
         <Paper
-          elevation={4}
+          elevation={0}
           sx={{
             p: { xs: 3, sm: 4 },
-            borderRadius: 3,
+            borderRadius: 4,
+            bgcolor: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(14px)",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
           }}
         >
-          <Typography variant="h5" fontWeight="bold" textAlign="center" mb={1}>
+          <Typography fontSize={22} fontWeight={800} textAlign="center" mb={1}>
             {type === "admin" ? "Crear administrador" : "Crear cuenta"}
           </Typography>
 
           <Typography
-            variant="body2"
+            fontSize={14}
             color="text.secondary"
             textAlign="center"
             mb={3}
           >
             {type === "admin"
               ? "Registro de administrador del sistema"
-              : "Registro de usuario"}
+              : "Crea tu cuenta en minutos"}
           </Typography>
 
-          <AdminForm onSubmit={handleCreate} type={type} />
+          <AdminForm
+            onSubmit={handleCreate}
+            type={type}
+            isFormCode={type == "user"}
+          />
 
           <Divider sx={{ my: 3 }} />
 
-          <Button
-            variant="outlined"
-            fullWidth
-            size="large"
-            onClick={() =>
-              navigate(type === "admin" ? "/login/admin" : "/login")
-            }
-          >
-            Iniciar sesión
-          </Button>
+          {/* Acciones */}
+          <Box display="flex" flexDirection="column" gap={1.5}>
+            <Button
+              fullWidth
+              size="large"
+              onClick={() =>
+                navigate(type === "admin" ? "/login/admin" : "/login")
+              }
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#007AFF",
+                color: "#007AFF",
+                "&:hover": {
+                  bgcolor: "rgba(0,122,255,0.08)",
+                },
+              }}
+              variant="outlined"
+            >
+              ¿Ya tienes cuenta? Inicia sesión
+            </Button>
+
+            <Button
+              fullWidth
+              size="large"
+              onClick={() => navigate("/planes")}
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+              variant="text"
+            >
+              Ver planes disponibles
+            </Button>
+          </Box>
         </Paper>
       </Container>
     </Box>

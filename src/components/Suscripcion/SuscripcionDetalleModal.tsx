@@ -113,6 +113,9 @@ export const SuscripcionDetalleModal = ({
               {plan.tieneBadge && (
                 <Chip label={`🏷️ ${plan.badgeTexto || "Badge especial"}`} />
               )}
+              {plan.isMultiUsuario && (
+                <Chip label="👥 Multiusuario"  />
+              )}
             </Stack>
           </Box>
 

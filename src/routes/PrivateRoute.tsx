@@ -4,9 +4,10 @@ import { jwtDecode } from "jwt-decode";
 import { useActualizarJwt } from "../hooks/useActualizarJwt";
 import { UserContext, type User } from "../context/UserContext ";
 
+
 interface PrivateRouteProps {
   children: ReactElement;
-  role?: string;
+  roles?: string[]; 
 }
 
 interface JwtPayload {
@@ -19,12 +20,12 @@ interface JwtPayload {
   FotoUrl: string;
 }
 
-const PrivateRoute = ({ children, role }: PrivateRouteProps) => {
+const PrivateRoute = ({ children, roles }: PrivateRouteProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const executedRef = useRef(false);
 
   const { actualizarJwt } = useActualizarJwt();
-  const executedRef = useRef(false);
 
   useEffect(() => {
     if (executedRef.current) return;
@@ -32,7 +33,6 @@ const PrivateRoute = ({ children, role }: PrivateRouteProps) => {
 
     const validarToken = async () => {
       const token = localStorage.getItem("token");
-
       if (!token) {
         setLoading(false);
         return;
@@ -49,13 +49,13 @@ const PrivateRoute = ({ children, role }: PrivateRouteProps) => {
           });
 
           const nuevoToken = response?.respuesta?.token;
-          if (!nuevoToken) throw new Error("No se pudo refrescar el token");
+          if (!nuevoToken) throw new Error("Token inválido");
 
           localStorage.setItem("token", nuevoToken);
           decoded = jwtDecode<JwtPayload>(nuevoToken);
         }
 
-        setUser(decoded);
+        setUser(decoded as User);
       } catch {
         localStorage.removeItem("token");
         setUser(null);
@@ -71,13 +71,24 @@ const PrivateRoute = ({ children, role }: PrivateRouteProps) => {
 
   if (!user) return <Navigate to="/login" replace />;
 
-  if (role && user.rol !== role) {
-    if (user.rol === "Admin") return <Navigate to="/Admin" replace />;
-    if (user.rol === "Comercio") return <Navigate to="/app" replace />;
-    return <Navigate to="/login" replace />;
+  // 🔐 validación de roles
+  if (roles && !roles.includes(user.rol)) {
+    switch (user.rol) {
+      case "Admin":
+        return <Navigate to="/Admin" replace />;
+      case "Comercio":
+      case "Colaborador":
+        return <Navigate to="/app" replace />;
+      default:
+        return <Navigate to="/login" replace />;
+    }
   }
 
-  return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
+  return (
+    <UserContext.Provider value={user}>
+      {children}
+    </UserContext.Provider>
+  );
 };
 
 export default PrivateRoute;

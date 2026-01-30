@@ -11,10 +11,12 @@ import AdminLayout from "./components/layouts/AdminLayout";
 import UserLayout from "./components/layouts/UserLayout";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import WelcomeCollaboratorPage from "./pages/WelcomeCollaboratorPage";
+import PlanesPublicList from "./pages/PlanesPublicList";
 
 export default function App() {
   return (
-    <div style={{ height: "100vh", width: "100vw" }}>
+    <div>
       <BrowserRouter>
         <Routes>
           <Route
@@ -22,6 +24,14 @@ export default function App() {
             element={
               <PublicRoute>
                 <LoginPage type="user" />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/planes"
+            element={
+              <PublicRoute>
+                <PlanesPublicList />
               </PublicRoute>
             }
           />
@@ -37,6 +47,10 @@ export default function App() {
           <Route
             path="/cambiar-contrasena/:token"
             element={<ResetPasswordPage />}
+          />
+          <Route
+            path="/nuevo-colaborador/:token"
+            element={<WelcomeCollaboratorPage />}
           />
 
           <Route
@@ -69,12 +83,12 @@ export default function App() {
           <Route
             path="/Admin"
             element={
-              <PrivateRoute role="Admin">
+              <PrivateRoute roles={["Admin"]}>
                 <AdminLayout />
               </PrivateRoute>
             }
           >
-            {adminRoutes.map((r) => (
+            {adminRoutes.filter(Boolean).map((r) => (
               <Route key={r.path} path={r.path} element={r.element} />
             ))}
           </Route>
@@ -82,12 +96,12 @@ export default function App() {
           <Route
             path="/app"
             element={
-              <PrivateRoute role="Comercio">
+              <PrivateRoute roles={["Comercio", "Colaborador"]}>
                 <UserLayout />
               </PrivateRoute>
             }
           >
-            {userRoutes.map((r) => (
+            {userRoutes.filter(Boolean).map((r) => (
               <Route key={r.path} path={r.path} element={r.element} />
             ))}
           </Route>

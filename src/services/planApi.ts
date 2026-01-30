@@ -52,6 +52,7 @@ export interface PlanCreateDto {
   tieneBadge: boolean;
   badgeTexto?: string | null;
   tieneAnalytics: boolean;
+  isMultiUsuario:boolean;
 }
 
 export type PlanFormErrors = Partial<Record<keyof PlanCreateDto, string>>;

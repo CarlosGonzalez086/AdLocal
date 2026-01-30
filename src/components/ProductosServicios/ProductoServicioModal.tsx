@@ -97,8 +97,6 @@ export const ProductoServicioModal = ({
     reader.readAsDataURL(file);
   };
 
-  console.log(form);
-
   return (
     <Dialog
       open={open}

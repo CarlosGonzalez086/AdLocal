@@ -45,6 +45,7 @@ const defaultForm: PlanCreateDto = {
   tieneBadge: false,
   badgeTexto: null,
   tieneAnalytics: false,
+  isMultiUsuario: false,
 };
 
 export const PlanModal = ({
@@ -106,9 +107,7 @@ export const PlanModal = ({
             error={!!errors.nombre}
             helperText={errors.nombre}
             disabled={soloVer}
-            onChange={(e) =>
-              setForm({ ...form, nombre: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
           />
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
@@ -155,9 +154,7 @@ export const PlanModal = ({
             label="Tipo de plan"
             value={form.tipo}
             disabled={soloVer}
-            onChange={(e) =>
-              setForm({ ...form, tipo: e.target.value as any })
-            }
+            onChange={(e) => setForm({ ...form, tipo: e.target.value as any })}
           >
             <MenuItem value="FREE">Free</MenuItem>
             <MenuItem value="BASIC">Básico</MenuItem>
@@ -266,9 +263,7 @@ export const PlanModal = ({
               label="Texto del badge"
               value={form.badgeTexto ?? ""}
               disabled={soloVer}
-              onChange={(e) =>
-                setForm({ ...form, badgeTexto: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, badgeTexto: e.target.value })}
             />
           )}
 
@@ -286,6 +281,21 @@ export const PlanModal = ({
               />
             }
             label="Analytics"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.isMultiUsuario}
+                disabled={soloVer}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    isMultiUsuario: e.target.checked,
+                  })
+                }
+              />
+            }
+            label="Multiusuario"
           />
         </Stack>
       </DialogContent>

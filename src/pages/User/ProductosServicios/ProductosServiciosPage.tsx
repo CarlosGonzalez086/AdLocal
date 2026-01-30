@@ -39,6 +39,7 @@ export const ProductosServiciosPage = () => {
     activo: true,
     stock: 0,
     imagenBase64: "",
+    idComercio: 0,
   };
 
   const { productos, total, loading, listar, guardar, eliminar, desactivar } =
@@ -235,7 +236,7 @@ export const ProductosServiciosPage = () => {
                     "&:hover": { bgcolor: "#FAD2CF" },
                   }}
                   onClick={() =>
-                    eliminar(Number(p.id), {
+                    eliminar(Number(p.id), 0, {
                       page,
                       rows,
                       orderBy,
@@ -256,7 +257,7 @@ export const ProductosServiciosPage = () => {
                     color: p.activo ? "#1E7F4F" : "#666",
                   }}
                   onClick={() =>
-                    desactivar(Number(p.id),p.activo, {
+                    desactivar(Number(p.id), 0, p.activo, {
                       page,
                       rows,
                       orderBy,
@@ -276,20 +277,23 @@ export const ProductosServiciosPage = () => {
           )}
         />
       </Paper>
-
-      <ProductoServicioModal
-        key={`edit-${producto?.id ?? "new"}`}
-        open={open}
-        onClose={() => {
-          setOpen(false);
-          setProducto(initialForm);
-        }}
-        onSave={(p) =>
-          guardar(p, { page, rows, orderBy, search, idComercio: 0 })
-        }
-        producto={producto}
-        loading={loading}
-      />
+      {open && (
+        <>
+          <ProductoServicioModal
+            key={`edit-${producto?.id ?? "new"}`}
+            open={open}
+            onClose={() => {
+              setOpen(false);
+              setProducto(initialForm);
+            }}
+            onSave={(p) =>
+              guardar(p, { page, rows, orderBy, search, idComercio: 0 })
+            }
+            producto={producto}
+            loading={loading}
+          />
+        </>
+      )}
     </Box>
   );
 };

@@ -21,13 +21,18 @@ import { ProductosServicioComercio } from "./pages/User/ProductosServicios/Produ
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 const dataJwt = localStorage.getItem("token");
 const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
+const puedeVerComercios =
+  claims?.rol !== "Colaborador" &&
+  (claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS");
+
+const permiteCatalogo = claims?.permiteCatalogo !== "False";
 
 export const userRoutes = [
   {
     path: "",
     element: <PreviewPage />,
   },
-  {
+  claims?.rol !== "Colaborador" && {
     path: "vistaprevia/:id",
     element: <PreviewNegocio />,
   },
@@ -47,53 +52,42 @@ export const userRoutes = [
     path: "comercio",
     element: <MiComercioPage />,
   },
-  {
+  claims?.rol !== "Colaborador" && {
     path: "comercio/editar/:id",
     element: <ComercioPageForm />,
   },
-  {
+  claims?.rol !== "Colaborador" && {
     path: "comercio/nuevo",
     element: <ComercioPageForm />,
   },
-
-  {
+  claims?.rol !== "Colaborador" && {
     path: "plan",
     element: <PlanesPage />,
   },
 
-  // {
-  //   path: "pagos",
-  //   element: <>Pagos</>,
-  // },
-  {
+ {
     path: "productos-servicios",
-    element:
-      claims?.permiteCatalogo != "False" ? (
-        <ProductosServiciosPage />
-      ) : (
-        <UpgradePlanPage />
-      ),
+    element: permiteCatalogo ? <ProductosServiciosPage /> : <UpgradePlanPage />,
   },
-  {
+  puedeVerComercios && {
     path: "productos-servicios/comercios",
-    element:
-      claims?.permiteCatalogo != "False" ? (
-        <ProductosServicioComercios />
-      ) : (
-        <UpgradePlanPage />
-      ),
-  },
-  {
-    path: "productos-servicios/comercios/comercio/:id",
-    element:
-      claims?.permiteCatalogo != "False" ? (
-        <ProductosServicioComercio />
-      ) : (
-        <UpgradePlanPage />
-      ),
+    element: permiteCatalogo ? (
+      <ProductosServicioComercios />
+    ) : (
+      <UpgradePlanPage />
+    ),
   },
 
-  {
+  puedeVerComercios && {
+    path: "productos-servicios/comercios/comercio/:id",
+    element: permiteCatalogo ? (
+      <ProductosServicioComercio />
+    ) : (
+      <UpgradePlanPage />
+    ),
+  },
+
+  claims?.rol !== "Colaborador" && {
     path: "tarjetas",
     element: (
       <Elements stripe={stripePromise}>

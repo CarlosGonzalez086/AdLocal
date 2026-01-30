@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { useComercio } from "../../../hooks/useComercio";
 import { ComercioForm } from "./ComercioForm";
 import { jwtDecode } from "jwt-decode";
-import type { JwtClaims } from "../../../services/auth.api";
+import { defaultJwtClaims, type JwtClaims } from "../../../services/auth.api";
 import { ComercioPlanGate } from "../../../components/Comercio/ComercioPlanGate";
 import { ComercioPreviewCard } from "../../../components/Comercio/ComercioPreviewCard";
 import { ComercioActionsHeader } from "../../../components/Comercio/ComercioActionsHeader";
@@ -25,28 +25,30 @@ export const MiComercioPage = () => {
     total,
     getAllComerciosByUser,
     eliminarFromTable,
+    guardarColaborador,
   } = useComercio();
 
   const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims | null = dataJwt
+  const claims: JwtClaims = dataJwt
     ? jwtDecode<JwtClaims>(dataJwt)
-    : null;
+    : defaultJwtClaims;
   const [editando, setEditando] = useState(false);
   const imagenes = comercio?.imagenes ?? [];
   const [page, setPage] = useState<number>(0);
-  const [rows, setRows] = useState<number>(Number(claims?.maxNegocios));
+  const [rows, setRows] = useState<number>(Number(claims.maxNegocios));
 
   useEffect(() => {
     if (
-      claims?.rol == "Comercio" &&
-      (claims?.planTipo == "PRO" || claims?.planTipo == "BUSINESS")
+      claims.rol != "Colaborador" &&
+      (claims.planTipo == "PRO" || claims.planTipo == "BUSINESS")
     ) {
       getAllComerciosByUser(page, rows);
     }
   }, []);
 
   const isPlanValido =
-    claims?.planTipo != "PRO" && claims?.planTipo != "BUSINESS";
+    (claims.planTipo != "PRO" && claims.planTipo != "BUSINESS") ||
+    claims.rol == "Colaborador" || claims.rol == "Comercio";
 
   if (isPlanValido && loading) {
     return (
@@ -68,7 +70,7 @@ export const MiComercioPage = () => {
     );
   }
 
-  if (isPlanValido && !comercio) {
+  if (isPlanValido && comercio.id == 0) {
     return (
       <Card sx={cardStyle}>
         <CardContent>
@@ -157,6 +159,7 @@ export const MiComercioPage = () => {
           setPage(0);
         }}
         eliminarFromTable={eliminarFromTable}
+        onSaveColaborador={guardarColaborador}
       />
     </ComercioPlanGate>
   );

@@ -78,6 +78,7 @@ const PlanesPage = () => {
                   maxFotos={suscripcion.plan.maxFotos}
                   precio={suscripcion.plan.precio}
                   esActivo={suscripcion.activa}
+                  isMultiUsuario={suscripcion.plan.isMultiUsuario}
                   onCancelar={cancelarPlan}
                   onVerDetalle={() => setOpenDetalle(true)}
                   tieneAnalytics={suscripcion.plan.tieneAnalytics}

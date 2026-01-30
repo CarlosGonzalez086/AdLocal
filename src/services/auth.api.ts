@@ -18,7 +18,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(
@@ -29,7 +29,7 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export interface UserDto {
@@ -50,8 +50,8 @@ export interface EmailDto {
 }
 
 export interface JwtClaims {
-  sub: string;    
-  id: string;             
+  sub: string;
+  id: string;
   nombre: string;
   rol: string;
 
@@ -66,8 +66,8 @@ export interface JwtClaims {
   maxProductos?: string;
   maxFotos?: number;
 
-  esatdo?:string;
-
+  esatdo?: string;
+  codigoReferido: string;
   permiteCatalogo?: string;
   tieneAnalytics?: string;
 
@@ -77,6 +77,33 @@ export interface JwtClaims {
   iat: number;
 }
 
+export const defaultJwtClaims: JwtClaims = {
+  sub: "",
+  id: "",
+  nombre: "",
+  rol: "Colaborador", // rol más restrictivo por default
+
+  comercioId: undefined,
+  fotoUrl: "",
+
+  planId: undefined,
+  planTipo: "BASIC", // plan más bajo por default
+  nivelVisibilidad: "0",
+
+  maxNegocios: "0",
+  maxProductos: "0",
+  maxFotos: 0,
+
+  esatdo: "inactive",
+  codigoReferido: "",
+  permiteCatalogo: "False",
+  tieneAnalytics: "False",
+
+  badge: "",
+
+  exp: 0,
+  iat: 0,
+};
 
 export const authApi = {
   forgetPassword: (data: EmailDto) =>

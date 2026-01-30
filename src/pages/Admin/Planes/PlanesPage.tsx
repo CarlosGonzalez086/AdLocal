@@ -41,6 +41,7 @@ export const PlanesPage = () => {
     tieneBadge: false,
     badgeTexto: null,
     tieneAnalytics: false,
+    isMultiUsuario: false,
   };
 
   const { planes, total, loading, listar, guardar, eliminar } = usePlanes();
@@ -77,9 +78,7 @@ export const PlanesPage = () => {
         p.precio === 0 ? (
           <Chip label="Gratis" size="small" color="success" />
         ) : (
-          <Typography fontWeight={500}>
-            ${p.precio.toLocaleString()}
-          </Typography>
+          <Typography fontWeight={500}>${p.precio.toLocaleString()}</Typography>
         ),
     },
     {
@@ -98,8 +97,8 @@ export const PlanesPage = () => {
             p.nivelVisibilidad >= 70
               ? "success"
               : p.nivelVisibilidad >= 30
-              ? "warning"
-              : "default"
+                ? "warning"
+                : "default"
           }
         />
       ),
@@ -117,11 +116,17 @@ export const PlanesPage = () => {
       label: "Badge",
       render: (p) =>
         p.tieneBadge ? (
-          <Chip
-            label={p.badgeTexto ?? "Badge"}
-            size="small"
-            color="primary"
-          />
+          <Chip label={p.badgeTexto ?? "Badge"} size="small" color="primary" />
+        ) : (
+          "—"
+        ),
+    },
+    {
+      key: "isMultiUsuario",
+      label: "MultriUsuario",
+      render: (p) =>
+        p.isMultiUsuario ? (
+          <Chip label={"Si"} size="small" color="primary" />
         ) : (
           "—"
         ),
@@ -138,8 +143,7 @@ export const PlanesPage = () => {
           p: 2.5,
           borderRadius: 3,
           border: "1px solid rgba(0,0,0,0.08)",
-          background:
-            "linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)",
+          background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)",
         }}
       >
         <Stack
@@ -177,8 +181,7 @@ export const PlanesPage = () => {
               borderRadius: 2,
               textTransform: "none",
               fontWeight: 600,
-              background:
-                "linear-gradient(135deg, #007AFF 0%, #005FCC 100%)",
+              background: "linear-gradient(135deg, #007AFF 0%, #005FCC 100%)",
               boxShadow: "0 6px 16px rgba(0,122,255,0.3)",
               "&:hover": {
                 boxShadow: "0 8px 20px rgba(0,122,255,0.4)",

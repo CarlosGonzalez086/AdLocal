@@ -49,6 +49,7 @@ export interface PlanDto {
   nivelVisibilidad: number;
   permiteCatalogo: boolean;
   coloresPersonalizados: boolean;
+  isMultiUsuario:boolean;
 
   tieneBadge: boolean;
   badgeTexto?: string;

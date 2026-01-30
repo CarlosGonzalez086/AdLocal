@@ -101,7 +101,7 @@ export default function App() {
               </PrivateRoute>
             }
           >
-            {userRoutes.filter(Boolean).map((r) => (
+            {userRoutes.filter(Boolean).map((r:any) => (
               <Route key={r.path} path={r.path} element={r.element} />
             ))}
           </Route>

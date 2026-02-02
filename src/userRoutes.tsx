@@ -27,7 +27,7 @@ const puedeVerComercios =
 
 const permiteCatalogo = claims?.permiteCatalogo !== "False";
 console.log(claims);
-
+  console.log(stripePromise);
 export const userRoutes = [
   {
     path: "",

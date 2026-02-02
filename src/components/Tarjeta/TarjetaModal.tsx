@@ -39,43 +39,77 @@ export const TarjetaModal = ({
 
   const [isDefault, setIsDefault] = useState(false);
   const [changingCard, setChangingCard] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsDefault(tarjeta?.isDefault ?? false);
     setChangingCard(false);
   }, [tarjeta, open]);
 
-  const createPaymentMethod = async (): Promise<string | null> => {
+  // 🔥 SETUP INTENT (FORMA CORRECTA EN LIVE)
+  const crearTarjetaConSetupIntent = async (): Promise<string | null> => {
     if (!stripe || !elements) return null;
 
     const card = elements.getElement(CardElement);
     if (!card) return null;
 
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: "card",
-      card,
-    });
+    // 1️⃣ Obtener clientSecret desde backend
+    const resp = await fetch(
+      `${import.meta.env.VITE_API_URL}/stripe/setup-intent`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
 
-    if (error) {
-      alert(error.message);
+    if (!resp.ok) {
+      alert("No se pudo iniciar el registro de la tarjeta");
       return null;
     }
 
-    return paymentMethod.id;
-  };
+    const { clientSecret } = await resp.json();
 
-  const handleSave = async () => {
-    let pmId = tarjeta?.stripePaymentMethodId ?? null;
+    // 2️⃣ Confirmar tarjeta con Stripe
+    const result = await stripe.confirmCardSetup(clientSecret, {
+      payment_method: { card },
+    });
 
-    if (!pmId || changingCard) {
-      const newPmId = await createPaymentMethod();
-      if (!newPmId) return;
-      pmId = newPmId;
+    if (result.error) {
+      alert(result.error.message);
+      return null;
     }
 
-    await onSave({ paymentMethodId: pmId, isDefault });
-    onClose();
+    // 3️⃣ PaymentMethod REAL y válido en LIVE
+    return result.setupIntent.payment_method as string;
+  };
+
+  // 🔹 GUARDAR
+  const handleSave = async () => {
+    if (saving) return;
+    setSaving(true);
+
+    try {
+      let pmId: string | null = tarjeta?.stripePaymentMethodId ?? null;
+
+      // Si es nueva o se está cambiando
+      if (!pmId || changingCard) {
+        const newPmId = await crearTarjetaConSetupIntent();
+        if (!newPmId) return;
+        pmId = newPmId;
+      }
+
+      await onSave({
+        paymentMethodId: pmId,
+        isDefault,
+      });
+
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -92,7 +126,6 @@ export const TarjetaModal = ({
       }}
     >
       <Box px={4} pt={4} pb={2}>
-        {/* 🔹 Header */}
         <Typography variant="h5" fontWeight={700}>
           {tarjeta ? "Editar tarjeta" : "Agregar tarjeta"}
         </Typography>
@@ -109,14 +142,12 @@ export const TarjetaModal = ({
             p={3}
             borderRadius={4}
             sx={{
-              background:
-                "linear-gradient(135deg, #1C1C1E 0%, #3A3A3C 100%)",
+              background: "linear-gradient(135deg, #1C1C1E 0%, #3A3A3C 100%)",
               color: "#fff",
-              boxShadow: "0 16px 40px rgba(0,0,0,0.35)",
             }}
           >
             <Stack direction="row" justifyContent="space-between" mb={2}>
-              <Typography fontWeight={700} letterSpacing={1}>
+              <Typography fontWeight={700}>
                 {tarjeta.brand.toUpperCase()}
               </Typography>
 
@@ -125,20 +156,17 @@ export const TarjetaModal = ({
                   px={1.5}
                   py={0.5}
                   borderRadius={2}
-                  fontSize="0.75rem"
                   bgcolor="#fff"
                   color="#000"
                   fontWeight={700}
+                  fontSize="0.75rem"
                 >
                   Principal
                 </Box>
               )}
             </Stack>
 
-            <Typography
-              variant="h6"
-              sx={{ letterSpacing: 3, fontFamily: "monospace" }}
-            >
+            <Typography sx={{ letterSpacing: 3 }}>
               •••• •••• •••• {tarjeta.last4}
             </Typography>
 
@@ -148,7 +176,7 @@ export const TarjetaModal = ({
               alignItems="center"
               mt={2}
             >
-              <Typography variant="body2" sx={{ opacity: 0.85 }}>
+              <Typography variant="body2">
                 Exp: {tarjeta.expMonth.toString().padStart(2, "0")}/
                 {tarjeta.expYear}
               </Typography>
@@ -156,16 +184,7 @@ export const TarjetaModal = ({
               <Button
                 size="small"
                 onClick={() => setChangingCard(true)}
-                sx={{
-                  color: "#fff",
-                  borderColor: "rgba(255,255,255,0.6)",
-                  border: "1px solid",
-                  borderRadius: 2,
-                  textTransform: "none",
-                  "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                  },
-                }}
+                sx={{ color: "#fff", textTransform: "none" }}
               >
                 Cambiar
               </Button>
@@ -177,12 +196,18 @@ export const TarjetaModal = ({
         {(!tarjeta || changingCard) && (
           <Box
             mb={3}
-            p={2.5}
+            px={2.5}
+            py={2}
             borderRadius={3}
             sx={{
-              backgroundColor: "#fff",
+              backgroundColor: "#FFFFFF",
               border: "1px solid rgba(0,0,0,0.08)",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+              transition: "all 0.25s ease",
+              "&:focus-within": {
+                borderColor: "#007AFF",
+                boxShadow: "0 0 0 3px rgba(0,122,255,0.15)",
+              },
             }}
           >
             <CardElement
@@ -191,13 +216,28 @@ export const TarjetaModal = ({
                 style: {
                   base: {
                     fontSize: "16px",
+                    fontWeight: "500",
+                    fontFamily:
+                      "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif",
                     color: "#1C1C1E",
+                    letterSpacing: "0.4px",
+
                     "::placeholder": {
-                      color: "#8E8E93",
+                      color: "#8E8E93", // gris iOS
+                      fontWeight: "400",
                     },
+
+                    iconColor: "#007AFF", // azul iOS
                   },
+
                   invalid: {
-                    color: "#FF3B30",
+                    color: "#FF3B30", // rojo iOS error
+                    iconColor: "#FF3B30",
+                  },
+
+                  complete: {
+                    color: "#34C759", // verde iOS success
+                    iconColor: "#34C759",
                   },
                 },
               }}
@@ -216,28 +256,13 @@ export const TarjetaModal = ({
         />
       </Box>
 
-      {/* 🔹 Actions */}
       <DialogActions sx={{ px: 4, pb: 4 }}>
-        <Button onClick={onClose} sx={{ textTransform: "none" }}>
-          Cancelar
-        </Button>
+        <Button onClick={onClose}>Cancelar</Button>
 
         <Button
           variant="contained"
           onClick={handleSave}
-          disabled={loading}
-          sx={{
-            px: 3,
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: 600,
-            background:
-              "linear-gradient(135deg, #007AFF 0%, #005FCC 100%)",
-            boxShadow: "0 8px 20px rgba(0,122,255,0.35)",
-            "&:hover": {
-              boxShadow: "0 10px 26px rgba(0,122,255,0.45)",
-            },
-          }}
+          disabled={loading || saving || !stripe}
         >
           Guardar
         </Button>

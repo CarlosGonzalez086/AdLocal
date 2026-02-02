@@ -16,7 +16,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import AddIcon from "@mui/icons-material/Add";
 
-const stripePromise = loadStripe("pk_live_51Sgu6YL1vXo9u5cKR6Cv9MttUY8OJa3q4Ut1RKMQ5QsJMHyqZcpW9SLPWuJi8F6UFSKCvYuhm56h1tX5jOmqA2ww00BrOotLg4");
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 export const TarjetasPage: React.FC = () => {
   const { tarjetas, listar, crear, setDefault, eliminar, loading } =
@@ -52,7 +52,7 @@ export const TarjetasPage: React.FC = () => {
   }
 
   return (
-    <Elements stripe={stripePromise}>
+    <>
       <Box>
         <Paper
           elevation={0}
@@ -158,24 +158,32 @@ export const TarjetasPage: React.FC = () => {
           </Box>
         )}
       </Box>
-
-      <TarjetaModal
-        open={creando}
-        onClose={() => setCreando(false)}
-        onSave={handleSave}
-        loading={loading}
-      />
-
-      <TarjetaModal
-        open={editando}
-        tarjeta={tarjetaSeleccionada}
-        onClose={() => {
-          setEditando(false);
-          setTarjetaSeleccionada(null);
-        }}
-        onSave={handleSave}
-        loading={loading}
-      />
-    </Elements>
+      {creando && (
+        <>
+          {" "}
+          <TarjetaModal
+            open={creando}
+            onClose={() => setCreando(false)}
+            onSave={handleSave}
+            loading={loading}
+          />
+        </>
+      )}
+      {editando && (
+        <>
+          {" "}
+          <TarjetaModal
+            open={editando}
+            tarjeta={tarjetaSeleccionada}
+            onClose={() => {
+              setEditando(false);
+              setTarjetaSeleccionada(null);
+            }}
+            onSave={handleSave}
+            loading={loading}
+          />
+        </>
+      )}
+    </>
   );
 };

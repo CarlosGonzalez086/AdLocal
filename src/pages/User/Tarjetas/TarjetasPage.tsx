@@ -12,16 +12,12 @@ import { useTarjetas } from "../../../hooks/useTarjetas";
 import { CardTarjeta } from "../../../components/Tarjeta/CardTarjeta";
 import { TarjetaModal } from "../../../components/Tarjeta/TarjetaModal";
 
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
 import AddIcon from "@mui/icons-material/Add";
-
-const stripePromise = loadStripe("pk_live_51Sgu6YL1vXo9u5cKR6Cv9MttUY8OJa3q4Ut1RKMQ5QsJMHyqZcpW9SLPWuJi8F6UFSKCvYuhm56h1tX5jOmqA2ww00BrOotLg4");
 
 export const TarjetasPage: React.FC = () => {
   const { tarjetas, listar, crear, setDefault, eliminar, loading } =
     useTarjetas();
-  console.log(stripePromise);
+
 
   const [creando, setCreando] = useState(false);
   const [editando, setEditando] = useState(false);
@@ -52,7 +48,7 @@ export const TarjetasPage: React.FC = () => {
   }
 
   return (
-    <Elements stripe={stripePromise}>
+    <>
       <Box>
         <Paper
           elevation={0}
@@ -158,24 +154,32 @@ export const TarjetasPage: React.FC = () => {
           </Box>
         )}
       </Box>
-
-      <TarjetaModal
-        open={creando}
-        onClose={() => setCreando(false)}
-        onSave={handleSave}
-        loading={loading}
-      />
-
-      <TarjetaModal
-        open={editando}
-        tarjeta={tarjetaSeleccionada}
-        onClose={() => {
-          setEditando(false);
-          setTarjetaSeleccionada(null);
-        }}
-        onSave={handleSave}
-        loading={loading}
-      />
-    </Elements>
+      {creando && (
+        <>
+          {" "}
+          <TarjetaModal
+            open={creando}
+            onClose={() => setCreando(false)}
+            onSave={handleSave}
+            loading={loading}
+          />
+        </>
+      )}
+      {editando && (
+        <>
+          {" "}
+          <TarjetaModal
+            open={editando}
+            tarjeta={tarjetaSeleccionada}
+            onClose={() => {
+              setEditando(false);
+              setTarjetaSeleccionada(null);
+            }}
+            onSave={handleSave}
+            loading={loading}
+          />
+        </>
+      )}
+    </>
   );
 };

@@ -64,6 +64,7 @@ export const TarjetaModal = ({
         },
       },
     );
+    console.log(resp);
 
     if (!resp.ok) {
       alert("No se pudo iniciar el registro de la tarjeta");
@@ -71,6 +72,7 @@ export const TarjetaModal = ({
     }
 
     const { clientSecret } = await resp.json();
+    console.log(clientSecret);
 
     // 2️⃣ Confirmar tarjeta con Stripe
     const result = await stripe.confirmCardSetup(clientSecret, {
@@ -93,6 +95,7 @@ export const TarjetaModal = ({
 
     try {
       let pmId: string | null = tarjeta?.stripePaymentMethodId ?? null;
+      console.log(pmId);
 
       // Si es nueva o se está cambiando
       if (!pmId || changingCard) {

@@ -38,7 +38,7 @@ const defaultForm: PlanCreateDto = {
   maxNegocios: 1,
   maxProductos: 0,
   maxFotos: 1,
-
+  stripePriceId: "",
   nivelVisibilidad: 0,
   permiteCatalogo: false,
   coloresPersonalizados: false,
@@ -108,6 +108,16 @@ export const PlanModal = ({
             helperText={errors.nombre}
             disabled={soloVer}
             onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+          />
+          <TextField
+            label="Stripe Price"
+            value={form.stripePriceId}
+            error={!!errors.stripePriceId}
+            helperText={errors.stripePriceId}
+            disabled={soloVer}
+            onChange={(e) =>
+              setForm({ ...form, stripePriceId: e.target.value })
+            }
           />
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>

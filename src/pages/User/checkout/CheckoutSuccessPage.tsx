@@ -12,12 +12,17 @@ export const CheckoutSuccessPage = () => {
   const { actualizarJwt } = useActualizarJwt();
 
   useEffect(() => {
-    actualizarJwt({
-      email: user.sub,
-      updateJWT: true,
-    });
-    window.location.reload();
-  }, []);
+    if (!user?.sub) return;
+
+    const timer = setTimeout(() => {
+      actualizarJwt({
+        email: user.sub,
+        updateJWT: true,
+      });
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [user?.sub]);
 
   return (
     <Stack

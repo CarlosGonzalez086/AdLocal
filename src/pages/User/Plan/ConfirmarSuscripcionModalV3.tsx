@@ -31,9 +31,15 @@ interface Props {
   open: boolean;
   onClose: () => void;
   plan: PlanCreateDto;
+  setIsSubSuccess: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const ConfirmarSuscripcionModalV3 = ({ open, onClose, plan }: Props) => {
+export const ConfirmarSuscripcionModalV3 = ({
+  open,
+  onClose,
+  plan,
+  setIsSubSuccess,
+}: Props) => {
   const [metodo, setMetodo] = useState<MetodoPago>("");
   const [autoRenew, setAutoRenew] = useState<boolean>(false);
   const [banco, setBanco] = useState<string>("");
@@ -49,7 +55,6 @@ export const ConfirmarSuscripcionModalV3 = ({ open, onClose, plan }: Props) => {
     loading: loadingCheckout,
     pagarConTarjetaGuardada,
     pagarConNuevaTarjeta,
-    pagarPorTransferencia,
   } = useCheckout();
 
   useEffect(() => {
@@ -85,19 +90,17 @@ export const ConfirmarSuscripcionModalV3 = ({ open, onClose, plan }: Props) => {
           tarjetaSeleccionada.toString(),
           autoRenew,
         );
-        console.log(res);
-
         if (res) {
-          cerrar();
           Swal.fire({
             icon: "success",
             title: "Pago realizado",
             showConfirmButton: false,
-            timer: 1800,
+            timer: 2000,
             timerProgressBar: true,
             confirmButtonText: "",
           });
-          window.location.reload();
+          setIsSubSuccess(true);
+          cerrar();
         }
       } else if (metodo === "nueva") {
         const res = await pagarConNuevaTarjeta(Number(plan.id));
@@ -105,22 +108,21 @@ export const ConfirmarSuscripcionModalV3 = ({ open, onClose, plan }: Props) => {
         cerrar();
         window.open(String(res), "_blank");
       } else if (metodo === "transferencia") {
-        const res = await pagarPorTransferencia(Number(plan.id), banco);
-
-        if (res) {
-          cerrar();
-          Swal.fire({
-            icon: "info",
-            title: "Se abrirá la ventana de pago",
-            text: "Completa tu transferencia en la nueva ventana",
-            confirmButtonText: "Continuar al pago",
-            allowOutsideClick: false,
-          }).then((result) => {
-            if (result.isConfirmed) {
-              window.open(String(res), "_blank");
-            }
-          });
-        }
+        // const res = await pagarPorTransferencia(Number(plan.id), banco);
+        // if (res) {
+        //   cerrar();
+        //   Swal.fire({
+        //     icon: "info",
+        //     title: "Se abrirá la ventana de pago",
+        //     text: "Completa tu transferencia en la nueva ventana",
+        //     confirmButtonText: "Continuar al pago",
+        //     allowOutsideClick: false,
+        //   }).then((result) => {
+        //     if (result.isConfirmed) {
+        //       window.open(String(res), "_blank");
+        //     }
+        //   });
+        // }
       }
     } catch (error) {
       console.error(error);

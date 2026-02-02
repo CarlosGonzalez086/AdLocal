@@ -23,26 +23,11 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
     return Promise.reject(e);
-  },
+  }
 );
-
-export interface CheckoutRequestDto {
-  planId: number;
-  metodo: "guardada" | "nueva" | "transferencia";
-  stripePaymentMethodId?: string;
-  autoRenew?:boolean;
-}
 
 export interface CheckoutResponseDto {
   url?: string;
-  paymentIntentId?: string;
-  referencia?: string;
-}
-
-export interface CambiarPlanDto {
-  planIdNuevo: number;
-  metodo: "guardada" | "nueva" | "transferencia";
-  stripePaymentMethodId?: string;
 }
 
 export interface SimpleResponse {
@@ -50,34 +35,31 @@ export interface SimpleResponse {
 }
 
 export const checkoutApi = {
-  crearSesion: (dto: CheckoutRequestDto) =>
-    api.post<ApiResponse<CheckoutResponseDto>>("/crearSesion", dto),
-
-  contratarConTarjetaGuardada: (
+  /**
+   * Tarjeta guardada
+   */
+  suscribirseConTarjetaGuardada: (
     planId: number,
     stripePaymentMethodId: string,
+    autoRenew: boolean
   ) =>
-    api.post<ApiResponse<CheckoutResponseDto>>("/crearSesion", {
+    api.post<ApiResponse<SimpleResponse>>("/suscribirse", {
       planId,
-      metodo: "guardada",
-      stripePaymentMethodId: stripePaymentMethodId,
+      stripePaymentMethodId,
+      autoRenew,
     }),
 
-  crearSesionStripe: (planId: number) =>
-    api.post<ApiResponse<CheckoutResponseDto>>("/crearSesion", {
+  /**
+   * Tarjeta nueva (Stripe Checkout)
+   */
+  crearCheckoutStripe: (planId: number) =>
+    api.post<ApiResponse<CheckoutResponseDto>>("/checkout", {
       planId,
-      metodo: "nueva",
     }),
 
-  generarReferenciaTransferencia: (planId: number, banco: string) =>
-    api.post<ApiResponse<CheckoutResponseDto>>("/crearSesion", {
-      planId,
-      metodo: "transferencia",
-      banco: banco,
-    }),
-
-  cancelarPlan: () => api.post<ApiResponse<SimpleResponse>>("/cancelar"),
-
-  cambiarPlan: (dto: CambiarPlanDto) =>
-    api.post<ApiResponse<CheckoutResponseDto>>("/cambiar-plan", dto),
+  /**
+   * Cancelar suscripción
+   */
+  cancelarPlan: () =>
+    api.post<ApiResponse<SimpleResponse>>("/cancelar"),
 };

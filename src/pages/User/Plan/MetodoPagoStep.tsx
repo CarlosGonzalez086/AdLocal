@@ -10,7 +10,7 @@ export const MetodoPagoStep = ({ onSelect }: Props) => {
   const opciones = [
     { label: "Tarjeta guardada", value: "guardada" },
     { label: "Nueva tarjeta", value: "nueva" },
-    { label: "Transferencia bancaria", value: "transferencia" },
+    // { label: "Transferencia bancaria", value: "transferencia" },
   ];
 
   return (

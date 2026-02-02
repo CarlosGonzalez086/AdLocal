@@ -50,7 +50,6 @@ export default function LoginPage({ type }: Props) {
   return (
     <Box
       sx={{
-        bgcolor: "#F2F2F7",
         display: "flex",
         flexDirection: "column",
         width: "100%",

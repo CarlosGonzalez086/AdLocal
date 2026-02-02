@@ -1,5 +1,11 @@
 import { useContext, useEffect, useState } from "react";
-import { Typography, Box, Button, useMediaQuery } from "@mui/material";
+import {
+  Typography,
+  Box,
+  Button,
+  useMediaQuery,
+  CircularProgress,
+} from "@mui/material";
 
 import { PlanesUserList } from "../../../components/Plan/PlanesUserList";
 import { PlanCard } from "../../../components/Plan/PlanCard";
@@ -12,14 +18,16 @@ import type { JwtClaims } from "../../../services/auth.api";
 import { jwtDecode } from "jwt-decode";
 import { UserContext } from "../../../context/UserContext ";
 import { useActualizarJwt } from "../../../hooks/useActualizarJwt";
+import toast from "react-hot-toast";
 
 const PlanesPage = () => {
-  const { suscripcion, obtenerMiSuscripcion } = useSuscripciones();
+  const { suscripcion, obtenerMiSuscripcion, loading } = useSuscripciones();
 
-  const { cancelarPlan } = useCheckout();
+  const { cancelarPlan, isCancel } = useCheckout();
 
   const [openDetalle, setOpenDetalle] = useState(false);
   const [modoCambio, setModoCambio] = useState(false);
+  const [isSubSuccess, setIsSubSuccess] = useState(false);
 
   const dataJwt = localStorage.getItem("token");
   const claims: JwtClaims | null = dataJwt
@@ -32,14 +40,99 @@ const PlanesPage = () => {
 
   useEffect(() => {
     obtenerMiSuscripcion();
-  }, [obtenerMiSuscripcion]);
+  }, []);
 
   useEffect(() => {
-    actualizarJwt({
-      email: user.sub,
-      updateJWT: true,
-    });
-  }, [suscripcion]);
+    if (!loading && suscripcion.id != 0) {
+      if (!isSubSuccess && !isCancel && !suscripcion) {
+        return;
+      }
+
+      const checkEstado = async () => {
+        try {
+          if (!suscripcion) return;
+
+          let mensaje: string | null = null;
+
+          if (isSubSuccess) {
+            mensaje = "Tu suscripción ya está activa";
+          } else if (isCancel) {
+            mensaje =
+              "Tu suscripción fue cancelada y seguirá activa hasta el final del periodo";
+          } else if (suscripcion.plan?.tipo === "FREE") {
+            mensaje = "Tu cuenta ahora tiene el Plan Free activo";
+          }
+          await actualizarJwt({
+            email: user.sub,
+            updateJWT: true,
+          });
+          if (!mensaje) return;
+          toast.success(mensaje, {
+            duration: 3000,
+            style: {
+              background: "#FFFFFF",
+              color: "#1C1C1E",
+              borderRadius: "14px",
+              padding: "14px 18px",
+              boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
+              fontSize: "0.95rem",
+              fontWeight: 500,
+            },
+            iconTheme: {
+              primary: "#34C759",
+              secondary: "#FFFFFF",
+            },
+          });
+        } catch (error) {
+          console.log(error);
+
+          toast.error("Error verificando suscripción", {
+            duration: 3000,
+            style: {
+              background: "#FFFFFF",
+              color: "#1C1C1E",
+              borderRadius: "14px",
+              padding: "14px 18px",
+              boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
+              fontSize: "0.95rem",
+              fontWeight: 500,
+            },
+            iconTheme: {
+              primary: "#a82913d0",
+              secondary: "#FFFFFF",
+            },
+          });
+        }
+      };
+
+      const timer = setTimeout(checkEstado, 1500);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [isSubSuccess, isCancel, suscripcion]);
+
+  if (loading) {
+    return (
+      <>
+        {" "}
+        <Box
+          minHeight="100vh"
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          gap={2}
+        >
+          <CircularProgress size={56} />
+          <Typography fontWeight={600} color="text.secondary">
+            Cargando informacion…
+          </Typography>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <Box>
@@ -134,7 +227,7 @@ const PlanesPage = () => {
               </Box>
             )}
 
-            <PlanesUserList />
+            <PlanesUserList setIsSubSuccess={setIsSubSuccess} />
           </>
         )}
       </Box>

@@ -34,7 +34,7 @@ export const PlanesPage = () => {
     maxNegocios: 1,
     maxProductos: 0,
     maxFotos: 1,
-
+    stripePriceId: "",
     nivelVisibilidad: 0,
     permiteCatalogo: false,
     coloresPersonalizados: false,
@@ -250,18 +250,22 @@ export const PlanesPage = () => {
         />
       </Paper>
 
-      {/* Modal */}
-      <PlanModal
-        key={`edit-${plan?.id ?? "new"}`}
-        open={open}
-        onClose={() => {
-          setOpen(false);
-          setPlan(initialForm);
-        }}
-        onSave={(p) => guardar(p, { page, rows, orderBy, search })}
-        plan={plan}
-        loading={loading}
-      />
+      {open && (
+        <>
+          {" "}
+          <PlanModal
+            key={`edit-${plan?.id ?? "new"}`}
+            open={open}
+            onClose={() => {
+              setOpen(false);
+              setPlan(initialForm);
+            }}
+            onSave={(p) => guardar(p, { page, rows, orderBy, search })}
+            plan={plan}
+            loading={loading}
+          />
+        </>
+      )}
     </Box>
   );
 };

@@ -70,7 +70,6 @@ export default function RegisterPage({ type }: Props) {
   return (
     <Box
       sx={{
-        bgcolor: "#F2F2F7",
         display: "flex",
         flexDirection: "column",
         width: "100%",
@@ -79,7 +78,6 @@ export default function RegisterPage({ type }: Props) {
       padding={3}
     >
       <Container maxWidth="sm">
-        {/* Logo */}
         <Box
           sx={{
             display: "flex",
@@ -97,8 +95,6 @@ export default function RegisterPage({ type }: Props) {
             }}
           />
         </Box>
-
-        {/* Card Registro */}
         <Paper
           elevation={0}
           sx={{

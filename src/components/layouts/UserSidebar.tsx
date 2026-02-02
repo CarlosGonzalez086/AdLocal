@@ -75,8 +75,7 @@ const UserSidebar = ({
       icon: <CategoryIcon />,
       path: "/app/productos-servicios/comercios",
     },
-esRutaBasica &&
-    {
+    esRutaBasica && {
       text: "Productos y servicios",
       icon: <CategoryIcon />,
       path: "/app/productos-servicios",

@@ -9,11 +9,11 @@ export default function PlanesPublicList() {
   return (
     <Box
       sx={{
-        bgcolor: "#F2F2F7",
         display: "flex",
         flexDirection: "column",
         width: "100%",
         height: "100%",
+        bgcolor:"#F2F2F7"
       }}
       padding={3}
     >
@@ -52,7 +52,7 @@ export default function PlanesPublicList() {
         </Button>
       </Box>
 
-      <Container maxWidth="lg" sx={{ flex: 1 }}>
+      <Container maxWidth="lg">
         <Box
           sx={{
             display: "flex",

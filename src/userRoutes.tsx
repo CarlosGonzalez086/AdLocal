@@ -26,6 +26,7 @@ const puedeVerComercios =
   (claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS");
 
 const permiteCatalogo = claims?.permiteCatalogo !== "False";
+console.log(claims);
 
 export const userRoutes = [
   {
@@ -65,7 +66,7 @@ export const userRoutes = [
     element: <PlanesPage />,
   },
 
- {
+  {
     path: "productos-servicios",
     element: permiteCatalogo ? <ProductosServiciosPage /> : <UpgradePlanPage />,
   },

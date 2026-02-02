@@ -109,7 +109,7 @@ export const PlanCard = ({
         </Typography>
 
         <Typography variant="body2" color="text.secondary">
-          Duración: {dias === 9999 ? "Ilimitado" : <strong>{dias} días</strong>}
+          Duración: {dias > 30 ? "Ilimitado" : <strong>{dias} días</strong>}
         </Typography>
 
         <Box mt={3} mb={2}>
@@ -156,7 +156,7 @@ export const PlanCard = ({
                 </Button>
 
                 {/* ESTADO CANCELADA */}
-                {claims?.esatdo === "cancelada" ? (
+                {claims?.esatdo === "cancelada" || claims?.esatdo === "canceling" ? (
                   <Box>
                     <Box
                       sx={{
@@ -228,7 +228,7 @@ export const PlanCard = ({
                   },
                 }}
               >
-                {claims?.esatdo === "cancelada"
+                {(claims?.esatdo === "cancelada" || claims?.esatdo === "canceling")
                   ? "Reactivar suscripción"
                   : "Cambiar mi plan"}
               </Button>

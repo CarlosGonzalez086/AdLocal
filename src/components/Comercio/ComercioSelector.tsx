@@ -11,7 +11,7 @@ export default function ComercioSelector({
   value,
   onChange,
 }: Props) {
-  if (comercios.length <= 1) return null;
+  if (comercios.length <= 0) return null;
 
   return (
     <Box

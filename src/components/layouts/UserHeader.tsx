@@ -61,7 +61,7 @@ const UserHeader = ({
   };
 
   const path = location.pathname;
-  
+
   const basePath = path.split("/").slice(0, -1).join("/");
   const isEditar = location.pathname.includes("/editar");
 
@@ -78,7 +78,7 @@ const UserHeader = ({
       sx={{
         backdropFilter: "blur(18px)",
         background:
-          "linear-gradient(180deg, rgba(255,255,255,.88), rgba(245,233,207,.85))",
+          "linear-gradient(180deg, rgba(255,255,255,.92), rgba(250,245,238,.96))",
         borderBottom: "1px solid rgba(0,0,0,.06)",
         color: "#3A2419",
 
@@ -162,9 +162,9 @@ const UserHeader = ({
                   borderRadius: 4,
                   mt: 1,
                   minWidth: 200,
-                  backdropFilter: "blur(12px)",
+                  backdropFilter: "blur(18px)",
                   background:
-                    "linear-gradient(180deg, rgba(255,255,255,.95), rgba(245,233,207,.95))",
+                    "linear-gradient(180deg, rgba(255,255,255,.92), rgba(250,245,238,.96))",
                   boxShadow: "0 18px 40px rgba(0,0,0,.25)",
                 },
               }}

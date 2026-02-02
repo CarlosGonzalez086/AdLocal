@@ -67,7 +67,6 @@ export const useActualizarJwt = () => {
           : `${import.meta.env.VITE_API_URL}/auth/actualizar-jwt`;
 
       const { data } = await api.post<ActualizarJwtResponse>(url, params);
-      console.log("Respuesta JWT:", data);
 
       if (data.respuesta?.token) {
         localStorage.setItem("token", data.respuesta.token);

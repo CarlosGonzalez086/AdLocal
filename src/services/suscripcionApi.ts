@@ -1,7 +1,6 @@
 import axios from "axios";
 import type { ApiResponse } from "../api/apiResponse";
 
-
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/Suscripciones`,
   headers: {
@@ -17,7 +16,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(
@@ -28,7 +27,7 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export interface SuscripcionCreateDto {
@@ -49,7 +48,7 @@ export interface PlanDto {
   nivelVisibilidad: number;
   permiteCatalogo: boolean;
   coloresPersonalizados: boolean;
-  isMultiUsuario:boolean;
+  isMultiUsuario: boolean;
 
   tieneBadge: boolean;
   badgeTexto?: string;
@@ -71,13 +70,46 @@ export interface SuscripcionDto {
   activa: boolean;
 }
 
+export const defaultPlan: PlanDto = {
+  nombre: "FREE",
+  precio: 0,
+  duracionDias: 0,
+  tipo: "FREE",
+
+  maxNegocios: 0,
+  maxProductos: 0,
+  maxFotos: 0,
+
+  nivelVisibilidad: 0,
+  permiteCatalogo: false,
+  coloresPersonalizados: false,
+  isMultiUsuario: false,
+
+  tieneBadge: false,
+  badgeTexto: "",
+  tieneAnalytics: false,
+};
+export const defaultSuscripcion: SuscripcionDto = {
+  id: 0,
+
+  plan: defaultPlan,
+
+  monto: 0,
+  moneda: "MXN",
+
+  fechaInicio: "",
+  fechaFin: "",
+
+  estado: "FREE",
+  activa: false,
+};
+
+
 export const suscripcionApi = {
   contratar: (data: SuscripcionCreateDto) =>
     api.post<ApiResponse<null>>("/crear", data),
 
-  miSuscripcion: () =>
-    api.get<ApiResponse<SuscripcionDto>>("/mi-suscripcion"),
+  miSuscripcion: () => api.get<ApiResponse<SuscripcionDto>>("/mi-suscripcion"),
 
-  cancelar: () =>
-    api.post<ApiResponse<null>>("/cancelar"),
+  cancelar: () => api.post<ApiResponse<null>>("/cancelar"),
 };

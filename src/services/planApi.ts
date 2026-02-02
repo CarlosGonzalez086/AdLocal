@@ -44,7 +44,7 @@ export interface PlanCreateDto {
   maxNegocios: number;
   maxProductos: number;
   maxFotos: number;
-
+  stripePriceId: string;
   // Features
   nivelVisibilidad: number; // 0 - 100
   permiteCatalogo: boolean;
@@ -52,7 +52,7 @@ export interface PlanCreateDto {
   tieneBadge: boolean;
   badgeTexto?: string | null;
   tieneAnalytics: boolean;
-  isMultiUsuario:boolean;
+  isMultiUsuario: boolean;
 }
 
 export type PlanFormErrors = Partial<Record<keyof PlanCreateDto, string>>;

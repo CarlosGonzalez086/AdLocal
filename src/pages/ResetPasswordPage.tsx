@@ -53,10 +53,12 @@ export default function ResetPasswordPage() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        bgcolor: "#f5f5f5",
         display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        height: "100%",
       }}
+      padding={3}
     >
       <Container maxWidth="sm">
         <Box

@@ -53,7 +53,6 @@ export default function WelcomeCollaboratorPage() {
   return (
     <Box
       sx={{
-        bgcolor: "#F2F2F7",
         display: "flex",
         flexDirection: "column",
         width: "100%",

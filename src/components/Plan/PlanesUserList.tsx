@@ -7,7 +7,11 @@ import { ConfirmarSuscripcionModalV3 } from "../../pages/User/Plan/ConfirmarSusc
 import { jwtDecode } from "jwt-decode";
 import type { JwtClaims } from "../../services/auth.api";
 
-export const PlanesUserList = () => {
+interface Props {
+  setIsSubSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
   const { planesUser, loading, listAllPlanesUser } = usePlanes();
   const dataJwt = localStorage.getItem("token");
   const claims: JwtClaims | null = dataJwt
@@ -15,6 +19,7 @@ export const PlanesUserList = () => {
     : null;
 
   const [openModal, setOpenModal] = useState(false);
+
   const [planSeleccionado, setPlanSeleccionado] =
     useState<PlanCreateDto | null>(null);
 
@@ -110,6 +115,7 @@ export const PlanesUserList = () => {
           open={openModal}
           plan={planSeleccionado}
           onClose={handleCloseModal}
+          setIsSubSuccess={setIsSubSuccess}
         />
       )}
     </>

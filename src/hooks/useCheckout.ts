@@ -1,44 +1,88 @@
 // hooks/useCheckout.ts
 import { useState, useCallback, useContext } from "react";
 import Swal from "sweetalert2";
-import {
-  checkoutApi,
-  type CheckoutRequestDto,
-  type CheckoutResponseDto,
-  type CambiarPlanDto,
-} from "../services/checkoutApi";
+import { checkoutApi, type CheckoutResponseDto } from "../services/checkoutApi";
 import { UserContext } from "../context/UserContext ";
 import { useActualizarJwt } from "./useActualizarJwt";
-
 
 export const useCheckout = () => {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<CheckoutResponseDto | null>(null);
+  const [isCancel, setIsCancel] = useState<boolean>(false);
+
   const user = useContext(UserContext);
   const { actualizarJwt } = useActualizarJwt();
 
+  /**
+   * Pagar con tarjeta guardada
+   */
+  const pagarConTarjetaGuardada = useCallback(
+    async (
+      planId: number,
+      stripePaymentMethodId: string,
+      autoRenew: boolean,
+    ) => {
+      setLoading(true);
+      setResponse(null);
 
-  const crearSesion = useCallback(async (dto: CheckoutRequestDto) => {
+      try {
+        const { data } = await checkoutApi.suscribirseConTarjetaGuardada(
+          planId,
+          stripePaymentMethodId,
+          autoRenew,
+        );
+
+        if (data.codigo !== "200") {
+          Swal.fire("Error", data.mensaje, "error");
+          return false;
+        }
+
+        await actualizarJwt({
+          email: user.sub,
+          updateJWT: true,
+        });
+
+        Swal.fire("Listo", data.mensaje, "success");
+        return true;
+      } catch (error: any) {
+        Swal.fire(
+          "Error",
+          error?.response?.data?.mensaje || "No se pudo completar el pago",
+          "error",
+        );
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [actualizarJwt, user.sub],
+  );
+
+  /**
+   * Pagar con tarjeta nueva (Stripe Checkout)
+   */
+  const pagarConNuevaTarjeta = useCallback(async (planId: number) => {
     setLoading(true);
     setResponse(null);
 
     try {
-      const { data } = await checkoutApi.crearSesion(dto);
+      const { data } = await checkoutApi.crearCheckoutStripe(planId);
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");
         return null;
       }
 
-      setResponse(data.respuesta);
+      if (data.respuesta?.url) {
+        window.location.href = data.respuesta.url;
+      }
+
+      setResponse(data.respuesta ?? null);
       return data.respuesta;
     } catch (error: any) {
-      console.error(error);
       Swal.fire(
         "Error",
-        error?.response?.data?.mensaje ||
-          error?.message ||
-          "Ocurrió un error inesperado",
+        error?.response?.data?.mensaje || "No se pudo iniciar el checkout",
         "error",
       );
       return null;
@@ -47,53 +91,9 @@ export const useCheckout = () => {
     }
   }, []);
 
-  const pagarConTarjetaGuardada = useCallback(
-    async (planId: number, stripePaymentMethodId: string,autoRenew:boolean) => {
-
-      return crearSesion({
-        planId,
-        metodo: "guardada",
-        stripePaymentMethodId,
-        autoRenew,
-      });
-    },
-    [crearSesion],
-  );
-
-  const pagarConNuevaTarjeta = useCallback(
-    async (planId: number) => {
-
-      return crearSesion({
-        planId,
-        metodo: "nueva",
-      });
-    },
-    [crearSesion],
-  );
-
-  const pagarPorTransferencia = useCallback(async (planId: number,banco:string) => {
-    setLoading(true);
-    try {
-      banco = banco != "oxxo" ? "spei" : "oxxo";
-      const { data } = await checkoutApi.generarReferenciaTransferencia(planId,banco);
-
-      if (data.codigo !== "200") {
-        Swal.fire("Error", data.mensaje, "error");
-        return null;
-      }
-      return data.mensaje;
-    } catch (error: any) {
-      Swal.fire(
-        "Error",
-        error?.response?.data?.mensaje || "Error al generar referencia",
-        "error",
-      );
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  /**
+   * Cancelar suscripción
+   */
   const cancelarPlan = useCallback(async () => {
     const r = await Swal.fire({
       icon: "warning",
@@ -107,6 +107,7 @@ export const useCheckout = () => {
     if (!r.isConfirmed) return false;
 
     setLoading(true);
+
     try {
       const { data } = await checkoutApi.cancelarPlan();
 
@@ -114,11 +115,16 @@ export const useCheckout = () => {
         Swal.fire("Error", data.mensaje, "error");
         return false;
       }
-      await actualizarJwt({
-        email: user.sub,
-        updateJWT: true,
+
+      Swal.fire({
+        icon: "success",
+        title: "Listo",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        confirmButtonText: "",
       });
-      Swal.fire("Listo", data.mensaje, "success");
+      setIsCancel(true);
       return true;
     } catch (error: any) {
       Swal.fire(
@@ -126,57 +132,19 @@ export const useCheckout = () => {
         error?.response?.data?.mensaje || "No se pudo cancelar el plan",
         "error",
       );
+      setIsCancel(false);
       return false;
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  const cambiarPlan = useCallback(async (dto: CambiarPlanDto) => {
-    setLoading(true);
-    setResponse(null);
-
-    try {
-      const { data } = await checkoutApi.cambiarPlan(dto);
-
-      if (data.codigo !== "200") {
-        Swal.fire("Error", data.mensaje, "error");
-        return null;
-      }
-
-      if (data.respuesta?.url) {
-        window.open(data.respuesta.url, "_blank");
-      } else {
-        Swal.fire(
-          "Plan cambiado",
-          "Tu plan fue actualizado correctamente",
-          "success",
-        );
-      }
-      setResponse(data.respuesta);
-      return data.respuesta;
-    } catch (error: any) {
-      Swal.fire(
-        "Error",
-        error?.response?.data?.mensaje || "No se pudo cambiar el plan",
-        "error",
-      );
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  }, [actualizarJwt, user.sub]);
 
   return {
     loading,
     response,
-
-    crearSesion,
+    isCancel,
     pagarConTarjetaGuardada,
     pagarConNuevaTarjeta,
-    pagarPorTransferencia,
-
     cancelarPlan,
-    cambiarPlan,
   };
 };

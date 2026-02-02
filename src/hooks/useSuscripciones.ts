@@ -1,6 +1,7 @@
-import { useState, useCallback, useContext } from "react";
+import { useState, useContext } from "react";
 import Swal from "sweetalert2";
 import {
+  defaultSuscripcion,
   suscripcionApi,
   type SuscripcionCreateDto,
   type SuscripcionDto,
@@ -9,7 +10,8 @@ import { UserContext } from "../context/UserContext ";
 import { useActualizarJwt } from "./useActualizarJwt";
 
 export const useSuscripciones = () => {
-  const [suscripcion, setSuscripcion] = useState<SuscripcionDto | null>(null);
+  const [suscripcion, setSuscripcion] =
+    useState<SuscripcionDto>(defaultSuscripcion);
   const user = useContext(UserContext);
   const { actualizarJwt } = useActualizarJwt();
   const [loading, setLoading] = useState(false);
@@ -42,25 +44,41 @@ export const useSuscripciones = () => {
     }
   };
 
-  const obtenerMiSuscripcion = useCallback(async () => {
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
+  const obtenerMiSuscripcion = async () => {
     setLoading(true);
+
+    const MAX_INTENTOS = 10;
+    const INTERVALO = 1500;
+    let intentos = 0;
+
     try {
-      const { data } = await suscripcionApi.miSuscripcion();
+      while (intentos < MAX_INTENTOS) {
+        const { data } = await suscripcionApi.miSuscripcion();
 
-      if (data.codigo !== "200") {
-        Swal.fire("Error", data.mensaje, "error");
-        setSuscripcion(null);
-        return;
+        if (data.codigo === "200") {
+          setSuscripcion(data.respuesta);
+          return;
+        }
+
+        intentos++;
+        await delay(INTERVALO);
       }
-
-      setSuscripcion(data.respuesta ?? null);
+      Swal.fire(
+        "Aviso",
+        "La suscripción aún se está procesando, intenta más tarde.",
+        "warning",
+      );
+      setSuscripcion(defaultSuscripcion);
     } catch (error) {
-      console.error(error);
-      setSuscripcion(null);
+      console.error("Error obteniendo suscripción:", error);
+      setSuscripcion(defaultSuscripcion);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   const cancelar = async (): Promise<void> => {
     const result = await Swal.fire({

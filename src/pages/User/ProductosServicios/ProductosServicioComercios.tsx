@@ -48,7 +48,6 @@ export default function ProductosServicioComercios() {
           alignItems: "center",
           justifyContent: "center",
           gap: 2,
-          background: "linear-gradient(135deg, #f9fafb, #eef2f7)",
         }}
       >
         <CircularProgress

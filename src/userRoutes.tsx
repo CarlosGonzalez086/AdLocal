@@ -18,7 +18,7 @@ import { PreviewNegocio } from "./pages/User/Preview/PreviewNegocio";
 import ProductosServicioComercios from "./pages/User/ProductosServicios/ProductosServicioComercios";
 import { ProductosServicioComercio } from "./pages/User/ProductosServicios/ProductosServicioComercio";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe("pk_live_51Sgu6YL1vXo9u5cKR6Cv9MttUY8OJa3q4Ut1RKMQ5QsJMHyqZcpW9SLPWuJi8F6UFSKCvYuhm56h1tX5jOmqA2ww00BrOotLg4");
 const dataJwt = localStorage.getItem("token");
 const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
 const puedeVerComercios =

@@ -21,6 +21,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 export const TarjetasPage: React.FC = () => {
   const { tarjetas, listar, crear, setDefault, eliminar, loading } =
     useTarjetas();
+  console.log(stripePromise);
 
   const [creando, setCreando] = useState(false);
   const [editando, setEditando] = useState(false);

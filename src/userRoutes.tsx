@@ -10,7 +10,7 @@ import PreviewPage from "./pages/User/Preview/PreviewPage";
 import type { JwtClaims } from "./services/auth.api";
 import { jwtDecode } from "jwt-decode";
 import UpgradePlanPage from "./pages/User/UpgradePlanPage";
-import { CheckoutRedirectPage } from "./pages/User/checkout/CheckoutRedirectPage";
+// import { CheckoutRedirectPage } from "./pages/User/checkout/CheckoutRedirectPage";
 import { CheckoutSuccessPage } from "./pages/User/checkout/CheckoutSuccessPage";
 import { CheckoutCancelPage } from "./pages/User/checkout/CheckoutCancelPage";
 import { ComercioPageForm } from "./pages/User/Comercio/ComercioPageForm";
@@ -37,10 +37,10 @@ export const userRoutes = [
     path: "vistaprevia/:id",
     element: <PreviewNegocio />,
   },
-  {
-    path: "checkout/redirect",
-    element: <CheckoutRedirectPage />,
-  },
+  // {
+  //   path: "checkout/redirect",
+  //   element: <CheckoutRedirectPage />,
+  // },
   {
     path: "checkout/success",
     element: <CheckoutSuccessPage />,

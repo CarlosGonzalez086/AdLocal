@@ -16,11 +16,12 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import AddIcon from "@mui/icons-material/Add";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe("pk_live_51Sgu6YL1vXo9u5cKR6Cv9MttUY8OJa3q4Ut1RKMQ5QsJMHyqZcpW9SLPWuJi8F6UFSKCvYuhm56h1tX5jOmqA2ww00BrOotLg4");
 
 export const TarjetasPage: React.FC = () => {
   const { tarjetas, listar, crear, setDefault, eliminar, loading } =
     useTarjetas();
+  console.log(stripePromise);
 
   const [creando, setCreando] = useState(false);
   const [editando, setEditando] = useState(false);

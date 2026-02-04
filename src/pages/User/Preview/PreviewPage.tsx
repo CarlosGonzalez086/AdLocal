@@ -24,6 +24,7 @@ import {
 } from "../../../services/productosServiciosApi";
 import type { JwtClaims } from "../../../services/auth.api";
 import CodigoReferido from "../../../components/User/CodigoReferido";
+import { useUsoCodigoReferido } from "../../../hooks/useUsoCodigoReferido";
 
 export default function PreviewPage() {
   const dataJwt = localStorage.getItem("token");
@@ -32,6 +33,8 @@ export default function PreviewPage() {
     : null;
 
   const { comercio, loading, comercios, getAllComerciosByUser } = useComercio();
+  const { contarPorCodigo } = useUsoCodigoReferido();
+  const [totalUsoCodigo, setTotalUsoCodigo] = useState<number>(0);
 
   const [productos, setProductos] = useState<ProductoServicioDto[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
@@ -73,6 +76,22 @@ export default function PreviewPage() {
   }, [comercio?.id, listarPorComercio]);
 
   useEffect(() => {
+    if (claims?.codigoReferido) {
+      contarPorCodigo(claims?.codigoReferido)
+        .then((resp) => {
+          setTotalUsoCodigo(resp);
+          return;
+        })
+        .then((error) => {
+          console.log(error);
+          
+          setTotalUsoCodigo(0);
+          return;
+        });
+    }
+  }, [claims?.codigoReferido]);
+
+  useEffect(() => {
     if (
       claims?.rol === "Comercio" &&
       (claims.planTipo === "PRO" || claims.planTipo === "BUSINESS")
@@ -112,14 +131,11 @@ export default function PreviewPage() {
     );
   }
 
-  
-
   return (
     <Box>
       {claims?.codigoReferido ? (
         <>
-          {" "}
-          <CodigoReferido codigoReferido={claims?.codigoReferido ?? ""} />
+          <CodigoReferido codigoReferido={claims?.codigoReferido ?? ""} totalUsoCodigo={totalUsoCodigo}/>
           <Divider />
         </>
       ) : (

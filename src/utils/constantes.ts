@@ -110,3 +110,14 @@ export const METODOS_PAGO = [
     value: "oxxo",
   },
 ];
+
+
+export const iosColors = {
+  primary: "#007AFF",
+  success: "#34C759",
+  warning: "#FF9F0A",
+  danger: "#FF3B30",
+  purple: "#AF52DE",
+  gray: "#8E8E93",
+  background: "#F9FAFB",
+};

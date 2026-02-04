@@ -1,5 +1,9 @@
 import axios from "axios";
+import type { ApiResponse } from "../api/apiResponse";
 
+/* ============================
+   Axios instance
+============================ */
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/Usuarios`,
   headers: {
@@ -7,14 +11,15 @@ const api = axios.create({
   },
 });
 
+/* ============================
+   Interceptors
+============================ */
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => Promise.reject(error)
@@ -31,22 +36,71 @@ api.interceptors.response.use(
   }
 );
 
-export interface UserDto {
-  id?: number;
+/* ============================
+   DTOs
+============================ */
+
+export interface PlanDto {
+  id: number;
+  nombre: string;
+  tipo: "FREE" | "BASIC" | "PRO" | "BUSINESS";
+  precio: number;
+  maxFotos: number;
+}
+
+export interface SuscripcionDto {
+  id: number;
+  status: "active" | "canceling" | "canceled";
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  autoRenew: boolean;
+  plan: PlanDto;
+}
+
+export interface UsuarioDto {
+  id: number;
   nombre: string;
   email: string;
-  fotoUrl: string;
+  fotoUrl: string | null;
   fechaCreacion: string;
 }
 
+export interface UsuarioConSuscripcionDto {
+  usuario: UsuarioDto;
+  suscripcion: SuscripcionDto;
+}
 
-export const usersApi = {
-  getAll: (params?: {
+export interface PaginatedResponse<T> {
+  totalRecords: number;
+  page: number;
+  pageSize: number;
+  data: T[];
+}
+
+/* ============================
+   Service
+============================ */
+
+export const usersService = {
+  /* Obtener usuarios con suscripción activa */
+  getAll(params?: {
     page?: number;
     pageSize?: number;
-    orderBy?: string;
+    orderBy?: "recent" | "old" | "az" | "za";
     search?: string;
-  }) => api.get("", { params }),
-  getById: (id: number) => api.get(`/${id}`),
-  eliminar: (id: number) => api.delete(`/${id}`),
+  }) {
+    return api.get<ApiResponse<PaginatedResponse<UsuarioConSuscripcionDto>>>("", {
+      params,
+    });
+  },
+
+  /* Obtener usuario por id (si lo necesitas) */
+  getById(id: number) {
+    return api.get<UsuarioDto>(`/${id}`);
+  },
+
+  /* Eliminar usuario */
+  eliminar(id: number) {
+    return api.delete(`/${id}`);
+  },
 };

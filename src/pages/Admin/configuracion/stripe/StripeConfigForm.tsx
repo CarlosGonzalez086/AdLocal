@@ -5,12 +5,17 @@ import {
   Stack,
   Card,
   CardContent,
-  CardHeader,
   Divider,
   InputAdornment,
   LinearProgress,
   Box,
+  Typography,
 } from "@mui/material";
+import LockIcon from "@mui/icons-material/Lock";
+import PercentIcon from "@mui/icons-material/Percent";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
+
 import { useConfiguracionSistema } from "../../../../hooks/useConfiguracionSistema";
 
 interface StripeFormState {
@@ -31,9 +36,6 @@ export const StripeConfigForm = () => {
     commissionFixed: "",
   });
 
-  /* =========================
-     Cargar configuración
-     ========================= */
   useEffect(() => {
     cargar();
   }, []);
@@ -53,9 +55,6 @@ export const StripeConfigForm = () => {
     });
   }, [configuraciones]);
 
-  /* =========================
-     Handlers
-     ========================= */
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -72,22 +71,37 @@ export const StripeConfigForm = () => {
     Number(form.commissionPercentage) < 0 ||
     Number(form.commissionFixed) < 0;
 
-  /* =========================
-     Render
-     ========================= */
   return (
-    <Card elevation={3}>
-      <CardHeader
-        title="Configuración de Stripe"
-        subheader="Claves y comisiones de pago"
-      />
+    <Card
+      elevation={0}
+      sx={{
+        borderRadius: 4,
+        border: "1px solid rgba(0,0,0,0.08)",
+        background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)",
+      }}
+    >
+      {/* Header */}
+      <Box sx={{ p: 3 }}>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <CreditCardIcon color="primary" />
+          <Box>
+            <Typography fontWeight={600} fontSize={18}>
+              Configuración de Stripe
+            </Typography>
+            <Typography fontSize={13} color="text.secondary">
+              Claves de integración y comisiones de pago
+            </Typography>
+          </Box>
+        </Stack>
+      </Box>
+
       <Divider />
 
       {loading && <LinearProgress />}
 
       <CardContent>
-        <Box sx={{ maxWidth: 600, mx: "auto" }}>
-          <Stack spacing={2}>
+        <Box sx={{ maxWidth: 520, mx: "auto" }}>
+          <Stack spacing={2.5}>
             <TextField
               label="Publishable Key"
               name="publishableKey"
@@ -95,6 +109,14 @@ export const StripeConfigForm = () => {
               onChange={onChange}
               fullWidth
               disabled={loading}
+              variant="filled"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
             />
 
             <TextField
@@ -104,19 +126,32 @@ export const StripeConfigForm = () => {
               onChange={onChange}
               fullWidth
               disabled={loading}
+              variant="filled"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
             />
 
+            <Divider />
+
             <TextField
-              label="Comisión (%)"
+              label="Comisión porcentual"
               name="commissionPercentage"
               value={form.commissionPercentage}
               onChange={onChange}
               type="number"
               fullWidth
               disabled={loading}
+              variant="filled"
               InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">%</InputAdornment>
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PercentIcon fontSize="small" />
+                  </InputAdornment>
                 ),
               }}
             />
@@ -129,20 +164,30 @@ export const StripeConfigForm = () => {
               type="number"
               fullWidth
               disabled={loading}
+              variant="filled"
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">$</InputAdornment>
+                  <InputAdornment position="start">
+                    <AttachMoneyIcon fontSize="small" />
+                  </InputAdornment>
                 ),
               }}
             />
 
             <Button
               variant="contained"
+              size="large"
               onClick={onSubmit}
               disabled={isDisabled}
-              size="large"
+              sx={{
+                mt: 1,
+                borderRadius: 3,
+                textTransform: "none",
+                fontWeight: 600,
+                py: 1.3,
+              }}
             >
-              Guardar configuración Stripe
+              Guardar configuración
             </Button>
           </Stack>
         </Box>

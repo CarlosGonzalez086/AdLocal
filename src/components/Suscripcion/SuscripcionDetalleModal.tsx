@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import type { SuscripcionDto } from "../../services/suscripcionApi";
 import {
-  calcularDiasEntreFechas,
+  calcularDiasRestantesDesdeHoy,
   utcToLocal,
 } from "../../utils/generalsFunctions";
 
@@ -90,11 +90,7 @@ export const SuscripcionDetalleModal = ({
             </Typography>
 
             <Typography variant="body2" color="text.secondary">
-              Duración:{" "}
-              {calcularDiasEntreFechas(
-                suscripcion.fechaInicio,
-                suscripcion.fechaFin,
-              )}{" "}
+              Duración: {calcularDiasRestantesDesdeHoy(suscripcion.fechaFin)}{" "}
               días
             </Typography>
           </Box>
@@ -113,9 +109,7 @@ export const SuscripcionDetalleModal = ({
               {plan.tieneBadge && (
                 <Chip label={`🏷️ ${plan.badgeTexto || "Badge especial"}`} />
               )}
-              {plan.isMultiUsuario && (
-                <Chip label="👥 Multiusuario"  />
-              )}
+              {plan.isMultiUsuario && <Chip label="👥 Multiusuario" />}
             </Stack>
           </Box>
 

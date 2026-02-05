@@ -54,6 +54,8 @@ export default function LoginPage({ type }: Props) {
         flexDirection: "column",
         width: "100%",
         height: "100%",
+        bgcolor:"#F2F2F7",
+        overflow:"auto"
       }}
       padding={3}
     >

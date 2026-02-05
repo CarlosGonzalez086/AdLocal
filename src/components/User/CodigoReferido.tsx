@@ -9,12 +9,14 @@ interface Prop {
   codigoReferido: string;
   totalUsoCodigo: number;
   setAplicoBeneficio: React.Dispatch<React.SetStateAction<boolean>>;
+  usoTotalReferidos: string;
 }
 
 const CodigoReferido = ({
   codigoReferido,
   totalUsoCodigo,
   setAplicoBeneficio,
+  usoTotalReferidos,
 }: Prop) => {
   const [copied, setCopied] = useState(false);
 
@@ -59,7 +61,7 @@ const CodigoReferido = ({
       setAplicoBeneficio(false);
     }
   };
-  const objetivo = 15;
+  const objetivo = 10;
   const progreso = Math.min((totalUsoCodigo / objetivo) * 100, 100);
   const alcanzado = totalUsoCodigo >= objetivo;
 
@@ -166,7 +168,6 @@ const CodigoReferido = ({
           justifyContent: "space-between",
         }}
       >
-        {/* Texto */}
         <Typography
           fontSize={13}
           fontWeight={600}
@@ -178,7 +179,6 @@ const CodigoReferido = ({
           <b>1 mes gratis</b> del plan básico o de tu plan actual contratado
         </Typography>
 
-        {/* Barra progreso estilo iOS */}
         <Box
           sx={{
             width: "100%",
@@ -202,13 +202,11 @@ const CodigoReferido = ({
           />
         </Box>
 
-        {/* Contador */}
         <Typography fontSize={12} fontWeight={700} color="text.secondary">
           {totalUsoCodigo} / {objetivo} usos
         </Typography>
 
-        {/* Botón reclamar */}
-        {alcanzado && (
+        {alcanzado && usoTotalReferidos == "false" && (
           <Box sx={{ mt: 2, textAlign: "center" }}>
             <Box
               component="button"

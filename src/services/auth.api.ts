@@ -57,7 +57,8 @@ export interface JwtClaims {
 
   comercioId?: string;
   fotoUrl?: string;
-
+  RedeemRewards?: string;
+  RedeemMonthFree?: string;
   planId?: string;
   planTipo?: string;
   nivelVisibilidad?: string;
@@ -83,10 +84,11 @@ export const defaultJwtClaims: JwtClaims = {
   nombre: "",
   rol: "Colaborador", // rol más restrictivo por default
 
-  comercioId: undefined,
+  comercioId: "0",
   fotoUrl: "",
-
-  planId: undefined,
+  RedeemMonthFree: "false",
+  RedeemRewards: "false",
+  planId: "0",
   planTipo: "BASIC", // plan más bajo por default
   nivelVisibilidad: "0",
 

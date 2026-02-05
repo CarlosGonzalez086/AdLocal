@@ -153,8 +153,12 @@ export default function PreviewPage() {
             codigoReferido={claims?.codigoReferido ?? ""}
             totalUsoCodigo={totalUsoCodigo}
             setAplicoBeneficio={setAplicoBeneficio}
+            usoTotalReferidos={claims?.RedeemRewards ?? ""}
           />
-          <Divider />
+          <Divider className="mt-3 mb-3" />
+          <Typography fontSize={{ xs: 22, sm: 26 }} fontWeight={800} mb={1}>
+            Vista previa
+          </Typography>
         </>
       ) : (
         <></>

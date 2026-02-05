@@ -2,13 +2,20 @@ import { Box, Typography, IconButton, Tooltip } from "@mui/material";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import { useState } from "react";
+import { beneficiosApi } from "../../services/beneficios.api";
+import Swal from "sweetalert2";
 
 interface Prop {
   codigoReferido: string;
   totalUsoCodigo: number;
+  setAplicoBeneficio: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const CodigoReferido = ({ codigoReferido, totalUsoCodigo }: Prop) => {
+const CodigoReferido = ({
+  codigoReferido,
+  totalUsoCodigo,
+  setAplicoBeneficio,
+}: Prop) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -17,6 +24,41 @@ const CodigoReferido = ({ codigoReferido, totalUsoCodigo }: Prop) => {
     setTimeout(() => setCopied(false), 1800);
   };
 
+  const handleSubmitClaimReward = async () => {
+    try {
+      Swal.fire({
+        title: "Aplicando beneficio...",
+        text: "Un momento por favor",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const response = await beneficiosApi.reclamarBeneficio();
+
+      if (response.data.codigo == "200") {
+        await Swal.fire({
+          icon: "success",
+          title: "¡Beneficio aplicado! 🎉",
+          text: response.data.mensaje,
+          confirmButtonText: "Perfecto",
+          confirmButtonColor: "#34C759",
+        });
+        setAplicoBeneficio(true);
+      }
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "No se pudo aplicar el beneficio",
+        text: error.message || "Ocurrió un error inesperado",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#FF3B30", // iOS red
+      });
+      setAplicoBeneficio(false);
+    }
+  };
   const objetivo = 15;
   const progreso = Math.min((totalUsoCodigo / objetivo) * 100, 100);
   const alcanzado = totalUsoCodigo >= objetivo;
@@ -170,7 +212,7 @@ const CodigoReferido = ({ codigoReferido, totalUsoCodigo }: Prop) => {
           <Box sx={{ mt: 2, textAlign: "center" }}>
             <Box
               component="button"
-              onClick={() => console.log("Reclamar mes gratis")}
+              onClick={() => handleSubmitClaimReward()}
               sx={{
                 px: 3,
                 py: 1.2,

@@ -14,18 +14,22 @@ export const utcToLocal = (utcDate: string | Date): string => {
   return `${day}/${month}/${year}`;
 };
 
-export const calcularDiasEntreFechas = (
-  fechaInicio: string,
+export const calcularDiasRestantesDesdeHoy = (
   fechaFin: string,
 ): number => {
-  const inicio = new Date(fechaInicio);
+  const hoy = new Date();
   const fin = new Date(fechaFin);
 
-  const diferenciaMs = fin.getTime() - inicio.getTime();
+  // Normalizamos horas para evitar errores por timezone
+  hoy.setHours(0, 0, 0, 0);
+  fin.setHours(0, 0, 0, 0);
+
+  const diferenciaMs = fin.getTime() - hoy.getTime();
   const dias = Math.ceil(diferenciaMs / (1000 * 60 * 60 * 24));
 
   return dias;
 };
+
 
 export const estaAbiertoAhora = (
   horarios: ComercioDto["horarios"] | undefined,

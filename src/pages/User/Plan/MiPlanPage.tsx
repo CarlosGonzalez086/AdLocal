@@ -10,7 +10,6 @@ import {
 import { PlanesUserList } from "../../../components/Plan/PlanesUserList";
 import { PlanCard } from "../../../components/Plan/PlanCard";
 import { useSuscripciones } from "../../../hooks/useSuscripciones";
-import { calcularDiasEntreFechas } from "../../../utils/generalsFunctions";
 import { SuscripcionDetalleModal } from "../../../components/Suscripcion/SuscripcionDetalleModal";
 import theme from "../../../theme/theme";
 import { useCheckout } from "../../../hooks/useCheckout";
@@ -19,6 +18,7 @@ import { jwtDecode } from "jwt-decode";
 import { UserContext } from "../../../context/UserContext ";
 import { useActualizarJwt } from "../../../hooks/useActualizarJwt";
 import toast from "react-hot-toast";
+import { calcularDiasRestantesDesdeHoy } from "../../../utils/generalsFunctions";
 
 const PlanesPage = () => {
   const { suscripcion, obtenerMiSuscripcion, loading } = useSuscripciones();
@@ -162,8 +162,7 @@ const PlanesPage = () => {
                 <PlanCard
                   nombre={suscripcion.plan.nombre}
                   tipo={suscripcion.plan.tipo}
-                  dias={calcularDiasEntreFechas(
-                    suscripcion.fechaInicio,
+                  dias={calcularDiasRestantesDesdeHoy(
                     suscripcion.fechaFin,
                   )}
                   maxNegocios={suscripcion.plan.maxNegocios}

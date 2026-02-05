@@ -156,9 +156,6 @@ export default function PreviewPage() {
             usoTotalReferidos={claims?.RedeemRewards ?? ""}
           />
           <Divider className="mt-3 mb-3" />
-          <Typography fontSize={{ xs: 22, sm: 26 }} fontWeight={800} mb={1}>
-            Vista previa
-          </Typography>
         </>
       ) : (
         <></>
@@ -166,18 +163,23 @@ export default function PreviewPage() {
 
       {claims?.rol !== "Colaborador" &&
         (claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS") && (
-          <Box mb={6} mt={3}>
-            <div className="row g-3 d-flex justify-content-center">
-              {comercios.map((c) => (
-                <div
-                  key={c.id}
-                  className="col-12 col-sm-6 col-md-4 col-lg-3 d-flex"
-                >
-                  <ComercioCard comercio={c} />
-                </div>
-              ))}
-            </div>
-          </Box>
+          <>
+            <Typography fontSize={{ xs: 22, sm: 26 }} fontWeight={800} mb={1}>
+              Vista previa
+            </Typography>
+            <Box mb={6} mt={3}>
+              <div className="row g-3 d-flex justify-content-center">
+                {comercios.map((c) => (
+                  <div
+                    key={c.id}
+                    className="col-12 col-sm-6 col-md-4 col-lg-3 d-flex"
+                  >
+                    <ComercioCard comercio={c} />
+                  </div>
+                ))}
+              </div>
+            </Box>
+          </>
         )}
 
       {(claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS") &&

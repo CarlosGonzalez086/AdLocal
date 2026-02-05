@@ -18,7 +18,6 @@ export const TarjetasPage: React.FC = () => {
   const { tarjetas, listar, crear, setDefault, eliminar, loading } =
     useTarjetas();
 
-
   const [creando, setCreando] = useState(false);
   const [editando, setEditando] = useState(false);
   const [tarjetaSeleccionada, setTarjetaSeleccionada] =
@@ -136,20 +135,21 @@ export const TarjetasPage: React.FC = () => {
                 sm: "repeat(2, 1fr)",
                 lg: "repeat(3, 1fr)",
               },
-              gap: 3,
             }}
           >
             {tarjetas.map((t) => (
-              <CardTarjeta
-                key={t.id}
-                tarjeta={t}
-                onSetDefault={setDefault}
-                onEliminar={eliminar}
-                onEdit={() => {
-                  setTarjetaSeleccionada(t);
-                  setEditando(true);
-                }}
-              />
+              <div className="p-3 d-flex justify-content-center justify-content-md-start justify-content-lg-start w-100">
+                <CardTarjeta
+                  key={t.id}
+                  tarjeta={t}
+                  onSetDefault={setDefault}
+                  onEliminar={eliminar}
+                  onEdit={() => {
+                    setTarjetaSeleccionada(t);
+                    setEditando(true);
+                  }}
+                />
+              </div>
             ))}
           </Box>
         )}

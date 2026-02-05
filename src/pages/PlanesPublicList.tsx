@@ -13,21 +13,13 @@ export default function PlanesPublicList() {
         flexDirection: "column",
         width: "100%",
         height: "100%",
-        bgcolor:"#F2F2F7"
+        bgcolor: "#F2F2F7",
+        overflow: "auto",
       }}
       padding={3}
     >
       <Box
         sx={{
-          position: "sticky",
-          top: 0,
-          left: 0,
-          zIndex: 10,
-          px: 2,
-          py: 1.5,
-          display: "flex",
-          justifyContent: "flex-start",
-          alignItems: "center",
           backdropFilter: "blur(12px)",
           bgcolor: "rgba(242,242,247,0.8)",
         }}

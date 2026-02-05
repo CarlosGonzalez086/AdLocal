@@ -109,7 +109,7 @@ export const PlanCard = ({
         </Typography>
 
         <Typography variant="body2" color="text.secondary">
-          Duración: {dias > 30 ? "Ilimitado" : <strong>{dias} días</strong>}
+          Duración: {dias > 60 ? "Ilimitado" : <strong>{dias} días</strong>}
         </Typography>
 
         <Box mt={3} mb={2}>

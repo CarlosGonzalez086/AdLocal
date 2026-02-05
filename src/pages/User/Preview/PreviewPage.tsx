@@ -25,6 +25,7 @@ import {
 import type { JwtClaims } from "../../../services/auth.api";
 import CodigoReferido from "../../../components/User/CodigoReferido";
 import { useUsoCodigoReferido } from "../../../hooks/useUsoCodigoReferido";
+import { useActualizarJwt } from "../../../hooks/useActualizarJwt";
 
 export default function PreviewPage() {
   const dataJwt = localStorage.getItem("token");
@@ -39,6 +40,7 @@ export default function PreviewPage() {
   const [productos, setProductos] = useState<ProductoServicioDto[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [verDetalle, setVerDetalle] = useState(false);
+  const [aplicoBeneficio, setAplicoBeneficio] = useState(false);
 
   const comercioSeleccionadoId = useMemo(() => {
     if (comercios.length > 0) return comercios[0].id;
@@ -48,6 +50,8 @@ export default function PreviewPage() {
   const [selectedId, setSelectedId] = useState<number | undefined>(
     comercioSeleccionadoId,
   );
+
+  const { actualizarJwt } = useActualizarJwt();
 
   const {
     data: stats,
@@ -84,7 +88,7 @@ export default function PreviewPage() {
         })
         .then((error) => {
           console.log(error);
-          
+
           setTotalUsoCodigo(0);
           return;
         });
@@ -99,6 +103,16 @@ export default function PreviewPage() {
       getAllComerciosByUser(0, Number(claims.maxNegocios));
     }
   }, []);
+
+  useEffect(() => {
+    if (aplicoBeneficio) {
+      const correo: string = String(claims?.sub);
+      actualizarJwt({
+        email: correo,
+        updateJWT: true,
+      });
+    }
+  }, [aplicoBeneficio]);
 
   if (loading) {
     return (
@@ -135,7 +149,11 @@ export default function PreviewPage() {
     <Box>
       {claims?.codigoReferido ? (
         <>
-          <CodigoReferido codigoReferido={claims?.codigoReferido ?? ""} totalUsoCodigo={totalUsoCodigo}/>
+          <CodigoReferido
+            codigoReferido={claims?.codigoReferido ?? ""}
+            totalUsoCodigo={totalUsoCodigo}
+            setAplicoBeneficio={setAplicoBeneficio}
+          />
           <Divider />
         </>
       ) : (

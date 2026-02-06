@@ -54,6 +54,7 @@ export const comercioCreateSchema = z
     estadoId: z.number().int().positive("El estado es obligatorio"),
 
     municipioId: z.number().int().positive("El municipio es obligatorio"),
+    tipoComercioId: z.number().int().positive().nullable().optional(),
   })
   .refine((d) => d.lat !== 0 && d.lng !== 0, {
     message: "La ubicación es obligatoria",
@@ -89,6 +90,7 @@ export const comercioUpdateSchema = z.object({
   horarios: z.array(horarioSchema).nullable().optional(),
   estadoId: z.number().int().positive().nullable().optional(),
   municipioId: z.number().int().positive().nullable().optional(),
+  tipoComercioId: z.number().int().positive().nullable().optional(),
 });
 
 export type ComercioUpdateDto = z.infer<typeof comercioUpdateSchema>;

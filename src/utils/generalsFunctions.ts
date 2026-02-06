@@ -82,4 +82,5 @@ export const normalizeComercioData = (data: any) => ({
 
   estadoId: data.estadoId > 0 ? data.estadoId : undefined,
   municipioId: data.municipioId > 0 ? data.municipioId : undefined,
+  tipoComercioId: data.tipoComercioId > 0 ? data.tipoComercioId : undefined,
 });

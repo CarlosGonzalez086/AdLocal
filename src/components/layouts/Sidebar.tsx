@@ -18,6 +18,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import PaymentIcon from "@mui/icons-material/Payment";
 import SettingsIcon from "@mui/icons-material/Settings";
 import HistoryIcon from "@mui/icons-material/History";
+import StoreIcon from "@mui/icons-material/Store";
 
 interface SidebarProps {
   drawerWidth: number;
@@ -42,6 +43,11 @@ const Sidebar = ({
     { text: "Home", icon: <HomeIcon />, path: "/Admin" },
     { text: "Planes", icon: <PaymentIcon />, path: "/Admin/planes" },
     { text: "Usuarios", icon: <PeopleIcon />, path: "/Admin/usuarios" },
+    {
+      text: "Tipos Comercios",
+      icon: <StoreIcon />,
+      path: "/Admin/tipos-comercios",
+    },
     {
       text: "Configuraciones",
       icon: <SettingsIcon />,

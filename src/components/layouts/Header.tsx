@@ -44,6 +44,7 @@ const Header = ({
     "/Admin": "Inicio",
     "/Admin/planes": "Planes",
     "/Admin/usuarios": "Usuarios",
+    "/Admin/tipos-comercios": "Tipos Comercios",
     "/Admin/configuraciones": "Configuraciones",
     "/Admin/historial-suscripciones": "Historial",
     "/Admin/perfil": "Mi perfil",

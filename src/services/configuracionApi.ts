@@ -21,7 +21,7 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // DTOs
@@ -32,10 +32,14 @@ export interface StripeConfiguracionDto {
   commissionFixed: string;
 }
 
-export const configuracionApi = {
-  guardarStripe: (data: StripeConfiguracionDto) =>
-    api.post("/stripe", data),
+export interface ClavesConfigDto {
+  ip2locationKey: string;
+}
 
-  obtenerTodas: () =>
-    api.get("/listar"),
+export const configuracionApi = {
+  guardarStripe: (data: StripeConfiguracionDto) => api.post("/stripe", data),
+
+  guardarClaves: (data: ClavesConfigDto) => api.post("/claves", data),
+
+  obtenerTodas: () => api.get("/listar"),
 };

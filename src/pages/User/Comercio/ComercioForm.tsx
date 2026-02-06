@@ -25,6 +25,7 @@ import dayjs from "dayjs";
 import { SelectEstadoAutocomplete } from "../../../components/Locations/SelectEstadoAutocomplete";
 import { SelectMunicipioAutocomplete } from "../../../components/Locations/SelectMunicipioAutocomplete";
 import type { JwtClaims } from "../../../services/auth.api";
+import { SelectTipoComercioAutocomplete } from "../../../components/TipoComercio/SelectTipoComercioAutocomplete";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -319,6 +320,13 @@ export const ComercioForm = ({
               estadoId={form.estadoId}
               value={form.municipioId}
               onChange={(id) => setForm((p) => ({ ...p, municipioId: id }))}
+            />
+
+            <SelectTipoComercioAutocomplete
+              value={form.tipoComercioId}
+              onChange={(id) =>
+                setForm((prev) => ({ ...prev, tipoComercioId: id }))
+              }
             />
 
             {claims?.planTipo !== "FREE" && (

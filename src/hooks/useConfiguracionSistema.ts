@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import Swal from "sweetalert2";
 import {
   configuracionApi,
+  type ClavesConfigDto,
   type StripeConfiguracionDto,
 } from "../services/configuracionApi";
 
@@ -31,6 +32,24 @@ export const useConfiguracionSistema = () => {
     try {
       setLoading(true);
       await configuracionApi.guardarStripe(dto);
+      Swal.fire("Guardado", "Configuración de claves actualizada", "success");
+      await cargar();
+    } catch (error) {
+      console.error(error);
+      Swal.fire(
+        "Error",
+        "No se pudo guardar la configuración de claves",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+    const guardarClaves = async (dto: ClavesConfigDto) => {
+    try {
+      setLoading(true);
+      await configuracionApi.guardarClaves(dto);
       Swal.fire("Guardado", "Configuración de Stripe actualizada", "success");
       await cargar();
     } catch (error) {
@@ -50,5 +69,6 @@ export const useConfiguracionSistema = () => {
     configuraciones,
     cargar,
     guardarStripe,
+    guardarClaves,
   };
 };

@@ -95,6 +95,7 @@ export interface ComercioDto {
   promedioCalificacion: number;
   calificacion?: number;
   badge?: string;
+  tipoComercioId: number;
 }
 
 export const comercioDtoDefault: ComercioDto = {
@@ -117,6 +118,7 @@ export const comercioDtoDefault: ComercioDto = {
   estadoNombre: "",
   municipioNombre: "",
   promedioCalificacion: 0,
+  tipoComercioId: 0,
 };
 
 export interface ComercioDtoListItem {

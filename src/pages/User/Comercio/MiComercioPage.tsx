@@ -48,7 +48,8 @@ export const MiComercioPage = () => {
 
   const isPlanValido =
     (claims.planTipo != "PRO" && claims.planTipo != "BUSINESS") ||
-    claims.rol == "Colaborador" || claims.rol == "Comercio";
+    claims.rol == "Colaborador" ||
+    claims.rol == "Comercio";
 
   if (isPlanValido && loading) {
     return (
@@ -98,6 +99,7 @@ export const MiComercioPage = () => {
               estadoNombre: "",
               municipioNombre: "",
               promedioCalificacion: 0,
+              tipoComercioId: 0,
             }}
             loading={loading}
             onSave={guardar}

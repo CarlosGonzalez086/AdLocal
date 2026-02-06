@@ -30,6 +30,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import ButtonBack from "../../../components/ButtonBack";
 import Swal from "sweetalert2";
+import { SelectTipoComercioAutocomplete } from "../../../components/TipoComercio/SelectTipoComercioAutocomplete";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -103,6 +104,7 @@ export function ComercioPageForm() {
     estadoNombre: "",
     municipioNombre: "",
     promedioCalificacion: 0,
+    tipoComercioId: 0,
   });
 
   const [tab, setTab] = useState(0);
@@ -231,6 +233,7 @@ export function ComercioPageForm() {
       estadoNombre: comercioPage.estadoNombre ?? "",
       municipioNombre: comercioPage.municipioNombre ?? "",
       promedioCalificacion: comercioPage.promedioCalificacion ?? 0,
+      tipoComercioId: comercioPage.tipoComercioId ?? 0,
     });
     setGaleria(comercioPage.imagenes);
     setPreview(comercioPage.logoBase64);
@@ -371,6 +374,12 @@ export function ComercioPageForm() {
                 value={form.municipioId}
                 onChange={(id) =>
                   setForm((prev) => ({ ...prev, municipioId: id }))
+                }
+              />
+              <SelectTipoComercioAutocomplete
+                value={form.tipoComercioId}
+                onChange={(id) =>
+                  setForm((prev) => ({ ...prev, tipoComercioId: id }))
                 }
               />
               {claims?.planTipo != "FREE" ? (

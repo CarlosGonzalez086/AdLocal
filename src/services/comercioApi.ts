@@ -142,6 +142,7 @@ export interface ComercioDtoListItem {
   municipioNombre: string;
   promedioCalificacion: number;
   badge: string;
+  idColaborador:number;
 }
 
 export interface ColaborarDto {

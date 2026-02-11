@@ -4,7 +4,6 @@ import { UserChangePasswordForm } from "./pages/User/Perfil/UserChangePasswordFo
 import UserProfilePage from "./pages/User/Perfil/UserProfilePage";
 import PlanesPage from "./pages/User/Plan/MiPlanPage";
 import { TarjetasPage } from "./pages/User/Tarjetas/TarjetasPage";
-import { loadStripe } from "@stripe/stripe-js";
 import { ProductosServiciosPage } from "./pages/User/ProductosServicios/ProductosServiciosPage";
 import PreviewPage from "./pages/User/Preview/PreviewPage";
 import type { JwtClaims } from "./services/auth.api";
@@ -17,8 +16,9 @@ import { ComercioPageForm } from "./pages/User/Comercio/ComercioPageForm";
 import { PreviewNegocio } from "./pages/User/Preview/PreviewNegocio";
 import ProductosServicioComercios from "./pages/User/ProductosServicios/ProductosServicioComercios";
 import { ProductosServicioComercio } from "./pages/User/ProductosServicios/ProductosServicioComercio";
+import { stripePromise } from "./utils/stripe";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
 const dataJwt = localStorage.getItem("token");
 const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
 const puedeVerComercios =

@@ -25,11 +25,32 @@ export default function ComercioCard({
   const renderBadge = (badge?: string) => {
     if (!badge) return null;
 
-    const isPremium = badge.toLowerCase().includes("premium");
+    const badgeLower = badge.toLowerCase();
+
+    const isPremium = badgeLower.includes("premium");
+    const isRecomendado = badgeLower.includes("recomendado");
+    const stylesByBadge = isPremium
+      ? {
+          background: "linear-gradient(135deg, #FFD700, #FFB300)",
+          color: "#1c1c1e",
+          boxShadow: "0 6px 20px rgba(255, 215, 0, 0.45)",
+        }
+      : isRecomendado
+        ? {
+            background: "linear-gradient(135deg, #FF9800, #FB8C00)",
+            color: "#fff",
+            boxShadow: "0 6px 18px rgba(255, 152, 0, 0.4)",
+          }
+        : {
+            background: "rgba(255,255,255,0.82)",
+            color: "#111",
+            boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
+          };
 
     return (
       <Box
         sx={{
+          ...stylesByBadge,
           position: "absolute",
           top: { xs: 8, sm: 12 },
           right: { xs: 8, sm: 12 },
@@ -48,15 +69,6 @@ export default function ComercioCard({
           textTransform: "uppercase",
 
           backdropFilter: "blur(16px)",
-          background: isPremium
-            ? "linear-gradient(135deg, #FFD700, #FFB300)"
-            : "rgba(255,255,255,0.82)",
-
-          color: isPremium ? "#1c1c1e" : "#111",
-
-          boxShadow: isPremium
-            ? "0 6px 20px rgba(255, 215, 0, 0.45)"
-            : "0 4px 14px rgba(0,0,0,0.18)",
 
           border: "1px solid rgba(255,255,255,0.65)",
           zIndex: 4,
@@ -67,24 +79,26 @@ export default function ComercioCard({
           },
         }}
       >
-        <Box
-          sx={{
-            fontSize: { xs: "0.75rem", sm: "0.8rem" },
-            lineHeight: 1,
-          }}
-        >
-          {isPremium ? "👑" : "⭐"}
-        </Box>
+        <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Box
+            sx={{
+              fontSize: { xs: "0.75rem", sm: "0.8rem" },
+              lineHeight: 1,
+            }}
+          >
+            {isPremium ? "👑" : isRecomendado ? "⭐" : "✨"}
+          </Box>
 
-        <Typography
-          sx={{
-            display: { xs: "none", sm: "block" },
-            fontSize: "inherit",
-            fontWeight: "inherit",
-          }}
-        >
-          {isPremium ? "Premium" : "Recomendado"}
-        </Typography>
+          <Typography
+            sx={{
+              display: { xs: "none", sm: "block" },
+              fontSize: "inherit",
+              fontWeight: 600,
+            }}
+          >
+            {isPremium ? "Premium" : isRecomendado ? "Recomendado" : "Esencial"}
+          </Typography>
+        </Stack>
       </Box>
     );
   };

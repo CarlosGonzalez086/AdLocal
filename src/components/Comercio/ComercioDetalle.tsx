@@ -24,6 +24,7 @@ import { DIAS_SEMANA_MAP } from "../../utils/constantes";
 import { estaAbiertoAhora } from "../../utils/generalsFunctions";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import StarIcon from "@mui/icons-material/Star";
+import CategoryIcon from "@mui/icons-material/Category";
 
 interface Props {
   comercio: ComercioDto;
@@ -47,7 +48,48 @@ export default function ComercioDetalle({
   const renderBadge = (badge?: string) => {
     if (!badge) return null;
 
-    const isPremium = badge.toLowerCase().includes("premium");
+    const badgeLower = badge.toLowerCase();
+
+    const tipo = badgeLower.includes("premium")
+      ? "premium"
+      : badgeLower.includes("recomendado")
+        ? "recomendado"
+        : "esencial";
+
+    const BADGE_CONFIG = {
+      premium: {
+        label: "Premium",
+        icon: "👑",
+        background: "linear-gradient(135deg, #FFD700, #FFB300)",
+        color: "#1c1c1e",
+        boxShadow: `
+        0 8px 22px rgba(255, 193, 7, 0.45),
+        inset 0 1px 0 rgba(255,255,255,0.5)
+      `,
+      },
+      recomendado: {
+        label: "Recomendado",
+        icon: "⭐",
+        background: "linear-gradient(135deg, #FF9800, #FB8C00)",
+        color: "#fff",
+        boxShadow: `
+        0 8px 20px rgba(255, 152, 0, 0.35),
+        inset 0 1px 0 rgba(255,255,255,0.4)
+      `,
+      },
+      esencial: {
+        label: "Esencial",
+        icon: "✨",
+        background: "rgba(255,255,255,0.82)",
+        color: "#111",
+        boxShadow: `
+        0 6px 16px rgba(0,0,0,0.14),
+        inset 0 1px 0 rgba(255,255,255,0.4)
+      `,
+      },
+    };
+
+    const config = BADGE_CONFIG[tipo];
 
     return (
       <Box
@@ -72,21 +114,9 @@ export default function ComercioDetalle({
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
 
-          background: isPremium
-            ? "linear-gradient(135deg, #FFD700, #FFB300)"
-            : "rgba(255,255,255,0.82)",
-
-          color: isPremium ? "#1c1c1e" : "#111",
-
-          boxShadow: isPremium
-            ? `
-            0 8px 22px rgba(255, 193, 7, 0.45),
-            inset 0 1px 0 rgba(255,255,255,0.5)
-          `
-            : `
-            0 6px 16px rgba(0,0,0,0.14),
-            inset 0 1px 0 rgba(255,255,255,0.4)
-          `,
+          background: config.background,
+          color: config.color,
+          boxShadow: config.boxShadow,
 
           border: "1px solid rgba(255,255,255,0.55)",
 
@@ -102,18 +132,16 @@ export default function ComercioDetalle({
         <Box
           component="span"
           sx={{
-            display: { xs: "inline", sm: "inline-flex" },
+            display: "inline-flex",
             alignItems: "center",
             gap: 0.4,
           }}
         >
-          {isPremium ? "👑 Premium" : "⭐ Recomendado"}
+          {config.icon} {config.label}
         </Box>
       </Box>
     );
   };
-
-  console.log(comercio);
 
   return (
     <>
@@ -324,6 +352,26 @@ export default function ComercioDetalle({
                 >
                   {comercio.email}
                 </Link>
+              </Stack>
+            )}
+            {comercio?.tipoComercio && (
+              <Stack direction="row" spacing={1.2} alignItems="center">
+                <CategoryIcon
+                  sx={{
+                    fontSize: 20,
+                    color: "text.disabled",
+                  }}
+                />
+
+                <Typography
+                  sx={{
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: "text.primary",
+                  }}
+                >
+                  {comercio.tipoComercio}
+                </Typography>
               </Stack>
             )}
           </Stack>

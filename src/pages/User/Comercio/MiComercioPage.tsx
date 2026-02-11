@@ -100,6 +100,7 @@ export const MiComercioPage = () => {
               municipioNombre: "",
               promedioCalificacion: 0,
               tipoComercioId: 0,
+              tipoComercio: "",
             }}
             loading={loading}
             onSave={guardar}

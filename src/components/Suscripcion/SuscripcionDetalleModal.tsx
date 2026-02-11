@@ -48,6 +48,7 @@ export const SuscripcionDetalleModal = ({
     >
       <DialogTitle sx={{ pb: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
+          {/* Información del plan */}
           <Box>
             <Typography fontWeight={900} fontSize="1.2rem">
               {plan.nombre}
@@ -57,15 +58,28 @@ export const SuscripcionDetalleModal = ({
             </Typography>
           </Box>
 
-          <Chip
-            label={esActivo ? "Activo" : "Cancelada"}
-            sx={{
-              fontWeight: 700,
-              px: 1.2,
-              bgcolor: esActivo ? "#E8F0FF" : "#b40f0f",
-              color: esActivo ? "#2563EB" : "#ffffff",
-            }}
-          />
+          {/* Estados */}
+          <Stack direction="row" spacing={1}>
+            <Chip
+              label={esActivo ? "Activo" : "Cancelada"}
+              sx={{
+                fontWeight: 700,
+                px: 1.5,
+                bgcolor: esActivo ? "#E8F0FF" : "#FEE2E2",
+                color: esActivo ? "#2563EB" : "#DC2626",
+              }}
+            />
+
+            <Chip
+              label={suscripcion.autoRenew ? "Auto-Renovacion" : "Sin Renovación"}
+              sx={{
+                fontWeight: 700,
+                px: 1.5,
+                bgcolor: suscripcion.autoRenew ? "#E8F0FF" : "#FEE2E2",
+                color: suscripcion.autoRenew ? "#2563EB" : "#DC2626",
+              }}
+            />
+          </Stack>
         </Box>
       </DialogTitle>
 

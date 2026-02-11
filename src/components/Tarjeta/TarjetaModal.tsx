@@ -10,7 +10,7 @@ import {
   Stack,
 } from "@mui/material";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { CrearTarjetaDto, TarjetaDto } from "../../services/tarjetaApi";
 
 interface Props {
@@ -40,6 +40,7 @@ export const TarjetaModal = ({
   const [isDefault, setIsDefault] = useState(false);
   const [changingCard, setChangingCard] = useState(false);
   const [saving, setSaving] = useState(false);
+  const confirmingRef = useRef(false);
 
   useEffect(() => {
     setIsDefault(tarjeta?.isDefault ?? false);
@@ -49,43 +50,45 @@ export const TarjetaModal = ({
   // 🔥 SETUP INTENT (FORMA CORRECTA EN LIVE)
   const crearTarjetaConSetupIntent = async (): Promise<string | null> => {
     if (!stripe || !elements) return null;
+    if (confirmingRef.current) return null;
 
-    const card = elements.getElement(CardElement);
-    if (!card) return null;
+    confirmingRef.current = true;
 
-    // 1️⃣ Obtener clientSecret desde backend
-    const resp = await fetch(
-      `${import.meta.env.VITE_API_URL}/stripe/setup-intent`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
+    try {
+      const card = elements.getElement(CardElement);
+      if (!card) return null;
+
+      const resp = await fetch(
+        `${import.meta.env.VITE_API_URL}/stripe/setup-intent`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
         },
-      },
-    );
-    console.log(resp);
+      );
 
-    if (!resp.ok) {
-      alert("No se pudo iniciar el registro de la tarjeta");
-      return null;
+      if (!resp.ok) {
+        alert("No se pudo iniciar el registro de la tarjeta");
+        return null;
+      }
+
+      const { clientSecret } = await resp.json();
+
+      const result = await stripe.confirmCardSetup(clientSecret, {
+        payment_method: { card },
+      });
+
+      if (result.error) {
+        alert(result.error.message);
+        return null;
+      }
+
+      return result.setupIntent?.payment_method as string;
+    } finally {
+      confirmingRef.current = false;
     }
-
-    const { clientSecret } = await resp.json();
-    console.log(clientSecret);
-
-    // 2️⃣ Confirmar tarjeta con Stripe
-    const result = await stripe.confirmCardSetup(clientSecret, {
-      payment_method: { card },
-    });
-
-    if (result.error) {
-      alert(result.error.message);
-      return null;
-    }
-
-    // 3️⃣ PaymentMethod REAL y válido en LIVE
-    return result.setupIntent.payment_method as string;
   };
 
   // 🔹 GUARDAR
@@ -108,7 +111,7 @@ export const TarjetaModal = ({
         paymentMethodId: pmId,
         isDefault,
       });
-
+      elements?.getElement(CardElement)?.clear();
       onClose();
     } finally {
       setSaving(false);

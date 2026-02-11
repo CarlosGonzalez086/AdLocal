@@ -19,6 +19,7 @@ import { UserContext } from "../../../context/UserContext ";
 import { useActualizarJwt } from "../../../hooks/useActualizarJwt";
 import toast from "react-hot-toast";
 import { calcularDiasRestantesDesdeHoy } from "../../../utils/generalsFunctions";
+import { Backdrop } from "@mui/material";
 
 const PlanesPage = () => {
   const { suscripcion, obtenerMiSuscripcion, loading } = useSuscripciones();
@@ -28,6 +29,7 @@ const PlanesPage = () => {
   const [openDetalle, setOpenDetalle] = useState(false);
   const [modoCambio, setModoCambio] = useState(false);
   const [isSubSuccess, setIsSubSuccess] = useState(false);
+  const [showProcessing, setShowProcessing] = useState(false);
 
   const dataJwt = localStorage.getItem("token");
   const claims: JwtClaims | null = dataJwt
@@ -43,17 +45,30 @@ const PlanesPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!loading && suscripcion.id != 0) {
-      if (!isSubSuccess && !isCancel && !suscripcion) {
-        return;
-      }
+    if (isSubSuccess) {
+      const checkEstado = async () => {
+        obtenerMiSuscripcion();
+      };
+      const timer = setTimeout(checkEstado, 1500);
 
+      return () => clearTimeout(timer);
+    }
+  }, [isSubSuccess]);
+
+  useEffect(() => {
+    if ((isSubSuccess || isCancel) && !loading) {
+      console.log("Entro");
+
+      setShowProcessing(true);
+    }
+
+    if (!loading) {
       const checkEstado = async () => {
         try {
           if (!suscripcion) return;
 
           let mensaje: string | null = null;
-
+          console.log("Entro Check");
           if (isSubSuccess) {
             mensaje = "Tu suscripción ya está activa";
           } else if (isCancel) {
@@ -62,56 +77,31 @@ const PlanesPage = () => {
           } else if (suscripcion.plan?.tipo === "FREE") {
             mensaje = "Tu cuenta ahora tiene el Plan Free activo";
           }
+
           await actualizarJwt({
             email: user.sub,
             updateJWT: true,
           });
-          if (!mensaje) return;
-          toast.success(mensaje, {
-            duration: 3000,
-            style: {
-              background: "#FFFFFF",
-              color: "#1C1C1E",
-              borderRadius: "14px",
-              padding: "14px 18px",
-              boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
-              fontSize: "0.95rem",
-              fontWeight: 500,
-            },
-            iconTheme: {
-              primary: "#34C759",
-              secondary: "#FFFFFF",
-            },
-          });
+          console.log("Entro JWT");
+          if (mensaje) {
+            toast.success(mensaje, {
+              /* tu config */
+            });
+          }
         } catch (error) {
-          console.log(error);
-
-          toast.error("Error verificando suscripción", {
-            duration: 3000,
-            style: {
-              background: "#FFFFFF",
-              color: "#1C1C1E",
-              borderRadius: "14px",
-              padding: "14px 18px",
-              boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
-              fontSize: "0.95rem",
-              fontWeight: 500,
-            },
-            iconTheme: {
-              primary: "#a82913d0",
-              secondary: "#FFFFFF",
-            },
-          });
+          toast.error("Error verificando suscripción");
+        } finally {
+          console.log("Entro Finally");
+          setIsSubSuccess(false);
+          setShowProcessing(false);
         }
       };
 
       const timer = setTimeout(checkEstado, 1500);
 
-      return () => {
-        clearTimeout(timer);
-      };
+      return () => clearTimeout(timer);
     }
-  }, [isSubSuccess, isCancel, suscripcion]);
+  }, [isSubSuccess, isCancel, suscripcion, loading]);
 
   if (loading) {
     return (
@@ -136,6 +126,27 @@ const PlanesPage = () => {
 
   return (
     <Box>
+      <Backdrop
+        open={showProcessing}
+        sx={{
+          zIndex: (theme) => theme.zIndex.modal + 10,
+          bgcolor: "rgba(255,255,255,0.85)",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <CircularProgress size={64} />
+        <Typography fontWeight={700} fontSize={16} color="text.primary">
+          {isCancel
+            ? "Procesando cancelación del plan…"
+            : "Activando tu suscripción…"}
+        </Typography>
+
+        <Typography fontSize={13} color="text.secondary">
+          Esto solo tomará unos segundos
+        </Typography>
+      </Backdrop>
+
       <Box
         sx={{
           py: 5,
@@ -162,9 +173,7 @@ const PlanesPage = () => {
                 <PlanCard
                   nombre={suscripcion.plan.nombre}
                   tipo={suscripcion.plan.tipo}
-                  dias={calcularDiasRestantesDesdeHoy(
-                    suscripcion.fechaFin,
-                  )}
+                  dias={calcularDiasRestantesDesdeHoy(suscripcion.fechaFin)}
                   maxNegocios={suscripcion.plan.maxNegocios}
                   maxProductos={suscripcion.plan.maxProductos}
                   maxFotos={suscripcion.plan.maxFotos}

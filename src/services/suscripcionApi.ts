@@ -68,6 +68,7 @@ export interface SuscripcionDto {
 
   estado: string;
   activa: boolean;
+  autoRenew: boolean;
 }
 
 export const defaultPlan: PlanDto = {
@@ -102,8 +103,8 @@ export const defaultSuscripcion: SuscripcionDto = {
 
   estado: "FREE",
   activa: false,
+  autoRenew:false,
 };
-
 
 export const suscripcionApi = {
   contratar: (data: SuscripcionCreateDto) =>

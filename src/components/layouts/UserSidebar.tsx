@@ -51,7 +51,7 @@ const UserSidebar = ({
 
   const esRutaBasica =
     claims?.rol == "Colaborador" ||
-    (claims?.planTipo == "BASIC" && claims?.rol == "Comercio");
+    claims?.rol == "Comercio";
 
   const menuItems = [
     { text: "Inicio", icon: <HomeIcon />, path: "/app" },

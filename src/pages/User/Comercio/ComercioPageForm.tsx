@@ -105,6 +105,7 @@ export function ComercioPageForm() {
     municipioNombre: "",
     promedioCalificacion: 0,
     tipoComercioId: 0,
+    tipoComercio: "",
   });
 
   const [tab, setTab] = useState(0);
@@ -234,6 +235,7 @@ export function ComercioPageForm() {
       municipioNombre: comercioPage.municipioNombre ?? "",
       promedioCalificacion: comercioPage.promedioCalificacion ?? 0,
       tipoComercioId: comercioPage.tipoComercioId ?? 0,
+      tipoComercio: "",
     });
     setGaleria(comercioPage.imagenes);
     setPreview(comercioPage.logoBase64);

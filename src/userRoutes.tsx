@@ -18,16 +18,15 @@ import ProductosServicioComercios from "./pages/User/ProductosServicios/Producto
 import { ProductosServicioComercio } from "./pages/User/ProductosServicios/ProductosServicioComercio";
 import { stripePromise } from "./utils/stripe";
 
-
 const dataJwt = localStorage.getItem("token");
 const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
 const puedeVerComercios =
   claims?.rol !== "Colaborador" &&
   (claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS");
+console.log(puedeVerComercios);
 
 const permiteCatalogo = claims?.permiteCatalogo !== "False";
-console.log(claims);
-  console.log(stripePromise);
+
 export const userRoutes = [
   {
     path: "",

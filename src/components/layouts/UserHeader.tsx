@@ -10,6 +10,7 @@ import {
   useMediaQuery,
   useTheme,
   Divider,
+  Chip,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -136,6 +137,39 @@ const UserHeader = ({
 
         {user && (
           <Box>
+            <Chip
+              label={user?.rol}
+              size="small"
+              sx={{
+                mr: 1.5,
+                px: 1.2,
+                height: 26,
+                fontSize: "0.72rem",
+                fontWeight: 700,
+                letterSpacing: ".03em",
+                textTransform: "uppercase",
+                color: "#1C1C1E",
+                background:
+                  "linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.55))",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+
+                border: "1px solid rgba(0,0,0,.08)",
+                borderRadius: "999px",
+
+                boxShadow:
+                  "0 4px 10px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.6)",
+
+                transition: "all .25s ease",
+
+                "&:hover": {
+                  transform: "translateY(-1px)",
+                  boxShadow:
+                    "0 6px 16px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.7)",
+                },
+              }}
+            />
+
             <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
               <Avatar
                 src={showImage ? user.FotoUrl : undefined}

@@ -142,26 +142,36 @@ export function ComerciosTable(props: Props) {
                 <DeleteIcon />
               </IconButton>
             </Tooltip>
+            {p.idColaborador == 0 ? (
+              <>
+                {" "}
+                <Tooltip
+                  title="Agregar colaborador"
+                  arrow
+                  enterDelay={300}
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        borderRadius: 3,
+                        fontSize: 12,
+                        fontWeight: 500,
+                      },
+                    },
+                  }}
+                  placement="top"
+                >
+                  <IconButton
+                    size="small"
+                    onClick={() => HandleOpenModal(p.id)}
+                  >
+                    <ManageAccountsIcon />
+                  </IconButton>
+                </Tooltip>
+              </>
+            ) : (
+              <></>
+            )}
 
-            <Tooltip
-              title="Agregar colaborador"
-              arrow
-              enterDelay={300}
-              componentsProps={{
-                tooltip: {
-                  sx: {
-                    borderRadius: 3,
-                    fontSize: 12,
-                    fontWeight: 500,
-                  },
-                },
-              }}
-              placement="top"
-            >
-              <IconButton size="small" onClick={() => HandleOpenModal(p.id)}>
-                <ManageAccountsIcon />
-              </IconButton>
-            </Tooltip>
             <Tooltip
               title="Ver colaboradores"
               arrow

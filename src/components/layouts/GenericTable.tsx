@@ -55,6 +55,7 @@ export function GenericTable<T>({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // 👉 SOLO 2 columnas en móvil (las primeras 2)
   const visibleColumns = isMobile ? columns.slice(0, 2) : columns;
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -72,6 +73,8 @@ export function GenericTable<T>({
     setSelectedRow(null);
   };
 
+  const totalColumns = visibleColumns.length + (actions ? 1 : 0);
+
   return (
     <TableContainer
       component={Paper}
@@ -84,6 +87,7 @@ export function GenericTable<T>({
       }}
     >
       <Table>
+        {/* HEADER */}
         <TableHead>
           <TableRow
             sx={{
@@ -126,7 +130,7 @@ export function GenericTable<T>({
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={visibleColumns.length + 1}>
+              <TableCell colSpan={totalColumns}>
                 <Box py={2}>
                   <LinearProgress />
                   <Typography
@@ -142,7 +146,7 @@ export function GenericTable<T>({
             </TableRow>
           ) : data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={visibleColumns.length + 1}>
+              <TableCell colSpan={totalColumns}>
                 <Box py={4} textAlign="center">
                   <Typography fontWeight={600}>{emptyText}</Typography>
                   <Typography fontSize={13} color="text.secondary">
@@ -180,6 +184,7 @@ export function GenericTable<T>({
                           onClick={(e) => handleMenuOpen(e, row)}
                           sx={{
                             bgcolor: "rgba(0,0,0,0.04)",
+                            borderRadius: "10px",
                             "&:hover": {
                               bgcolor: "rgba(0,0,0,0.08)",
                             },
@@ -200,6 +205,7 @@ export function GenericTable<T>({
           )}
         </TableBody>
 
+        {/* FOOTER */}
         <TableFooter>
           <TableRow>
             <TablePagination
@@ -218,7 +224,6 @@ export function GenericTable<T>({
               SelectProps={{ native: true }}
               sx={{
                 borderTop: "1px solid rgba(0,0,0,0.08)",
-
                 ".MuiTablePagination-toolbar": {
                   minHeight: 52,
                   display: "flex",
@@ -227,20 +232,16 @@ export function GenericTable<T>({
                   gap: 2,
                   px: 2,
                 },
-
                 ".MuiTablePagination-displayedRows": {
                   fontSize: 13,
                   margin: 0,
                   display: "flex",
                   alignItems: "center",
                 },
-
                 ".MuiTablePagination-selectLabel": {
                   fontSize: 13,
-                  marginTop:"1rem"
-
+                  mt: 1,
                 },
-
                 ".MuiTablePagination-select": {
                   fontSize: 13,
                   display: "flex",
@@ -248,11 +249,10 @@ export function GenericTable<T>({
                   paddingTop: "4px",
                   paddingBottom: "4px",
                 },
-
                 ".MuiTablePagination-actions": {
                   display: "flex",
                   alignItems: "center",
-                  marginLeft: 1,
+                  ml: 1,
                 },
               }}
             />
@@ -260,19 +260,36 @@ export function GenericTable<T>({
         </TableFooter>
       </Table>
 
+      {/* MENÚ DE ACCIONES EN MÓVIL */}
       {isMobile && actions && (
         <Menu
           anchorEl={anchorEl}
           open={openMenu}
           onClose={handleMenuClose}
+          TransitionComponent={Fade}
           PaperProps={{
             sx: {
-              borderRadius: 2,
-              minWidth: 160,
+              borderRadius: "16px",
+              minWidth: 180,
+              overflow: "hidden",
+
+              // iOS glass style
+              backdropFilter: "blur(18px)",
+              WebkitBackdropFilter: "blur(18px)",
+              background:
+                "linear-gradient(180deg, rgba(255,255,255,.92), rgba(245,245,247,.96))",
+
+              border: "1px solid rgba(0,0,0,.08)",
+              boxShadow:
+                "0 20px 40px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.6)",
             },
           }}
         >
-          {selectedRow && actions(selectedRow)}
+          {selectedRow && (
+            <Box px={1} py={0.5}>
+              {actions(selectedRow)}
+            </Box>
+          )}
         </Menu>
       )}
     </TableContainer>

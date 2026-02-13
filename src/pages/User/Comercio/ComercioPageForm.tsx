@@ -241,6 +241,9 @@ export function ComercioPageForm() {
     setPreview(comercioPage.logoBase64);
   }, [comercioPage]);
 
+  console.log(galeria);
+  
+
   return (
     <>
       <div className="pb-3">

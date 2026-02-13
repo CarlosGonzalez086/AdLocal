@@ -49,9 +49,10 @@ const UserSidebar = ({
     (claims?.planTipo == "BUSINESS" && claims?.rol == "Comercio");
   console.log(claims);
 
-  const esRutaBasica =
+  const esRutaBasicaOrFree =
     claims?.rol == "Colaborador" ||
-(claims?.rol == "Comercio" && claims?.planTipo == "BASIC");
+    (claims?.rol == "Comercio" && claims?.planTipo == "BASIC") ||
+    (claims?.rol == "Comercio" && claims?.planTipo == "FREE");
 
   const menuItems = [
     { text: "Inicio", icon: <HomeIcon />, path: "/app" },
@@ -75,7 +76,7 @@ const UserSidebar = ({
       icon: <CategoryIcon />,
       path: "/app/productos-servicios/comercios",
     },
-    esRutaBasica && {
+    esRutaBasicaOrFree && {
       text: "Productos y servicios",
       icon: <CategoryIcon />,
       path: "/app/productos-servicios",

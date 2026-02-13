@@ -329,33 +329,31 @@ export const ComercioForm = ({
               }
             />
 
-            {claims?.planTipo !== "FREE" && (
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                  gap: 2,
-                  mt: 2,
-                }}
-              >
-                <TextField
-                  type="color"
-                  label="Color primario"
-                  value={form.colorPrimario ?? "#007AFF"}
-                  onChange={handleChange("colorPrimario")}
-                  fullWidth
-                  disabled={!soloVer}
-                />
-                <TextField
-                  type="color"
-                  label="Color secundario"
-                  value={form.colorSecundario ?? "#FF9500"}
-                  onChange={handleChange("colorSecundario")}
-                  fullWidth
-                  disabled={!soloVer}
-                />
-              </Box>
-            )}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                gap: 2,
+                mt: 2,
+              }}
+            >
+              <TextField
+                type="color"
+                label="Color primario"
+                value={form.colorPrimario ?? "#007AFF"}
+                onChange={handleChange("colorPrimario")}
+                fullWidth
+                disabled={!soloVer}
+              />
+              <TextField
+                type="color"
+                label="Color secundario"
+                value={form.colorSecundario ?? "#FF9500"}
+                onChange={handleChange("colorSecundario")}
+                fullWidth
+                disabled={!soloVer}
+              />
+            </Box>
           </TabPanel>
 
           <TabPanel value={tab} index={1}>

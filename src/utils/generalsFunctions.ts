@@ -69,9 +69,7 @@ export const normalizeComercioData = (data: any) => ({
     ? data.logoBase64
     : undefined,
 
-  imagenes: data.imagenes?.filter((img: string) =>
-    img.startsWith("data:image/"),
-  ),
+  imagenes: data.imagenes,
 
   horarios: data.horarios?.map((h: HorarioComercioDto) => ({
     dia: h.dia,

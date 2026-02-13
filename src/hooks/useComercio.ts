@@ -224,6 +224,7 @@ export const useComercio = () => {
 
     try {
       const normalizedData = normalizeComercioData(data);
+      
 
       if (comercioPage?.id) {
         const result = comercioUpdateSchema.safeParse({

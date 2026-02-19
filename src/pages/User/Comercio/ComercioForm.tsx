@@ -312,16 +312,16 @@ export const ComercioForm = ({
 
               <Stack spacing={2}>
                 {[
-                  { label: "Nombre", key: "nombre" },
-                  { label: "Dirección", key: "direccion" },
-                  { label: "Teléfono", key: "telefono" },
-                  { label: "Email", key: "email" },
+                  { label: "Nombre", key: "nombre" as const },
+                  { label: "Dirección", key: "direccion" as const },
+                  { label: "Teléfono", key: "telefono" as const },
+                  { label: "Email", key: "email" as const },
                 ].map(({ label, key }) => (
                   <TextField
                     key={key}
                     label={label}
                     value={(form as any)[key] ?? ""}
-                    onChange={handleChange(key)}
+                    onChange={handleChange(key as keyof ComercioDto)}
                     fullWidth
                     disabled={!soloVer}
                     sx={fieldSx}

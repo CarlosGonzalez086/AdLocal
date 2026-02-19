@@ -81,7 +81,6 @@ export const ProductoServicioModal = ({
     const e: typeof errors = {};
     if (!form.nombre) e.nombre = "El nombre es obligatorio";
     if (form.precio < 0) e.precio = "Debe ser mayor o igual a 0";
-    if (form.stock < 0) e.stock = "Debe ser mayor o igual a 0";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -293,22 +292,7 @@ export const ProductoServicioModal = ({
               sx={fieldSx}
             />
 
-            <TextField
-              label="Stock"
-              type="number"
-              value={form.stock}
-              error={!!errors.stock}
-              helperText={errors.stock}
-              disabled={soloVer}
-              fullWidth
-              inputProps={{ min: 0, step: 1 }}
-              onChange={(e) => {
-                const value = Number(e.target.value);
-                if (value < 0) return;
-                setForm({ ...form, stock: value });
-              }}
-              sx={fieldSx}
-            />
+
           </Stack>
         </Stack>
       </DialogContent>

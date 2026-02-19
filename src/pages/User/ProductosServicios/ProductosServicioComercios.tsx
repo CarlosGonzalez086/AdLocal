@@ -4,89 +4,70 @@ import { useComercio } from "../../../hooks/useComercio";
 import { useEffect } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
 import ComercioCard from "../../../components/Comercio/ComercioCard";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
 
 export default function ProductosServicioComercios() {
   const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims | null = dataJwt
-    ? jwtDecode<JwtClaims>(dataJwt)
-    : null;
+  const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
   const { loading, comercios, getAllComerciosByUser } = useComercio();
   const navigate = useNavigate();
-  const page = 0;
-  const rows = Number(claims?.maxNegocios);
+
+  const isAllowed =
+    claims?.rol === "Comercio" &&
+    (claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS");
+
   useEffect(() => {
-    if (
-      claims?.rol == "Comercio" &&
-      (claims?.planTipo == "PRO" || claims?.planTipo == "BUSINESS")
-    ) {
-      getAllComerciosByUser(page, rows);
+    if (isAllowed) {
+      getAllComerciosByUser(0, Number(claims?.maxNegocios));
     } else {
       Swal.fire({
         icon: "warning",
         title: "Acceso restringido",
         text: "Tu plan actual no incluye acceso a esta sección. Actualiza tu plan para desbloquear esta funcionalidad.",
         confirmButtonText: "Entendido",
-        confirmButtonColor: "#0d6efd",
+        confirmButtonColor: "#007AFF",
         allowOutsideClick: false,
         allowEscapeKey: false,
-      }).then(() => {
-        navigate("/app/productos-servicios");
-      });
-
-      return;
+      }).then(() => navigate("/app/productos-servicios"));
     }
   }, []);
+
+  /* ─── LOADING ─── */
   if (loading) {
     return (
       <Box
         sx={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2,1fr)",
+            md: "repeat(3,1fr)",
+            lg: "repeat(4,1fr)",
+          },
           gap: 2,
         }}
       >
-        <CircularProgress
-          size={60}
-          thickness={4.5}
-          sx={{
-            color: "#6F4E37",
-          }}
-        />
-
-        <Typography
-          sx={{
-            fontWeight: 600,
-            fontSize: "1.1rem",
-            color: "text.secondary",
-            letterSpacing: "0.3px",
-            animation: "pulse 1.5s ease-in-out infinite",
-          }}
-        >
-          Cargando comercios...
-        </Typography>
-
-        <style>
-          {`
-          @keyframes pulse {
-            0% { opacity: 0.4; }
-            50% { opacity: 1; }
-            100% { opacity: 0.4; }
-          }
-        `}
-        </style>
+        {[1, 2, 3, 4].map((i) => (
+          <Skeleton
+            key={i}
+            variant="rounded"
+            height={260}
+            sx={{ borderRadius: 4, bgcolor: "rgba(0,0,0,0.06)" }}
+          />
+        ))}
       </Box>
     );
   }
-  if (!loading && comercios.length === 0) {
+
+  /* ─── EMPTY ─── */
+  if (comercios.length === 0) {
     return (
       <Box
         sx={{
-          minHeight: "70vh",
+          minHeight: "60vh",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -96,38 +77,49 @@ export default function ProductosServicioComercios() {
           px: 3,
         }}
       >
-        <Typography
+        <Box
           sx={{
-            fontSize: "3rem",
+            width: 72, height: 72,
+            borderRadius: 4,
+            bgcolor: "rgba(0,0,0,0.04)",
+            border: "1px solid rgba(0,0,0,0.07)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            mb: 0.5,
           }}
         >
-          🏪
-        </Typography>
+          <StorefrontRoundedIcon sx={{ fontSize: 32, color: "text.disabled" }} />
+        </Box>
 
-        <Typography
-          sx={{
-            fontWeight: 700,
-            fontSize: "1.3rem",
-          }}
-        >
-          Aún no tienes un comercio registrado
-        </Typography>
-
-        <Typography color="text.secondary" sx={{ maxWidth: 420 }}>
-          Para registrar productos o servicios, primero da de alta tu negocio o
-          comercio.
-        </Typography>
+        <Stack spacing={0.5} alignItems="center">
+          <Typography fontWeight={800} fontSize="1.1rem" color="text.primary">
+            Aún no tienes un comercio registrado
+          </Typography>
+          <Typography fontSize="0.82rem" color="text.disabled" maxWidth={380}>
+            Para registrar productos o servicios, primero da de alta tu negocio.
+          </Typography>
+        </Stack>
 
         <Button
           variant="contained"
+          startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
           onClick={() => navigate("/app/comercio")}
           sx={{
             mt: 1,
-            px: 4,
-            py: 1.2,
-            borderRadius: 3,
+            borderRadius: 999,
             textTransform: "none",
-            fontWeight: 600,
+            fontWeight: 700,
+            fontSize: "0.875rem",
+            px: 3, py: 1.2,
+            background: "linear-gradient(135deg, #1c1c1e, #3a3a3c)",
+            boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
+            transition: "all 0.25s ease",
+            "&:hover": {
+              boxShadow: "0 10px 24px rgba(0,0,0,0.24)",
+              transform: "translateY(-1px)",
+            },
+            "&:active": { transform: "scale(0.98)" },
           }}
         >
           Registrar comercio
@@ -135,21 +127,24 @@ export default function ProductosServicioComercios() {
       </Box>
     );
   }
+
+  /* ─── GRID ─── */
   return (
-    <>
-      {" "}
-      <div className="container-fluid">
-        <div className="row align-items-stretch">
-          {comercios.map((c) => (
-            <div
-              key={c.id}
-              className="col-12 col-sm-6 col-md-4 col-lg-3 d-flex pb-3"
-            >
-              <ComercioCard comercio={c} isProductOrServiceCreation={true} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "1fr",
+          sm: "repeat(2,1fr)",
+          md: "repeat(3,1fr)",
+          lg: "repeat(4,1fr)",
+        },
+        gap: 2,
+      }}
+    >
+      {comercios.map((c) => (
+        <ComercioCard key={c.id} comercio={c} isProductOrServiceCreation />
+      ))}
+    </Box>
   );
 }

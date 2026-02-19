@@ -8,15 +8,15 @@ import {
   TableFooter,
   TablePagination,
   Paper,
-  LinearProgress,
   Typography,
   IconButton,
   Menu,
   Box,
   Fade,
   useMediaQuery,
+  Skeleton,
 } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import { useTheme } from "@mui/material/styles";
 import { useState, type ReactNode } from "react";
 
@@ -55,13 +55,11 @@ export function GenericTable<T>({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // 👉 SOLO 2 columnas en móvil (las primeras 2)
   const visibleColumns = isMobile ? columns.slice(0, 2) : columns;
+  const totalColumns = visibleColumns.length + (actions ? 1 : 0);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = useState<T | null>(null);
-
-  const openMenu = Boolean(anchorEl);
 
   const handleMenuOpen = (e: React.MouseEvent<HTMLElement>, row: T) => {
     setAnchorEl(e.currentTarget);
@@ -73,17 +71,17 @@ export function GenericTable<T>({
     setSelectedRow(null);
   };
 
-  const totalColumns = visibleColumns.length + (actions ? 1 : 0);
-
   return (
     <TableContainer
       component={Paper}
       elevation={0}
       sx={{
-        borderRadius: 3,
-        border: "1px solid rgba(0,0,0,0.08)",
+        borderRadius: 4,
+        border: "1px solid rgba(0,0,0,0.06)",
         overflow: "hidden",
-        backgroundColor: "#fff",
+        bgcolor: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(14px)",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.07)",
       }}
     >
       <Table>
@@ -91,8 +89,8 @@ export function GenericTable<T>({
         <TableHead>
           <TableRow
             sx={{
-              background:
-                "linear-gradient(180deg, rgba(248,249,250,1), rgba(240,242,244,1))",
+              bgcolor: "rgba(0,0,0,0.025)",
+              borderBottom: "1px solid rgba(0,0,0,0.06)",
             }}
           >
             {visibleColumns.map((col) => (
@@ -100,11 +98,13 @@ export function GenericTable<T>({
                 key={String(col.key)}
                 align={col.align ?? "left"}
                 sx={{
-                  fontWeight: 600,
-                  fontSize: 13,
-                  color: "text.secondary",
+                  fontWeight: 700,
+                  fontSize: "0.72rem",
+                  color: "text.disabled",
                   textTransform: "uppercase",
-                  letterSpacing: "0.04em",
+                  letterSpacing: "0.06em",
+                  py: 1.8,
+                  borderBottom: "none",
                 }}
               >
                 {col.label}
@@ -115,9 +115,12 @@ export function GenericTable<T>({
               <TableCell
                 align="right"
                 sx={{
-                  fontWeight: 600,
-                  fontSize: 13,
-                  color: "text.secondary",
+                  fontWeight: 700,
+                  fontSize: "0.72rem",
+                  color: "text.disabled",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  borderBottom: "none",
                 }}
               >
                 Acciones
@@ -129,27 +132,29 @@ export function GenericTable<T>({
         {/* BODY */}
         <TableBody>
           {loading ? (
-            <TableRow>
-              <TableCell colSpan={totalColumns}>
-                <Box py={2}>
-                  <LinearProgress />
-                  <Typography
-                    mt={1.5}
-                    fontSize={13}
-                    color="text.secondary"
-                    textAlign="center"
-                  >
-                    Cargando información…
-                  </Typography>
-                </Box>
-              </TableCell>
-            </TableRow>
+            // Skeleton rows
+            Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                {Array.from({ length: totalColumns }).map((_, j) => (
+                  <TableCell key={j} sx={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
+                    <Skeleton
+                      variant="rounded"
+                      height={20}
+                      sx={{ borderRadius: 999, bgcolor: "rgba(0,0,0,0.05)" }}
+                    />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
           ) : data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={totalColumns}>
-                <Box py={4} textAlign="center">
-                  <Typography fontWeight={600}>{emptyText}</Typography>
-                  <Typography fontSize={13} color="text.secondary">
+              <TableCell colSpan={totalColumns} sx={{ border: "none" }}>
+                <Box py={6} textAlign="center">
+                  <Typography fontSize="2rem" mb={1}>🗂️</Typography>
+                  <Typography fontWeight={700} fontSize="0.9rem" color="text.primary">
+                    {emptyText}
+                  </Typography>
+                  <Typography fontSize="0.78rem" color="text.disabled" mt={0.5}>
                     Intenta ajustar los filtros
                   </Typography>
                 </Box>
@@ -159,10 +164,13 @@ export function GenericTable<T>({
             data.map((row, index) => (
               <Fade in key={index}>
                 <TableRow
-                  hover
                   sx={{
-                    "&:hover": {
-                      backgroundColor: "rgba(0,0,0,0.03)",
+                    transition: "background 0.15s ease",
+                    "&:hover": { bgcolor: "rgba(0,0,0,0.025)" },
+                    "&:last-child td": { borderBottom: "none" },
+                    "& td": {
+                      borderBottom: "1px solid rgba(0,0,0,0.04)",
+                      py: 1.6,
                     },
                   }}
                 >
@@ -170,7 +178,7 @@ export function GenericTable<T>({
                     <TableCell
                       key={String(col.key)}
                       align={col.align ?? "left"}
-                      sx={{ fontSize: 14 }}
+                      sx={{ fontSize: "0.875rem", color: "text.primary" }}
                     >
                       {col.render ? col.render(row) : (row as any)[col.key]}
                     </TableCell>
@@ -183,17 +191,18 @@ export function GenericTable<T>({
                           size="small"
                           onClick={(e) => handleMenuOpen(e, row)}
                           sx={{
-                            bgcolor: "rgba(0,0,0,0.04)",
-                            borderRadius: "10px",
-                            "&:hover": {
-                              bgcolor: "rgba(0,0,0,0.08)",
-                            },
+                            width: 32,
+                            height: 32,
+                            borderRadius: 999,
+                            bgcolor: "rgba(0,0,0,0.05)",
+                            border: "1px solid rgba(0,0,0,0.07)",
+                            "&:hover": { bgcolor: "rgba(0,0,0,0.09)" },
                           }}
                         >
-                          <MoreVertIcon fontSize="small" />
+                          <MoreVertRoundedIcon sx={{ fontSize: 18 }} />
                         </IconButton>
                       ) : (
-                        <Box display="flex" gap={1} justifyContent="flex-end">
+                        <Box display="flex" gap={0.8} justifyContent="flex-end">
                           {actions(row)}
                         </Box>
                       )}
@@ -214,45 +223,30 @@ export function GenericTable<T>({
               page={page}
               rowsPerPage={rowsPerPage}
               onPageChange={(_, p) => onPageChange(p)}
-              onRowsPerPageChange={(e) =>
-                onRowsPerPageChange(Number(e.target.value))
-              }
+              onRowsPerPageChange={(e) => onRowsPerPageChange(Number(e.target.value))}
               labelRowsPerPage="Filas"
-              labelDisplayedRows={({ from, to, count }) =>
-                `${from}-${to} de ${count}`
-              }
+              labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
               SelectProps={{ native: true }}
               sx={{
-                borderTop: "1px solid rgba(0,0,0,0.08)",
-                ".MuiTablePagination-toolbar": {
+                borderTop: "1px solid rgba(0,0,0,0.06)",
+                bgcolor: "rgba(0,0,0,0.015)",
+                "& .MuiTablePagination-toolbar": {
                   minHeight: 52,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 2,
                   px: 2,
+                  gap: 1,
                 },
-                ".MuiTablePagination-displayedRows": {
-                  fontSize: 13,
+                "& .MuiTablePagination-displayedRows, & .MuiTablePagination-selectLabel": {
+                  fontSize: "0.8rem",
+                  color: "text.secondary",
                   margin: 0,
-                  display: "flex",
-                  alignItems: "center",
                 },
-                ".MuiTablePagination-selectLabel": {
-                  fontSize: 13,
-                  mt: 1,
+                "& .MuiTablePagination-select": {
+                  fontSize: "0.8rem",
                 },
-                ".MuiTablePagination-select": {
-                  fontSize: 13,
-                  display: "flex",
-                  alignItems: "center",
-                  paddingTop: "4px",
-                  paddingBottom: "4px",
-                },
-                ".MuiTablePagination-actions": {
-                  display: "flex",
-                  alignItems: "center",
-                  ml: 1,
+                "& .MuiTablePagination-actions button": {
+                  borderRadius: 999,
+                  width: 32,
+                  height: 32,
                 },
               }}
             />
@@ -260,28 +254,23 @@ export function GenericTable<T>({
         </TableFooter>
       </Table>
 
-      {/* MENÚ DE ACCIONES EN MÓVIL */}
+      {/* MENÚ ACCIONES MOBILE */}
       {isMobile && actions && (
         <Menu
           anchorEl={anchorEl}
-          open={openMenu}
+          open={Boolean(anchorEl)}
           onClose={handleMenuClose}
           TransitionComponent={Fade}
           PaperProps={{
             sx: {
-              borderRadius: "16px",
+              borderRadius: 3,
               minWidth: 180,
               overflow: "hidden",
-
-              // iOS glass style
-              backdropFilter: "blur(18px)",
-              WebkitBackdropFilter: "blur(18px)",
-              background:
-                "linear-gradient(180deg, rgba(255,255,255,.92), rgba(245,245,247,.96))",
-
-              border: "1px solid rgba(0,0,0,.08)",
-              boxShadow:
-                "0 20px 40px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.6)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              bgcolor: "rgba(255,255,255,0.94)",
+              border: "1px solid rgba(0,0,0,0.07)",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.16)",
             },
           }}
         >

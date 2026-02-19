@@ -6,7 +6,6 @@ import {
   CardContent,
   Chip,
   Divider,
-  Paper,
   Stack,
   Typography,
 } from "@mui/material";
@@ -14,11 +13,13 @@ import type { JwtClaims } from "../../services/auth.api";
 import type { ComercioDto } from "../../services/comercioApi";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import {
-  LocationOn,
-  Phone,
-  Email,
-  AccessTime,
-  Palette,
+  LocationOnRounded,
+  PhoneRounded,
+  EmailRounded,
+  AccessTimeRounded,
+  PaletteRounded,
+  EditRounded,
+  DeleteOutlineRounded,
 } from "@mui/icons-material";
 import { DIAS_SEMANA_MAP } from "../../utils/constantes";
 
@@ -38,41 +39,61 @@ export function ComercioPreviewCard({
   setEditando,
 }: Props) {
   return (
-    <Card sx={cardStyle}>
-      {/* HERO SECTION */}
+    <Card
+      elevation={0}
+      sx={{
+        borderRadius: 5,
+        overflow: "hidden",
+        bgcolor: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(0,0,0,0.06)",
+        boxShadow: "0 20px 48px rgba(0,0,0,0.09)",
+      }}
+    >
+      {/* HERO */}
       <Box
         sx={{
-          background: `linear-gradient(135deg, ${comercio.colorPrimario}22, ${comercio.colorSecundario}22)`,
-          py: 6,
+          background: `linear-gradient(135deg, ${comercio.colorPrimario}, ${comercio.colorSecundario})`,
+          py: { xs: 5, sm: 6 },
           px: 3,
           textAlign: "center",
+          position: "relative",
         }}
       >
         <Avatar
           src={comercio.logoBase64}
           variant="rounded"
           sx={{
-            width: 120,
-            height: 120,
+            width: { xs: 96, sm: 114 },
+            height: { xs: 96, sm: 114 },
             mx: "auto",
             mb: 2,
-            borderRadius: "24px",
-            boxShadow: "0 15px 40px rgba(0,0,0,.15)",
+            borderRadius: 4,
+            border: "3px solid rgba(255,255,255,0.85)",
+            boxShadow: "0 12px 32px rgba(0,0,0,0.22)",
           }}
         />
 
-        <Typography fontSize="1.6rem" fontWeight={800}>
+        <Typography
+          sx={{
+            fontSize: { xs: "1.4rem", sm: "1.7rem" },
+            fontWeight: 800,
+            color: "#fff",
+            letterSpacing: "-0.5px",
+          }}
+        >
           {comercio.nombre}
         </Typography>
 
         {comercio.descripcion && (
           <Typography
-            variant="body2"
             sx={{
-              mt: 1.5,
-              maxWidth: 500,
+              mt: 1.2,
+              maxWidth: 480,
               mx: "auto",
-              color: "text.secondary",
+              fontSize: "0.875rem",
+              color: "rgba(255,255,255,0.82)",
               lineHeight: 1.6,
             }}
           >
@@ -81,162 +102,162 @@ export function ComercioPreviewCard({
         )}
       </Box>
 
-      <CardContent sx={{ p: 4 }}>
-        {/* INFORMACIÓN */}
-        <Stack spacing={2} mb={4}>
-          {comercio.direccion && (
-            <InfoRow
-              icon={<LocationOn sx={{ color: "#007AFF" }} />}
-              text={`${comercio.direccion}, ${comercio.municipioNombre}, ${comercio.estadoNombre}`}
-            />
-          )}
-          {comercio.telefono && (
-            <InfoRow
-              icon={<Phone sx={{ color: "#34C759" }} />}
-              text={comercio.telefono}
-            />
-          )}
-          {comercio.email && (
-            <InfoRow
-              icon={<Email sx={{ color: "#FF3B30" }} />}
-              text={comercio.email}
-            />
-          )}
-        </Stack>
+      <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
+
+        {/* INFO CONTACTO */}
+        <SectionCard>
+          <Stack spacing={1.8}>
+            {comercio.direccion && (
+              <InfoRow
+                icon={<LocationOnRounded sx={{ color: "#007AFF", fontSize: 20 }} />}
+                text={`${comercio.direccion}, ${comercio.municipioNombre}, ${comercio.estadoNombre}`}
+              />
+            )}
+            {comercio.telefono && (
+              <InfoRow
+                icon={<PhoneRounded sx={{ color: "#34C759", fontSize: 20 }} />}
+                text={comercio.telefono}
+              />
+            )}
+            {comercio.email && (
+              <InfoRow
+                icon={<EmailRounded sx={{ color: "#FF3B30", fontSize: 20 }} />}
+                text={comercio.email}
+              />
+            )}
+          </Stack>
+        </SectionCard>
 
         {/* COLORES */}
         {claims?.planTipo !== "FREE" && (
           <>
-            <Divider sx={{ my: 4 }} />
-
-            <SectionTitle
-              icon={<Palette sx={{ color: "#FF9500" }} />}
-              text="Colores del comercio"
-            />
-
-            <Stack direction="row" spacing={2} mb={4}>
-              <ColorChip
-                label="Primario"
-                color={comercio.colorPrimario}
+            <Divider sx={{ my: 3, opacity: 0.5 }} />
+            <SectionCard>
+              <SectionTitle
+                icon={<PaletteRounded sx={{ color: "#FF9500", fontSize: 18 }} />}
+                text="Colores de marca"
               />
-              <ColorChip
-                label="Secundario"
-                color={comercio.colorSecundario}
-              />
-            </Stack>
+              <Stack direction="row" spacing={1.5}>
+                <ColorChip label="Primario" color={comercio.colorPrimario} />
+                <ColorChip label="Secundario" color={comercio.colorSecundario} />
+              </Stack>
+            </SectionCard>
           </>
         )}
 
-        <Divider sx={{ my: 4 }} />
-
-        {/* GALERÍA + HORARIOS GRID */}
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            gap: 4,
-          }}
-        >
-          {/* GALERÍA */}
-          {imagenes.length > 0 && (
-            <Box>
-              <SectionTitle text="Galería" />
-              <Box display="flex" flexWrap="wrap" gap={2}>
-                {imagenes.slice(0, claims?.maxFotos).map((img, i) => (
-                  <Paper
-                    key={i}
-                    sx={{
-                      borderRadius: "20px",
-                      overflow: "hidden",
-                      width: "100%",
-                      height: 140,
-                      cursor: "pointer",
-                      transition: "all .35s ease",
-                      boxShadow: "0 10px 25px rgba(0,0,0,.08)",
-                      "&:hover": {
-                        transform: "scale(1.03)",
-                        boxShadow: "0 20px 40px rgba(0,0,0,.15)",
-                      },
-                    }}
-                  >
-                    <img
-                      src={img}
-                      alt=""
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </Paper>
-                ))}
-              </Box>
-            </Box>
-          )}
-
-          {/* HORARIOS */}
-          {comercio.horarios.length > 0 && (
-            <Box>
-              <SectionTitle
-                icon={<AccessTime sx={{ color: "#5856D6" }} />}
-                text="Horarios"
-              />
-
-              <Stack spacing={1.5}>
-                {comercio.horarios
-                  .sort((a, b) => a.dia - b.dia)
-                  .map((h) => (
-                    <Paper
-                      key={h.dia}
-                      sx={{
-                        px: 2,
-                        py: 1.5,
-                        borderRadius: "18px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        background:
-                          "linear-gradient(180deg, rgba(248,249,255,.9), rgba(255,255,255,.95))",
-                        border: "1px solid rgba(0,0,0,.05)",
-                      }}
-                    >
-                      <Typography fontWeight={600}>
-                        {DIAS_SEMANA_MAP[h.dia]}
-                      </Typography>
-
-                      {h.abierto ? (
-                        <Typography variant="body2">
-                          {h.horaApertura} – {h.horaCierre}
-                        </Typography>
-                      ) : (
-                        <Chip
-                          label="Cerrado"
-                          size="small"
-                          sx={{
-                            background: "rgba(255,59,48,.12)",
-                            color: "#FF3B30",
-                            fontWeight: 600,
-                            borderRadius: "999px",
-                          }}
+        {/* GALERÍA + HORARIOS */}
+        {(imagenes.length > 0 || comercio.horarios.length > 0) && (
+          <>
+            <Divider sx={{ my: 3, opacity: 0.5 }} />
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                gap: 3,
+              }}
+            >
+              {/* GALERÍA */}
+              {imagenes.length > 0 && (
+                <Box>
+                  <SectionTitle text="🖼️ Galería" />
+                  <Stack spacing={1.5}>
+                    {imagenes.slice(0, claims?.maxFotos).map((img, i) => (
+                      <Box
+                        key={i}
+                        sx={{
+                          borderRadius: 3,
+                          overflow: "hidden",
+                          height: 140,
+                          border: "1px solid rgba(0,0,0,0.06)",
+                          boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
+                          transition: "transform 0.25s ease, box-shadow 0.25s ease",
+                          "&:hover": {
+                            transform: "scale(1.02)",
+                            boxShadow: "0 10px 28px rgba(0,0,0,0.14)",
+                          },
+                        }}
+                      >
+                        <img
+                          src={img}
+                          alt=""
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
                         />
-                      )}
-                    </Paper>
-                  ))}
-              </Stack>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+              )}
+
+              {/* HORARIOS */}
+              {comercio.horarios.length > 0 && (
+                <Box>
+                  <SectionTitle
+                    icon={<AccessTimeRounded sx={{ color: "#5856D6", fontSize: 18 }} />}
+                    text="Horarios"
+                  />
+                  <Stack spacing={1}>
+                    {comercio.horarios
+                      .sort((a, b) => a.dia - b.dia)
+                      .map((h) => (
+                        <Box
+                          key={h.dia}
+                          sx={{
+                            px: 2,
+                            py: 1.2,
+                            borderRadius: 3,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            bgcolor: h.abierto
+                              ? "rgba(255,255,255,0.95)"
+                              : "rgba(0,0,0,0.03)",
+                            border: "1px solid",
+                            borderColor: h.abierto
+                              ? "rgba(0,0,0,0.06)"
+                              : "rgba(0,0,0,0.04)",
+                          }}
+                        >
+                          <Typography fontWeight={600} fontSize="0.875rem">
+                            {DIAS_SEMANA_MAP[h.dia]}
+                          </Typography>
+                          {h.abierto ? (
+                            <Typography fontSize="0.8rem" color="text.secondary" fontWeight={500}>
+                              {h.horaApertura} – {h.horaCierre}
+                            </Typography>
+                          ) : (
+                            <Chip
+                              label="Cerrado"
+                              size="small"
+                              sx={{
+                                height: 22,
+                                fontSize: "0.7rem",
+                                fontWeight: 700,
+                                bgcolor: "rgba(255,59,48,0.10)",
+                                color: "#FF3B30",
+                                borderRadius: 999,
+                              }}
+                            />
+                          )}
+                        </Box>
+                      ))}
+                  </Stack>
+                </Box>
+              )}
             </Box>
-          )}
-        </Box>
+          </>
+        )}
 
         {/* MAPA */}
         {comercio.lat && comercio.lng && (
           <>
-            <Divider sx={{ my: 4 }} />
+            <Divider sx={{ my: 3, opacity: 0.5 }} />
             <Box
               sx={{
-                height: 320,
-                borderRadius: "24px",
+                height: { xs: 240, sm: 300 },
+                borderRadius: 4,
                 overflow: "hidden",
-                boxShadow: "0 20px 45px rgba(0,0,0,.1)",
+                border: "1px solid rgba(0,0,0,0.06)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
               }}
             >
               <MapContainer
@@ -247,34 +268,35 @@ export function ComercioPreviewCard({
                 scrollWheelZoom={false}
               >
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <Marker
-                  position={[Number(comercio.lat), Number(comercio.lng)]}
-                />
+                <Marker position={[Number(comercio.lat), Number(comercio.lng)]} />
               </MapContainer>
             </Box>
           </>
         )}
 
-        <Divider sx={{ my: 4 }} />
+        <Divider sx={{ my: 3, opacity: 0.5 }} />
 
         {/* BOTONES */}
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
           <Button
             variant="contained"
             onClick={() => setEditando(true)}
+            startIcon={<EditRounded sx={{ fontSize: 18 }} />}
             sx={{
               flex: 1,
               py: 1.4,
-              borderRadius: "18px",
+              borderRadius: 999,
               textTransform: "none",
               fontWeight: 700,
-              fontSize: "0.95rem",
-              background:
-                "linear-gradient(135deg, #007AFF, #0051FF)",
-              boxShadow: "0 12px 30px rgba(0,122,255,.35)",
+              fontSize: "0.9rem",
+              background: "linear-gradient(135deg, #007AFF, #0051FF)",
+              boxShadow: "0 8px 22px rgba(0,122,255,0.30)",
+              transition: "all 0.25s ease",
               "&:hover": {
-                boxShadow: "0 18px 40px rgba(0,122,255,.45)",
+                boxShadow: "0 12px 28px rgba(0,122,255,0.42)",
+                transform: "translateY(-1px)",
               },
+              "&:active": { transform: "scale(0.98)" },
             }}
           >
             Editar
@@ -285,12 +307,19 @@ export function ComercioPreviewCard({
               variant="outlined"
               color="error"
               onClick={eliminar}
+              startIcon={<DeleteOutlineRounded sx={{ fontSize: 18 }} />}
               sx={{
                 flex: 1,
                 py: 1.4,
-                borderRadius: "18px",
+                borderRadius: 999,
                 textTransform: "none",
                 fontWeight: 600,
+                fontSize: "0.9rem",
+                borderColor: "rgba(255,59,48,0.35)",
+                "&:hover": {
+                  bgcolor: "rgba(255,59,48,0.06)",
+                  borderColor: "#FF3B30",
+                },
               }}
             >
               Eliminar
@@ -302,47 +331,52 @@ export function ComercioPreviewCard({
   );
 }
 
-/* ================== COMPONENTES AUXILIARES ================== */
+/* ================== AUXILIARES ================== */
 
-const InfoRow = ({ icon, text }: any) => (
-  <Box display="flex" gap={2} alignItems="center">
+const SectionCard = ({ children }: { children: React.ReactNode }) => (
+  <Box
+    sx={{
+      p: { xs: 2, sm: 2.5 },
+      borderRadius: 4,
+      bgcolor: "rgba(255,255,255,0.95)",
+      border: "1px solid rgba(0,0,0,0.06)",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+    }}
+  >
+    {children}
+  </Box>
+);
+
+const InfoRow = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
+  <Box display="flex" gap={1.5} alignItems="center">
     {icon}
-    <Typography variant="body2" color="text.secondary">
+    <Typography fontSize="0.875rem" color="text.secondary" fontWeight={500}>
       {text}
     </Typography>
   </Box>
 );
 
-const SectionTitle = ({ icon, text }: any) => (
-  <Box display="flex" alignItems="center" gap={1} mb={2}>
+const SectionTitle = ({ icon, text }: { icon?: React.ReactNode; text: string }) => (
+  <Box display="flex" alignItems="center" gap={0.8} mb={1.5}>
     {icon}
-    <Typography fontWeight={700} fontSize="1rem">
+    <Typography fontWeight={700} fontSize="0.9rem" color="text.primary">
       {text}
     </Typography>
   </Box>
 );
 
-const ColorChip = ({ label, color }: any) => (
+const ColorChip = ({ label, color }: { label: string; color: string }) => (
   <Chip
     label={label}
+    size="small"
     sx={{
-      backgroundColor: color,
+      bgcolor: color,
       color: "#fff",
-      px: 2,
-      fontWeight: 600,
-      borderRadius: "999px",
-      boxShadow: "0 6px 15px rgba(0,0,0,.2)",
+      px: 1.5,
+      fontWeight: 700,
+      fontSize: "0.75rem",
+      borderRadius: 999,
+      boxShadow: `0 4px 12px ${color}55`,
     }}
   />
 );
-
-const cardStyle = {
-  borderRadius: "28px",
-  overflow: "hidden",
-  background:
-    "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9))",
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
-  border: "1px solid rgba(0,0,0,0.06)",
-  boxShadow: "0 25px 60px rgba(0,0,0,0.08)",
-};

@@ -4,7 +4,8 @@ import {
   Button,
   Typography,
   Divider,
-  CircularProgress,
+  Skeleton,
+  Stack,
 } from "@mui/material";
 import Swal from "sweetalert2";
 import { jwtDecode } from "jwt-decode";
@@ -29,14 +30,11 @@ import { useActualizarJwt } from "../../../hooks/useActualizarJwt";
 
 export default function PreviewPage() {
   const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims | null = dataJwt
-    ? jwtDecode<JwtClaims>(dataJwt)
-    : null;
+  const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
 
   const { comercio, loading, comercios, getAllComerciosByUser } = useComercio();
   const { contarPorCodigo } = useUsoCodigoReferido();
   const [totalUsoCodigo, setTotalUsoCodigo] = useState<number>(0);
-
   const [productos, setProductos] = useState<ProductoServicioDto[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [verDetalle, setVerDetalle] = useState(false);
@@ -47,26 +45,17 @@ export default function PreviewPage() {
     return comercio?.id;
   }, [comercios, comercio]);
 
-  const [selectedId, setSelectedId] = useState<number | undefined>(
-    comercioSeleccionadoId,
-  );
-
+  const [selectedId, setSelectedId] = useState<number | undefined>(comercioSeleccionadoId);
   const { actualizarJwt } = useActualizarJwt();
 
-  const {
-    data: stats,
-    loading: loadingStats,
-    error: statsError,
-  } = useComercioVisitasStats(selectedId);
+  const { data: stats, loading: loadingStats, error: statsError } =
+    useComercioVisitasStats(selectedId);
 
   const listarPorComercio = useCallback(async (idComercio: number) => {
     setLoadingProducts(true);
     try {
       const { data } = await productosServiciosApi.getAllByComercio(idComercio);
-      if (data.codigo !== "200") {
-        Swal.fire("Error", data.mensaje, "error");
-        return;
-      }
+      if (data.codigo !== "200") { Swal.fire("Error", data.mensaje, "error"); return; }
       setProductos(data.respuesta ?? []);
     } catch {
       Swal.fire("Error", "Error al cargar los productos", "error");
@@ -75,179 +64,188 @@ export default function PreviewPage() {
     }
   }, []);
 
-  useEffect(() => {
-    if (comercio?.id) listarPorComercio(comercio.id);
-  }, [comercio?.id, listarPorComercio]);
-
+  useEffect(() => { if (comercio?.id) listarPorComercio(comercio.id); }, [comercio?.id]);
   useEffect(() => {
     if (claims?.codigoReferido) {
-      contarPorCodigo(claims?.codigoReferido)
-        .then((resp) => {
-          setTotalUsoCodigo(resp);
-          return;
-        })
-        .then((error) => {
-          console.log(error);
-
-          setTotalUsoCodigo(0);
-          return;
-        });
+      contarPorCodigo(claims.codigoReferido)
+        .then(setTotalUsoCodigo)
+        .catch(() => setTotalUsoCodigo(0));
     }
   }, [claims?.codigoReferido]);
 
   useEffect(() => {
-    if (
-      claims?.rol === "Comercio" &&
-      (claims.planTipo === "PRO" || claims.planTipo === "BUSINESS")
-    ) {
+    if (claims?.rol === "Comercio" && (claims.planTipo === "PRO" || claims.planTipo === "BUSINESS")) {
       getAllComerciosByUser(0, Number(claims.maxNegocios));
     }
   }, []);
 
   useEffect(() => {
     if (aplicoBeneficio) {
-      const correo: string = String(claims?.sub);
-      actualizarJwt({
-        email: correo,
-        updateJWT: true,
-      });
+      actualizarJwt({ email: String(claims?.sub), updateJWT: true });
     }
   }, [aplicoBeneficio]);
 
+  const isProOrBusiness = claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS";
+  const isBasicOrFree = claims?.planTipo === "FREE" || claims?.planTipo === "BASIC";
+  const isColaborador = claims?.rol === "Colaborador";
+
+  /* ─── LOADING ─── */
   if (loading) {
     return (
-      <Box
-        minHeight="100vh"
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        gap={2}
-      >
-        <CircularProgress size={56} />
-        <Typography fontWeight={600} color="text.secondary">
-          Cargando comercios…
-        </Typography>
+      <Box p={{ xs: 2, sm: 4 }}>
+        <Skeleton variant="rounded" height={80} sx={{ borderRadius: 4, mb: 2 }} />
+        <Stack direction="row" spacing={2} flexWrap="wrap">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} variant="rounded" height={260} sx={{ flex: 1, minWidth: 220, borderRadius: 4 }} />
+          ))}
+        </Stack>
       </Box>
     );
   }
 
-  if (comercio.id == 0) {
+  /* ─── SIN COMERCIO ─── */
+  if (comercio.id === 0) {
     return (
-      <Box p={{ xs: 2, sm: 4 }}>
-        <Typography variant="h5" fontWeight={700}>
-          ¡Aún no tienes un comercio!
+      <Box
+        sx={{
+          p: { xs: 3, sm: 5 },
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1.5,
+          mt: 4,
+        }}
+      >
+        <Typography fontSize="3rem">🏪</Typography>
+        <Typography fontWeight={800} fontSize="1.3rem" color="text.primary">
+          Aún no tienes un comercio
         </Typography>
-        <Typography color="text.secondary">
-          Registra tu comercio para continuar.
+        <Typography color="text.secondary" fontSize="0.875rem">
+          Registra tu primer comercio para comenzar.
         </Typography>
       </Box>
     );
   }
 
   return (
-    <Box>
-      {claims?.codigoReferido ? (
-        <>
+    <Box sx={{ px: { xs: 0, sm: 0 } }}>
+
+      {/* CÓDIGO REFERIDO */}
+      {claims?.codigoReferido && (
+        <Box mb={3}>
           <CodigoReferido
-            codigoReferido={claims?.codigoReferido ?? ""}
+            codigoReferido={claims.codigoReferido}
             totalUsoCodigo={totalUsoCodigo}
             setAplicoBeneficio={setAplicoBeneficio}
             usoTotalReferidos={claims?.RedeemRewards ?? ""}
           />
-          <Divider className="mt-3 mb-3" />
-        </>
-      ) : (
-        <></>
+          <Divider sx={{ mt: 3, opacity: 0.5 }} />
+        </Box>
       )}
 
-      {claims?.rol !== "Colaborador" &&
-        (claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS") && (
-          <>
-            <Typography fontSize={{ xs: 22, sm: 26 }} fontWeight={800} mb={1}>
-              Vista previa
-            </Typography>
-            <Box mb={6} mt={3}>
-              <div className="row g-3 d-flex justify-content-center">
-                {comercios.map((c) => (
-                  <div
-                    key={c.id}
-                    className="col-12 col-sm-6 col-md-4 col-lg-3 d-flex"
-                  >
-                    <ComercioCard comercio={c} />
-                  </div>
-                ))}
-              </div>
-            </Box>
-          </>
-        )}
-
-      {(claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS") &&
-        claims?.rol !== "Colaborador" && (
-          <>
-            <Divider />
-            <Box mt={6}>
-              <Typography fontSize={{ xs: 22, sm: 26 }} fontWeight={800} mb={2}>
-                Estadísticas de visitas
-              </Typography>
-
-              <ComercioSelector
-                comercios={comercios}
-                value={selectedId ?? 0}
-                onChange={setSelectedId}
-              />
-
-              {loadingStats && (
-                <Box textAlign="center" mt={4}>
-                  <CircularProgress />
-                </Box>
-              )}
-
-              {statsError && (
-                <Typography color="error" mt={2}>
-                  {statsError}
-                </Typography>
-              )}
-
-              {stats && (
-                <Box mt={4}>
-                  <ComercioVisitasCharts
-                    ultimaSemana={stats.ultimaSemana}
-                    ultimosTresMeses={stats.ultimosTresMeses}
-                  />
-                </Box>
-              )}
-            </Box>
-          </>
-        )}
-
-      {(claims?.planTipo === "FREE" ||
-        claims?.planTipo === "BASIC" ||
-        claims?.rol === "Colaborador") && (
+      {/* VISTA PRO / BUSINESS */}
+      {isProOrBusiness && !isColaborador && (
         <>
-          <Typography fontSize={{ xs: 22, sm: 26 }} fontWeight={800} mb={1}>
-            Vista previa
-          </Typography>
+          <SectionHeader emoji="👁️" title="Vista previa de comercios" />
 
-          <Divider sx={{ mb: 3 }} />
+          <Box mb={4}>
+            <div className="row g-3">
+              {comercios.map((c) => (
+                <div key={c.id} className="col-12 col-sm-6 col-md-4 col-lg-3 d-flex">
+                  <ComercioCard comercio={c} />
+                </div>
+              ))}
+            </div>
+          </Box>
 
-          {!verDetalle ? (
-            <Box display="flex" justifyContent="center">
-              <Box
-                onClick={() => setVerDetalle(true)}
-                sx={{ cursor: "pointer" }}
-              >
-                <ComercioCardBasico comercio={comercio} />
-              </Box>
+          <Divider sx={{ my: 3, opacity: 0.5 }} />
+
+          {/* ESTADÍSTICAS */}
+          <SectionHeader emoji="📊" title="Estadísticas de visitas" />
+
+          <ComercioSelector
+            comercios={comercios}
+            value={selectedId ?? 0}
+            onChange={setSelectedId}
+          />
+
+          {loadingStats && (
+            <Box mt={4}>
+              <Stack spacing={2}>
+                <Skeleton variant="rounded" height={200} sx={{ borderRadius: 4 }} />
+                <Skeleton variant="rounded" height={200} sx={{ borderRadius: 4 }} />
+              </Stack>
             </Box>
+          )}
+
+          {statsError && (
+            <Box
+              mt={3}
+              sx={{
+                p: 2.5,
+                borderRadius: 4,
+                bgcolor: "rgba(255,59,48,0.06)",
+                border: "1px solid rgba(255,59,48,0.15)",
+              }}
+            >
+              <Typography color="error.main" fontSize="0.875rem" fontWeight={600}>
+                ⚠️ {statsError}
+              </Typography>
+            </Box>
+          )}
+
+          {stats && (
+            <Box mt={3}>
+              <ComercioVisitasCharts
+                ultimaSemana={stats.ultimaSemana}
+                ultimosTresMeses={stats.ultimosTresMeses}
+              />
+            </Box>
+          )}
+        </>
+      )}
+
+      {/* VISTA FREE / BASIC / COLABORADOR */}
+      {(isBasicOrFree || isColaborador) && (
+        <>
+          {!verDetalle ? (
+            <>
+              <SectionHeader emoji="👁️" title="Vista previa" />
+              <Divider sx={{ mb: 3, opacity: 0.5 }} />
+
+              <Box display="flex" justifyContent="center">
+                <Box onClick={() => setVerDetalle(true)} sx={{ cursor: "pointer", width: "100%", maxWidth: 340 }}>
+                  <ComercioCardBasico comercio={comercio} />
+                </Box>
+              </Box>
+            </>
           ) : (
             <>
-              <Button
-                onClick={() => setVerDetalle(false)}
-                sx={{ textTransform: "none", mb: 2 }}
-              >
-                ← Volver
-              </Button>
+              <Box mb={2}>
+                <Button
+                  onClick={() => setVerDetalle(false)}
+                  startIcon={<span style={{ fontSize: 14 }}>←</span>}
+                  sx={{
+                    borderRadius: 999,
+                    textTransform: "none",
+                    fontWeight: 600,
+                    fontSize: "0.875rem",
+                    color: "#007AFF",
+                    px: 2,
+                    py: 0.8,
+                    border: "1px solid rgba(0,122,255,0.20)",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      bgcolor: "rgba(0,122,255,0.06)",
+                      borderColor: "rgba(0,122,255,0.35)",
+                      transform: "translateX(-2px)",
+                    },
+                  }}
+                >
+                  Volver
+                </Button>
+              </Box>
 
               <Box display="flex" justifyContent="center">
                 <ComercioDetalle
@@ -263,3 +261,20 @@ export default function PreviewPage() {
     </Box>
   );
 }
+
+/* ─── AUXILIAR ─── */
+const SectionHeader = ({ emoji, title }: { emoji: string; title: string }) => (
+  <Box display="flex" alignItems="center" gap={1} mb={2.5}>
+    <Typography fontSize="1.4rem" lineHeight={1}>{emoji}</Typography>
+    <Typography
+      sx={{
+        fontSize: { xs: "1.2rem", sm: "1.4rem" },
+        fontWeight: 800,
+        color: "#1c1c1e",
+        letterSpacing: "-0.3px",
+      }}
+    >
+      {title}
+    </Typography>
+  </Box>
+);

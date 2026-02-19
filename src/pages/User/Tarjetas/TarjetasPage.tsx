@@ -2,30 +2,32 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
-  LinearProgress,
   Typography,
-  Paper,
   Stack,
+  Skeleton,
 } from "@mui/material";
 import type { CrearTarjetaDto, TarjetaDto } from "../../../services/tarjetaApi";
 import { useTarjetas } from "../../../hooks/useTarjetas";
 import { CardTarjeta } from "../../../components/Tarjeta/CardTarjeta";
 import { TarjetaModal } from "../../../components/Tarjeta/TarjetaModal";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
 
-import AddIcon from "@mui/icons-material/Add";
+const cardSx = {
+  borderRadius: 4,
+  bgcolor: "rgba(255,255,255,0.92)",
+  backdropFilter: "blur(14px)",
+  border: "1px solid rgba(0,0,0,0.06)",
+  boxShadow: "0 4px 16px rgba(0,0,0,0.07)",
+};
 
 export const TarjetasPage: React.FC = () => {
-  const { tarjetas, listar, crear, setDefault, eliminar, loading } =
-    useTarjetas();
-
+  const { tarjetas, listar, crear, setDefault, eliminar, loading } = useTarjetas();
   const [creando, setCreando] = useState(false);
   const [editando, setEditando] = useState(false);
-  const [tarjetaSeleccionada, setTarjetaSeleccionada] =
-    useState<TarjetaDto | null>(null);
+  const [tarjetaSeleccionada, setTarjetaSeleccionada] = useState<TarjetaDto | null>(null);
 
-  useEffect(() => {
-    listar();
-  }, []);
+  useEffect(() => { listar(); }, []);
 
   const handleSave = async (data: CrearTarjetaDto) => {
     await crear(data);
@@ -34,14 +36,22 @@ export const TarjetasPage: React.FC = () => {
     setTarjetaSeleccionada(null);
   };
 
-  /* 🔹 Loading */
+  /* ─── LOADING ─── */
   if (loading) {
     return (
       <Box>
-        <Typography variant="body2" color="text.secondary" mb={1}>
-          Cargando tarjetas…
-        </Typography>
-        <LinearProgress sx={{ borderRadius: 1 }} />
+        <Skeleton variant="rounded" height={88} sx={{ borderRadius: 4, mb: 2.5 }} />
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2,1fr)", lg: "repeat(3,1fr)" },
+            gap: 2,
+          }}
+        >
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} variant="rounded" height={180} sx={{ borderRadius: 4 }} />
+          ))}
+        </Box>
       </Box>
     );
   }
@@ -49,83 +59,111 @@ export const TarjetasPage: React.FC = () => {
   return (
     <>
       <Box>
-        <Paper
-          elevation={0}
-          sx={{
-            mb: 3,
-            p: 2.5,
-            borderRadius: 3,
-            border: "1px solid rgba(0,0,0,0.08)",
-            background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)",
-          }}
-        >
+        {/* HEADER */}
+        <Box sx={{ ...cardSx, p: { xs: 2.5, sm: 3 }, mb: 2.5 }}>
           <Stack
             direction={{ xs: "column", sm: "row" }}
             alignItems={{ sm: "center" }}
             spacing={2}
           >
-            <Box>
-              <Typography variant="h5" fontWeight={600}>
-                Mis tarjetas
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Administra tus métodos de pago
-              </Typography>
-            </Box>
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <Box
+                sx={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 3,
+                  bgcolor: "rgba(0,122,255,0.10)",
+                  border: "1px solid rgba(0,122,255,0.15)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <CreditCardRoundedIcon sx={{ fontSize: 22, color: "#007AFF" }} />
+              </Box>
+              <Box>
+                <Typography fontWeight={800} fontSize="1.05rem" color="text.primary" letterSpacing="-0.2px">
+                  Mis tarjetas
+                </Typography>
+                <Typography fontSize="0.75rem" color="text.disabled">
+                  Administra tus métodos de pago
+                </Typography>
+              </Box>
+            </Stack>
 
             <Button
               variant="contained"
-              startIcon={<AddIcon />}
+              startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
               onClick={() => setCreando(true)}
               sx={{
-                ml: "auto",
-                px: 3,
-                borderRadius: 2,
+                ml: { sm: "auto" },
+                borderRadius: 999,
                 textTransform: "none",
-                fontWeight: 600,
-                background: "linear-gradient(135deg, #007AFF 0%, #005FCC 100%)",
-                boxShadow: "0 6px 16px rgba(0,122,255,0.3)",
+                fontWeight: 700,
+                fontSize: "0.875rem",
+                px: 3,
+                py: 1.2,
+                background: "linear-gradient(135deg, #007AFF, #005FCC)",
+                boxShadow: "0 6px 18px rgba(0,122,255,0.30)",
+                transition: "all 0.25s ease",
                 "&:hover": {
-                  boxShadow: "0 8px 20px rgba(0,122,255,0.4)",
+                  boxShadow: "0 10px 24px rgba(0,122,255,0.42)",
+                  transform: "translateY(-1px)",
                 },
+                "&:active": { transform: "scale(0.98)" },
               }}
             >
               Agregar tarjeta
             </Button>
           </Stack>
-        </Paper>
+        </Box>
 
+        {/* EMPTY STATE */}
         {tarjetas.length === 0 ? (
-          <Paper
-            elevation={0}
+          <Box
             sx={{
-              p: 4,
+              ...cardSx,
+              py: 7,
+              px: 3,
               textAlign: "center",
-              borderRadius: 3,
-              border: "1px dashed rgba(0,0,0,0.15)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1.5,
+              border: "1.5px dashed rgba(0,0,0,0.10)",
+              boxShadow: "none",
             }}
           >
-            <Typography variant="h6" mb={1}>
+            <Typography fontSize="2.5rem" lineHeight={1}>💳</Typography>
+            <Typography fontWeight={700} fontSize="1rem" color="text.primary">
               No tienes tarjetas registradas
             </Typography>
-            <Typography variant="body2" color="text.secondary" mb={3}>
-              Agrega una tarjeta para comenzar a realizar pagos
+            <Typography fontSize="0.82rem" color="text.disabled" maxWidth={280}>
+              Agrega una tarjeta para comenzar a realizar pagos fácilmente
             </Typography>
-
             <Button
               variant="contained"
-              startIcon={<AddIcon />}
+              startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
               onClick={() => setCreando(true)}
               sx={{
-                px: 3,
-                borderRadius: 2,
+                mt: 1,
+                borderRadius: 999,
                 textTransform: "none",
-                fontWeight: 600,
+                fontWeight: 700,
+                px: 3,
+                py: 1.2,
+                background: "linear-gradient(135deg, #007AFF, #005FCC)",
+                boxShadow: "0 6px 18px rgba(0,122,255,0.28)",
+                transition: "all 0.25s ease",
+                "&:hover": {
+                  boxShadow: "0 10px 24px rgba(0,122,255,0.40)",
+                  transform: "translateY(-1px)",
+                },
               }}
             >
               Agregar tarjeta
             </Button>
-          </Paper>
+          </Box>
         ) : (
           <Box
             sx={{
@@ -135,51 +173,39 @@ export const TarjetasPage: React.FC = () => {
                 sm: "repeat(2, 1fr)",
                 lg: "repeat(3, 1fr)",
               },
+              gap: 2,
             }}
           >
             {tarjetas.map((t) => (
-              <div className="p-3 d-flex justify-content-center justify-content-md-start justify-content-lg-start w-100">
-                <CardTarjeta
-                  key={t.id}
-                  tarjeta={t}
-                  onSetDefault={setDefault}
-                  onEliminar={eliminar}
-                  onEdit={() => {
-                    setTarjetaSeleccionada(t);
-                    setEditando(true);
-                  }}
-                />
-              </div>
+              <CardTarjeta
+                key={t.id}
+                tarjeta={t}
+                onSetDefault={setDefault}
+                onEliminar={eliminar}
+                onEdit={() => {
+                  setTarjetaSeleccionada(t);
+                  setEditando(true);
+                }}
+              />
             ))}
           </Box>
         )}
       </Box>
-      {creando && (
-        <>
-          {" "}
-          <TarjetaModal
-            open={creando}
-            onClose={() => setCreando(false)}
-            onSave={handleSave}
-            loading={loading}
-          />
-        </>
-      )}
-      {editando && (
-        <>
-          {" "}
-          <TarjetaModal
-            open={editando}
-            tarjeta={tarjetaSeleccionada}
-            onClose={() => {
-              setEditando(false);
-              setTarjetaSeleccionada(null);
-            }}
-            onSave={handleSave}
-            loading={loading}
-          />
-        </>
-      )}
+
+      <TarjetaModal
+        open={creando}
+        onClose={() => setCreando(false)}
+        onSave={handleSave}
+        loading={loading}
+      />
+
+      <TarjetaModal
+        open={editando}
+        tarjeta={tarjetaSeleccionada}
+        onClose={() => { setEditando(false); setTarjetaSeleccionada(null); }}
+        onSave={handleSave}
+        loading={loading}
+      />
     </>
   );
 };

@@ -12,19 +12,24 @@ const ButtonBack = ({ route }: ButtonBackProps) => {
   return (
     <Button
       onClick={() => navigate(route)}
-      startIcon={<ArrowBackIosNewIcon />}
+      startIcon={<ArrowBackIosNewIcon sx={{ fontSize: "13px !important" }} />}
       sx={{
         textTransform: "none",
-        fontSize: 15,
-        fontWeight: 500,
+        fontSize: "0.875rem",
+        fontWeight: 600,
         color: "#007AFF",
-        padding: "6px 8px",
-        borderRadius: "12px",
+        px: 2,
+        py: 0.8,
+        borderRadius: 999,
+        border: "1px solid rgba(0,122,255,0.20)",
+        transition: "all 0.2s ease",
         "&:hover": {
-          backgroundColor: "rgba(0, 122, 255, 0.08)",
+          bgcolor: "rgba(0,122,255,0.08)",
+          borderColor: "rgba(0,122,255,0.35)",
+          transform: "translateX(-2px)",
         },
       }}
-      variant="text"
+      variant="outlined"
     >
       Regresar
     </Button>

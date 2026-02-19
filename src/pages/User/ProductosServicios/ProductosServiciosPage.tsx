@@ -2,36 +2,41 @@ import {
   IconButton,
   Button,
   Box,
-  Paper,
   Tooltip,
   Chip,
   Stack,
   Typography,
+  LinearProgress,
 } from "@mui/material";
 
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
-import ToggleOnIcon from "@mui/icons-material/ToggleOn";
-import ToggleOffIcon from "@mui/icons-material/ToggleOff";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import ToggleOnRoundedIcon from "@mui/icons-material/ToggleOnRounded";
+import ToggleOffRoundedIcon from "@mui/icons-material/ToggleOffRounded";
+
 import { useEffect, useState } from "react";
 import type { ProductoServicioDto } from "../../../services/productosServiciosApi";
 import { useProductosServicios } from "../../../hooks/useProductosServicios";
-import {
-  GenericTable,
-  type TableColumn,
-} from "../../../components/layouts/GenericTable";
+import { GenericTable, type TableColumn } from "../../../components/layouts/GenericTable";
 import { SearchInput } from "../../../components/SearchInput";
 import { OrderSelect } from "../../../components/OrderSelect";
 import { ProductoServicioModal } from "../../../components/ProductosServicios/ProductoServicioModal";
 import type { JwtClaims } from "../../../services/auth.api";
 import { jwtDecode } from "jwt-decode";
 
+const cardSx = {
+  borderRadius: 4,
+  bgcolor: "rgba(255,255,255,0.92)",
+  backdropFilter: "blur(14px)",
+  border: "1px solid rgba(0,0,0,0.06)",
+  boxShadow: "0 4px 16px rgba(0,0,0,0.07)",
+};
+
 export const ProductosServiciosPage = () => {
   const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims | null = dataJwt
-    ? jwtDecode<JwtClaims>(dataJwt)
-    : null;
+  const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
+
   const initialForm: ProductoServicioDto = {
     nombre: "",
     descripcion: "",
@@ -56,20 +61,21 @@ export const ProductosServiciosPage = () => {
     listar({ page, rows, orderBy, search, idComercio: 0 });
   }, [page, rows, orderBy, search]);
 
+  const max = Number(claims?.maxProductos);
+  const restantes = max - total;
+  const limiteAlcanzado = restantes <= 0;
+  const porcentaje = max > 0 ? Math.min((total / max) * 100, 100) : 0;
+
   const columns: TableColumn<ProductoServicioDto>[] = [
-    {
-      key: "nombre",
-      label: "Nombre",
-    },
-    {
-      key: "descripcion",
-      label: "Descripción",
-    },
+    { key: "nombre", label: "Nombre" },
+    { key: "descripcion", label: "Descripción" },
     {
       key: "precio",
       label: "Precio",
       render: (p) => (
-        <Typography fontWeight={500}>${p.precio.toLocaleString()}</Typography>
+        <Typography fontWeight={600} fontSize="0.875rem">
+          ${p.precio.toLocaleString()}
+        </Typography>
       ),
     },
     {
@@ -80,10 +86,12 @@ export const ProductosServiciosPage = () => {
           label={p.activo ? "Activo" : "Inactivo"}
           size="small"
           sx={{
-            borderRadius: 1.5,
-            fontWeight: 500,
-            bgcolor: p.activo ? "#E9F7EF" : "#F2F2F7",
-            color: p.activo ? "#1E7F4F" : "#666",
+            height: 22,
+            borderRadius: 999,
+            fontSize: "0.72rem",
+            fontWeight: 700,
+            bgcolor: p.activo ? "rgba(52,199,89,0.10)" : "rgba(0,0,0,0.06)",
+            color: p.activo ? "#34C759" : "#8e8e93",
           }}
         />
       ),
@@ -92,16 +100,8 @@ export const ProductosServiciosPage = () => {
 
   return (
     <Box>
-      <Paper
-        elevation={0}
-        sx={{
-          mb: 3,
-          p: 2.5,
-          borderRadius: 3,
-          border: "1px solid rgba(0,0,0,0.08)",
-          background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)",
-        }}
-      >
+      {/* HEADER CARD */}
+      <Box sx={{ ...cardSx, p: { xs: 2.5, sm: 3 }, mb: 2.5 }}>
         <Stack
           direction={{ xs: "column", md: "row" }}
           spacing={2}
@@ -110,92 +110,94 @@ export const ProductosServiciosPage = () => {
           <SearchInput
             value={search}
             placeholder="Buscar producto o servicio…"
-            onChange={(value) => {
-              setSearch(value);
-              setPage(0);
-            }}
+            onChange={(value) => { setSearch(value); setPage(0); }}
           />
 
           <OrderSelect
             value={orderBy}
-            onChange={(value) => {
-              setOrderBy(value);
-              setPage(0);
-            }}
+            onChange={(value) => { setOrderBy(value); setPage(0); }}
           />
 
           <Button
             variant="contained"
-            disabled={Number(claims?.maxProductos) == total}
-            startIcon={<AddIcon />}
-            onClick={() => {
-              setProducto(initialForm);
-              setOpen(true);
-            }}
+            disabled={limiteAlcanzado}
+            startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
+            onClick={() => { setProducto(initialForm); setOpen(true); }}
             sx={{
-              ml: "auto",
-              px: 3,
-              borderRadius: 2,
+              borderRadius: 999,
               textTransform: "none",
-              fontWeight: 600,
-              background:
-                Number(claims?.maxProductos) == total
-                  ? "linear-gradient(135deg, #rgb(190, 202, 214)0%, #9ba0a5 100%)"
-                  : "linear-gradient(135deg, #007AFF 0%, #005FCC 100%)",
-              boxShadow: "0 6px 16px rgba(0,122,255,0.3)",
+              fontWeight: 700,
+              fontSize: "0.875rem",
+              px: 3,
+              py: 1.2,
+              whiteSpace: "nowrap",
+              background: limiteAlcanzado
+                ? undefined
+                : "linear-gradient(135deg, #007AFF, #005FCC)",
+              boxShadow: limiteAlcanzado ? "none" : "0 6px 18px rgba(0,122,255,0.30)",
+              transition: "all 0.25s ease",
+              "&:hover": {
+                boxShadow: "0 10px 24px rgba(0,122,255,0.40)",
+                transform: "translateY(-1px)",
+              },
+              "&:active": { transform: "scale(0.98)" },
             }}
           >
-            Nuevo
+            Nuevo 
           </Button>
         </Stack>
+
+        {/* Barra uso */}
         {claims?.maxProductos && (
-          <Box
-            sx={{
-              mt: 2,
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Box
+          <Box mt={2.5}>
+            <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+              <Typography fontSize="0.78rem" fontWeight={600} color="text.secondary">
+                Productos registrados
+              </Typography>
+              <Box
+                sx={{
+                  px: 1.2,
+                  py: 0.2,
+                  borderRadius: 999,
+                  bgcolor: limiteAlcanzado ? "rgba(255,59,48,0.10)" : "rgba(52,199,89,0.10)",
+                  border: `1px solid ${limiteAlcanzado ? "rgba(255,59,48,0.20)" : "rgba(52,199,89,0.20)"}`,
+                }}
+              >
+                <Typography
+                  fontSize="0.7rem"
+                  fontWeight={700}
+                  color={limiteAlcanzado ? "error.main" : "success.main"}
+                >
+                  {total} / {max}
+                </Typography>
+              </Box>
+            </Stack>
+
+            <LinearProgress
+              variant="determinate"
+              value={porcentaje}
               sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 1,
-                px: 1.75,
-                py: 0.75,
+                height: 6,
                 borderRadius: 999,
-                background: "rgba(0,122,255,0.08)",
+                bgcolor: "rgba(0,0,0,0.06)",
+                "& .MuiLinearProgress-bar": {
+                  borderRadius: 999,
+                  bgcolor: limiteAlcanzado ? "error.main" : "#007AFF",
+                },
               }}
-            >
-              {Number(claims.maxProductos) - total == 0 ? (
-                <>
-                  <Typography fontSize={13} color="text.secondary">
-                    Llegaste al límite de productos o servicios disponibles en
-                    tu plan
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  {" "}
-                  <Typography fontSize={13} color="text.secondary">
-                    Aún puedes registrar {Number(claims.maxProductos) - total}{" "}
-                    productos más
-                  </Typography>
-                </>
-              )}
-            </Box>
+            />
+
+            <Typography fontSize="0.72rem" color="text.disabled" mt={0.8}>
+              {limiteAlcanzado
+                ? "Llegaste al límite de productos de tu plan"
+                : `Puedes registrar ${restantes} producto${restantes !== 1 ? "s" : ""} más`}
+            </Typography>
           </Box>
         )}
-      </Paper>
+      </Box>
 
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: 3,
-          border: "1px solid rgba(0,0,0,0.08)",
-          overflow: "hidden",
-        }}
-      >
+      {/* TABLA */}
+      <Box sx={cardSx}>
         <GenericTable<ProductoServicioDto>
           columns={columns}
           data={productos}
@@ -205,94 +207,77 @@ export const ProductosServiciosPage = () => {
           rowsPerPage={rows}
           total={total}
           onPageChange={setPage}
-          onRowsPerPageChange={(r) => {
-            setRows(r);
-            setPage(0);
-          }}
+          onRowsPerPageChange={(r) => { setRows(r); setPage(0); }}
           actions={(p) => (
-            <Stack direction="row" spacing={0.5} className="p-1">
-              <Tooltip title="Editar">
+            <Stack direction="row" spacing={0.5} sx={{ p: 0.5 }}>
+              <Tooltip title="Editar" arrow>
                 <IconButton
                   size="small"
+                  onClick={() => { setProducto(p); setOpen(true); }}
                   sx={{
-                    bgcolor: "#F2F2F7",
-                    "&:hover": { bgcolor: "#E5E5EA" },
-                  }}
-                  onClick={() => {
-                    setProducto(p);
-                    setOpen(true);
+                    width: 32, height: 32, borderRadius: 999,
+                    bgcolor: "rgba(0,0,0,0.05)",
+                    border: "1px solid rgba(0,0,0,0.07)",
+                    "&:hover": { bgcolor: "rgba(0,122,255,0.10)", color: "#007AFF" },
+                    transition: "all 0.2s ease",
                   }}
                 >
-                  <EditIcon fontSize="small" />
+                  <EditRoundedIcon sx={{ fontSize: 16 }} />
                 </IconButton>
               </Tooltip>
 
-              <Tooltip title="Eliminar">
+              <Tooltip title="Eliminar" arrow>
                 <IconButton
                   size="small"
+                  onClick={() => eliminar(Number(p.id), 0, { page, rows, orderBy, search, idComercio: 0 })}
                   sx={{
-                    bgcolor: "#FDECEA",
-                    color: "#D93025",
-                    "&:hover": { bgcolor: "#FAD2CF" },
+                    width: 32, height: 32, borderRadius: 999,
+                    bgcolor: "rgba(255,59,48,0.08)",
+                    border: "1px solid rgba(255,59,48,0.15)",
+                    color: "#FF3B30",
+                    "&:hover": { bgcolor: "rgba(255,59,48,0.16)" },
+                    transition: "all 0.2s ease",
                   }}
-                  onClick={() =>
-                    eliminar(Number(p.id), 0, {
-                      page,
-                      rows,
-                      orderBy,
-                      search,
-                      idComercio: 0,
-                    })
-                  }
                 >
-                  <DeleteIcon fontSize="small" />
+                  <DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />
                 </IconButton>
               </Tooltip>
 
-              <Tooltip title={p.activo ? "Desactivar" : "Activar"}>
+              <Tooltip title={p.activo ? "Desactivar" : "Activar"} arrow>
                 <IconButton
                   size="small"
+                  onClick={() => desactivar(Number(p.id), 0, p.activo, { page, rows, orderBy, search, idComercio: 0 })}
                   sx={{
-                    bgcolor: p.activo ? "#E9F7EF" : "#F2F2F7",
-                    color: p.activo ? "#1E7F4F" : "#666",
+                    width: 32, height: 32, borderRadius: 999,
+                    bgcolor: p.activo ? "rgba(52,199,89,0.10)" : "rgba(0,0,0,0.05)",
+                    border: `1px solid ${p.activo ? "rgba(52,199,89,0.20)" : "rgba(0,0,0,0.07)"}`,
+                    color: p.activo ? "#34C759" : "#8e8e93",
+                    "&:hover": {
+                      bgcolor: p.activo ? "rgba(52,199,89,0.20)" : "rgba(0,0,0,0.09)",
+                    },
+                    transition: "all 0.2s ease",
                   }}
-                  onClick={() =>
-                    desactivar(Number(p.id), 0, p.activo, {
-                      page,
-                      rows,
-                      orderBy,
-                      search,
-                      idComercio: 0,
-                    })
-                  }
                 >
-                  {p.activo ? (
-                    <ToggleOnIcon fontSize="small" />
-                  ) : (
-                    <ToggleOffIcon fontSize="small" />
-                  )}
+                  {p.activo
+                    ? <ToggleOnRoundedIcon sx={{ fontSize: 18 }} />
+                    : <ToggleOffRoundedIcon sx={{ fontSize: 18 }} />
+                  }
                 </IconButton>
               </Tooltip>
             </Stack>
           )}
         />
-      </Paper>
+      </Box>
+
       {open && (
-        <>
-          <ProductoServicioModal
-            key={`edit-${producto?.id ?? "new"}`}
-            open={open}
-            onClose={() => {
-              setOpen(false);
-              setProducto(initialForm);
-            }}
-            onSave={(p) =>
-              guardar(p, { page, rows, orderBy, search, idComercio: 0 })
-            }
-            producto={producto}
-            loading={loading}
-          />
-        </>
+        <ProductoServicioModal
+          key={`edit-${producto?.id ?? "new"}`}
+          open={open}
+          onClose={() => { setOpen(false); setProducto(initialForm); }}
+          onSave={(p) => guardar(p, { page, rows, orderBy, search, idComercio: 0 })}
+          producto={producto}
+          loading={loading}
+        />
       )}
     </Box>
   );

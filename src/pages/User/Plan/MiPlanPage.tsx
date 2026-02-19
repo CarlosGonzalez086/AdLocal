@@ -5,6 +5,9 @@ import {
   Button,
   useMediaQuery,
   CircularProgress,
+  Backdrop,
+  Skeleton,
+  Stack,
 } from "@mui/material";
 
 import { PlanesUserList } from "../../../components/Plan/PlanesUserList";
@@ -19,11 +22,11 @@ import { UserContext } from "../../../context/UserContext ";
 import { useActualizarJwt } from "../../../hooks/useActualizarJwt";
 import toast from "react-hot-toast";
 import { calcularDiasRestantesDesdeHoy } from "../../../utils/generalsFunctions";
-import { Backdrop } from "@mui/material";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import SwapHorizRoundedIcon from "@mui/icons-material/SwapHorizRounded";
 
 const PlanesPage = () => {
   const { suscripcion, obtenerMiSuscripcion, loading } = useSuscripciones();
-
   const { cancelarPlan, isCancel } = useCheckout();
 
   const [openDetalle, setOpenDetalle] = useState(false);
@@ -32,133 +35,110 @@ const PlanesPage = () => {
   const [showProcessing, setShowProcessing] = useState(false);
 
   const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims | null = dataJwt
-    ? jwtDecode<JwtClaims>(dataJwt)
-    : null;
+  const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
   const user = useContext(UserContext);
   const { actualizarJwt } = useActualizarJwt();
-
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  useEffect(() => {
-    obtenerMiSuscripcion();
-  }, []);
+  useEffect(() => { obtenerMiSuscripcion(); }, []);
 
   useEffect(() => {
     if (isSubSuccess) {
-      const checkEstado = async () => {
-        obtenerMiSuscripcion();
-      };
-      const timer = setTimeout(checkEstado, 1500);
-
+      const timer = setTimeout(() => obtenerMiSuscripcion(), 1500);
       return () => clearTimeout(timer);
     }
   }, [isSubSuccess]);
 
   useEffect(() => {
-    if ((isSubSuccess || isCancel) && !loading) {
-      console.log("Entro");
-
-      setShowProcessing(true);
-    }
+    if ((isSubSuccess || isCancel) && !loading) setShowProcessing(true);
 
     if (!loading) {
       const checkEstado = async () => {
         try {
           if (!suscripcion) return;
-
           let mensaje: string | null = null;
-          console.log("Entro Check");
-          if (isSubSuccess) {
-            mensaje = "Tu suscripción ya está activa";
-          } else if (isCancel) {
-            mensaje =
-              "Tu suscripción fue cancelada y seguirá activa hasta el final del periodo";
-          } else if (suscripcion.plan?.tipo === "FREE") {
-            mensaje = "Tu cuenta ahora tiene el Plan Free activo";
-          }
+          if (isSubSuccess) mensaje = "Tu suscripción ya está activa";
+          else if (isCancel) mensaje = "Tu suscripción fue cancelada y seguirá activa hasta el final del periodo";
+          else if (suscripcion.plan?.tipo === "FREE") mensaje = "Tu cuenta ahora tiene el Plan Free activo";
 
-          await actualizarJwt({
-            email: user.sub,
-            updateJWT: true,
-          });
-          console.log("Entro JWT");
-          if (mensaje) {
-            toast.success(mensaje, {
-              /* tu config */
-            });
-          }
-        } catch (error) {
+          await actualizarJwt({ email: user.sub, updateJWT: true });
+          if (mensaje) toast.success(mensaje);
+        } catch {
           toast.error("Error verificando suscripción");
         } finally {
-          console.log("Entro Finally");
           setIsSubSuccess(false);
           setShowProcessing(false);
         }
       };
-
       const timer = setTimeout(checkEstado, 1500);
-
       return () => clearTimeout(timer);
     }
   }, [isSubSuccess, isCancel, suscripcion, loading]);
 
+  /* ─── LOADING ─── */
   if (loading) {
     return (
-      <>
-        {" "}
-        <Box
-          minHeight="100vh"
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          gap={2}
-        >
-          <CircularProgress size={56} />
-          <Typography fontWeight={600} color="text.secondary">
-            Cargando informacion…
-          </Typography>
+      <Box>
+        {/* Header skeleton */}
+        <Box textAlign="center" py={5} mb={2}>
+          <Skeleton variant="rounded" width={200} height={36} sx={{ borderRadius: 999, mx: "auto", mb: 1.5 }} />
+          <Skeleton variant="rounded" width={280} height={18} sx={{ borderRadius: 999, mx: "auto" }} />
         </Box>
-      </>
+        <Box maxWidth={420} mx="auto" px={2}>
+          <Skeleton variant="rounded" height={380} sx={{ borderRadius: 5 }} />
+          <Skeleton variant="rounded" height={52} sx={{ borderRadius: 999, mt: 2 }} />
+        </Box>
+      </Box>
     );
   }
 
   return (
     <Box>
+      {/* BACKDROP procesando */}
       <Backdrop
         open={showProcessing}
         sx={{
-          zIndex: (theme) => theme.zIndex.modal + 10,
-          bgcolor: "rgba(255,255,255,0.85)",
+          zIndex: (t) => t.zIndex.modal + 10,
+          bgcolor: "rgba(255,255,255,0.88)",
+          backdropFilter: "blur(12px)",
           flexDirection: "column",
           gap: 2,
         }}
       >
-        <CircularProgress size={64} />
-        <Typography fontWeight={700} fontSize={16} color="text.primary">
-          {isCancel
-            ? "Procesando cancelación del plan…"
-            : "Activando tu suscripción…"}
-        </Typography>
-
-        <Typography fontSize={13} color="text.secondary">
-          Esto solo tomará unos segundos
-        </Typography>
+        <CircularProgress
+          size={52}
+          thickness={4}
+          sx={{ color: isCancel ? "#FF3B30" : "#007AFF" }}
+        />
+        <Stack alignItems="center" spacing={0.5}>
+          <Typography fontWeight={800} fontSize="1rem" color="text.primary">
+            {isCancel ? "Procesando cancelación…" : "Activando tu suscripción…"}
+          </Typography>
+          <Typography fontSize="0.8rem" color="text.disabled">
+            Esto solo tomará unos segundos
+          </Typography>
+        </Stack>
       </Backdrop>
 
+      {/* HERO HEADER */}
       <Box
         sx={{
-          py: 5,
+          py: { xs: 4, sm: 5 },
           textAlign: "center",
-          mb: 4,
+          mb: 3,
         }}
       >
-        <Typography variant="h4" fontWeight={800}>
-          {suscripcion && !modoCambio ? "Mi plan" : "Planes disponibles"}
+        <Typography
+          sx={{
+            fontSize: { xs: "1.5rem", sm: "1.9rem" },
+            fontWeight: 800,
+            color: "#1c1c1e",
+            letterSpacing: "-0.5px",
+          }}
+        >
+          {suscripcion && !modoCambio ? "📋 Mi plan" : "🚀 Planes disponibles"}
         </Typography>
-
-        <Typography variant="body2" color="text.secondary" mt={1}>
+        <Typography fontSize="0.875rem" color="text.disabled" mt={0.8}>
           {suscripcion && !modoCambio
             ? "Administra tu suscripción actual"
             : "Elige el plan que mejor se adapte a tu negocio"}
@@ -166,8 +146,10 @@ const PlanesPage = () => {
       </Box>
 
       <Box maxWidth={1200} mx="auto" px={{ xs: 2, md: 3 }}>
+
+        {/* PLAN ACTUAL */}
         {suscripcion && !modoCambio && (
-          <Box maxWidth={420} mx="auto">
+          <Box maxWidth={440} mx="auto">
             {(!isMobile || !openDetalle) && (
               <>
                 <PlanCard
@@ -192,16 +174,21 @@ const PlanesPage = () => {
                 <Button
                   fullWidth
                   onClick={() => setModoCambio(true)}
+                  startIcon={<SwapHorizRoundedIcon sx={{ fontSize: 18 }} />}
                   sx={{
                     mt: 2,
-                    py: 1.3,
-                    borderRadius: 3,
+                    py: 1.4,
+                    borderRadius: 999,
                     textTransform: "none",
                     fontWeight: 700,
-                    bgcolor: "#F2F4F7",
-                    color: "#111827",
+                    fontSize: "0.9rem",
+                    bgcolor: "rgba(0,0,0,0.05)",
+                    color: "text.primary",
+                    border: "1px solid rgba(0,0,0,0.08)",
+                    transition: "all 0.2s ease",
                     "&:hover": {
-                      bgcolor: "#E5E7EB",
+                      bgcolor: "rgba(0,0,0,0.09)",
+                      transform: "translateY(-1px)",
                     },
                   }}
                 >
@@ -218,19 +205,32 @@ const PlanesPage = () => {
           </Box>
         )}
 
+        {/* LISTA DE PLANES */}
         {(!suscripcion || modoCambio) && (
           <>
             {suscripcion && (
               <Box textAlign="center" mb={3}>
                 <Button
                   onClick={() => setModoCambio(false)}
+                  startIcon={<ArrowBackRoundedIcon sx={{ fontSize: 16 }} />}
                   sx={{
+                    borderRadius: 999,
                     textTransform: "none",
                     fontWeight: 600,
-                    color: "#2563EB",
+                    fontSize: "0.875rem",
+                    color: "#007AFF",
+                    px: 2.5,
+                    py: 0.9,
+                    border: "1px solid rgba(0,122,255,0.20)",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      bgcolor: "rgba(0,122,255,0.06)",
+                      borderColor: "rgba(0,122,255,0.35)",
+                      transform: "translateX(-2px)",
+                    },
                   }}
                 >
-                  ← Volver a mi plan
+                  Volver a mi plan
                 </Button>
               </Box>
             )}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CircularProgress, Typography, Box, Fade } from "@mui/material";
+import { Typography, Box, Fade, Skeleton } from "@mui/material";
 import { usePlanes } from "../../hooks/usePlanes";
 import { PlanCard } from "./PlanCard";
 import type { PlanCreateDto } from "../../services/planApi";
@@ -14,18 +14,12 @@ interface Props {
 export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
   const { planesUser, loading, listAllPlanesUser } = usePlanes();
   const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims | null = dataJwt
-    ? jwtDecode<JwtClaims>(dataJwt)
-    : null;
+  const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
 
   const [openModal, setOpenModal] = useState(false);
+  const [planSeleccionado, setPlanSeleccionado] = useState<PlanCreateDto | null>(null);
 
-  const [planSeleccionado, setPlanSeleccionado] =
-    useState<PlanCreateDto | null>(null);
-
-  useEffect(() => {
-    listAllPlanesUser();
-  }, [listAllPlanesUser]);
+  useEffect(() => { listAllPlanesUser(); }, [listAllPlanesUser]);
 
   const handleSelectPlan = (plan: PlanCreateDto) => {
     setPlanSeleccionado(plan);
@@ -37,37 +31,60 @@ export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
     setPlanSeleccionado(null);
   };
 
+  /* ─── LOADING ─── */
   if (loading) {
     return (
-      <Box
-        minHeight={260}
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        gap={2}
-      >
-        <CircularProgress />
-        <Typography variant="body2" color="text.secondary">
-          Cargando planes disponibles…
-        </Typography>
+      <Box maxWidth={1200} mx="auto" px={{ xs: 2, md: 3 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2,1fr)", lg: "repeat(3,1fr)" },
+            gap: 3,
+          }}
+        >
+          {[1, 2, 3].map((i) => (
+            <Box key={i}>
+              <Skeleton
+                variant="rounded"
+                height={420}
+                sx={{
+                  borderRadius: 5,
+                  bgcolor: "rgba(0,0,0,0.06)",
+                }}
+              />
+            </Box>
+          ))}
+        </Box>
       </Box>
     );
   }
 
+  /* ─── EMPTY ─── */
   if (!planesUser.length) {
     return (
-      <Box textAlign="center" py={6}>
-        <Typography variant="h6" fontWeight={700} mb={1}>
+      <Box
+        sx={{
+          textAlign: "center",
+          py: 8,
+          px: 3,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography fontSize="2.5rem" lineHeight={1}>📭</Typography>
+        <Typography fontWeight={800} fontSize="1rem" color="text.primary">
           No hay planes disponibles
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography fontSize="0.82rem" color="text.disabled">
           Intenta nuevamente más tarde
         </Typography>
       </Box>
     );
   }
 
+  /* ─── LISTA ─── */
   return (
     <>
       <Fade in timeout={400}>
@@ -84,27 +101,26 @@ export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
             }}
           >
             {planesUser
-              .filter((plan) => plan.tipo != "FREE")
+              .filter((plan) => plan.tipo !== "FREE")
               .sort((a, b) => a.precio - b.precio)
               .map((plan) => (
-                <Box key={plan.id}>
-                  <PlanCard
-                    nombre={plan.nombre}
-                    tipo={plan.tipo}
-                    dias={plan.duracionDias}
-                    precio={plan.precio}
-                    maxNegocios={plan.maxNegocios}
-                    maxProductos={plan.maxProductos}
-                    maxFotos={plan.maxFotos}
-                    permiteCatalogo={plan.permiteCatalogo}
-                    tieneAnalytics={plan.tieneAnalytics}
-                    isMultiUsuario={plan.isMultiUsuario}
-                    coloresPersonalizados={plan.coloresPersonalizados}
-                    soportePrioritario={plan.tieneBadge}
-                    onSelect={() => handleSelectPlan(plan)}
-                    claims={claims}
-                  />
-                </Box>
+                <PlanCard
+                  key={plan.id}
+                  nombre={plan.nombre}
+                  tipo={plan.tipo}
+                  dias={plan.duracionDias}
+                  precio={plan.precio}
+                  maxNegocios={plan.maxNegocios}
+                  maxProductos={plan.maxProductos}
+                  maxFotos={plan.maxFotos}
+                  permiteCatalogo={plan.permiteCatalogo}
+                  tieneAnalytics={plan.tieneAnalytics}
+                  isMultiUsuario={plan.isMultiUsuario}
+                  coloresPersonalizados={plan.coloresPersonalizados}
+                  soportePrioritario={plan.tieneBadge}
+                  onSelect={() => handleSelectPlan(plan)}
+                  claims={claims}
+                />
               ))}
           </Box>
         </Box>

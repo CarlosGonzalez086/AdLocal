@@ -105,6 +105,7 @@ export const ListadoPlanesPublicos = () => {
                   coloresPersonalizados={plan.coloresPersonalizados}
                   soportePrioritario={plan.tieneBadge}
                   isPublic
+                  badgeTexto={plan.badgeTexto || ""}
                 />
               </Box>
             ))}

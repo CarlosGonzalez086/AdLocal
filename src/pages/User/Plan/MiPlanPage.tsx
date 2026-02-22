@@ -35,12 +35,16 @@ const PlanesPage = () => {
   const [showProcessing, setShowProcessing] = useState(false);
 
   const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
+  const claims: JwtClaims | null = dataJwt
+    ? jwtDecode<JwtClaims>(dataJwt)
+    : null;
   const user = useContext(UserContext);
   const { actualizarJwt } = useActualizarJwt();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  useEffect(() => { obtenerMiSuscripcion(); }, []);
+  useEffect(() => {
+    obtenerMiSuscripcion();
+  }, []);
 
   useEffect(() => {
     if (isSubSuccess) {
@@ -58,8 +62,11 @@ const PlanesPage = () => {
           if (!suscripcion) return;
           let mensaje: string | null = null;
           if (isSubSuccess) mensaje = "Tu suscripción ya está activa";
-          else if (isCancel) mensaje = "Tu suscripción fue cancelada y seguirá activa hasta el final del periodo";
-          else if (suscripcion.plan?.tipo === "FREE") mensaje = "Tu cuenta ahora tiene el Plan Free activo";
+          else if (isCancel)
+            mensaje =
+              "Tu suscripción fue cancelada y seguirá activa hasta el final del periodo";
+          else if (suscripcion.plan?.tipo === "FREE")
+            mensaje = "Tu cuenta ahora tiene el Plan Free activo";
 
           await actualizarJwt({ email: user.sub, updateJWT: true });
           if (mensaje) toast.success(mensaje);
@@ -81,12 +88,26 @@ const PlanesPage = () => {
       <Box>
         {/* Header skeleton */}
         <Box textAlign="center" py={5} mb={2}>
-          <Skeleton variant="rounded" width={200} height={36} sx={{ borderRadius: 999, mx: "auto", mb: 1.5 }} />
-          <Skeleton variant="rounded" width={280} height={18} sx={{ borderRadius: 999, mx: "auto" }} />
+          <Skeleton
+            variant="rounded"
+            width={200}
+            height={36}
+            sx={{ borderRadius: 999, mx: "auto", mb: 1.5 }}
+          />
+          <Skeleton
+            variant="rounded"
+            width={280}
+            height={18}
+            sx={{ borderRadius: 999, mx: "auto" }}
+          />
         </Box>
         <Box maxWidth={420} mx="auto" px={2}>
           <Skeleton variant="rounded" height={380} sx={{ borderRadius: 5 }} />
-          <Skeleton variant="rounded" height={52} sx={{ borderRadius: 999, mt: 2 }} />
+          <Skeleton
+            variant="rounded"
+            height={52}
+            sx={{ borderRadius: 999, mt: 2 }}
+          />
         </Box>
       </Box>
     );
@@ -146,7 +167,6 @@ const PlanesPage = () => {
       </Box>
 
       <Box maxWidth={1200} mx="auto" px={{ xs: 2, md: 3 }}>
-
         {/* PLAN ACTUAL */}
         {suscripcion && !modoCambio && (
           <Box maxWidth={440} mx="auto">
@@ -169,6 +189,7 @@ const PlanesPage = () => {
                   soportePrioritario={suscripcion.plan.tieneBadge}
                   permiteCatalogo={suscripcion.plan.permiteCatalogo}
                   claims={claims}
+                  badgeTexto={suscripcion.plan.badgeTexto || ""}
                 />
 
                 <Button

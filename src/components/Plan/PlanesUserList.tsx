@@ -120,6 +120,7 @@ export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
                   soportePrioritario={plan.tieneBadge}
                   onSelect={() => handleSelectPlan(plan)}
                   claims={claims}
+                  badgeTexto={plan.badgeTexto || ""}
                 />
               ))}
           </Box>

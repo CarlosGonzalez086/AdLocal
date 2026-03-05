@@ -35,7 +35,6 @@ export default function ProductosServicioComercios() {
     }
   }, []);
 
-  /* ─── LOADING ─── */
   if (loading) {
     return (
       <Box
@@ -62,7 +61,6 @@ export default function ProductosServicioComercios() {
     );
   }
 
-  /* ─── EMPTY ─── */
   if (comercios.length === 0) {
     return (
       <Box
@@ -127,8 +125,6 @@ export default function ProductosServicioComercios() {
       </Box>
     );
   }
-
-  /* ─── GRID ─── */
   return (
     <Box
       sx={{

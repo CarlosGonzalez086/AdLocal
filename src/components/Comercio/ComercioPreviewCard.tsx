@@ -51,7 +51,6 @@ export function ComercioPreviewCard({
         boxShadow: "0 20px 48px rgba(0,0,0,0.09)",
       }}
     >
-      {/* HERO */}
       <Box
         sx={{
           background: `linear-gradient(135deg, ${comercio.colorPrimario}, ${comercio.colorSecundario})`,
@@ -103,13 +102,13 @@ export function ComercioPreviewCard({
       </Box>
 
       <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
-
-        {/* INFO CONTACTO */}
         <SectionCard>
           <Stack spacing={1.8}>
             {comercio.direccion && (
               <InfoRow
-                icon={<LocationOnRounded sx={{ color: "#007AFF", fontSize: 20 }} />}
+                icon={
+                  <LocationOnRounded sx={{ color: "#007AFF", fontSize: 20 }} />
+                }
                 text={`${comercio.direccion}, ${comercio.municipioNombre}, ${comercio.estadoNombre}`}
               />
             )}
@@ -128,24 +127,20 @@ export function ComercioPreviewCard({
           </Stack>
         </SectionCard>
 
-        {/* COLORES */}
-        {claims?.planTipo !== "FREE" && (
-          <>
-            <Divider sx={{ my: 3, opacity: 0.5 }} />
-            <SectionCard>
-              <SectionTitle
-                icon={<PaletteRounded sx={{ color: "#FF9500", fontSize: 18 }} />}
-                text="Colores de marca"
-              />
-              <Stack direction="row" spacing={1.5}>
-                <ColorChip label="Primario" color={comercio.colorPrimario} />
-                <ColorChip label="Secundario" color={comercio.colorSecundario} />
-              </Stack>
-            </SectionCard>
-          </>
-        )}
+        <>
+          <Divider sx={{ my: 3, opacity: 0.5 }} />
+          <SectionCard>
+            <SectionTitle
+              icon={<PaletteRounded sx={{ color: "#FF9500", fontSize: 18 }} />}
+              text="Colores de marca"
+            />
+            <Stack direction="row" spacing={1.5}>
+              <ColorChip label="Primario" color={comercio.colorPrimario} />
+              <ColorChip label="Secundario" color={comercio.colorSecundario} />
+            </Stack>
+          </SectionCard>
+        </>
 
-        {/* GALERÍA + HORARIOS */}
         {(imagenes.length > 0 || comercio.horarios.length > 0) && (
           <>
             <Divider sx={{ my: 3, opacity: 0.5 }} />
@@ -170,7 +165,8 @@ export function ComercioPreviewCard({
                           height: 140,
                           border: "1px solid rgba(0,0,0,0.06)",
                           boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
-                          transition: "transform 0.25s ease, box-shadow 0.25s ease",
+                          transition:
+                            "transform 0.25s ease, box-shadow 0.25s ease",
                           "&:hover": {
                             transform: "scale(1.02)",
                             boxShadow: "0 10px 28px rgba(0,0,0,0.14)",
@@ -180,19 +176,25 @@ export function ComercioPreviewCard({
                         <img
                           src={img}
                           alt=""
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
                         />
                       </Box>
                     ))}
                   </Stack>
                 </Box>
               )}
-
-              {/* HORARIOS */}
               {comercio.horarios.length > 0 && (
                 <Box>
                   <SectionTitle
-                    icon={<AccessTimeRounded sx={{ color: "#5856D6", fontSize: 18 }} />}
+                    icon={
+                      <AccessTimeRounded
+                        sx={{ color: "#5856D6", fontSize: 18 }}
+                      />
+                    }
                     text="Horarios"
                   />
                   <Stack spacing={1}>
@@ -221,7 +223,11 @@ export function ComercioPreviewCard({
                             {DIAS_SEMANA_MAP[h.dia]}
                           </Typography>
                           {h.abierto ? (
-                            <Typography fontSize="0.8rem" color="text.secondary" fontWeight={500}>
+                            <Typography
+                              fontSize="0.8rem"
+                              color="text.secondary"
+                              fontWeight={500}
+                            >
                               {h.horaApertura} – {h.horaCierre}
                             </Typography>
                           ) : (
@@ -247,7 +253,6 @@ export function ComercioPreviewCard({
           </>
         )}
 
-        {/* MAPA */}
         {comercio.lat && comercio.lng && (
           <>
             <Divider sx={{ my: 3, opacity: 0.5 }} />
@@ -268,7 +273,9 @@ export function ComercioPreviewCard({
                 scrollWheelZoom={false}
               >
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <Marker position={[Number(comercio.lat), Number(comercio.lng)]} />
+                <Marker
+                  position={[Number(comercio.lat), Number(comercio.lng)]}
+                />
               </MapContainer>
             </Box>
           </>
@@ -276,7 +283,6 @@ export function ComercioPreviewCard({
 
         <Divider sx={{ my: 3, opacity: 0.5 }} />
 
-        {/* BOTONES */}
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
           <Button
             variant="contained"
@@ -331,7 +337,6 @@ export function ComercioPreviewCard({
   );
 }
 
-/* ================== AUXILIARES ================== */
 
 const SectionCard = ({ children }: { children: React.ReactNode }) => (
   <Box
@@ -356,7 +361,13 @@ const InfoRow = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
   </Box>
 );
 
-const SectionTitle = ({ icon, text }: { icon?: React.ReactNode; text: string }) => (
+const SectionTitle = ({
+  icon,
+  text,
+}: {
+  icon?: React.ReactNode;
+  text: string;
+}) => (
   <Box display="flex" alignItems="center" gap={0.8} mb={1.5}>
     {icon}
     <Typography fontWeight={700} fontSize="0.9rem" color="text.primary">

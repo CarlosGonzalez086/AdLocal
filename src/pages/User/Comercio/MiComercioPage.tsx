@@ -63,7 +63,6 @@ export const MiComercioPage = () => {
     }
   }, []);
 
-  /* ─── LOADING ─── */
   if (isPlanValido && loading) {
     return (
       <Box>
@@ -77,7 +76,6 @@ export const MiComercioPage = () => {
     );
   }
 
-  /* ─── REGISTRAR (sin comercio) ─── */
   if (isPlanValido && comercio.id === 0) {
     return (
       <Card elevation={0} sx={cardSx}>
@@ -123,7 +121,6 @@ export const MiComercioPage = () => {
     );
   }
 
-  /* ─── EDITAR ─── */
   if (isPlanValido && editando) {
     return (
       <Card elevation={0} sx={cardSx}>
@@ -165,7 +162,6 @@ export const MiComercioPage = () => {
     );
   }
 
-  /* ─── VISTA PRINCIPAL ─── */
   return (
     <ComercioPlanGate
       claims={claims}

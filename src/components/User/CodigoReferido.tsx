@@ -1,241 +1,406 @@
-import { Box, Typography, IconButton, Tooltip, Button } from "@mui/material";
-import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
-import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
-import { useState } from "react";
-import { beneficiosApi } from "../../services/beneficios.api";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import Swal from "sweetalert2";
 
-interface Prop {
+import { beneficiosApi } from "../../services/beneficios.api";
+import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
+
+import styles from "../../styles/CodigoReferido.module.css";
+
+interface Props {
   codigoReferido: string;
   totalUsoCodigo: number;
-  setAplicoBeneficio: React.Dispatch<React.SetStateAction<boolean>>;
+  setAplicoBeneficio: Dispatch<SetStateAction<boolean>>;
   usoTotalReferidos: string;
 }
+
+interface ApiError {
+  response?: {
+    data?: {
+      mensaje?: string;
+    };
+  };
+  message?: string;
+}
+
+const OBJETIVO_REFERIDOS = 10;
+const COPY_FEEDBACK_DURATION = 1800;
+
+const getErrorMessage = (error: unknown): string => {
+  const apiError = error as ApiError;
+
+  return (
+    apiError.response?.data?.mensaje ??
+    apiError.message ??
+    "Ocurrió un error inesperado al aplicar el beneficio."
+  );
+};
+
+const copyText = async (text: string): Promise<void> => {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textArea = document.createElement("textarea");
+
+  textArea.value = text;
+  textArea.setAttribute("readonly", "");
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+  textArea.style.pointerEvents = "none";
+
+  document.body.appendChild(textArea);
+
+  textArea.select();
+  textArea.setSelectionRange(0, textArea.value.length);
+
+  const copied = document.execCommand("copy");
+
+  document.body.removeChild(textArea);
+
+  if (!copied) {
+    throw new Error("No fue posible copiar el código.");
+  }
+};
 
 const CodigoReferido = ({
   codigoReferido,
   totalUsoCodigo,
   setAplicoBeneficio,
   usoTotalReferidos,
-}: Prop) => {
+}: Props) => {
   const [copied, setCopied] = useState(false);
 
+  const [claimingReward, setClaimingReward] = useState(false);
+
+  const copyTimeoutRef = useRef<number | null>(null);
+
+  const totalUsos = Math.max(Number(totalUsoCodigo) || 0, 0);
+
+  const progreso = useMemo(() => {
+    return Math.min(Math.max((totalUsos / OBJETIVO_REFERIDOS) * 100, 0), 100);
+  }, [totalUsos]);
+
+  const alcanzado = totalUsos >= OBJETIVO_REFERIDOS;
+
+  const usosRestantes = Math.max(OBJETIVO_REFERIDOS - totalUsos, 0);
+
+  const beneficioYaAplicado =
+    String(usoTotalReferidos).trim().toLowerCase() === "true";
+
+  const puedeReclamar = alcanzado && !beneficioYaAplicado;
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(codigoReferido);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
+    if (!codigoReferido.trim()) {
+      return;
+    }
+
+    try {
+      await copyText(codigoReferido);
+
+      setCopied(true);
+
+      if (copyTimeoutRef.current) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+
+      copyTimeoutRef.current = window.setTimeout(() => {
+        setCopied(false);
+        copyTimeoutRef.current = null;
+      }, COPY_FEEDBACK_DURATION);
+    } catch (error) {
+      console.error("Error al copiar el código:", error);
+
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo copiar",
+        text: "Copia el código manualmente e inténtalo nuevamente.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#007AFF",
+      });
+    }
   };
 
   const handleSubmitClaimReward = async () => {
+    if (claimingReward || !puedeReclamar) {
+      return;
+    }
+
     try {
+      setClaimingReward(true);
+      setAplicoBeneficio(false);
+
       Swal.fire({
-        title: "Aplicando beneficio...",
-        text: "Un momento por favor",
+        title: "Aplicando beneficio",
+        text: "Estamos procesando tu mes gratuito.",
         allowOutsideClick: false,
         allowEscapeKey: false,
-        didOpen: () => Swal.showLoading(),
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
       });
 
       const response = await beneficiosApi.reclamarBeneficio();
 
-      if (response.data.codigo === "200") {
-        await Swal.fire({
-          icon: "success",
-          title: "¡Beneficio aplicado! 🎉",
-          text: response.data.mensaje,
-          confirmButtonText: "Perfecto",
-          confirmButtonColor: "#34C759",
-        });
-        setAplicoBeneficio(true);
+      if (response.data.codigo !== "200") {
+        throw new Error(
+          response.data.mensaje || "No fue posible aplicar el beneficio.",
+        );
       }
-    } catch (error: any) {
-      Swal.fire({
+
+      await Swal.fire({
+        icon: "success",
+        title: "Beneficio aplicado",
+        text:
+          response.data.mensaje ||
+          "El mes gratuito fue agregado correctamente.",
+        confirmButtonText: "Continuar",
+        confirmButtonColor: "#34C759",
+      });
+
+      setAplicoBeneficio(true);
+    } catch (error: unknown) {
+      console.error("Error al reclamar el beneficio:", error);
+
+      await Swal.fire({
         icon: "error",
         title: "No se pudo aplicar el beneficio",
-        text: error.message || "Ocurrió un error inesperado",
+        text: getErrorMessage(error),
         confirmButtonText: "Entendido",
         confirmButtonColor: "#FF3B30",
       });
+
       setAplicoBeneficio(false);
+    } finally {
+      setClaimingReward(false);
     }
-  };
-
-  const objetivo = 10;
-  const progreso = Math.min((totalUsoCodigo / objetivo) * 100, 100);
-  const alcanzado = totalUsoCodigo >= objetivo;
-
-  const cardSx = {
-    borderRadius: 4,
-    bgcolor: "rgba(255,255,255,0.92)",
-    backdropFilter: "blur(14px)",
-    border: "1px solid rgba(0,0,0,0.06)",
-    boxShadow: "0 4px 16px rgba(0,0,0,0.07)",
   };
 
   return (
     <Box
-      sx={{
-        width: "100%",
-        display: "flex",
-        flexDirection: { xs: "column", md: "row" },
-        gap: 2,
-      }}
+      component="section"
+      className={styles.container}
+      aria-label="Programa de referidos"
     >
-      {/* Card código */}
-      <Box sx={{ ...cardSx, flex: 1, px: { xs: 2.5, sm: 3 }, py: 2.5 }}>
-        <Typography fontSize="0.72rem" fontWeight={700} color="text.disabled" letterSpacing="0.06em" textTransform="uppercase" mb={1}>
-          Tu código de referido
-        </Typography>
+      <Paper elevation={0} className={styles.card}>
+        <Box className={styles.cardHeader}>
+          <Box className={styles.cardHeaderIcon}>
+            <MaterialSymbol icon="share" size="medium" />
+          </Box>
 
-        <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
+          <Typography component="h2" className={styles.cardTitle}>
+            Tu código de referido
+          </Typography>
+        </Box>
+
+        <Box className={styles.codeRow}>
           <Typography
-            sx={{
-              fontSize: { xs: "1.5rem", sm: "1.8rem" },
-              fontWeight: 800,
-              letterSpacing: 3,
-              color: "#1c1c1e",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              fontFamily: "monospace",
-            }}
+            component="span"
+            className={styles.referralCode}
+            title={codigoReferido}
           >
             {codigoReferido}
           </Typography>
 
-          <Tooltip title={copied ? "¡Copiado!" : "Copiar código"}>
+          <Tooltip
+            title={copied ? "Código copiado" : "Copiar código"}
+            placement="top"
+            arrow
+          >
             <IconButton
-              onClick={handleCopy}
-              sx={{
-                width: 42,
-                height: 42,
-                borderRadius: 999,
-                flexShrink: 0,
-                bgcolor: copied ? "rgba(52,199,89,0.12)" : "rgba(0,0,0,0.05)",
-                border: "1px solid",
-                borderColor: copied ? "rgba(52,199,89,0.25)" : "rgba(0,0,0,0.08)",
-                transition: "all 0.22s ease",
-                "&:hover": {
-                  bgcolor: copied ? "rgba(52,199,89,0.20)" : "rgba(0,0,0,0.09)",
-                  transform: "scale(1.06)",
-                },
-              }}
-            >
-              {copied
-                ? <CheckRoundedIcon sx={{ fontSize: 18, color: "#34C759" }} />
-                : <ContentCopyRoundedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+              type="button"
+              aria-label={
+                copied ? "Código copiado" : "Copiar código de referido"
               }
+              className={[
+                styles.copyButton,
+                copied ? styles.copyButtonSuccess : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() => void handleCopy()}
+            >
+              <MaterialSymbol
+                icon={copied ? "check" : "content_copy"}
+                size="small"
+              />
             </IconButton>
           </Tooltip>
         </Box>
 
-        <Box
-          sx={{
-            mt: 1.5,
-            px: 1.5,
-            py: 0.6,
-            borderRadius: 999,
-            bgcolor: "rgba(0,0,0,0.05)",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.5,
-          }}
-        >
-          <Typography fontSize="0.75rem" fontWeight={600} color="text.secondary">
-            Usado {totalUsoCodigo} {totalUsoCodigo === 1 ? "vez" : "veces"}
+        <Box className={styles.usageBadge}>
+          <MaterialSymbol icon="group" size="small" />
+
+          <Typography component="span" className={styles.usageText}>
+            Usado {totalUsos} {totalUsos === 1 ? "vez" : "veces"}
           </Typography>
         </Box>
-      </Box>
+      </Paper>
 
-      {/* Card progreso */}
-      <Box
-        sx={{
-          ...cardSx,
-          flex: 1,
-          px: { xs: 2.5, sm: 3 },
-          py: 2.5,
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.5,
-        }}
-      >
-        <Typography fontSize="0.72rem" fontWeight={700} color="text.disabled" letterSpacing="0.06em" textTransform="uppercase">
-          Progreso de referidos
-        </Typography>
-
-        <Typography fontSize="0.82rem" color="text.secondary" lineHeight={1.6}>
-          Llega a <strong style={{ color: "#1c1c1e" }}>{objetivo} referidos</strong> y obtén{" "}
-          <strong style={{ color: alcanzado ? "#34C759" : "#007AFF" }}>1 mes gratis</strong>{" "}
-          de tu plan actual
-        </Typography>
-
-        {/* Barra */}
-        <Box>
+      <Paper elevation={0} className={styles.card}>
+        <Box className={styles.cardHeader}>
           <Box
-            sx={{
-              width: "100%",
-              height: 8,
-              borderRadius: 999,
-              bgcolor: "rgba(0,0,0,0.07)",
-              overflow: "hidden",
-              mb: 0.8,
-            }}
+            className={[
+              styles.cardHeaderIcon,
+              alcanzado ? styles.achievedHeaderIcon : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
           >
-            <Box
-              sx={{
-                width: `${progreso}%`,
-                height: "100%",
-                borderRadius: 999,
-                transition: "width 0.5s cubic-bezier(.4,0,.2,1)",
-                background: alcanzado
-                  ? "linear-gradient(90deg, #34C759, #30D158)"
-                  : "linear-gradient(90deg, #007AFF, #5AC8FA)",
-                boxShadow: alcanzado
-                  ? "0 2px 8px rgba(52,199,89,0.4)"
-                  : "0 2px 8px rgba(0,122,255,0.3)",
-              }}
+            <MaterialSymbol
+              icon={alcanzado ? "workspace_premium" : "monitoring"}
+              size="medium"
+              filled={alcanzado}
             />
           </Box>
 
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography fontSize="0.75rem" fontWeight={700} color={alcanzado ? "success.main" : "text.secondary"}>
-              {totalUsoCodigo} / {objetivo} usos
+          <Typography component="h2" className={styles.cardTitle}>
+            Progreso de referidos
+          </Typography>
+        </Box>
+
+        <Typography component="p" className={styles.rewardDescription}>
+          Llega a{" "}
+          <Box component="strong" className={styles.emphasis}>
+            {OBJETIVO_REFERIDOS} referidos
+          </Box>{" "}
+          y obtén{" "}
+          <Box
+            component="strong"
+            className={[
+              styles.rewardEmphasis,
+              alcanzado ? styles.rewardAchieved : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            1 mes gratis
+          </Box>{" "}
+          de tu plan actual.
+        </Typography>
+
+        <Box className={styles.progressSection}>
+          <LinearProgress
+            variant="determinate"
+            value={progreso}
+            className={[
+              styles.progress,
+              alcanzado ? styles.progressAchieved : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            aria-label={`Progreso de referidos: ${Math.round(progreso)}%`}
+          />
+
+          <Box className={styles.progressInformation}>
+            <Typography
+              component="span"
+              className={[
+                styles.progressCount,
+                alcanzado ? styles.progressCountAchieved : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {totalUsos} / {OBJETIVO_REFERIDOS} usos
             </Typography>
-            <Typography fontSize="0.72rem" color="text.disabled" fontWeight={500}>
-              {alcanzado ? "✅ Meta alcanzada" : `${objetivo - totalUsoCodigo} restantes`}
-            </Typography>
+
+            <Box
+              className={[
+                styles.progressStatus,
+                alcanzado ? styles.progressStatusAchieved : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              <MaterialSymbol
+                icon={alcanzado ? "check_circle" : "schedule"}
+                size="small"
+                filled={alcanzado}
+              />
+
+              <Typography
+                component="span"
+                className={styles.progressStatusText}
+              >
+                {alcanzado
+                  ? "Meta alcanzada"
+                  : `${usosRestantes} ${
+                      usosRestantes === 1 ? "restante" : "restantes"
+                    }`}
+              </Typography>
+            </Box>
           </Box>
         </Box>
 
-        {/* Botón reclamar */}
-        {alcanzado && usoTotalReferidos === "false" && (
+        {puedeReclamar && (
           <Button
-            onClick={handleSubmitClaimReward}
-            startIcon={<EmojiEventsRoundedIcon sx={{ fontSize: 18 }} />}
+            type="button"
+            variant="contained"
             fullWidth
-            sx={{
-              mt: 0.5,
-              py: 1.3,
-              borderRadius: 999,
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.875rem",
-              background: "linear-gradient(135deg, #34C759, #28A745)",
-              color: "#fff",
-              boxShadow: "0 6px 18px rgba(52,199,89,0.35)",
-              transition: "all 0.25s ease",
-              "&:hover": {
-                boxShadow: "0 10px 24px rgba(52,199,89,0.48)",
-                transform: "translateY(-1px)",
-              },
-              "&:active": { transform: "scale(0.98)" },
-            }}
+            disabled={claimingReward}
+            className={styles.claimButton}
+            onClick={() => void handleSubmitClaimReward()}
+            startIcon={
+              claimingReward ? (
+                <CircularProgress
+                  size={18}
+                  thickness={5}
+                  className={styles.buttonProgress}
+                />
+              ) : (
+                <MaterialSymbol icon="workspace_premium" size="small" filled />
+              )
+            }
           >
-            Reclamar mes gratis
+            {claimingReward ? "Aplicando beneficio..." : "Reclamar mes gratis"}
           </Button>
         )}
-      </Box>
+
+        {alcanzado && beneficioYaAplicado && (
+          <Box className={styles.redeemedMessage}>
+            <Box className={styles.redeemedIcon}>
+              <MaterialSymbol icon="verified" size="small" filled />
+            </Box>
+
+            <Box>
+              <Typography component="span" className={styles.redeemedTitle}>
+                Beneficio aplicado
+              </Typography>
+
+              <Typography component="p" className={styles.redeemedDescription}>
+                El mes gratuito ya fue agregado a tu cuenta.
+              </Typography>
+            </Box>
+          </Box>
+        )}
+      </Paper>
     </Box>
   );
 };

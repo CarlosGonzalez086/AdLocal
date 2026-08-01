@@ -1,28 +1,25 @@
-import { Link, useLocation } from "react-router-dom";
 import {
+  Box,
+  Divider,
   Drawer,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Box,
-  Divider,
   Tooltip,
   Typography,
-  useTheme,
   useMediaQuery,
+  useTheme,
 } from "@mui/material";
-
-import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import StoreRoundedIcon from "@mui/icons-material/StoreRounded";
-import EventNoteRoundedIcon from "@mui/icons-material/EventNoteRounded";
-import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
-import CategoryRoundedIcon from "@mui/icons-material/CategoryRounded";
+import { jwtDecode } from "jwt-decode";
+import { useMemo, type CSSProperties } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 import type { JwtClaims } from "../../services/auth.api";
-import { jwtDecode } from "jwt-decode";
-import type { JSX } from "react";
+import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
+
+import styles from "../../styles/UserSidebar.module.css";
 
 interface UserSidebarProps {
   drawerWidth: number;
@@ -32,10 +29,80 @@ interface UserSidebarProps {
   onCloseMobile: () => void;
 }
 
+interface MenuItemConfig {
+  text: string;
+  icon: string;
+  path: string;
+}
+
+interface PlanPresentation {
+  icon: string;
+  label: string;
+}
+
+type SidebarCssVariables = CSSProperties & {
+  "--sidebar-width": string;
+};
+
 const LOGO_FULL =
-  "https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg";
+  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
+
 const LOGO_ICON =
-  "https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/AZuAXHqalTLlz8th7NMdBA-AZuAXHqaHD92HliWBxJzdA.jpg";
+  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
+
+const PLAN_PRESENTATION: Record<string, PlanPresentation> = {
+  FREE: {
+    icon: "redeem",
+    label: "Free",
+  },
+  BASIC: {
+    icon: "bolt",
+    label: "Basic",
+  },
+  PRO: {
+    icon: "rocket_launch",
+    label: "Pro",
+  },
+  BUSINESS: {
+    icon: "business_center",
+    label: "Business",
+  },
+};
+
+const decodeClaims = (token: string | null): JwtClaims | null => {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    return jwtDecode<JwtClaims>(token);
+  } catch (error) {
+    console.error("No fue posible decodificar el token:", error);
+
+    return null;
+  }
+};
+
+const normalizePath = (path: string) => {
+  if (path === "/") {
+    return path;
+  }
+
+  return path.replace(/\/+$/, "");
+};
+
+const isPathSelected = (currentPath: string, itemPath: string) => {
+  const normalizedCurrentPath = normalizePath(currentPath);
+
+  if (itemPath === "/app") {
+    return normalizedCurrentPath === "/app";
+  }
+
+  return (
+    normalizedCurrentPath === itemPath ||
+    normalizedCurrentPath.startsWith(`${itemPath}/`)
+  );
+};
 
 const UserSidebar = ({
   drawerWidth,
@@ -45,208 +112,247 @@ const UserSidebar = ({
   onCloseMobile,
 }: UserSidebarProps) => {
   const location = useLocation();
+
   const theme = useTheme();
+
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims | null = dataJwt
-    ? jwtDecode<JwtClaims>(dataJwt)
+  const token = localStorage.getItem("token");
+
+  const claims = useMemo(() => decodeClaims(token), [token]);
+
+  const isCollapsedDesktop = collapsed && !isMobile;
+
+  const currentWidth = isMobile
+    ? drawerWidth
+    : collapsed
+      ? collapsedWidth
+      : drawerWidth;
+
+  const sidebarVariables: SidebarCssVariables = {
+    "--sidebar-width": `${currentWidth}px`,
+  };
+
+  const menuItems = useMemo<MenuItemConfig[]>(() => {
+    const items: MenuItemConfig[] = [
+      {
+        text: "Inicio",
+        icon: "home",
+        path: "/app",
+      },
+      {
+        text: "Mi comercio",
+        icon: "storefront",
+        path: "/app/comercio",
+      },
+    ];
+
+    const isCollaborator = claims?.rol === "Colaborador";
+
+    const hasMultipleBusinesses =
+      claims?.rol === "Comercio" &&
+      (claims.planTipo === "PRO" || claims.planTipo === "BUSINESS");
+
+    const hasSingleBusiness =
+      isCollaborator ||
+      (claims?.rol === "Comercio" &&
+        (claims.planTipo === "BASIC" || claims.planTipo === "FREE"));
+
+    if (!isCollaborator) {
+      items.push(
+        {
+          text: "Mi plan",
+          icon: "event_note",
+          path: "/app/plan",
+        },
+        {
+          text: "Tarjetas",
+          icon: "credit_card",
+          path: "/app/tarjetas",
+        },
+      );
+    }
+
+    if (hasMultipleBusinesses) {
+      items.push({
+        text: "Productos y servicios",
+        icon: "category",
+        path: "/app/productos-servicios/comercios",
+      });
+    }
+
+    if (hasSingleBusiness) {
+      items.push({
+        text: "Productos y servicios",
+        icon: "category",
+        path: "/app/productos-servicios",
+      });
+    }
+
+    return items;
+  }, [claims?.rol, claims?.planTipo]);
+
+  const planPresentation = claims?.planTipo
+    ? (PLAN_PRESENTATION[claims.planTipo.toUpperCase()] ?? {
+        icon: "workspace_premium",
+        label: claims.planTipo,
+      })
     : null;
 
-  const esRutaComercios =
-    claims?.rol === "Comercio" &&
-    (claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS");
-
-  const esRutaBasicaOrFree =
-    claims?.rol === "Colaborador" ||
-    (claims?.rol === "Comercio" &&
-      (claims?.planTipo === "BASIC" || claims?.planTipo === "FREE"));
-
-  const menuItems = [
-    { text: "Inicio", icon: <HomeRoundedIcon />, path: "/app" },
-    { text: "Mi comercio", icon: <StoreRoundedIcon />, path: "/app/comercio" },
-    claims?.rol !== "Colaborador" && {
-      text: "Mi plan",
-      icon: <EventNoteRoundedIcon />,
-      path: "/app/plan",
-    },
-    claims?.rol !== "Colaborador" && {
-      text: "Tarjetas",
-      icon: <CreditCardRoundedIcon />,
-      path: "/app/tarjetas",
-    },
-    esRutaComercios && {
-      text: "Productos y servicios",
-      icon: <CategoryRoundedIcon />,
-      path: "/app/productos-servicios/comercios",
-    },
-    esRutaBasicaOrFree && {
-      text: "Productos y servicios",
-      icon: <CategoryRoundedIcon />,
-      path: "/app/productos-servicios",
-    },
-  ].filter((x): x is { text: string; icon: JSX.Element; path: string } =>
-    Boolean(x),
-  );
-
-  const currentWidth = collapsed ? collapsedWidth : drawerWidth;
-
   const drawerContent = (
-    <>
-      {/* Logo */}
+    <Box className={styles.sidebarContent}>
       <Box
-        sx={{
-          height: isMobile ? "auto" : 120,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          px: 2,
-          py: isMobile ? 3 : 0,
-          gap: 1,
-        }}
+        className={[
+          styles.logoSection,
+          isCollapsedDesktop ? styles.logoSectionCollapsed : "",
+          isMobile ? styles.logoSectionMobile : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
       >
         <Box
-          component="img"
-          src={collapsed && !isMobile ? LOGO_ICON : LOGO_FULL}
-          alt="AdLocal"
-          sx={{
-            width: collapsed && !isMobile ? 44 : isMobile ? "70%" : "80%",
-            maxHeight: collapsed && !isMobile ? 44 : 90,
-            borderRadius: collapsed && !isMobile ? "50%" : 3,
-            objectFit: "contain",
-            transition: "all .35s ease",
-            boxShadow:
-              collapsed && !isMobile ? "0 6px 18px rgba(0,0,0,0.15)" : "none",
-          }}
-        />
+          component={Link}
+          to="/app"
+          className={styles.logoLink}
+          aria-label="Ir al inicio de ADLocal"
+          onClick={isMobile ? onCloseMobile : undefined}
+        >
+          <Box
+            component="img"
+            src={isCollapsedDesktop ? LOGO_ICON : LOGO_FULL}
+            alt="ADLocal"
+            className={[
+              styles.logo,
+              isCollapsedDesktop ? styles.logoCollapsed : "",
+              isMobile ? styles.logoMobile : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          />
+        </Box>
 
-        {/* Nombre app en mobile */}
         {isMobile && (
-          <Typography fontWeight={800} fontSize="1rem" color="#008989">
+          <Typography component="span" className={styles.mobileAppName}>
             ADLocal
           </Typography>
         )}
       </Box>
 
-      <Divider sx={{ opacity: 0.4, mx: 1.5 }} />
+      <Divider className={styles.divider} />
 
-      {/* Nav items */}
-      <List sx={{ px: 1.2, py: 1.5, flex: 1 }}>
-        {menuItems.map((item) => {
-          if (!item?.path) return null;
-          const isSelected = location.pathname === item.path;
+      <Box
+        component="nav"
+        className={styles.navigation}
+        aria-label="Navegación principal"
+      >
+        <List className={styles.menuList}>
+          {menuItems.map((item) => {
+            const selected = isPathSelected(location.pathname, item.path);
 
-          const content = (
-            <ListItemButton
-              component={Link}
-              to={item.path}
-              onClick={isMobile ? onCloseMobile : undefined}
-              sx={{
-                minHeight: 48,
-                mb: 0.6,
-                px: collapsed && !isMobile ? 1.4 : 2,
-                borderRadius: 999,
-                justifyContent:
-                  collapsed && !isMobile ? "center" : "flex-start",
-                transition: "all .22s ease",
-                background: isSelected
-                  ? "linear-gradient(135deg, rgba(232,105,44,0.18), rgba(232,105,44,0.10))"
-                  : "transparent",
-                color: isSelected ? "#E8692C" : "#3A2419",
-                boxShadow: isSelected
-                  ? "0 4px 14px rgba(232,105,44,0.20)"
-                  : "none",
-                "&:hover": {
-                  background: isSelected
-                    ? "linear-gradient(135deg, rgba(232,105,44,0.26), rgba(232,105,44,0.14))"
-                    : "rgba(0,0,0,0.04)",
-                },
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: collapsed && !isMobile ? 0 : 1.8,
-                  color: "inherit",
-                  "& svg": { fontSize: 21 },
-                }}
+            const menuContent = (
+              <ListItemButton
+                component={Link}
+                to={item.path}
+                selected={selected}
+                aria-current={selected ? "page" : undefined}
+                onClick={isMobile ? onCloseMobile : undefined}
+                className={[
+                  styles.menuButton,
+                  selected ? styles.menuButtonSelected : "",
+                  isCollapsedDesktop ? styles.menuButtonCollapsed : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
               >
-                {item.icon}
-              </ListItemIcon>
+                <ListItemIcon
+                  className={[
+                    styles.menuIcon,
+                    isCollapsedDesktop ? styles.menuIconCollapsed : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <MaterialSymbol
+                    icon={item.icon}
+                    size="medium"
+                    filled={selected}
+                  />
+                </ListItemIcon>
 
-              <ListItemText
-                primary={item.text}
-                primaryTypographyProps={{
-                  fontSize: "0.875rem",
-                  fontWeight: isSelected ? 700 : 500,
-                  letterSpacing: "0.1px",
-                  noWrap: true,
-                }}
-                sx={{
-                  opacity: collapsed && !isMobile ? 0 : 1,
-                  maxWidth: collapsed && !isMobile ? 0 : "100%",
-                  transition: "opacity .2s ease, max-width .2s ease",
-                  overflow: "hidden",
-                }}
+                <ListItemText
+                  className={[
+                    styles.menuText,
+                    isCollapsedDesktop ? styles.menuTextCollapsed : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  slotProps={{
+                    primary: {
+                      component: "span",
+                      noWrap: true,
+                      className: styles.menuTextTypography,
+                    },
+                  }}
+                  primary={item.text}
+                />
+              </ListItemButton>
+            );
+
+            return (
+              <ListItem
+                key={item.path}
+                disablePadding
+                className={styles.menuListItem}
+              >
+                {isCollapsedDesktop ? (
+                  <Tooltip
+                    title={item.text}
+                    placement="right"
+                    arrow
+                    slotProps={{
+                      tooltip: {
+                        className: styles.menuTooltip,
+                      },
+                      arrow: {
+                        className: styles.menuTooltipArrow,
+                      },
+                    }}
+                  >
+                    {menuContent}
+                  </Tooltip>
+                ) : (
+                  menuContent
+                )}
+              </ListItem>
+            );
+          })}
+        </List>
+      </Box>
+
+      {!isCollapsedDesktop && planPresentation && (
+        <Box className={styles.planContainer}>
+          <Box className={styles.planCard}>
+            <Box className={styles.planIcon}>
+              <MaterialSymbol
+                icon={planPresentation.icon}
+                size="medium"
+                filled
               />
-            </ListItemButton>
-          );
+            </Box>
 
-          return (
-            <ListItem key={item.path} disablePadding>
-              {collapsed && !isMobile ? (
-                <Tooltip title={item.text} placement="right" arrow>
-                  {content}
-                </Tooltip>
-              ) : (
-                content
-              )}
-            </ListItem>
-          );
-        })}
-      </List>
-
-      {/* Plan badge al pie */}
-      {!collapsed && claims?.planTipo && (
-        <Box px={2} pb={2.5}>
-          <Box
-            sx={{
-              px: 2,
-              py: 1.2,
-              borderRadius: 3,
-              bgcolor: "rgba(232,105,44,0.08)",
-              border: "1px solid rgba(232,105,44,0.15)",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <Typography fontSize="1rem">
-              {claims.planTipo === "FREE"
-                ? "🆓"
-                : claims.planTipo === "BASIC"
-                  ? "⚡"
-                  : claims.planTipo === "PRO"
-                    ? "🚀"
-                    : "💼"}
-            </Typography>
-            <Box>
-              <Typography
-                fontSize="0.7rem"
-                color="text.disabled"
-                fontWeight={500}
-              >
+            <Box className={styles.planInformation}>
+              <Typography component="span" className={styles.planCaption}>
                 Plan actual
               </Typography>
-              <Typography fontSize="0.8rem" fontWeight={700} color="#E8692C">
-                {claims.planTipo}
+
+              <Typography component="span" className={styles.planName}>
+                {planPresentation.label}
               </Typography>
             </Box>
           </Box>
         </Box>
       )}
-    </>
+    </Box>
   );
 
   return (
@@ -254,26 +360,14 @@ const UserSidebar = ({
       variant={isMobile ? "temporary" : "permanent"}
       open={isMobile ? mobileOpen : true}
       onClose={onCloseMobile}
-      sx={{
-        width: currentWidth,
-        flexShrink: 0,
-        // En mobile sube por encima del AppBar, en desktop normal
-        zIndex: isMobile
-          ? (theme) => theme.zIndex.modal + 1
-          : (theme) => theme.zIndex.drawer,
-        "& .MuiDrawer-paper": {
-          width: currentWidth,
-          transition: "width .35s cubic-bezier(.4,0,.2,1)",
-          background: "rgba(255,255,255,0.92)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          borderRight: "1px solid rgba(0,0,0,0.06)",
-          overflowX: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          zIndex: isMobile
-            ? (theme) => theme.zIndex.modal + 1
-            : (theme) => theme.zIndex.drawer,
+      style={sidebarVariables}
+      className={[
+        styles.drawer,
+        isMobile ? styles.mobileDrawer : styles.desktopDrawer,
+      ].join(" ")}
+      slotProps={{
+        paper: {
+          className: styles.drawerPaper,
         },
       }}
     >

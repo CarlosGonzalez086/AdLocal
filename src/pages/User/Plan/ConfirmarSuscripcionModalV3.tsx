@@ -1,28 +1,40 @@
 import {
+  Box,
+  Button,
+  ButtonBase,
+  Checkbox,
+  CircularProgress,
   Dialog,
   DialogContent,
-  Button,
-  Stack,
-  Typography,
-  Box,
-  CircularProgress,
-  Radio,
   Divider,
-  TextField,
-  MenuItem,
   FormControlLabel,
-  Checkbox,
   IconButton,
+  MenuItem,
+  Radio,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { useState, useEffect } from "react";
-import type { PlanCreateDto } from "../../../services/planApi";
-import { useTarjetas } from "../../../hooks/useTarjetas";
-import { useCheckout } from "../../../hooks/useCheckout";
-import { MetodoPagoStep } from "./MetodoPagoStep";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import Swal from "sweetalert2";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
-import AutorenewRoundedIcon from "@mui/icons-material/AutorenewRounded";
+
+import { MetodoPagoStep } from "./MetodoPagoStep";
+
+import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol";
+
+import { useCheckout } from "../../../hooks/useCheckout";
+import { useTarjetas } from "../../../hooks/useTarjetas";
+
+import type { PlanCreateDto } from "../../../services/planApi";
+
+import styles from "../../../styles/ConfirmarSuscripcionModalV3.module.css";
 
 type MetodoPago = "guardada" | "nueva" | "transferencia" | "";
 
@@ -30,70 +42,252 @@ interface Props {
   open: boolean;
   onClose: () => void;
   plan: PlanCreateDto;
-  setIsSubSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSubSuccess: Dispatch<SetStateAction<boolean>>;
 }
 
-const PLAN_GRADIENT: Record<string, string> = {
-  BASIC:    "linear-gradient(135deg, #007AFF, #005FCC)",
-  PRO:      "linear-gradient(135deg, #5856D6, #3634A3)",
-  BUSINESS: "linear-gradient(135deg, #FF9500, #CC7700)",
-  FREE:     "linear-gradient(135deg, #8e8e93, #636366)",
+const BANKS = [
+  "BBVA",
+  "Citibanamex",
+  "Santander",
+  "Banorte",
+  "HSBC",
+  "Banco Azteca",
+  "OXXO",
+] as const;
+
+const normalizePlanType = (planType?: string): string => {
+  return planType?.trim().toUpperCase() || "FREE";
 };
 
-export const ConfirmarSuscripcionModalV3 = ({ open, onClose, plan, setIsSubSuccess }: Props) => {
+const formatCurrency = (amount: number): string => {
+  const normalizedAmount = Number(amount);
+
+  return Number.isFinite(normalizedAmount)
+    ? normalizedAmount.toLocaleString("es-MX", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    : "0.00";
+};
+
+export const ConfirmarSuscripcionModalV3 = ({
+  open,
+  onClose,
+  plan,
+  setIsSubSuccess,
+}: Props) => {
   const [metodo, setMetodo] = useState<MetodoPago>("");
+
   const [autoRenew, setAutoRenew] = useState(false);
+
   const [banco, setBanco] = useState("");
-  const [tarjetaSeleccionada, setTarjetaSeleccionada] = useState<string | null>(null);
-  const [tarjetaPreSeleccionada, setTarjetaPreSeleccionada] = useState<number | null>(null);
+
+  const [tarjetaSeleccionada, setTarjetaSeleccionada] = useState<string | null>(
+    null,
+  );
+
+  const [tarjetaPreSeleccionada, setTarjetaPreSeleccionada] = useState<
+    number | null
+  >(null);
 
   const { tarjetas, listar, loading: loadingTarjetas } = useTarjetas();
-  const { loading: loadingCheckout, pagarConTarjetaGuardada, pagarConNuevaTarjeta } = useCheckout();
 
-  useEffect(() => {
-    if (open && metodo === "guardada") listar();
-  }, [open, metodo, listar]);
+  const {
+    loading: loadingCheckout,
+    pagarConTarjetaGuardada,
+    pagarConNuevaTarjeta,
+  } = useCheckout();
 
-  useEffect(() => {
-    if (tarjetas.length && tarjetaPreSeleccionada === null) {
-      const def = tarjetas.find((t) => t.isDefault) ?? tarjetas[0];
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTarjetaPreSeleccionada(def.id);
+  const planType = useMemo(() => normalizePlanType(plan.tipo), [plan.tipo]);
+
+  const isLoading = loadingTarjetas || loadingCheckout;
+
+  const selectedCard = useMemo(
+    () =>
+      tarjetas.find(
+        (card) => card.stripePaymentMethodId === tarjetaSeleccionada,
+      ) ?? null,
+    [tarjetas, tarjetaSeleccionada],
+  );
+
+  const canConfirm = useMemo(() => {
+    if (isLoading) {
+      return false;
     }
-  }, [tarjetas, tarjetaPreSeleccionada]);
 
-  const cerrar = () => {
+    if (metodo === "guardada") {
+      return Boolean(tarjetaSeleccionada);
+    }
+
+    if (metodo === "nueva") {
+      return true;
+    }
+
+    /*
+     * El hook actual no expone un método para
+     * procesar transferencias.
+     */
+    return false;
+  }, [isLoading, metodo, tarjetaSeleccionada]);
+
+  const resetModal = useCallback(() => {
+    setMetodo("");
+    setAutoRenew(false);
+    setBanco("");
+    setTarjetaSeleccionada(null);
+    setTarjetaPreSeleccionada(null);
+  }, []);
+
+  const cerrar = useCallback(() => {
+    if (isLoading) {
+      return;
+    }
+
+    resetModal();
+    onClose();
+  }, [isLoading, onClose, resetModal]);
+
+  const handleSelectMethod = (selectedMethod: MetodoPago) => {
+    setMetodo(selectedMethod);
+
+    if (selectedMethod !== "guardada") {
+      setTarjetaSeleccionada(null);
+      setTarjetaPreSeleccionada(null);
+      setAutoRenew(false);
+    }
+
+    if (selectedMethod !== "transferencia") {
+      setBanco("");
+    }
+  };
+
+  const handleReturnToMethods = () => {
+    if (isLoading) {
+      return;
+    }
+
     setMetodo("");
     setTarjetaSeleccionada(null);
     setTarjetaPreSeleccionada(null);
-    onClose();
+    setBanco("");
+    setAutoRenew(false);
   };
+
+  useEffect(() => {
+    if (!open || metodo !== "guardada") {
+      return;
+    }
+
+    void listar();
+  }, [open, metodo, listar]);
+
+  useEffect(() => {
+    if (metodo !== "guardada" || tarjetas.length === 0 || tarjetaSeleccionada) {
+      return;
+    }
+
+    const defaultCard = tarjetas.find((card) => card.isDefault) ?? tarjetas[0];
+
+    setTarjetaPreSeleccionada(defaultCard.id);
+
+    setTarjetaSeleccionada(defaultCard.stripePaymentMethodId);
+  }, [metodo, tarjetas, tarjetaSeleccionada]);
+
+  useEffect(() => {
+    if (open) {
+      return;
+    }
+
+    resetModal();
+  }, [open, resetModal]);
 
   const confirmarPago = async () => {
-    if (!metodo) return;
+    if (!canConfirm || isLoading) {
+      return;
+    }
+
     try {
       if (metodo === "guardada") {
-        if (!tarjetaSeleccionada) { alert("Selecciona una tarjeta antes de confirmar"); return; }
-        const res = await pagarConTarjetaGuardada(Number(plan.id), tarjetaSeleccionada.toString(), autoRenew);
-        if (res) {
-          Swal.fire({ icon: "success", title: "Pago realizado", showConfirmButton: false, timer: 2000, timerProgressBar: true });
-          setIsSubSuccess(true);
-          cerrar();
+        if (!tarjetaSeleccionada) {
+          await Swal.fire({
+            icon: "warning",
+            title: "Selecciona una tarjeta",
+            text: "Debes seleccionar una tarjeta antes de confirmar el pago.",
+            confirmButtonText: "Entendido",
+            confirmButtonColor: "#007AFF",
+          });
+
+          return;
         }
-      } else if (metodo === "nueva") {
-        const res = await pagarConNuevaTarjeta(Number(plan.id));
-        cerrar();
-        window.open(String(res), "_blank");
+
+        const result = await pagarConTarjetaGuardada(
+          Number(plan.id),
+          tarjetaSeleccionada,
+          autoRenew,
+        );
+
+        if (!result) {
+          throw new Error("El pago no devolvió una respuesta válida.");
+        }
+
+        await Swal.fire({
+          icon: "success",
+          title: "Pago realizado",
+          text: "Tu suscripción se está activando.",
+          showConfirmButton: false,
+          timer: 1800,
+          timerProgressBar: true,
+        });
+
+        setIsSubSuccess(true);
+        resetModal();
+        onClose();
+
+        return;
+      }
+
+      if (metodo === "nueva") {
+        /*
+         * Se abre primero una ventana vacía para
+         * evitar que el navegador bloquee el
+         * checkout después del await.
+         */
+        const checkoutWindow = window.open("", "_blank", "noopener,noreferrer");
+
+        try {
+          const checkoutUrl = (await pagarConNuevaTarjeta(Number(plan.id))) as string | undefined;
+
+          if (typeof checkoutUrl !== "string" || !checkoutUrl.trim()) {
+            checkoutWindow?.close();
+
+            throw new Error("No se recibió una URL válida de checkout.");
+          }
+
+          if (checkoutWindow) {
+            checkoutWindow.location.href = checkoutUrl;
+          } else {
+            window.location.assign(checkoutUrl);
+          }
+
+          resetModal();
+          onClose();
+        } catch (error) {
+          checkoutWindow?.close();
+          throw error;
+        }
       }
     } catch (error) {
-      console.error(error);
-      alert("Ocurrió un error al procesar el pago");
+      console.error("Error al procesar el pago:", error);
+
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo procesar el pago",
+        text: "Revisa la información e inténtalo nuevamente.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#FF3B30",
+      });
     }
   };
-
-  const isLoading = loadingTarjetas || loadingCheckout;
-  const planGradient = PLAN_GRADIENT[plan.tipo] ?? PLAN_GRADIENT.FREE;
-  const canConfirm = metodo && (metodo !== "guardada" || tarjetaSeleccionada);
 
   return (
     <Dialog
@@ -101,263 +295,389 @@ export const ConfirmarSuscripcionModalV3 = ({ open, onClose, plan, setIsSubSucce
       onClose={cerrar}
       fullWidth
       maxWidth="sm"
-      PaperProps={{
-        sx: {
-          borderRadius: 5,
-          overflow: "hidden",
-          bgcolor: "rgba(255,255,255,0.96)",
-          backdropFilter: "blur(20px)",
-          border: "1px solid rgba(0,0,0,0.06)",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.15)",
+      aria-labelledby="subscription-confirmation-title"
+      slotProps={{
+        paper: {
+          className: styles.dialogPaper,
+        },
+        backdrop: {
+          className: styles.dialogBackdrop,
         },
       }}
     >
-      {/* HEADER */}
       <Box
-        sx={{
-          px: 3,
-          pt: 3,
-          pb: 2.5,
-          background: planGradient,
-          position: "relative",
-          overflow: "hidden",
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            top: -40, right: -40,
-            width: 150, height: 150,
-            borderRadius: "50%",
-            bgcolor: "rgba(255,255,255,0.07)",
-          },
-        }}
+        component="header"
+        className={[
+          styles.header,
+          styles[`header${planType}`] ?? styles.headerFREE,
+        ].join(" ")}
       >
-        <Box display="flex" alignItems="flex-start" justifyContent="space-between">
-          <Stack spacing={0.3}>
-            <Typography fontWeight={800} fontSize="1.15rem" color="#fff" letterSpacing="-0.3px">
-              Confirmar suscripción
-            </Typography>
-            <Typography fontSize="0.78rem" sx={{ color: "rgba(255,255,255,0.72)" }}>
-              {plan.nombre} · {plan.tipo}
-            </Typography>
-          </Stack>
+        <Box className={styles.headerDecoration} aria-hidden="true" />
+
+        <Box className={styles.headerContent}>
+          <Box className={styles.headerTitleRow}>
+            <Box className={styles.headerIcon}>
+              <MaterialSymbol icon="workspace_premium" size="medium" filled />
+            </Box>
+
+            <Stack className={styles.headerText}>
+              <Typography
+                id="subscription-confirmation-title"
+                component="h2"
+                className={styles.headerTitle}
+              >
+                Confirmar suscripción
+              </Typography>
+
+              <Typography component="p" className={styles.headerSubtitle}>
+                {plan.nombre} · {planType}
+              </Typography>
+            </Stack>
+          </Box>
+
           <IconButton
+            type="button"
             onClick={cerrar}
-            size="small"
-            sx={{
-              width: 30, height: 30, borderRadius: 999,
-              bgcolor: "rgba(255,255,255,0.18)",
-              "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-            }}
+            disabled={isLoading}
+            className={styles.closeButton}
+            aria-label="Cerrar confirmación de suscripción"
           >
-            <CloseRoundedIcon sx={{ fontSize: 16, color: "#fff" }} />
+            <MaterialSymbol icon="close" size="small" />
           </IconButton>
         </Box>
       </Box>
 
-      <DialogContent sx={{ px: 3, pt: 3, pb: 1 }}>
+      <DialogContent className={styles.content}>
+        <Box className={styles.planSummary}>
+          <Box className={styles.planInformation}>
+            <Typography component="h3" className={styles.planName}>
+              {plan.nombre}
+            </Typography>
 
-        {/* RESUMEN DEL PLAN */}
-        <Box
-          sx={{
-            mb: 3,
-            p: 2.5,
-            borderRadius: 4,
-            bgcolor: "rgba(0,0,0,0.03)",
-            border: "1px solid rgba(0,0,0,0.06)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Box>
-            <Typography fontWeight={700} fontSize="0.9rem">{plan.nombre}</Typography>
-            <Typography fontSize="0.75rem" color="text.disabled" mt={0.2}>Plan {plan.tipo}</Typography>
+            <Typography component="p" className={styles.planType}>
+              Plan {planType}
+            </Typography>
           </Box>
-          <Typography
-            fontWeight={900}
-            fontSize="1.4rem"
-            sx={{ background: planGradient, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
-          >
-            ${plan.precio.toLocaleString()}
-            <Typography component="span" fontSize="0.75rem" fontWeight={500} sx={{ WebkitTextFillColor: "#8e8e93", ml: 0.4 }}>
+
+          <Box className={styles.priceContainer}>
+            <Typography
+              component="span"
+              className={[
+                styles.price,
+                styles[`price${planType}`] ?? styles.priceFREE,
+              ].join(" ")}
+            >
+              ${formatCurrency(plan.precio)}
+            </Typography>
+
+            <Typography component="span" className={styles.currency}>
               MXN
             </Typography>
-          </Typography>
+          </Box>
         </Box>
 
-        <Divider sx={{ mb: 2.5, opacity: 0.5 }} />
+        <Divider className={styles.divider} />
 
-        {/* MÉTODO DE PAGO */}
-        {metodo === "" && <MetodoPagoStep onSelect={setMetodo} />}
+        {metodo === "" && <MetodoPagoStep onSelect={handleSelectMethod} />}
+
+        {metodo !== "" && (
+          <Box className={styles.methodHeader}>
+            <Button
+              type="button"
+              className={styles.changeMethodButton}
+              onClick={handleReturnToMethods}
+              disabled={isLoading}
+              startIcon={<MaterialSymbol icon="arrow_back" size="small" />}
+            >
+              Cambiar método
+            </Button>
+
+            <Typography component="span" className={styles.selectedMethodLabel}>
+              {metodo === "guardada"
+                ? "Tarjeta guardada"
+                : metodo === "nueva"
+                  ? "Nueva tarjeta"
+                  : "Transferencia"}
+            </Typography>
+          </Box>
+        )}
 
         {metodo === "guardada" && (
-          <Stack spacing={2}>
+          <Stack className={styles.savedCardsSection}>
             {loadingTarjetas ? (
-              <Box py={5} display="flex" justifyContent="center">
-                <CircularProgress size={28} thickness={4} sx={{ color: "#007AFF" }} />
+              <Box className={styles.cardsLoading} aria-live="polite">
+                <CircularProgress
+                  size={30}
+                  thickness={4}
+                  className={styles.loadingProgress}
+                />
+
+                <Typography component="p" className={styles.loadingMessage}>
+                  Consultando tus tarjetas...
+                </Typography>
               </Box>
-            ) : !tarjetas.length ? (
-              <Box
-                sx={{
-                  py: 4, textAlign: "center",
-                  borderRadius: 4, bgcolor: "rgba(0,0,0,0.03)",
-                  border: "1px dashed rgba(0,0,0,0.10)",
-                }}
-              >
-                <CreditCardRoundedIcon sx={{ fontSize: 32, color: "text.disabled", mb: 1 }} />
-                <Typography fontSize="0.875rem" color="text.disabled">
+            ) : tarjetas.length === 0 ? (
+              <Box className={styles.emptyCards}>
+                <Box className={styles.emptyCardsIcon}>
+                  <MaterialSymbol icon="credit_card_off" size="large" />
+                </Box>
+
+                <Typography component="h3" className={styles.emptyCardsTitle}>
                   No tienes tarjetas registradas
+                </Typography>
+
+                <Typography
+                  component="p"
+                  className={styles.emptyCardsDescription}
+                >
+                  Registra una nueva tarjeta para completar la suscripción.
                 </Typography>
               </Box>
             ) : (
-              tarjetas.map((t) => {
-                const selected = tarjetaSeleccionada === t.stripePaymentMethodId;
-                return (
-                  <Box
-                    key={t.id}
-                    onClick={() => setTarjetaSeleccionada(t.stripePaymentMethodId)}
-                    sx={{
-                      p: 2.5,
-                      borderRadius: 4,
-                      cursor: "pointer",
-                      bgcolor: selected ? "#fff" : "rgba(0,0,0,0.02)",
-                      border: selected ? "1.5px solid #007AFF" : "1px solid rgba(0,0,0,0.08)",
-                      boxShadow: selected ? "0 6px 20px rgba(0,122,255,0.15)" : "none",
-                      transition: "all .22s ease",
-                      "&:hover": { transform: "translateY(-2px)" },
-                    }}
-                  >
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Box>
-                        <Typography fontWeight={700} fontSize="0.9rem" fontFamily="monospace" letterSpacing={2}>
-                          •••• •••• •••• {t.last4}
-                        </Typography>
-                        <Typography fontSize="0.75rem" color="text.disabled" mt={0.3}>
-                          {t.brand} · Exp {t.expMonth}/{t.expYear}
-                          {tarjetaPreSeleccionada === t.id && " · Principal"}
-                        </Typography>
+              <Stack className={styles.cardsList}>
+                {tarjetas.map((card) => {
+                  const selected =
+                    tarjetaSeleccionada === card.stripePaymentMethodId;
+
+                  const isDefault = tarjetaPreSeleccionada === card.id;
+
+                  return (
+                    <ButtonBase
+                      key={card.id}
+                      type="button"
+                      className={[
+                        styles.cardOption,
+                        selected ? styles.cardOptionSelected : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      onClick={() => {
+                        setTarjetaSeleccionada(card.stripePaymentMethodId);
+
+                        setTarjetaPreSeleccionada(card.id);
+                      }}
+                      disabled={isLoading}
+                      role="radio"
+                      aria-checked={selected}
+                      aria-label={`Tarjeta ${card.brand} terminación ${card.last4}`}
+                    >
+                      <Box className={styles.cardDetails}>
+                        <Box className={styles.cardBrandIcon}>
+                          <MaterialSymbol icon="credit_card" size="medium" />
+                        </Box>
+
+                        <Box className={styles.cardText}>
+                          <Typography
+                            component="p"
+                            className={styles.cardNumber}
+                          >
+                            •••• •••• •••• {card.last4}
+                          </Typography>
+
+                          <Box className={styles.cardMetadata}>
+                            <Typography
+                              component="span"
+                              className={styles.cardDescription}
+                            >
+                              {card.brand} · Exp. {card.expMonth}/{card.expYear}
+                            </Typography>
+
+                            {isDefault && (
+                              <Box className={styles.defaultBadge}>
+                                <MaterialSymbol
+                                  icon="verified"
+                                  size="small"
+                                  filled
+                                />
+
+                                <span>Principal</span>
+                              </Box>
+                            )}
+                          </Box>
+                        </Box>
                       </Box>
+
                       <Radio
                         checked={selected}
-                        sx={{ "&.Mui-checked": { color: "#007AFF" } }}
+                        className={styles.cardRadio}
+                        tabIndex={-1}
+                        disableRipple
                       />
-                    </Box>
-                  </Box>
-                );
-              })
+                    </ButtonBase>
+                  );
+                })}
+              </Stack>
             )}
 
-            <Box
-              sx={{
-                px: 2, py: 1.5,
-                borderRadius: 3,
-                bgcolor: "rgba(0,122,255,0.05)",
-                border: "1px solid rgba(0,122,255,0.12)",
-              }}
-            >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={autoRenew}
-                    onChange={(e) => setAutoRenew(e.target.checked)}
-                    sx={{ "&.Mui-checked": { color: "#007AFF" } }}
-                  />
-                }
-                label={
-                  <Stack direction="row" alignItems="center" spacing={0.5}>
-                    <AutorenewRoundedIcon sx={{ fontSize: 16, color: autoRenew ? "#007AFF" : "text.disabled" }} />
-                    <Typography fontSize="0.82rem" fontWeight={500} color="text.secondary">
-                      Renovar automáticamente mi suscripción
-                    </Typography>
-                  </Stack>
-                }
-              />
-            </Box>
+            {tarjetas.length > 0 && (
+              <Box className={styles.autoRenewContainer}>
+                <FormControlLabel
+                  className={styles.autoRenewControl}
+                  control={
+                    <Checkbox
+                      checked={autoRenew}
+                      disabled={isLoading}
+                      className={styles.autoRenewCheckbox}
+                      onChange={(event) => setAutoRenew(event.target.checked)}
+                    />
+                  }
+                  label={
+                    <Box className={styles.autoRenewLabel}>
+                      <Box
+                        className={[
+                          styles.autoRenewIcon,
+                          autoRenew ? styles.autoRenewIconActive : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      >
+                        <MaterialSymbol icon="autorenew" size="small" />
+                      </Box>
+
+                      <Box>
+                        <Typography
+                          component="span"
+                          className={styles.autoRenewTitle}
+                        >
+                          Renovación automática
+                        </Typography>
+
+                        <Typography
+                          component="p"
+                          className={styles.autoRenewDescription}
+                        >
+                          Cobraremos el siguiente periodo automáticamente.
+                        </Typography>
+                      </Box>
+                    </Box>
+                  }
+                />
+              </Box>
+            )}
+
+            {selectedCard && (
+              <Typography component="p" className={styles.selectedCardMessage}>
+                Se utilizará la tarjeta terminación {selectedCard.last4}.
+              </Typography>
+            )}
           </Stack>
         )}
 
         {metodo === "nueva" && (
-          <Box
-            sx={{
-              p: 2.5, borderRadius: 4,
-              bgcolor: "rgba(0,122,255,0.05)",
-              border: "1px solid rgba(0,122,255,0.12)",
-              display: "flex", alignItems: "center", gap: 1.5,
-            }}
-          >
-            <CreditCardRoundedIcon sx={{ fontSize: 22, color: "#007AFF", flexShrink: 0 }} />
-            <Typography fontSize="0.875rem" color="text.secondary" lineHeight={1.5}>
-              Serás redirigido a la pasarela de pago seguro para completar tu suscripción.
-            </Typography>
+          <Box className={styles.newCardInformation}>
+            <Box className={styles.informationIcon}>
+              <MaterialSymbol icon="add_card" size="medium" />
+            </Box>
+
+            <Box>
+              <Typography component="h3" className={styles.informationTitle}>
+                Pago seguro con tarjeta
+              </Typography>
+
+              <Typography
+                component="p"
+                className={styles.informationDescription}
+              >
+                Serás redirigido a la pasarela de pago segura para registrar tu
+                tarjeta y completar la suscripción.
+              </Typography>
+            </Box>
           </Box>
         )}
 
         {metodo === "transferencia" && (
-          <Box sx={{ p: 2.5, borderRadius: 4, bgcolor: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)" }}>
-            <Typography fontSize="0.78rem" fontWeight={700} color="text.disabled" letterSpacing="0.06em" textTransform="uppercase" mb={1.5}>
-              🏦 Banco para transferencia
-            </Typography>
+          <Box className={styles.transferSection}>
+            <Box className={styles.transferHeader}>
+              <Box className={styles.transferIcon}>
+                <MaterialSymbol icon="account_balance" size="medium" />
+              </Box>
+
+              <Box>
+                <Typography component="h3" className={styles.transferTitle}>
+                  Banco para transferencia
+                </Typography>
+
+                <Typography
+                  component="p"
+                  className={styles.transferDescription}
+                >
+                  Selecciona la institución desde la que realizarás el pago.
+                </Typography>
+              </Box>
+            </Box>
+
             <TextField
               select
               fullWidth
               size="small"
+              label="Banco"
               value={banco}
-              onChange={(e) => setBanco(e.target.value)}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "12px",
-                  bgcolor: "#fff",
-                  "& fieldset": { borderColor: "#E0E0E0" },
-                  "&.Mui-focused fieldset": { borderColor: "#007AFF" },
-                },
-              }}
+              className={styles.bankField}
+              onChange={(event) => setBanco(event.target.value)}
             >
-              {["BBVA","Citibanamex","Santander","Banorte","HSBC","Banco Azteca","OXXO"].map((b) => (
-                <MenuItem key={b} value={b.toLowerCase()}>{b}</MenuItem>
+              {BANKS.map((bank) => (
+                <MenuItem key={bank} value={bank.toLowerCase()}>
+                  {bank}
+                </MenuItem>
               ))}
             </TextField>
+
+            <Box className={styles.transferNotice}>
+              <MaterialSymbol icon="info" size="small" />
+
+              <Typography component="p" className={styles.transferNoticeText}>
+                La confirmación automática por transferencia todavía requiere el
+                servicio correspondiente en `useCheckout`.
+              </Typography>
+            </Box>
           </Box>
         )}
       </DialogContent>
 
-      {/* FOOTER */}
-      <Box
-        sx={{
-          px: 3, py: 2.5, mt: 1,
-          borderTop: "1px solid rgba(0,0,0,0.06)",
-          display: "flex", justifyContent: "flex-end", gap: 1.5,
-        }}
-      >
+      <Box component="footer" className={styles.footer}>
         <Button
+          type="button"
           onClick={cerrar}
-          sx={{
-            borderRadius: 999, textTransform: "none", fontWeight: 600, px: 3,
-            border: "1px solid rgba(0,0,0,0.15)", color: "text.secondary",
-            "&:hover": { bgcolor: "rgba(0,0,0,0.04)" },
-          }}
+          disabled={isLoading}
+          className={styles.cancelButton}
         >
           Cancelar
         </Button>
 
         {canConfirm && (
           <Button
+            type="button"
             variant="contained"
             onClick={confirmarPago}
             disabled={isLoading}
-            sx={{
-              borderRadius: 999, textTransform: "none", fontWeight: 700,
-              px: 4, py: 1.1,
-              background: planGradient,
-              boxShadow: "0 6px 18px rgba(0,122,255,0.30)",
-              transition: "all 0.25s ease",
-              "&:hover": { boxShadow: "0 10px 24px rgba(0,122,255,0.42)", transform: "translateY(-1px)" },
-              "&:active": { transform: "scale(0.98)" },
-            }}
-          >
-            {isLoading
-              ? <CircularProgress size={18} thickness={4} sx={{ color: "#fff" }} />
-              : "Confirmar pago"
+            className={[
+              styles.confirmButton,
+              styles[`confirmButton${planType}`] ?? styles.confirmButtonFREE,
+            ].join(" ")}
+            startIcon={
+              isLoading ? undefined : (
+                <MaterialSymbol
+                  icon={metodo === "nueva" ? "open_in_new" : "lock"}
+                  size="small"
+                />
+              )
             }
+          >
+            {isLoading ? (
+              <>
+                <CircularProgress
+                  size={18}
+                  thickness={4}
+                  className={styles.confirmProgress}
+                />
+
+                <span>Procesando...</span>
+              </>
+            ) : metodo === "nueva" ? (
+              "Continuar al pago"
+            ) : (
+              "Confirmar pago"
+            )}
           </Button>
         )}
       </Box>

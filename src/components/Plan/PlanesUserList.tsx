@@ -1,111 +1,173 @@
-import { useEffect, useState } from "react";
-import { Typography, Box, Fade, Skeleton } from "@mui/material";
-import { usePlanes } from "../../hooks/usePlanes";
-import { PlanCard } from "./PlanCard";
-import type { PlanCreateDto } from "../../services/planApi";
-import { ConfirmarSuscripcionModalV3 } from "../../pages/User/Plan/ConfirmarSuscripcionModalV3";
+import { Box, Fade, Skeleton, Typography } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
+
+import { usePlanes } from "../../hooks/usePlanes";
+
 import type { JwtClaims } from "../../services/auth.api";
+import type { PlanCreateDto } from "../../services/planApi";
+
+import { ConfirmarSuscripcionModalV3 } from "../../pages/User/Plan/ConfirmarSuscripcionModalV3";
+
+import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
+import { PlanCard } from "./PlanCard";
+
+import styles from "../../styles/PlanesUserList.module.css";
 
 interface Props {
-  setIsSubSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSubSuccess: Dispatch<SetStateAction<boolean>>;
 }
+
+const decodeClaims = (token: string | null): JwtClaims | null => {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    return jwtDecode<JwtClaims>(token);
+  } catch (error) {
+    console.error("No fue posible decodificar el JWT:", error);
+
+    return null;
+  }
+};
+
+const normalizePlanType = (type?: string): string => {
+  return type?.trim().toUpperCase() || "";
+};
+
+const normalizePrice = (price: unknown): number => {
+  const parsedPrice = Number(price);
+
+  if (!Number.isFinite(parsedPrice)) {
+    return 0;
+  }
+
+  return parsedPrice;
+};
+
+const PlansSkeleton = () => {
+  return (
+    <Box
+      className={styles.loadingContainer}
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <Box className={styles.loadingGrid}>
+        {[1, 2, 3].map((item) => (
+          <Box key={item} className={styles.loadingItem}>
+            <Skeleton variant="rounded" className={styles.cardSkeleton} />
+
+            <Skeleton variant="rounded" className={styles.actionSkeleton} />
+          </Box>
+        ))}
+      </Box>
+
+      <Typography component="p" className={styles.loadingText}>
+        Consultando los planes disponibles...
+      </Typography>
+    </Box>
+  );
+};
+
+const EmptyPlans = () => {
+  return (
+    <Box
+      component="section"
+      className={styles.emptyState}
+      aria-labelledby="empty-user-plans-title"
+    >
+      <Box className={styles.emptyIcon}>
+        <MaterialSymbol icon="inventory_2" size="large" />
+      </Box>
+
+      <Typography
+        id="empty-user-plans-title"
+        component="h2"
+        className={styles.emptyTitle}
+      >
+        No hay planes disponibles
+      </Typography>
+
+      <Typography component="p" className={styles.emptyDescription}>
+        Por el momento no existen planes de pago disponibles. Intenta nuevamente
+        más tarde.
+      </Typography>
+    </Box>
+  );
+};
 
 export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
   const { planesUser, loading, listAllPlanesUser } = usePlanes();
-  const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
+
+  const claims = useMemo(() => decodeClaims(localStorage.getItem("token")), []);
 
   const [openModal, setOpenModal] = useState(false);
-  const [planSeleccionado, setPlanSeleccionado] = useState<PlanCreateDto | null>(null);
 
-  useEffect(() => { listAllPlanesUser(); }, [listAllPlanesUser]);
+  const [planSeleccionado, setPlanSeleccionado] =
+    useState<PlanCreateDto | null>(null);
 
-  const handleSelectPlan = (plan: PlanCreateDto) => {
+  /*
+   * Evita que el efecto inicial se repita si la
+   * función del hook cambia de referencia.
+   */
+  const listPlansRef = useRef(listAllPlanesUser);
+
+  useEffect(() => {
+    listPlansRef.current = listAllPlanesUser;
+  }, [listAllPlanesUser]);
+
+  useEffect(() => {
+    void listPlansRef.current();
+  }, []);
+
+  const planesDisponibles = useMemo(() => {
+    return [...(planesUser ?? [])]
+      .filter((plan) => normalizePlanType(plan.tipo) !== "FREE")
+      .sort(
+        (firstPlan, secondPlan) =>
+          normalizePrice(firstPlan.precio) - normalizePrice(secondPlan.precio),
+      );
+  }, [planesUser]);
+
+  const handleSelectPlan = useCallback((plan: PlanCreateDto) => {
     setPlanSeleccionado(plan);
     setOpenModal(true);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setOpenModal(false);
     setPlanSeleccionado(null);
-  };
+  }, []);
 
-  /* ─── LOADING ─── */
   if (loading) {
-    return (
-      <Box maxWidth={1200} mx="auto" px={{ xs: 2, md: 3 }}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2,1fr)", lg: "repeat(3,1fr)" },
-            gap: 3,
-          }}
-        >
-          {[1, 2, 3].map((i) => (
-            <Box key={i}>
-              <Skeleton
-                variant="rounded"
-                height={420}
-                sx={{
-                  borderRadius: 5,
-                  bgcolor: "rgba(0,0,0,0.06)",
-                }}
-              />
-            </Box>
-          ))}
-        </Box>
-      </Box>
-    );
+    return <PlansSkeleton />;
   }
 
-  /* ─── EMPTY ─── */
-  if (!planesUser.length) {
-    return (
-      <Box
-        sx={{
-          textAlign: "center",
-          py: 8,
-          px: 3,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <Typography fontSize="2.5rem" lineHeight={1}>📭</Typography>
-        <Typography fontWeight={800} fontSize="1rem" color="text.primary">
-          No hay planes disponibles
-        </Typography>
-        <Typography fontSize="0.82rem" color="text.disabled">
-          Intenta nuevamente más tarde
-        </Typography>
-      </Box>
-    );
+  if (planesDisponibles.length === 0) {
+    return <EmptyPlans />;
   }
 
-  /* ─── LISTA ─── */
   return (
     <>
       <Fade in timeout={400}>
-        <Box maxWidth={1200} mx="auto" px={{ xs: 2, md: 3 }}>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                lg: "repeat(3, 1fr)",
-              },
-              gap: 3,
-            }}
-          >
-            {planesUser
-              .filter((plan) => plan.tipo !== "FREE")
-              .sort((a, b) => a.precio - b.precio)
-              .map((plan) => (
+        <Box
+          component="section"
+          className={styles.container}
+          aria-label="Planes de suscripción disponibles"
+        >
+          <Box className={styles.plansGrid}>
+            {planesDisponibles.map((plan) => (
+              <Box key={plan.id} className={styles.planItem}>
                 <PlanCard
-                  key={plan.id}
                   nombre={plan.nombre}
                   tipo={plan.tipo}
                   dias={plan.duracionDias}
@@ -122,7 +184,8 @@ export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
                   claims={claims}
                   badgeTexto={plan.badgeTexto || ""}
                 />
-              ))}
+              </Box>
+            ))}
           </Box>
         </Box>
       </Fade>

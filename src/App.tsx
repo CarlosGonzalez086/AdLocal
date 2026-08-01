@@ -18,7 +18,6 @@ import PlanesPublicList from "./pages/PlanesPublicList";
 export default function App() {
   return (
     <BrowserRouter>
-      {/* 🔔 TOASTER GLOBAL */}
       <Toaster
         position="top-right"
         toastOptions={{

@@ -1,0 +1,958 @@
+.dialogBackdrop {
+  background-color: rgba(15, 23, 42, 0.34) !important;
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.dialogPaper {
+  --payment-text: #1c1c1e;
+  --payment-muted: #7d8088;
+  --payment-primary: #007aff;
+  --payment-border: rgba(15, 23, 42, 0.075);
+
+  width: calc(100% - 28px);
+  max-height: calc(100% - 32px);
+
+  overflow: hidden;
+
+  background-color: rgba(255, 255, 255, 0.97) !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.7);
+
+  border-radius: 25px !important;
+
+  box-shadow: 0 26px 68px rgba(15, 23, 42, 0.2) !important;
+
+  backdrop-filter: blur(22px) saturate(165%);
+
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
+}
+
+/* Encabezado */
+
+.header {
+  position: relative;
+
+  padding: 25px 26px 22px;
+
+  overflow: hidden;
+
+  color: #ffffff;
+}
+
+.headerBASIC {
+  background: linear-gradient(135deg, #007aff, #005fcc);
+}
+
+.headerPRO {
+  background: linear-gradient(135deg, #5856d6, #3634a3);
+}
+
+.headerBUSINESS {
+  background: linear-gradient(135deg, #ff9500, #cc7700);
+}
+
+.headerFREE {
+  background: linear-gradient(135deg, #8e8e93, #636366);
+}
+
+.headerDecoration {
+  position: absolute;
+  top: -75px;
+  right: -55px;
+
+  width: 190px;
+  height: 190px;
+
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.14),
+    transparent 68%
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  border-radius: 50%;
+
+  pointer-events: none;
+}
+
+.headerContent {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.headerTitleRow {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.headerIcon {
+  width: 41px;
+  height: 41px;
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+
+  background-color: rgba(255, 255, 255, 0.15);
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  border-radius: 13px;
+}
+
+.headerText {
+  min-width: 0;
+
+  gap: 3px !important;
+}
+
+.headerTitle {
+  margin: 0 !important;
+
+  color: #ffffff;
+
+  font-size: 1.12rem !important;
+  font-weight: 850 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.headerSubtitle {
+  margin: 0 !important;
+
+  color: rgba(255, 255, 255, 0.74);
+
+  font-size: 0.75rem !important;
+  font-weight: 550 !important;
+}
+
+.closeButton {
+  width: 32px;
+  height: 32px;
+
+  flex-shrink: 0;
+
+  color: #ffffff !important;
+
+  background-color: rgba(255, 255, 255, 0.16) !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease !important;
+}
+
+.closeButton:hover {
+  background-color: rgba(255, 255, 255, 0.27) !important;
+
+  transform: rotate(4deg);
+}
+
+/* Contenido */
+
+.content {
+  padding: 26px 26px 14px !important;
+}
+
+.planSummary {
+  margin-bottom: 24px;
+  padding: 19px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  background-color: rgba(15, 23, 42, 0.035);
+
+  border: 1px solid var(--payment-border);
+
+  border-radius: 17px;
+}
+
+.planInformation {
+  min-width: 0;
+}
+
+.planName {
+  margin: 0 !important;
+
+  color: var(--payment-text);
+
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+}
+
+.planType {
+  margin: 3px 0 0 !important;
+
+  color: var(--payment-muted);
+
+  font-size: 0.69rem !important;
+}
+
+.priceContainer {
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.price {
+  font-size: 1.32rem !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.priceBASIC {
+  background-image: linear-gradient(135deg, #007aff, #005fcc);
+}
+
+.pricePRO {
+  background-image: linear-gradient(135deg, #5856d6, #3634a3);
+}
+
+.priceBUSINESS {
+  background-image: linear-gradient(135deg, #ff9500, #cc7700);
+}
+
+.priceFREE {
+  background-image: linear-gradient(135deg, #8e8e93, #636366);
+}
+
+.currency {
+  color: #8e8e93;
+
+  font-size: 0.69rem !important;
+  font-weight: 550 !important;
+}
+
+.divider {
+  margin-bottom: 22px !important;
+
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Método seleccionado */
+
+.methodHeader {
+  margin-bottom: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.changeMethodButton {
+  min-height: 35px;
+  padding-right: 13px !important;
+  padding-left: 10px !important;
+
+  color: var(--payment-primary) !important;
+
+  background-color: rgba(0, 122, 255, 0.055) !important;
+
+  border-radius: 999px !important;
+
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+}
+
+.changeMethodButton:hover {
+  background-color: rgba(0, 122, 255, 0.11) !important;
+}
+
+.selectedMethodLabel {
+  color: var(--payment-muted);
+
+  font-size: 0.67rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.035em !important;
+  text-transform: uppercase;
+}
+
+/* Tarjetas guardadas */
+
+.savedCardsSection {
+  gap: 16px !important;
+}
+
+.cardsLoading {
+  min-height: 180px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loadingProgress {
+  color: var(--payment-primary) !important;
+}
+
+.loadingMessage {
+  margin: 12px 0 0 !important;
+
+  color: var(--payment-muted);
+
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+}
+
+.emptyCards {
+  min-height: 190px;
+  padding: 28px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  background-color: rgba(15, 23, 42, 0.025);
+
+  border: 1px dashed rgba(15, 23, 42, 0.13);
+
+  border-radius: 17px;
+}
+
+.emptyCardsIcon {
+  width: 60px;
+  height: 60px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #9699a1;
+
+  background-color: rgba(15, 23, 42, 0.055);
+
+  border-radius: 50%;
+}
+
+.emptyCardsTitle {
+  margin: 14px 0 0 !important;
+
+  color: var(--payment-text);
+
+  font-size: 0.86rem !important;
+  font-weight: 800 !important;
+}
+
+.emptyCardsDescription {
+  max-width: 310px;
+  margin: 5px 0 0 !important;
+
+  color: var(--payment-muted);
+
+  font-size: 0.69rem !important;
+  line-height: 1.5 !important;
+}
+
+.cardsList {
+  gap: 10px !important;
+}
+
+.cardOption {
+  width: 100%;
+  padding: 17px 18px;
+
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between !important;
+
+  color: var(--payment-text) !important;
+
+  background-color: rgba(15, 23, 42, 0.025) !important;
+
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+
+  border-radius: 16px !important;
+
+  text-align: left !important;
+
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.cardOption:hover {
+  transform: translateY(-2px);
+
+  background-color: rgba(255, 255, 255, 0.96) !important;
+
+  box-shadow: 0 8px 21px rgba(15, 23, 42, 0.08);
+}
+
+.cardOptionSelected {
+  background-color: #ffffff !important;
+
+  border-color: var(--payment-primary) !important;
+
+  box-shadow: 0 7px 22px rgba(0, 122, 255, 0.14);
+}
+
+.cardDetails {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.cardBrandIcon {
+  width: 39px;
+  height: 39px;
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--payment-primary);
+
+  background-color: rgba(0, 122, 255, 0.075);
+
+  border-radius: 12px;
+}
+
+.cardText {
+  min-width: 0;
+}
+
+.cardNumber {
+  margin: 0 !important;
+
+  color: var(--payment-text);
+
+  font-family: "SFMono-Regular", Consolas, monospace !important;
+
+  font-size: 0.82rem !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.1em !important;
+}
+
+.cardMetadata {
+  margin-top: 5px;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.cardDescription {
+  color: var(--payment-muted);
+
+  font-size: 0.66rem !important;
+}
+
+.defaultBadge {
+  padding: 3px 7px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+
+  color: #229b43;
+  background-color: rgba(52, 199, 89, 0.09);
+
+  border-radius: 999px;
+
+  font-size: 0.58rem;
+  font-weight: 750;
+}
+
+.defaultBadge > span:first-child {
+  font-size: 13px !important;
+}
+
+.cardRadio {
+  flex-shrink: 0;
+
+  color: rgba(15, 23, 42, 0.22) !important;
+}
+
+.cardRadio:global(.Mui-checked) {
+  color: var(--payment-primary) !important;
+}
+
+/* Renovación */
+
+.autoRenewContainer {
+  padding: 13px 15px;
+
+  background-color: rgba(0, 122, 255, 0.045);
+
+  border: 1px solid rgba(0, 122, 255, 0.11);
+
+  border-radius: 14px;
+}
+
+.autoRenewControl {
+  width: 100%;
+  margin: 0 !important;
+}
+
+.autoRenewCheckbox {
+  color: rgba(15, 23, 42, 0.28) !important;
+}
+
+.autoRenewCheckbox:global(.Mui-checked) {
+  color: var(--payment-primary) !important;
+}
+
+.autoRenewLabel {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.autoRenewIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #9a9da5;
+}
+
+.autoRenewIconActive {
+  color: var(--payment-primary);
+}
+
+.autoRenewTitle {
+  color: #45484f;
+
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+}
+
+.autoRenewDescription {
+  margin: 2px 0 0 !important;
+
+  color: var(--payment-muted);
+
+  font-size: 0.62rem !important;
+  line-height: 1.4 !important;
+}
+
+.selectedCardMessage {
+  margin: -4px 0 0 !important;
+
+  color: var(--payment-muted);
+
+  font-size: 0.65rem !important;
+  text-align: center;
+}
+
+/* Nueva tarjeta */
+
+.newCardInformation {
+  padding: 20px;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+
+  background-color: rgba(0, 122, 255, 0.05);
+
+  border: 1px solid rgba(0, 122, 255, 0.12);
+
+  border-radius: 16px;
+}
+
+.informationIcon {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--payment-primary);
+
+  background-color: rgba(0, 122, 255, 0.09);
+
+  border-radius: 13px;
+}
+
+.informationTitle {
+  margin: 0 !important;
+
+  color: var(--payment-text);
+
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+}
+
+.informationDescription {
+  margin: 5px 0 0 !important;
+
+  color: #686b73;
+
+  font-size: 0.73rem !important;
+  line-height: 1.55 !important;
+}
+
+/* Transferencia */
+
+.transferSection {
+  padding: 20px;
+
+  background-color: rgba(15, 23, 42, 0.025);
+
+  border: 1px solid var(--payment-border);
+
+  border-radius: 16px;
+}
+
+.transferHeader {
+  margin-bottom: 17px;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.transferIcon {
+  width: 39px;
+  height: 39px;
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  color: #5856d6;
+
+  background-color: rgba(88, 86, 214, 0.085);
+
+  border-radius: 12px;
+}
+
+.transferTitle {
+  margin: 0 !important;
+
+  color: var(--payment-text);
+
+  font-size: 0.81rem !important;
+  font-weight: 800 !important;
+}
+
+.transferDescription {
+  margin: 4px 0 0 !important;
+
+  color: var(--payment-muted);
+
+  font-size: 0.68rem !important;
+}
+
+.bankField :global(.MuiOutlinedInput-root) {
+  background-color: #ffffff;
+
+  border-radius: 13px;
+}
+
+.bankField :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: rgba(15, 23, 42, 0.13);
+}
+
+.bankField
+  :global(.MuiOutlinedInput-root.Mui-focused)
+  :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: var(--payment-primary);
+}
+
+.transferNotice {
+  margin-top: 14px;
+  padding: 10px 12px;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+
+  color: #777a82;
+  background-color: rgba(255, 149, 0, 0.07);
+
+  border: 1px solid rgba(255, 149, 0, 0.13);
+
+  border-radius: 11px;
+}
+
+.transferNotice > span:first-child {
+  flex-shrink: 0;
+
+  color: #d67d00;
+}
+
+.transferNoticeText {
+  margin: 0 !important;
+
+  color: inherit;
+
+  font-size: 0.64rem !important;
+  line-height: 1.5 !important;
+}
+
+/* Pie */
+
+.footer {
+  margin-top: 8px;
+  padding: 19px 26px 22px;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 11px;
+
+  background-color: rgba(255, 255, 255, 0.82);
+
+  border-top: 1px solid rgba(15, 23, 42, 0.07);
+}
+
+.cancelButton,
+.confirmButton {
+  min-height: 43px;
+  padding-right: 23px !important;
+  padding-left: 23px !important;
+
+  border-radius: 999px !important;
+
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+}
+
+.cancelButton {
+  color: #686b73 !important;
+
+  background-color: rgba(255, 255, 255, 0.75) !important;
+
+  border: 1px solid rgba(15, 23, 42, 0.13) !important;
+}
+
+.cancelButton:hover {
+  color: #303238 !important;
+
+  background-color: rgba(15, 23, 42, 0.045) !important;
+
+  border-color: rgba(15, 23, 42, 0.22) !important;
+}
+
+.confirmButton {
+  min-width: 160px;
+
+  color: #ffffff !important;
+
+  box-shadow: 0 7px 20px rgba(15, 23, 42, 0.2) !important;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.confirmButtonBASIC {
+  background: linear-gradient(135deg, #007aff, #005fcc) !important;
+}
+
+.confirmButtonPRO {
+  background: linear-gradient(135deg, #5856d6, #3634a3) !important;
+}
+
+.confirmButtonBUSINESS {
+  background: linear-gradient(135deg, #ff9500, #cc7700) !important;
+}
+
+.confirmButtonFREE {
+  background: linear-gradient(135deg, #8e8e93, #636366) !important;
+}
+
+.confirmButton:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 11px 27px rgba(15, 23, 42, 0.27) !important;
+}
+
+.confirmButton:active {
+  transform: scale(0.985);
+}
+
+.confirmButton:global(.Mui-disabled) {
+  color: rgba(255, 255, 255, 0.72) !important;
+
+  background: #929296 !important;
+
+  box-shadow: none !important;
+}
+
+.confirmProgress {
+  color: currentColor !important;
+}
+
+/* Móvil */
+
+@media (max-width: 599px) {
+  .dialogPaper {
+    width: calc(100% - 18px);
+    max-height: calc(100% - 18px);
+
+    border-radius: 20px !important;
+  }
+
+  .header {
+    padding: 21px 18px 19px;
+  }
+
+  .headerIcon {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 12px;
+  }
+
+  .headerTitle {
+    font-size: 1rem !important;
+  }
+
+  .headerSubtitle {
+    font-size: 0.69rem !important;
+  }
+
+  .content {
+    padding: 20px 16px 10px !important;
+  }
+
+  .planSummary {
+    padding: 16px;
+
+    align-items: flex-start;
+  }
+
+  .priceContainer {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .price {
+    font-size: 1.15rem !important;
+  }
+
+  .methodHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .cardOption {
+    padding: 15px 13px;
+  }
+
+  .cardBrandIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cardNumber {
+    font-size: 0.73rem !important;
+    letter-spacing: 0.07em !important;
+  }
+
+  .cardRadio {
+    padding-right: 0 !important;
+  }
+
+  .newCardInformation,
+  .transferSection {
+    padding: 17px 14px;
+  }
+
+  .footer {
+    padding: 16px;
+
+    flex-direction: column-reverse;
+  }
+
+  .cancelButton,
+  .confirmButton {
+    width: 100%;
+    min-height: 45px;
+  }
+}
+
+/* Pantallas muy pequeñas */
+
+@media (max-width: 359px) {
+  .planSummary {
+    flex-direction: column;
+  }
+
+  .priceContainer {
+    align-items: baseline;
+    flex-direction: row;
+  }
+
+  .cardDetails {
+    align-items: flex-start;
+  }
+
+  .cardMetadata {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Sin hover */
+
+@media (hover: none) {
+  .closeButton:hover,
+  .cardOption:hover,
+  .confirmButton:hover {
+    transform: none;
+  }
+}
+
+/* Animaciones reducidas */
+
+@media (prefers-reduced-motion: reduce) {
+  .closeButton,
+  .cardOption,
+  .confirmButton {
+    transition: none !important;
+  }
+
+  .closeButton:hover,
+  .cardOption:hover,
+  .confirmButton:hover {
+    transform: none;
+  }
+}

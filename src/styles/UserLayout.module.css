@@ -1,0 +1,180 @@
+.layout {
+  --user-header-height: 60px;
+  --user-layout-background: #f2f2f7;
+  --user-layout-surface: #f8f9fc;
+  --user-layout-scrollbar: rgba(15, 23, 42, 0.18);
+
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  color: #1c1c1e;
+
+  background: linear-gradient(
+    145deg,
+    var(--user-layout-surface) 0%,
+    var(--user-layout-background) 52%,
+    #eceef4 100%
+  );
+}
+
+/* Accesibilidad */
+
+.skipLink {
+  position: fixed;
+  top: -80px;
+  left: 18px;
+  z-index: 1400;
+
+  min-height: 42px;
+  padding: 10px 17px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+  background-color: #008989;
+
+  border-radius: 12px;
+
+  font-size: 0.8rem;
+  font-weight: 750;
+  line-height: 1;
+  text-decoration: none;
+
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+
+  transition: top 180ms ease;
+}
+
+.skipLink:focus {
+  top: 12px;
+
+  outline: 3px solid rgba(0, 137, 137, 0.24);
+
+  outline-offset: 3px;
+}
+
+/* Contenedor inferior al header */
+
+.contentRow {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+
+  padding-top: var(--user-header-height);
+
+  display: flex;
+
+  overflow: hidden;
+}
+
+/* Contenido principal */
+
+.mainContent {
+  position: relative;
+
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+
+  padding: 16px 12px 28px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  scroll-behavior: smooth;
+  scroll-padding-top: 20px;
+
+  overscroll-behavior-y: contain;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--user-layout-scrollbar) transparent;
+}
+
+.mainContent:focus {
+  outline: none;
+}
+
+.mainContent::-webkit-scrollbar {
+  width: 7px;
+}
+
+.mainContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mainContent::-webkit-scrollbar-thumb {
+  background-color: var(--user-layout-scrollbar);
+
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+.mainContent::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(15, 23, 42, 0.3);
+}
+
+.outletContainer {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+}
+
+/* Tablet */
+
+@media (min-width: 600px) {
+  .mainContent {
+    padding: 20px 18px 34px;
+  }
+}
+
+/* Escritorio */
+
+@media (min-width: 900px) {
+  .layout {
+    --user-header-height: 68px;
+  }
+
+  .mainContent {
+    padding: 24px 24px 40px;
+  }
+}
+
+/* Pantallas amplias */
+
+@media (min-width: 1200px) {
+  .mainContent {
+    padding-right: 30px;
+    padding-left: 30px;
+  }
+}
+
+/* Móvil pequeño */
+
+@media (max-width: 419px) {
+  .mainContent {
+    padding: 13px 10px 26px;
+  }
+}
+
+/* Animaciones reducidas */
+
+@media (prefers-reduced-motion: reduce) {
+  .mainContent {
+    scroll-behavior: auto;
+  }
+
+  .skipLink {
+    transition: none;
+  }
+}

@@ -1,180 +1,218 @@
 import {
   Box,
+  Container,
+  Divider,
+  Link,
   Paper,
   Typography,
-  Divider,
-  Button,
-  Container,
-  Link,
 } from "@mui/material";
-import LoginForm from "../components/forms/LoginForm";
-import { adminApi } from "../api/admin.api";
-import Swal from "sweetalert2";
-import { authApi } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+
+import { adminApi } from "../api/admin.api";
+import { authApi } from "../api/authApi";
+import LoginForm from "../components/forms/LoginForm";
+
+import styles from "../styles/LoginPage.module.css";
+import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
+
+
+const LOGO_URL =
+  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
 
 interface Props {
   type: "admin" | "user";
 }
 
+interface LoginError {
+  response?: {
+    data?: {
+      mensaje?: string;
+    };
+  };
+}
+
 export default function LoginPage({ type }: Props) {
   const navigate = useNavigate();
 
+  const isAdmin = type === "admin";
+
   const handleLogin = async (data: any) => {
     try {
-      const res =
-        type === "admin"
-          ? await adminApi.loginAdmin(data)
-          : await authApi.login(data);
+      const response = isAdmin
+        ? await adminApi.loginAdmin(data)
+        : await authApi.login(data);
 
-      localStorage.setItem("token", res.data.respuesta.token);
+      const token = response.data?.respuesta?.token;
+
+      if (!token) {
+        throw new Error("La respuesta no contiene un token de autenticación.");
+      }
+
+      localStorage.setItem("token", token);
 
       await Swal.fire({
         icon: "success",
         title: "Bienvenido",
-        timer: 1200,
+        text: isAdmin
+          ? "Acceso administrativo autorizado."
+          : "Has iniciado sesión correctamente.",
+        timer: 1300,
+        timerProgressBar: true,
         showConfirmButton: false,
       });
 
-      window.location.href = type === "admin" ? "/Admin" : "/app";
-    } catch (error: any) {
-      Swal.fire({
+      navigate(isAdmin ? "/Admin" : "/app", {
+        replace: true,
+      });
+    } catch (error: unknown) {
+      const apiError = error as LoginError;
+
+      await Swal.fire({
         icon: "error",
-        title: "Error",
+        title: "No pudimos iniciar sesión",
         text:
-          error?.response?.data?.mensaje || "Correo o contraseña incorrectos",
+          apiError.response?.data?.mensaje ??
+          "Correo o contraseña incorrectos.",
+        confirmButtonText: "Intentar nuevamente",
+        confirmButtonColor: "#007AFF",
       });
     }
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        minHeight: "100vh",
-        bgcolor: "#F2F2F7",
-        overflow: "auto",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-      padding={3}
-    >
-      <Container maxWidth="xs">
-        {/* Logo */}
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
+    <Box component="main" className={styles.loginPage}>
+      <Box className={styles.backgroundDecoration} aria-hidden="true">
+        <Box className={styles.decorationOne} />
+        <Box className={styles.decorationTwo} />
+        <Box className={styles.decorationThree} />
+      </Box>
+
+      <Container maxWidth="xs" className={styles.container}>
+        <Link
+          href="/"
+          underline="none"
+          className={styles.logoLink}
+          aria-label="Ir al inicio de ADLocal"
+        >
           <Box
             component="img"
-            src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
-            alt="AdLocal"
-            sx={{ width: { xs: 140, sm: 180 }, borderRadius: 3 }}
+            src={LOGO_URL}
+            alt="ADLocal"
+            className={styles.logo}
           />
-        </Box>
+        </Link>
 
-        {/* Card */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: { xs: 3, sm: 4 },
-            borderRadius: 4,
-            bgcolor: "rgba(255,255,255,0.9)",
-            backdropFilter: "blur(14px)",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
-          }}
-        >
-          {/* Header */}
-          <Typography fontSize={24} fontWeight={800} mb={0.5}>
-            {type === "admin" ? "Acceso administrador" : "Iniciar sesión"}
-          </Typography>
-
-          <Typography fontSize={14} color="text.secondary" mb={3}>
-            {type === "admin" ? (
-              "Accede a tu cuenta para continuar"
-            ) : (
-              <>
-                Nuevo Usuario?{" "}
-                <Link
-                  component="button"
-                  onClick={() => navigate("/registro")}
-                  sx={{
-                    color: "#007AFF",
-                    fontWeight: 600,
-                    textDecoration: "none",
-                    "&:hover": { textDecoration: "underline" },
-                  }}
-                >
-                  Crear cuenta
-                </Link>
-              </>
-            )}
-          </Typography>
-
-          {/* Form */}
-          <LoginForm onSubmit={handleLogin} />
-
-          {/* Forgot password */}
-          <Box mt={1.5}>
-            <Link
-              component="button"
-              onClick={() => navigate("/recuperar-contrasena")}
-              sx={{
-                fontSize: 14,
-                color: "#007AFF",
-                fontWeight: 500,
-                textDecoration: "none",
-                "&:hover": { textDecoration: "underline" },
-              }}
+        <Paper elevation={0} className={styles.loginCard}>
+          <Box className={styles.loginHeader}>
+            <Box
+              className={[
+                styles.headerIcon,
+                isAdmin ? styles.adminHeaderIcon : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
-              ¿Olvidaste tu contraseña?
-            </Link>
+              <MaterialSymbol
+                icon={isAdmin ? "admin_panel_settings" : "account_circle"}
+                size="large"
+                filled
+              />
+            </Box>
+
+            <Box className={styles.headerContent}>
+              <Typography
+                component="span"
+                className={[
+                  styles.loginType,
+                  isAdmin ? styles.adminLoginType : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {isAdmin ? "Portal administrativo" : "Cuenta ADLocal"}
+              </Typography>
+
+              <Typography component="h1" className={styles.title}>
+                {isAdmin ? "Acceso administrador" : "Iniciar sesión"}
+              </Typography>
+
+              <Typography component="p" className={styles.description}>
+                {isAdmin
+                  ? "Ingresa tus credenciales para administrar la plataforma."
+                  : "Accede a tu cuenta para administrar tu negocio y sus servicios."}
+              </Typography>
+            </Box>
           </Box>
 
-          <Divider sx={{ my: 3, fontSize: 13, color: "text.disabled" }}>
-            o
-          </Divider>
+          {!isAdmin && (
+            <Box className={styles.registerMessage}>
+              <Typography component="span" className={styles.registerText}>
+                ¿Todavía no tienes una cuenta?
+              </Typography>
 
-          {/* Planes / Crear admin */}
-          <Button
-            fullWidth
-            size="large"
-            onClick={() =>
-              type === "admin" ? navigate("/crear-admin") : navigate("/planes")
-            }
-            sx={{
-              borderRadius: 999,
-              textTransform: "none",
-              fontWeight: 600,
-              borderColor: "#007AFF",
-              color: "#007AFF",
-              "&:hover": { bgcolor: "rgba(0,122,255,0.08)" },
-            }}
-            variant="outlined"
-          >
-            {type === "admin"
-              ? "Crear administrador"
-              : "Ver planes disponibles"}
-          </Button>
-
-          {/* Terms */}
-          {type === "user" && (
-            <Typography
-              fontSize={12}
-              color="text.disabled"
-              align="center"
-              mt={3}
-            >
-              Al registrarte, aceptas nuestros{" "}
-              <Link href="#" sx={{ color: "#007AFF", textDecoration: "none" }}>
-                Términos y Condiciones
-              </Link>{" "}
-              and{" "}
-              <Link href="#" sx={{ color: "#007AFF", textDecoration: "none" }}>
-                Política de Privacidad
+              <Link
+                component="button"
+                type="button"
+                underline="none"
+                className={styles.textButton}
+                onClick={() => navigate("/registro")}
+              >
+                Crear cuenta
               </Link>
-            </Typography>
+            </Box>
+          )}
+
+          <Box className={styles.formContainer}>
+            <LoginForm onSubmit={handleLogin} />
+          </Box>
+
+          <Link
+            component="button"
+            type="button"
+            underline="none"
+            className={styles.forgotPasswordButton}
+            onClick={() => navigate("/recuperar-contrasena")}
+          >
+            <MaterialSymbol icon="lock_reset" size="small" />
+
+            <span>¿Olvidaste tu contraseña?</span>
+          </Link>
+
+          {!isAdmin && (
+            <>
+              <Divider className={styles.divider}>Información legal</Divider>
+
+              <Typography component="p" className={styles.terms}>
+                Al iniciar sesión o crear una cuenta, aceptas nuestros{" "}
+                <Link
+                  href="/terminos"
+                  underline="none"
+                  className={styles.termsLink}
+                >
+                  Términos y Condiciones
+                </Link>{" "}
+                y la{" "}
+                <Link
+                  href="/privacidad"
+                  underline="none"
+                  className={styles.termsLink}
+                >
+                  Política de Privacidad
+                </Link>
+                .
+              </Typography>
+            </>
           )}
         </Paper>
+
+        <Box className={styles.pageFooter}>
+          <MaterialSymbol icon="verified_user" size="small" />
+
+          <Typography component="span" className={styles.pageFooterText}>
+            Tu información está protegida por ADLocal
+          </Typography>
+        </Box>
       </Container>
     </Box>
   );

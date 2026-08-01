@@ -4,7 +4,7 @@ import type { PagedResponse } from "./productosServiciosApi";
 import type { ProfileUser } from "./userProfileApi";
 
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/comercios`,
+  baseURL: `https://adlocalapi.onrender.com/api/comercios`,
   headers: {
     "Content-Type": "application/json",
   },

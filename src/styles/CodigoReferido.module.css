@@ -1,0 +1,519 @@
+.container {
+  --referral-primary: #007aff;
+  --referral-primary-light: #5ac8fa;
+  --referral-success: #34c759;
+  --referral-success-dark: #28a745;
+  --referral-text: #1c1c1e;
+  --referral-muted: #74777f;
+  --referral-border: rgba(15, 23, 42, 0.07);
+
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 16px;
+}
+
+/* Tarjetas */
+
+.card {
+  width: 100%;
+  min-width: 0;
+  padding: 24px;
+
+  display: flex;
+  flex-direction: column;
+
+  background-color: rgba(255, 255, 255, 0.93) !important;
+
+  border: 1px solid var(--referral-border);
+
+  border-radius: 22px !important;
+
+  box-shadow:
+    0 5px 18px rgba(15, 23, 42, 0.065),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+
+  backdrop-filter: blur(16px) saturate(160%);
+
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+/* Encabezado */
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cardHeaderIcon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--referral-primary);
+
+  background-color: rgba(0, 122, 255, 0.09);
+
+  border: 1px solid rgba(0, 122, 255, 0.08);
+
+  border-radius: 12px;
+}
+
+.achievedHeaderIcon {
+  color: var(--referral-success);
+
+  background-color: rgba(52, 199, 89, 0.1);
+
+  border-color: rgba(52, 199, 89, 0.12);
+}
+
+.cardTitle {
+  margin: 0 !important;
+
+  color: #8b8e96;
+
+  font-size: 0.7rem !important;
+  font-weight: 750 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.065em !important;
+  text-transform: uppercase;
+}
+
+/* Código */
+
+.codeRow {
+  min-width: 0;
+  margin-top: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.referralCode {
+  min-width: 0;
+
+  display: block;
+  overflow: hidden;
+
+  color: var(--referral-text);
+
+  font-family:
+    "SFMono-Regular", Consolas, "Liberation Mono", monospace !important;
+
+  font-size: 1.72rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.13em !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copyButton {
+  width: 43px;
+  height: 43px;
+
+  flex-shrink: 0;
+
+  color: #73777f !important;
+
+  background-color: rgba(15, 23, 42, 0.05) !important;
+
+  border: 1px solid rgba(15, 23, 42, 0.075) !important;
+
+  border-radius: 50% !important;
+
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease !important;
+}
+
+.copyButton:hover {
+  color: var(--referral-primary) !important;
+
+  background-color: rgba(0, 122, 255, 0.08) !important;
+
+  border-color: rgba(0, 122, 255, 0.17) !important;
+
+  transform: scale(1.06);
+}
+
+.copyButtonSuccess {
+  color: var(--referral-success) !important;
+
+  background-color: rgba(52, 199, 89, 0.11) !important;
+
+  border-color: rgba(52, 199, 89, 0.22) !important;
+}
+
+.copyButtonSuccess:hover {
+  color: var(--referral-success-dark) !important;
+
+  background-color: rgba(52, 199, 89, 0.17) !important;
+
+  border-color: rgba(52, 199, 89, 0.28) !important;
+}
+
+.copyButton:focus-visible {
+  outline: 3px solid rgba(0, 122, 255, 0.2);
+
+  outline-offset: 2px;
+}
+
+/* Contador */
+
+.usageBadge {
+  width: fit-content;
+  margin-top: 18px;
+  padding: 7px 12px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #686b72;
+
+  background-color: rgba(15, 23, 42, 0.05);
+
+  border: 1px solid rgba(15, 23, 42, 0.045);
+
+  border-radius: 999px;
+}
+
+.usageText {
+  color: inherit;
+
+  font-size: 0.73rem !important;
+  font-weight: 650 !important;
+  line-height: 1.3 !important;
+}
+
+/* Descripción de recompensa */
+
+.rewardDescription {
+  margin: 17px 0 0 !important;
+
+  color: var(--referral-muted);
+
+  font-size: 0.8rem !important;
+  line-height: 1.65 !important;
+}
+
+.emphasis {
+  color: var(--referral-text);
+
+  font-weight: 750;
+}
+
+.rewardEmphasis {
+  color: var(--referral-primary);
+
+  font-weight: 800;
+}
+
+.rewardAchieved {
+  color: var(--referral-success);
+}
+
+/* Progreso */
+
+.progressSection {
+  margin-top: 18px;
+}
+
+.progress {
+  height: 8px !important;
+
+  overflow: hidden;
+
+  background-color: rgba(15, 23, 42, 0.075) !important;
+
+  border-radius: 999px !important;
+}
+
+.progress :global(.MuiLinearProgress-bar) {
+  background: linear-gradient(
+    90deg,
+    var(--referral-primary),
+    var(--referral-primary-light)
+  ) !important;
+
+  border-radius: 999px;
+
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.28);
+
+  transition: transform 500ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.progressAchieved :global(.MuiLinearProgress-bar) {
+  background: linear-gradient(
+    90deg,
+    var(--referral-success),
+    #30d158
+  ) !important;
+
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.36);
+}
+
+.progressInformation {
+  margin-top: 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.progressCount {
+  color: #70737a;
+
+  font-size: 0.72rem !important;
+  font-weight: 750 !important;
+  line-height: 1.3 !important;
+}
+
+.progressCountAchieved {
+  color: var(--referral-success);
+}
+
+.progressStatus {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  color: #989ba2;
+}
+
+.progressStatusAchieved {
+  color: var(--referral-success);
+}
+
+.progressStatusText {
+  color: inherit;
+
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+}
+
+/* Botón reclamar */
+
+.claimButton {
+  min-height: 48px;
+  margin-top: 20px !important;
+
+  color: #ffffff !important;
+
+  background: linear-gradient(
+    135deg,
+    var(--referral-success),
+    var(--referral-success-dark)
+  ) !important;
+
+  border-radius: 999px !important;
+
+  font-size: 0.84rem !important;
+  font-weight: 750 !important;
+  text-transform: none !important;
+
+  box-shadow: 0 7px 20px rgba(52, 199, 89, 0.3) !important;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.claimButton:hover {
+  background: linear-gradient(135deg, #3bd064, #24993f) !important;
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 11px 26px rgba(52, 199, 89, 0.42) !important;
+}
+
+.claimButton:active {
+  transform: scale(0.985);
+}
+
+.claimButton:global(.Mui-disabled) {
+  color: rgba(255, 255, 255, 0.78) !important;
+
+  background: linear-gradient(135deg, #89c997, #75b883) !important;
+
+  box-shadow: none !important;
+}
+
+.buttonProgress {
+  color: currentColor !important;
+}
+
+/* Beneficio reclamado */
+
+.redeemedMessage {
+  margin-top: 19px;
+  padding: 12px 14px;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  color: #247f3a;
+
+  background-color: rgba(52, 199, 89, 0.075);
+
+  border: 1px solid rgba(52, 199, 89, 0.15);
+
+  border-radius: 14px;
+}
+
+.redeemedIcon {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--referral-success);
+
+  background-color: rgba(52, 199, 89, 0.12);
+
+  border-radius: 10px;
+}
+
+.redeemedTitle {
+  display: block;
+
+  color: inherit;
+
+  font-size: 0.76rem !important;
+  font-weight: 750 !important;
+  line-height: 1.35 !important;
+}
+
+.redeemedDescription {
+  margin: 2px 0 0 !important;
+
+  color: #5d8065;
+
+  font-size: 0.69rem !important;
+  line-height: 1.45 !important;
+}
+
+/* Tablet */
+
+@media (max-width: 899px) {
+  .container {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .card {
+    padding: 22px;
+  }
+}
+
+/* Móvil */
+
+@media (max-width: 599px) {
+  .container {
+    gap: 13px;
+  }
+
+  .card {
+    padding: 20px 17px;
+
+    border-radius: 19px !important;
+  }
+
+  .cardHeaderIcon {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 11px;
+  }
+
+  .codeRow {
+    margin-top: 17px;
+    gap: 10px;
+  }
+
+  .referralCode {
+    font-size: 1.32rem !important;
+    letter-spacing: 0.09em !important;
+  }
+
+  .copyButton {
+    width: 41px;
+    height: 41px;
+  }
+
+  .rewardDescription {
+    font-size: 0.76rem !important;
+  }
+
+  .progressInformation {
+    align-items: flex-start;
+  }
+
+  .progressStatus {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .claimButton {
+    min-height: 47px;
+  }
+}
+
+/* Móvil muy pequeño */
+
+@media (max-width: 359px) {
+  .referralCode {
+    font-size: 1.1rem !important;
+  }
+
+  .progressInformation {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .progressStatus {
+    justify-content: flex-start;
+    text-align: left;
+  }
+}
+
+/* Dispositivos sin hover */
+
+@media (hover: none) {
+  .copyButton:hover,
+  .claimButton:hover {
+    transform: none;
+  }
+}
+
+/* Animaciones reducidas */
+
+@media (prefers-reduced-motion: reduce) {
+  .copyButton,
+  .claimButton,
+  .progress :global(.MuiLinearProgress-bar) {
+    transition: none !important;
+  }
+
+  .copyButton:hover,
+  .claimButton:hover {
+    transform: none;
+  }
+}

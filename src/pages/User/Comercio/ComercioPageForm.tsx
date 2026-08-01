@@ -1,15 +1,3 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { useComercio } from "../../../hooks/useComercio";
-import { useEffect, useState } from "react";
-import type {
-  ComercioDto,
-  HorarioComercioDto,
-} from "../../../services/comercioApi";
-import type { JwtClaims } from "../../../services/auth.api";
-import { jwtDecode } from "jwt-decode";
-import L from "leaflet";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import { DIAS_SEMANA } from "../../../utils/constantes";
 import {
   Avatar,
   Box,
@@ -23,197 +11,574 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { SelectEstadoAutocomplete } from "../../../components/Locations/SelectEstadoAutocomplete";
-import { SelectMunicipioAutocomplete } from "../../../components/Locations/SelectMunicipioAutocomplete";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+
+import L from "leaflet";
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+
 import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import ButtonBack from "../../../components/ButtonBack";
 import Swal from "sweetalert2";
+
+import { useComercio } from "../../../hooks/useComercio";
+
+import ButtonBack from "../../../components/ButtonBack";
+import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol";
+import { SelectEstadoAutocomplete } from "../../../components/Locations/SelectEstadoAutocomplete";
+import { SelectMunicipioAutocomplete } from "../../../components/Locations/SelectMunicipioAutocomplete";
 import { SelectTipoComercioAutocomplete } from "../../../components/TipoComercio/SelectTipoComercioAutocomplete";
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+import type {
+  ComercioDto,
+  HorarioComercioDto,
+} from "../../../services/comercioApi";
+import type { JwtClaims } from "../../../services/auth.api";
+
+import { DIAS_SEMANA } from "../../../utils/constantes";
+
+import styles from "../../../styles/MiComercioPage.module.css";
+
+delete (
+  L.Icon.Default.prototype as {
+    _getIconUrl?: unknown;
+  }
+)._getIconUrl;
+
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-const normalizarHorarios = (horarios: HorarioComercioDto[] = []) =>
-  DIAS_SEMANA.map((d) => {
-    const existente = horarios.find((h) => h.dia === d.dia);
+const DEFAULT_LATITUDE = 19.4326;
+const DEFAULT_LONGITUDE = -99.1332;
+
+type EditableTextField =
+  | "nombre"
+  | "direccion"
+  | "telefono"
+  | "email"
+  | "descripcion"
+  | "colorPrimario"
+  | "colorSecundario";
+
+interface TabPanelProps {
+  value: number;
+  index: number;
+  labelledBy: string;
+  children: ReactNode;
+}
+
+interface SectionHeaderProps {
+  icon: string;
+  title: string;
+  description?: string;
+}
+
+interface LocationPickerProps {
+  latitude: number;
+  longitude: number;
+  onLocationChange: (latitude: number, longitude: number) => void;
+}
+
+interface MapViewportProps {
+  latitude: number;
+  longitude: number;
+}
+
+const decodeClaims = (token: string | null): JwtClaims | null => {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    return jwtDecode<JwtClaims>(token);
+  } catch (error) {
+    console.error("No fue posible decodificar el JWT:", error);
+
+    return null;
+  }
+};
+
+const getPositiveInteger = (value: unknown, fallback = 0): number => {
+  const parsedValue = Number(value);
+
+  if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+    return fallback;
+  }
+
+  return Math.floor(parsedValue);
+};
+
+const normalizarHorarios = (
+  horarios: HorarioComercioDto[] = [],
+): HorarioComercioDto[] => {
+  return DIAS_SEMANA.map((day) => {
+    const existingSchedule = horarios.find(
+      (schedule) => schedule.dia === day.dia,
+    );
+
     return (
-      existente ?? {
-        dia: d.dia,
+      existingSchedule ?? {
+        dia: day.dia,
         abierto: false,
         horaApertura: undefined,
         horaCierre: undefined,
       }
     );
   });
+};
 
-const TabPanel = ({
-  value,
-  index,
-  children,
-}: {
-  value: number;
-  index: number;
-  children: React.ReactNode;
-}) =>
-  value === index ? (
+const createInitialForm = (id = 0): ComercioDto => ({
+  id,
+  nombre: "",
+  direccion: "",
+  telefono: "",
+  email: "",
+  descripcion: "",
+  activo: false,
+  lat: 0,
+  lng: 0,
+  logoBase64: "",
+  imagenes: [],
+  colorPrimario: "#007AFF",
+  colorSecundario: "#FF9500",
+  horarios: normalizarHorarios(),
+  estadoId: 0,
+  municipioId: 0,
+  estadoNombre: "",
+  municipioNombre: "",
+  promedioCalificacion: 0,
+  tipoComercioId: 0,
+  tipoComercio: "",
+});
+
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+
+      reject(new Error("No fue posible procesar la imagen."));
+    };
+
+    reader.onerror = () => {
+      reject(new Error("Ocurrió un error al leer la imagen."));
+    };
+
+    reader.readAsDataURL(file);
+  });
+};
+
+const isImageFile = (file: File) => {
+  return file.type.startsWith("image/");
+};
+
+const TabPanel = ({ value, index, labelledBy, children }: TabPanelProps) => {
+  const isActive = value === index;
+
+  return (
     <Box
-      sx={{
-        width: "100%",
-        mt: { xs: 1.5, sm: 2.5, md: 3 },
-        px: { xs: 0, sm: 1, md: 2 },
-        boxSizing: "border-box",
-      }}
+      role="tabpanel"
+      hidden={!isActive}
+      id={`commerce-tabpanel-${index}`}
+      aria-labelledby={labelledBy}
+      className={styles.tabPanel}
     >
-      {children}
+      {isActive && children}
     </Box>
-  ) : null;
+  );
+};
+
+const SectionHeader = ({ icon, title, description }: SectionHeaderProps) => {
+  return (
+    <Box className={styles.sectionHeader}>
+      <Box className={styles.sectionIcon}>
+        <MaterialSymbol icon={icon} size="medium" />
+      </Box>
+
+      <Box className={styles.sectionHeaderText}>
+        <Typography component="h2" className={styles.sectionTitle}>
+          {title}
+        </Typography>
+
+        {description && (
+          <Typography component="p" className={styles.sectionDescription}>
+            {description}
+          </Typography>
+        )}
+      </Box>
+    </Box>
+  );
+};
+
+const MapViewport = ({ latitude, longitude }: MapViewportProps) => {
+  const map = useMap();
+
+  useEffect(() => {
+    const centerLatitude = latitude || DEFAULT_LATITUDE;
+
+    const centerLongitude = longitude || DEFAULT_LONGITUDE;
+
+    map.setView([centerLatitude, centerLongitude], 15);
+  }, [latitude, longitude, map]);
+
+  return null;
+};
+
+const LocationPicker = ({
+  latitude,
+  longitude,
+  onLocationChange,
+}: LocationPickerProps) => {
+  useMapEvents({
+    click(event) {
+      onLocationChange(event.latlng.lat, event.latlng.lng);
+    },
+  });
+
+  const hasPosition =
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude !== 0 &&
+    longitude !== 0;
+
+  return hasPosition ? <Marker position={[latitude, longitude]} /> : null;
+};
 
 export function ComercioPageForm() {
-  const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims | null = dataJwt
-    ? jwtDecode<JwtClaims>(dataJwt)
-    : null;
-  const { id } = useParams();
+  const { id } = useParams<{
+    id: string;
+  }>();
+
+  const navigate = useNavigate();
+
   const { comercioPage, guardarPage, cargarPorId, loading, totalByUser } =
     useComercio();
 
-  const [form, setForm] = useState<ComercioDto>({
-    id: id == undefined ? 0 : Number(id),
-    nombre: "",
-    direccion: "",
-    telefono: "",
-    email: "",
-    descripcion: "",
-    activo: false,
-    lat: 0,
-    lng: 0,
-    logoBase64: "",
-    imagenes: [],
-    colorPrimario: "",
-    colorSecundario: "",
-    horarios: normalizarHorarios(comercioPage?.horarios),
-    estadoId: 0,
-    municipioId: 0,
-    estadoNombre: "",
-    municipioNombre: "",
-    promedioCalificacion: 0,
-    tipoComercioId: 0,
-    tipoComercio: "",
-  });
+  const claims = useMemo(() => decodeClaims(localStorage.getItem("token")), []);
+
+  const comercioId = useMemo(() => {
+    if (!id) {
+      return 0;
+    }
+
+    const parsedId = Number(id);
+
+    if (!Number.isInteger(parsedId) || parsedId <= 0) {
+      return null;
+    }
+
+    return parsedId;
+  }, [id]);
+
+  const isEditMode = comercioId !== null && comercioId > 0;
+
+  const maxFotos = useMemo(
+    () => getPositiveInteger(claims?.maxFotos, 0),
+    [claims?.maxFotos],
+  );
+
+  const maxNegocios = useMemo(
+    () => getPositiveInteger(claims?.maxNegocios, 0),
+    [claims?.maxNegocios],
+  );
+
+  const [form, setForm] = useState<ComercioDto>(() =>
+    createInitialForm(comercioId ?? 0),
+  );
 
   const [tab, setTab] = useState(0);
-  const [preview, setPreview] = useState<string>("");
+
+  const [preview, setPreview] = useState("");
+
   const [galeria, setGaleria] = useState<string[]>([]);
-  const navigate = useNavigate();
+
+  const limitAlertShownRef = useRef(false);
+
+  const canUploadMoreImages = maxFotos > 0 && galeria.length < maxFotos;
+
+  const remainingImages = Math.max(maxFotos - galeria.length, 0);
+
+  const canCustomizeColors = claims?.planTipo !== "FREE";
 
   const handleChange =
-    (field: keyof ComercioDto) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      let value = e.target.value;
+    (field: EditableTextField) => (event: ChangeEvent<HTMLInputElement>) => {
+      let value = event.target.value;
+
       if (field === "telefono") {
         value = value.replace(/\D/g, "").slice(0, 10);
       }
-      setForm({ ...form, [field]: value });
+
+      setForm((previousForm) => ({
+        ...previousForm,
+        [field]: value,
+      }));
     };
 
-  const updateHorario = (dia: number, changes: Partial<HorarioComercioDto>) =>
-    setForm((prev) => ({
-      ...prev,
-      horarios: prev.horarios.map((h) =>
-        h.dia === dia ? { ...h, ...changes } : h,
-      ),
-    }));
+  const updateHorario = useCallback(
+    (dia: number, changes: Partial<HorarioComercioDto>) => {
+      setForm((previousForm) => ({
+        ...previousForm,
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-      setForm({ ...form, logoBase64: reader.result as string });
-    };
-    reader.readAsDataURL(file);
-  };
+        horarios: previousForm.horarios.map((schedule) =>
+          schedule.dia === dia
+            ? {
+                ...schedule,
+                ...changes,
+              }
+            : schedule,
+        ),
+      }));
+    },
+    [],
+  );
 
-  const handleGaleriaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    if (!files.length) return;
-    const disponibles = Number(claims?.maxFotos) - galeria.length;
-    files.slice(0, disponibles).forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () =>
-        setGaleria((prev) => [...prev, reader.result as string]);
-      reader.readAsDataURL(file);
-    });
-    e.target.value = "";
-  };
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
 
-  const handleReplaceImage = (
-    index: number,
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const copia = [...galeria];
-      copia[index] = reader.result as string;
-      setGaleria(copia);
-    };
-    reader.readAsDataURL(file);
-  };
+    event.target.value = "";
 
-  const LocationPicker = () => {
-    useMapEvents({
-      click(e) {
-        setForm({ ...form, lat: e.latlng.lat, lng: e.latlng.lng });
-      },
-    });
-    return form.lat && form.lng ? (
-      <Marker position={[form.lat, form.lng]} />
-    ) : null;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    guardarPage({ ...form, imagenes: galeria });
-  };
-
-  useEffect(() => {
-    if (id) {
-      cargarPorId(Number(id));
+    if (!file) {
       return;
     }
-    const max = Number(claims?.maxNegocios);
-    const restantes = max - totalByUser;
-    const limiteAlcanzado = restantes <= 0;
 
-    if (limiteAlcanzado) {
-      Swal.fire({
+    if (!isImageFile(file)) {
+      await Swal.fire({
         icon: "warning",
-        title: "Límite alcanzado",
-        text: "Ya alcanzaste el máximo de negocios permitidos para crear según tu plan.",
-        confirmButtonText: "Volver",
-        confirmButtonColor: "#0d6efd",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      }).then(() => {
-        navigate("/app/comercio");
+        title: "Archivo no válido",
+        text: "Selecciona un archivo de imagen.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#007AFF",
       });
 
       return;
     }
-  }, [id]);
+
+    try {
+      const imageBase64 = await fileToBase64(file);
+
+      setPreview(imageBase64);
+
+      setForm((previousForm) => ({
+        ...previousForm,
+        logoBase64: imageBase64,
+      }));
+    } catch (error) {
+      console.error("Error al procesar el logo:", error);
+
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo cargar el logo",
+        text: "Intenta seleccionar otra imagen.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#FF3B30",
+      });
+    }
+  };
+
+  const handleGaleriaChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files ?? []);
+
+    event.target.value = "";
+
+    if (selectedFiles.length === 0 || remainingImages <= 0) {
+      return;
+    }
+
+    const validFiles = selectedFiles
+      .filter(isImageFile)
+      .slice(0, remainingImages);
+
+    if (validFiles.length === 0) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Archivos no válidos",
+        text: "Selecciona uno o más archivos de imagen.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#007AFF",
+      });
+
+      return;
+    }
+
+    try {
+      const imagesBase64 = await Promise.all(validFiles.map(fileToBase64));
+
+      setGaleria((currentGallery) => [...currentGallery, ...imagesBase64]);
+    } catch (error) {
+      console.error("Error al cargar la galería:", error);
+
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudieron cargar las imágenes",
+        text: "Revisa los archivos seleccionados e inténtalo nuevamente.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#FF3B30",
+      });
+    }
+  };
+
+  const handleReplaceImage = async (
+    index: number,
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    if (!isImageFile(file)) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Archivo no válido",
+        text: "Selecciona un archivo de imagen.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#007AFF",
+      });
+
+      return;
+    }
+
+    try {
+      const imageBase64 = await fileToBase64(file);
+
+      setGaleria((currentGallery) => {
+        const updatedGallery = [...currentGallery];
+
+        updatedGallery[index] = imageBase64;
+
+        return updatedGallery;
+      });
+    } catch (error) {
+      console.error("Error al reemplazar la imagen:", error);
+
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo reemplazar la imagen",
+        text: "Intenta seleccionar otra imagen.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#FF3B30",
+      });
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setGaleria((currentGallery) =>
+      currentGallery.filter((_, imageIndex) => imageIndex !== index),
+    );
+  };
+
+  const handleLocationChange = useCallback(
+    (latitude: number, longitude: number) => {
+      setForm((previousForm) => ({
+        ...previousForm,
+        lat: latitude,
+        lng: longitude,
+      }));
+    },
+    [],
+  );
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (loading) {
+      return;
+    }
+
+    await guardarPage({
+      ...form,
+      imagenes: galeria,
+    });
+  };
+
+  const handleCancel = () => {
+    navigate("/app/comercio");
+  };
 
   useEffect(() => {
-    if (!comercioPage) return;
+    if (comercioId === null) {
+      void Swal.fire({
+        icon: "error",
+        title: "Comercio no válido",
+        text: "El identificador del comercio no es válido.",
+        confirmButtonText: "Volver",
+        confirmButtonColor: "#007AFF",
+        allowOutsideClick: false,
+      }).then(() => {
+        navigate("/app/comercio", {
+          replace: true,
+        });
+      });
 
+      return;
+    }
+
+    if (isEditMode) {
+      void cargarPorId(comercioId);
+      return;
+    }
+
+    if (
+      maxNegocios <= 0 ||
+      totalByUser < maxNegocios ||
+      limitAlertShownRef.current
+    ) {
+      return;
+    }
+
+    limitAlertShownRef.current = true;
+
+    void Swal.fire({
+      icon: "warning",
+      title: "Límite alcanzado",
+      text: "Ya alcanzaste el máximo de negocios permitidos por tu plan.",
+      confirmButtonText: "Volver",
+      confirmButtonColor: "#007AFF",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+    }).then(() => {
+      navigate("/app/comercio", {
+        replace: true,
+      });
+    });
+  }, [comercioId, isEditMode, maxNegocios, totalByUser, cargarPorId, navigate]);
+
+  useEffect(() => {
+    if (!isEditMode || !comercioPage || comercioPage.id === 0) {
+      return;
+    }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm({
       id: comercioPage.id ?? 0,
       nombre: comercioPage.nombre ?? "",
@@ -226,8 +591,8 @@ export function ComercioPageForm() {
       lng: comercioPage.lng ?? 0,
       logoBase64: comercioPage.logoBase64 ?? "",
       imagenes: comercioPage.imagenes ?? [],
-      colorPrimario: comercioPage.colorPrimario ?? "",
-      colorSecundario: comercioPage.colorSecundario ?? "",
+      colorPrimario: comercioPage.colorPrimario || "#007AFF",
+      colorSecundario: comercioPage.colorSecundario || "#FF9500",
       horarios: normalizarHorarios(comercioPage.horarios ?? []),
       estadoId: comercioPage.estadoId ?? 0,
       municipioId: comercioPage.municipioId ?? 0,
@@ -235,529 +600,606 @@ export function ComercioPageForm() {
       municipioNombre: comercioPage.municipioNombre ?? "",
       promedioCalificacion: comercioPage.promedioCalificacion ?? 0,
       tipoComercioId: comercioPage.tipoComercioId ?? 0,
-      tipoComercio: "",
+      tipoComercio: comercioPage.tipoComercio ?? "",
     });
-    setGaleria(comercioPage.imagenes);
-    setPreview(comercioPage.logoBase64);
-  }, [comercioPage]);
 
-  const fieldSx = {
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "12px",
-      bgcolor: "#fff",
-      "& fieldset": { borderColor: "#E0E0E0" },
-      "&:hover fieldset": { borderColor: "#BDBDBD" },
-      "&.Mui-focused fieldset": { borderColor: "#007AFF" },
-    },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#007AFF" },
-  };
+    setGaleria(comercioPage.imagenes ?? []);
 
-  const cardSx = {
-    bgcolor: "rgba(255,255,255,0.92)",
-    backdropFilter: "blur(14px)",
-    borderRadius: 4,
-    border: "1px solid rgba(0,0,0,0.06)",
-    boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-    p: { xs: 2.5, sm: 3 },
-  };
+    setPreview(comercioPage.logoBase64 ?? "");
+  }, [comercioPage, isEditMode]);
+
+  const mapLatitude = Number(form.lat) || DEFAULT_LATITUDE;
+
+  const mapLongitude = Number(form.lng) || DEFAULT_LONGITUDE;
 
   return (
-    <>
-      <div className="pb-3">
+    <Box component="main" className={styles.page}>
+      <Box className={styles.backContainer}>
         <ButtonBack route="/app/comercio" />
-      </div>
-      <Box
-        sx={{
-          width: "100%",
-          px: { xs: 1, sm: 2, md: 3 },
-          mt: { xs: 2, sm: 3, md: 4 },
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <Box sx={{ width: "100%", maxWidth: { xs: "100%", md: 900 } }}>
-          {/* Tabs pill */}
-          <Box
-            sx={{
-              overflowX: "auto",
-              "&::-webkit-scrollbar": { display: "none" },
-              scrollbarWidth: "none",
-              mb: { xs: 2.5, sm: 3 },
+      </Box>
+
+      <Box className={styles.formContainer}>
+        <Box className={styles.tabsScroller}>
+          <Tabs
+            value={tab}
+            onChange={(_, newValue: number) => setTab(newValue)}
+            variant="scrollable"
+            scrollButtons={false}
+            aria-label="Secciones del formulario del comercio"
+            className={styles.tabs}
+            slotProps={{
+              indicator: {
+                className: styles.hiddenIndicator,
+              },
             }}
           >
-            <Tabs
-              value={tab}
-              onChange={(_, v) => setTab(v)}
-              variant="scrollable"
-              scrollButtons={false}
-              TabIndicatorProps={{ style: { display: "none" } }}
-              sx={{
-                minHeight: { xs: 40, sm: 46 },
-                bgcolor: "#F2F2F7",
-                borderRadius: 999,
-                p: 0.7,
-                width: "fit-content",
-                mx: "auto",
-                ".MuiTabs-flexContainer": { gap: 0.5 },
-                ".MuiTab-root": {
-                  textTransform: "none",
-                  fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                  fontWeight: 600,
-                  minHeight: { xs: 34, sm: 38 },
-                  px: { xs: 2, sm: 2.5 },
-                  borderRadius: 999,
-                  color: "text.secondary",
-                  transition: "all 0.22s ease",
-                  "&.Mui-selected": {
-                    color: "#fff",
-                    bgcolor: "#1c1c1e",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.18)",
-                  },
-                },
-              }}
-            >
-              <Tab label="⚙️ General" />
-              <Tab label="🖼️ Galería" />
-              <Tab label="🕐 Horarios" />
-              <Tab label="📍 Ubicación" />
-            </Tabs>
-          </Box>
+            <Tab
+              id="commerce-tab-general"
+              aria-controls="commerce-tabpanel-0"
+              icon={<MaterialSymbol icon="settings" size="small" />}
+              iconPosition="start"
+              label="General"
+              className={styles.tab}
+            />
 
-          <form onSubmit={handleSubmit}>
-            {/* ================= GENERAL ================= */}
-            <TabPanel value={tab} index={0}>
-              {/* Info básica */}
-              <Box sx={cardSx}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    mb: 3,
-                  }}
+            <Tab
+              id="commerce-tab-gallery"
+              aria-controls="commerce-tabpanel-1"
+              icon={<MaterialSymbol icon="photo_library" size="small" />}
+              iconPosition="start"
+              label="Galería"
+              className={styles.tab}
+            />
+
+            <Tab
+              id="commerce-tab-schedules"
+              aria-controls="commerce-tabpanel-2"
+              icon={<MaterialSymbol icon="schedule" size="small" />}
+              iconPosition="start"
+              label="Horarios"
+              className={styles.tab}
+            />
+
+            <Tab
+              id="commerce-tab-location"
+              aria-controls="commerce-tabpanel-3"
+              icon={<MaterialSymbol icon="location_on" size="small" />}
+              iconPosition="start"
+              label="Ubicación"
+              className={styles.tab}
+            />
+          </Tabs>
+        </Box>
+
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <TabPanel value={tab} index={0} labelledBy="commerce-tab-general">
+            <Box className={styles.sectionCard}>
+              <SectionHeader
+                icon="storefront"
+                title="Información general"
+                description="Configura los datos principales que verán tus clientes."
+              />
+
+              <Box className={styles.logoSection}>
+                <Avatar
+                  src={preview || undefined}
+                  alt={
+                    preview
+                      ? `Logotipo de ${form.nombre || "comercio"}`
+                      : "Sin logotipo"
+                  }
+                  className={styles.logoPreview}
                 >
-                  <Avatar
-                    src={preview ?? undefined}
-                    sx={{
-                      width: 110,
-                      height: 110,
-                      border: "3px solid rgba(255,255,255,0.9)",
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.14)",
-                    }}
-                  />
-                  <Button
-                    component="label"
-                    size="small"
-                    sx={{
-                      mt: 1.5,
-                      borderRadius: 999,
-                      textTransform: "none",
-                      fontWeight: 600,
-                      fontSize: "0.8rem",
-                      border: "1px solid rgba(0,0,0,0.15)",
-                      color: "text.secondary",
-                      "&:hover": { bgcolor: "rgba(0,0,0,0.04)" },
-                    }}
-                  >
-                    Subir logo
-                    <input
-                      hidden
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
-                  </Button>
-                </Box>
+                  {!preview && (
+                    <MaterialSymbol icon="storefront" size="large" />
+                  )}
+                </Avatar>
 
-                <Stack spacing={2}>
-                  {[
-                    { label: "Nombre", key: "nombre" as const },
-                    { label: "Dirección", key: "direccion" as const },
-                    { label: "Teléfono", key: "telefono" as const },
-                    { label: "Email", key: "email" as const },
-                  ].map(({ label, key }) => (
-                    <TextField
-                      key={key}
-                      label={label}
-                      value={(form as any)[key] ?? ""}
-                      onChange={handleChange(key as keyof ComercioDto)}
-                      fullWidth
-                      sx={fieldSx}
-                    />
-                  ))}
-                  <TextField
-                    label="Descripción"
-                    value={form.descripcion ?? ""}
-                    onChange={handleChange("descripcion")}
-                    fullWidth
-                    multiline
-                    rows={3}
-                    sx={fieldSx}
-                  />
-                </Stack>
-              </Box>
-
-              {/* Ubicación */}
-              <Box sx={{ ...cardSx, mt: 2 }}>
-                <Typography
-                  fontWeight={700}
-                  fontSize="0.875rem"
-                  color="text.secondary"
-                  mb={2}
-                >
-                  Ubicación
-                </Typography>
-                <Stack spacing={2}>
-                  <SelectEstadoAutocomplete
-                    value={form.estadoId}
-                    onChange={(estadoId) =>
-                      setForm((prev) => ({ ...prev, estadoId, municipioId: 0 }))
-                    }
-                  />
-                  <SelectMunicipioAutocomplete
-                    estadoId={form.estadoId}
-                    value={form.municipioId}
-                    onChange={(id) =>
-                      setForm((prev) => ({ ...prev, municipioId: id }))
-                    }
-                  />
-                  <SelectTipoComercioAutocomplete
-                    value={form.tipoComercioId}
-                    onChange={(id) =>
-                      setForm((prev) => ({ ...prev, tipoComercioId: id }))
-                    }
-                  />
-                </Stack>
-              </Box>
-
-              {/* Colores — solo planes no FREE */}
-              {claims?.planTipo !== "FREE" && (
-                <Box sx={{ ...cardSx, mt: 2 }}>
-                  <Typography
-                    fontWeight={700}
-                    fontSize="0.875rem"
-                    color="text.secondary"
-                    mb={2}
-                  >
-                    Colores de marca
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                      gap: 2,
-                    }}
-                  >
-                    <TextField
-                      type="color"
-                      label="Color primario"
-                      value={form.colorPrimario ?? "#007AFF"}
-                      onChange={handleChange("colorPrimario")}
-                      fullWidth
-                      sx={fieldSx}
-                    />
-                    <TextField
-                      type="color"
-                      label="Color secundario"
-                      value={form.colorSecundario ?? "#FF9500"}
-                      onChange={handleChange("colorSecundario")}
-                      fullWidth
-                      sx={fieldSx}
-                    />
-                  </Box>
-                </Box>
-              )}
-            </TabPanel>
-
-            {/* ================= GALERÍA ================= */}
-            <TabPanel value={tab} index={1}>
-              <Box sx={cardSx}>
                 <Button
-                  variant="outlined"
                   component="label"
-                  disabled={galeria.length >= Number(claims?.maxFotos)}
-                  fullWidth
-                  sx={{
-                    mb: 3,
-                    py: 1.4,
-                    borderRadius: 999,
-                    textTransform: "none",
-                    fontWeight: 600,
-                    borderColor: "rgba(0,0,0,0.15)",
-                    color: "text.secondary",
-                    "&:hover": { bgcolor: "rgba(0,0,0,0.03)" },
-                  }}
+                  variant="outlined"
+                  size="small"
+                  className={styles.uploadLogoButton}
+                  startIcon={<MaterialSymbol icon="upload" size="small" />}
                 >
-                  📷 Subir imágenes ({galeria.length}/{Number(claims?.maxFotos)}
-                  )
+                  {preview ? "Cambiar logo" : "Subir logo"}
+
                   <input
                     hidden
                     type="file"
                     accept="image/*"
-                    multiple
-                    onChange={handleGaleriaChange}
+                    onChange={handleImageChange}
                   />
                 </Button>
+              </Box>
 
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                      xs: "repeat(2, 1fr)",
-                      sm: "repeat(3, 1fr)",
-                      md: "repeat(4, 1fr)",
+              <Stack className={styles.fieldsStack}>
+                <TextField
+                  label="Nombre"
+                  value={form.nombre ?? ""}
+                  onChange={handleChange("nombre")}
+                  fullWidth
+                  required
+                  className={styles.field}
+                />
+
+                <TextField
+                  label="Dirección"
+                  value={form.direccion ?? ""}
+                  onChange={handleChange("direccion")}
+                  fullWidth
+                  className={styles.field}
+                />
+
+                <TextField
+                  label="Teléfono"
+                  value={form.telefono ?? ""}
+                  onChange={handleChange("telefono")}
+                  fullWidth
+                  className={styles.field}
+                  slotProps={{
+                    htmlInput: {
+                      inputMode: "numeric",
+                      maxLength: 10,
                     },
-                    gap: 2,
                   }}
+                />
+
+                <TextField
+                  type="email"
+                  label="Correo electrónico"
+                  value={form.email ?? ""}
+                  onChange={handleChange("email")}
+                  fullWidth
+                  className={styles.field}
+                />
+
+                <TextField
+                  label="Descripción"
+                  value={form.descripcion ?? ""}
+                  onChange={handleChange("descripcion")}
+                  fullWidth
+                  multiline
+                  rows={4}
+                  className={styles.field}
+                />
+              </Stack>
+            </Box>
+
+            <Box className={styles.sectionCard}>
+              <SectionHeader
+                icon="location_city"
+                title="Clasificación y región"
+                description="Selecciona el estado, municipio y giro comercial."
+              />
+
+              <Stack className={styles.fieldsStack}>
+                <SelectEstadoAutocomplete
+                  value={form.estadoId}
+                  onChange={(estadoId) => {
+                    setForm((previousForm) => ({
+                      ...previousForm,
+                      estadoId,
+                      municipioId: 0,
+                    }));
+                  }}
+                />
+
+                <SelectMunicipioAutocomplete
+                  estadoId={form.estadoId}
+                  value={form.municipioId}
+                  onChange={(municipioId) => {
+                    setForm((previousForm) => ({
+                      ...previousForm,
+                      municipioId,
+                    }));
+                  }}
+                />
+
+                <SelectTipoComercioAutocomplete
+                  value={form.tipoComercioId}
+                  onChange={(tipoComercioId) => {
+                    setForm((previousForm) => ({
+                      ...previousForm,
+                      tipoComercioId,
+                    }));
+                  }}
+                />
+              </Stack>
+            </Box>
+
+            {canCustomizeColors && (
+              <Box className={styles.sectionCard}>
+                <SectionHeader
+                  icon="palette"
+                  title="Colores de marca"
+                  description="Personaliza la apariencia pública de tu comercio."
+                />
+
+                <Box className={styles.colorGrid}>
+                  <TextField
+                    type="color"
+                    label="Color primario"
+                    value={form.colorPrimario || "#007AFF"}
+                    onChange={handleChange("colorPrimario")}
+                    fullWidth
+                    className={[styles.field, styles.colorField].join(" ")}
+                    slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
+                    }}
+                  />
+
+                  <TextField
+                    type="color"
+                    label="Color secundario"
+                    value={form.colorSecundario || "#FF9500"}
+                    onChange={handleChange("colorSecundario")}
+                    fullWidth
+                    className={[styles.field, styles.colorField].join(" ")}
+                    slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
+                    }}
+                  />
+                </Box>
+              </Box>
+            )}
+          </TabPanel>
+
+          <TabPanel value={tab} index={1} labelledBy="commerce-tab-gallery">
+            <Box className={styles.sectionCard}>
+              <SectionHeader
+                icon="photo_library"
+                title="Galería del comercio"
+                description="Agrega imágenes de tus instalaciones, productos o servicios."
+              />
+
+              <Button
+                variant="outlined"
+                component="label"
+                disabled={!canUploadMoreImages}
+                fullWidth
+                className={styles.uploadGalleryButton}
+                startIcon={
+                  <MaterialSymbol icon="add_photo_alternate" size="small" />
+                }
+              >
+                Subir imágenes ({galeria.length}/{maxFotos})
+                <input
+                  hidden
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleGaleriaChange}
+                />
+              </Button>
+
+              {maxFotos <= 0 && (
+                <Typography
+                  component="p"
+                  className={styles.galleryLimitMessage}
                 >
-                  {galeria.map((img, i) => (
-                    <Box key={i} textAlign="center">
+                  Tu plan no tiene imágenes de galería disponibles.
+                </Typography>
+              )}
+
+              {galeria.length === 0 ? (
+                <Box className={styles.emptyGallery}>
+                  <Box className={styles.emptyGalleryIcon}>
+                    <MaterialSymbol icon="imagesmode" size="large" />
+                  </Box>
+
+                  <Typography
+                    component="h3"
+                    className={styles.emptyGalleryTitle}
+                  >
+                    Galería vacía
+                  </Typography>
+
+                  <Typography
+                    component="p"
+                    className={styles.emptyGalleryDescription}
+                  >
+                    Las imágenes que agregues aparecerán aquí.
+                  </Typography>
+                </Box>
+              ) : (
+                <Box className={styles.galleryGrid}>
+                  {galeria.map((image, index) => (
+                    <Box
+                      key={`${image.slice(0, 30)}-${index}`}
+                      className={styles.galleryItem}
+                    >
                       <Avatar
-                        src={img}
+                        src={image}
+                        alt={`Imagen ${index + 1} de la galería`}
                         variant="rounded"
-                        sx={{
-                          width: "100%",
-                          aspectRatio: "1 / 1",
-                          height: "auto",
-                          borderRadius: 3,
-                          boxShadow: "0 4px 14px rgba(0,0,0,0.10)",
-                          border: "1px solid rgba(0,0,0,0.06)",
-                          transition: "transform 0.25s ease",
-                          "&:hover": { transform: "scale(1.03)" },
-                        }}
+                        className={styles.galleryImage}
                       />
-                      <Button
-                        size="small"
-                        component="label"
-                        sx={{
-                          mt: 1,
-                          fontSize: "0.7rem",
-                          textTransform: "none",
-                          borderRadius: 999,
-                          border: "1px solid rgba(0,0,0,0.12)",
-                          color: "text.secondary",
-                          px: 1.5,
-                        }}
-                      >
-                        Reemplazar
-                        <input
-                          hidden
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleReplaceImage(i, e)}
-                        />
-                      </Button>
+
+                      <Box className={styles.galleryActions}>
+                        <Button
+                          component="label"
+                          size="small"
+                          className={styles.replaceButton}
+                          startIcon={
+                            <MaterialSymbol icon="sync" size="small" />
+                          }
+                        >
+                          Reemplazar
+                          <input
+                            hidden
+                            type="file"
+                            accept="image/*"
+                            onChange={(event) =>
+                              void handleReplaceImage(index, event)
+                            }
+                          />
+                        </Button>
+
+                        <Button
+                          type="button"
+                          size="small"
+                          className={styles.removeButton}
+                          onClick={() => handleRemoveImage(index)}
+                          aria-label={`Eliminar imagen ${index + 1}`}
+                        >
+                          <MaterialSymbol icon="delete" size="small" />
+                        </Button>
+                      </Box>
                     </Box>
                   ))}
                 </Box>
-              </Box>
-            </TabPanel>
+              )}
+            </Box>
+          </TabPanel>
 
-            {/* ================= HORARIOS ================= */}
-            <TabPanel value={tab} index={2}>
-              <Stack spacing={1.5}>
-                {DIAS_SEMANA.map((d) => {
-                  const horario = form.horarios.find((h) => h.dia === d.dia)!;
-                  return (
-                    <Box
-                      key={d.dia}
-                      sx={{
-                        p: { xs: 2, sm: 2.5 },
-                        borderRadius: 4,
-                        bgcolor: horario?.abierto
-                          ? "rgba(255,255,255,0.95)"
-                          : "rgba(0,0,0,0.03)",
-                        border: "1px solid",
-                        borderColor: horario?.abierto
-                          ? "rgba(0,0,0,0.07)"
-                          : "rgba(0,0,0,0.04)",
-                        boxShadow: horario?.abierto
-                          ? "0 2px 12px rgba(0,0,0,0.06)"
-                          : "none",
-                        transition: "all 0.2s ease",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          mb: horario?.abierto ? 2 : 0,
-                        }}
-                      >
-                        <Typography fontWeight={700} fontSize="0.9rem">
-                          {d.label}
+          <TabPanel value={tab} index={2} labelledBy="commerce-tab-schedules">
+            <Box className={styles.schedulePageHeader}>
+              <SectionHeader
+                icon="schedule"
+                title="Horarios de atención"
+                description="Indica qué días abre el comercio y sus horas de operación."
+              />
+            </Box>
+
+            <Stack className={styles.scheduleList}>
+              {DIAS_SEMANA.map((day) => {
+                const schedule = form.horarios.find(
+                  (item) => item.dia === day.dia,
+                );
+
+                if (!schedule) {
+                  return null;
+                }
+
+                return (
+                  <Box
+                    key={day.dia}
+                    className={[
+                      styles.scheduleCard,
+                      schedule.abierto
+                        ? styles.scheduleCardOpen
+                        : styles.scheduleCardClosed,
+                    ].join(" ")}
+                  >
+                    <Box className={styles.scheduleHeader}>
+                      <Box className={styles.scheduleDay}>
+                        <Box className={styles.scheduleDayIcon}>
+                          <MaterialSymbol
+                            icon={
+                              schedule.abierto
+                                ? "event_available"
+                                : "event_busy"
+                            }
+                            size="small"
+                          />
+                        </Box>
+
+                        <Typography
+                          component="h3"
+                          className={styles.scheduleDayTitle}
+                        >
+                          {day.label}
                         </Typography>
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={horario?.abierto}
-                              size="small"
-                              onChange={(e) =>
-                                updateHorario(d.dia, {
-                                  abierto: e.target.checked,
-                                  ...(!e.target.checked && {
-                                    horaApertura: undefined,
-                                    horaCierre: undefined,
-                                  }),
-                                })
-                              }
-                            />
-                          }
-                          label={
-                            <Typography
-                              fontSize="0.8rem"
-                              fontWeight={600}
-                              color={
-                                horario?.abierto
-                                  ? "success.main"
-                                  : "text.disabled"
-                              }
-                            >
-                              {horario?.abierto ? "Abierto" : "Cerrado"}
-                            </Typography>
-                          }
-                          sx={{ mr: 0 }}
-                        />
                       </Box>
 
-                      {horario?.abierto && (
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                          <Box
-                            sx={{
-                              display: "grid",
-                              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                              gap: 2,
-                            }}
-                          >
-                            <TimePicker
-                              label="Apertura"
-                              ampm={false}
-                              disabled={!horario?.abierto}
-                              value={
-                                horario?.horaApertura
-                                  ? dayjs(`2000-01-01T${horario.horaApertura}`)
-                                  : null
-                              }
-                              onChange={(v) =>
-                                updateHorario(d.dia, {
-                                  horaApertura: v?.format("HH:mm"),
-                                })
-                              }
-                              slotProps={{
-                                textField: { fullWidth: true, sx: fieldSx },
-                              }}
-                            />
-                            <TimePicker
-                              label="Cierre"
-                              ampm={false}
-                              disabled={!horario?.abierto}
-                              value={
-                                horario?.horaCierre
-                                  ? dayjs(`2000-01-01T${horario.horaCierre}`)
-                                  : null
-                              }
-                              onChange={(v) =>
-                                updateHorario(d.dia, {
-                                  horaCierre: v?.format("HH:mm"),
-                                })
-                              }
-                              slotProps={{
-                                textField: { fullWidth: true, sx: fieldSx },
-                              }}
-                            />
-                          </Box>
-                        </LocalizationProvider>
-                      )}
-                    </Box>
-                  );
-                })}
-              </Stack>
-            </TabPanel>
+                      <FormControlLabel
+                        className={styles.scheduleControl}
+                        control={
+                          <Switch
+                            checked={schedule.abierto}
+                            size="small"
+                            className={styles.scheduleSwitch}
+                            onChange={(event) => {
+                              const abierto = event.target.checked;
 
-            {/* ================= MAPA ================= */}
-            <TabPanel value={tab} index={3}>
-              <Box
-                sx={{
-                  height: { xs: 250, sm: 320, md: 420 },
-                  borderRadius: 4,
-                  overflow: "hidden",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                }}
-              >
-                <MapContainer
-                  center={[form.lat || 19.4326, form.lng || -99.1332]}
-                  zoom={15}
-                  style={{ height: "100%", width: "100%" }}
+                              updateHorario(day.dia, {
+                                abierto,
+
+                                ...(!abierto && {
+                                  horaApertura: undefined,
+
+                                  horaCierre: undefined,
+                                }),
+                              });
+                            }}
+                          />
+                        }
+                        label={
+                          <Typography
+                            component="span"
+                            className={[
+                              styles.scheduleStatus,
+                              schedule.abierto
+                                ? styles.openStatus
+                                : styles.closedStatus,
+                            ].join(" ")}
+                          >
+                            {schedule.abierto ? "Abierto" : "Cerrado"}
+                          </Typography>
+                        }
+                      />
+                    </Box>
+
+                    {schedule.abierto && (
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <Box className={styles.timeGrid}>
+                          <TimePicker
+                            label="Apertura"
+                            ampm={false}
+                            value={
+                              schedule.horaApertura
+                                ? dayjs(`2000-01-01T${schedule.horaApertura}`)
+                                : null
+                            }
+                            onChange={(value) => {
+                              updateHorario(day.dia, {
+                                horaApertura: value?.format("HH:mm"),
+                              });
+                            }}
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                className: styles.field,
+                              },
+                            }}
+                          />
+
+                          <TimePicker
+                            label="Cierre"
+                            ampm={false}
+                            value={
+                              schedule.horaCierre
+                                ? dayjs(`2000-01-01T${schedule.horaCierre}`)
+                                : null
+                            }
+                            onChange={(value) => {
+                              updateHorario(day.dia, {
+                                horaCierre: value?.format("HH:mm"),
+                              });
+                            }}
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                className: styles.field,
+                              },
+                            }}
+                          />
+                        </Box>
+                      </LocalizationProvider>
+                    )}
+                  </Box>
+                );
+              })}
+            </Stack>
+          </TabPanel>
+
+          <TabPanel value={tab} index={3} labelledBy="commerce-tab-location">
+            <Box className={styles.sectionCard}>
+              <SectionHeader
+                icon="map"
+                title="Ubicación en el mapa"
+                description="Selecciona el punto exacto donde se encuentra el comercio."
+              />
+
+              <Box className={styles.mapInstructions}>
+                <MaterialSymbol icon="touch_app" size="small" />
+
+                <Typography
+                  component="p"
+                  className={styles.mapInstructionsText}
                 >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <LocationPicker />
+                  Presiona sobre el mapa para colocar o mover el marcador.
+                </Typography>
+              </Box>
+
+              <Box className={styles.mapContainer}>
+                <MapContainer
+                  center={[mapLatitude, mapLongitude]}
+                  zoom={15}
+                  className={styles.map}
+                >
+                  <TileLayer
+                    attribution="&copy; OpenStreetMap contributors"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+
+                  <MapViewport
+                    latitude={mapLatitude}
+                    longitude={mapLongitude}
+                  />
+
+                  <LocationPicker
+                    latitude={Number(form.lat) || 0}
+                    longitude={Number(form.lng) || 0}
+                    onLocationChange={handleLocationChange}
+                  />
                 </MapContainer>
               </Box>
-            </TabPanel>
 
-            {/* ================= BOTONES ================= */}
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column-reverse", sm: "row" },
-                justifyContent: "flex-end",
-                gap: 1.5,
-                mt: 4,
-              }}
-            >
-              <Button
-                variant="outlined"
-                onClick={() => {}}
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 3,
-                  borderColor: "rgba(0,0,0,0.15)",
-                  color: "text.secondary",
-                  "&:hover": { bgcolor: "rgba(0,0,0,0.04)" },
-                }}
-              >
-                Cancelar
-              </Button>
+              {form.lat !== 0 && form.lng !== 0 && (
+                <Box className={styles.coordinates}>
+                  <MaterialSymbol icon="my_location" size="small" />
 
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={loading}
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 700,
-                  px: 4,
-                  py: 1.4,
-                  fontSize: "0.9rem",
-                  background: "linear-gradient(135deg, #1c1c1e, #3a3a3c)",
-                  boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
-                  transition: "all 0.25s ease",
-                  "&:hover": {
-                    boxShadow: "0 10px 24px rgba(0,0,0,0.24)",
-                    transform: "translateY(-1px)",
-                  },
-                  "&:active": { transform: "scale(0.98)" },
-                }}
-              >
-                {loading ? (
-                  <CircularProgress
-                    size={20}
-                    thickness={4}
-                    sx={{ color: "#fff" }}
-                  />
-                ) : (
-                  "Guardar cambios"
-                )}
-              </Button>
+                  <Typography
+                    component="span"
+                    className={styles.coordinatesText}
+                  >
+                    {Number(form.lat).toFixed(6)}, {Number(form.lng).toFixed(6)}
+                  </Typography>
+                </Box>
+              )}
             </Box>
-          </form>
+          </TabPanel>
+
+          <Box className={styles.formActions}>
+            <Button
+              type="button"
+              variant="outlined"
+              className={styles.cancelButton}
+              onClick={handleCancel}
+              disabled={loading}
+            >
+              Cancelar
+            </Button>
+
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              className={styles.submitButton}
+              startIcon={
+                loading ? undefined : (
+                  <MaterialSymbol
+                    icon={isEditMode ? "save" : "add_business"}
+                    size="small"
+                  />
+                )
+              }
+            >
+              {loading ? (
+                <>
+                  <CircularProgress
+                    size={19}
+                    thickness={4.5}
+                    className={styles.submitProgress}
+                  />
+
+                  <span>Guardando...</span>
+                </>
+              ) : isEditMode ? (
+                "Guardar cambios"
+              ) : (
+                "Registrar comercio"
+              )}
+            </Button>
+          </Box>
         </Box>
       </Box>
-    </>
+    </Box>
   );
 }

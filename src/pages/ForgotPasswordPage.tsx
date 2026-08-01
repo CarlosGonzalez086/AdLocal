@@ -1,161 +1,294 @@
 import {
-  Box,
-  Paper,
-  Typography,
-  Divider,
-  Button,
-  Container,
-  TextField,
   Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Divider,
   InputAdornment,
+  Paper,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { useState } from "react";
-import { useForgetPassword } from "../hooks/useForgetPassword";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-const fieldSx = {
-  "& .MuiOutlinedInput-root": {
-    borderRadius: "12px",
-    bgcolor: "#fff",
-    "& fieldset": { borderColor: "#E0E0E0" },
-    "&:hover fieldset": { borderColor: "#BDBDBD" },
-    "&.Mui-focused fieldset": { borderColor: "#007AFF" },
-  },
-  "& .MuiInputLabel-root.Mui-focused": { color: "#007AFF" },
-};
+import { useForgetPassword } from "../hooks/useForgetPassword";
+import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
+
+import styles from "../styles/ForgotPasswordPage.module.css";
+
+const LOGO_URL =
+  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+
   const navigate = useNavigate();
 
-  const { forgetPassword, loading, error, successMessage } = useForgetPassword();
+  const {
+    forgetPassword,
+    loading,
+    error,
+    successMessage,
+  } = useForgetPassword();
 
-  const handleSubmit = async () => {
-    if (!email) return;
-    await forgetPassword(email);
+  const cleanEmail = email.trim();
+
+  const emailIsEmpty = cleanEmail.length === 0;
+
+  const emailIsInvalid =
+    !emailIsEmpty && !EMAIL_REGEX.test(cleanEmail);
+
+  const showEmailError =
+    emailTouched && (emailIsEmpty || emailIsInvalid);
+
+  const emailHelperText = showEmailError
+    ? emailIsEmpty
+      ? "El correo electrónico es obligatorio."
+      : "Ingresa un correo electrónico válido."
+    : "Te enviaremos las instrucciones a este correo.";
+
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+
+    setEmailTouched(true);
+
+    if (
+      emailIsEmpty ||
+      emailIsInvalid ||
+      loading
+    ) {
+      return;
+    }
+
+    await forgetPassword(cleanEmail);
   };
 
   return (
     <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        minHeight: "100vh",
-        bgcolor: "#F2F2F7",
-        overflow: "auto",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-      padding={3}
+      component="main"
+      className={styles.page}
     >
-      {/* Botón regresar */}
-      <Box sx={{ position: "absolute", top: 24, left: 24 }}>
-        <Button
-          onClick={() => navigate("/login")}
-          sx={{
-            borderRadius: 999,
-            px: 2.5,
-            fontWeight: 600,
-            textTransform: "none",
-            borderColor: "#007AFF",
-            color: "#007AFF",
-            "&:hover": { bgcolor: "rgba(0,122,255,0.08)" },
-          }}
-          variant="outlined"
-          startIcon={<ArrowBackIosNewIcon sx={{ fontSize: 14 }} />}
-        >
-          Regresar
-        </Button>
+      <Box
+        className={styles.backgroundDecoration}
+        aria-hidden="true"
+      >
+        <Box className={styles.decorationOne} />
+        <Box className={styles.decorationTwo} />
       </Box>
 
-      <Container maxWidth="xs">
-        {/* Logo */}
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
+      <Button
+        type="button"
+        variant="outlined"
+        className={styles.backButton}
+        onClick={() => navigate("/login")}
+        startIcon={
+          <MaterialSymbol
+            icon="arrow_back_ios_new"
+            size="small"
+          />
+        }
+      >
+        Regresar
+      </Button>
+
+      <Container
+        maxWidth="xs"
+        className={styles.container}
+      >
+        <Box
+          component="a"
+          href="/"
+          className={styles.logoLink}
+          aria-label="Ir al inicio de ADLocal"
+        >
           <Box
             component="img"
-            src="https://uzgnfwbztoizcctyfdiv.supabase.co/storage/v1/object/public/Imagenes/WhatsApp%20Image%202025-12-23%20at%2021.19.26.jpeg"
-            alt="AdLocal"
-            sx={{ width: { xs: 140, sm: 180 }, borderRadius: 3 }}
+            src={LOGO_URL}
+            alt="ADLocal"
+            className={styles.logo}
           />
         </Box>
 
-        {/* Card */}
         <Paper
+          component="form"
           elevation={0}
-          sx={{
-            p: { xs: 3, sm: 4 },
-            borderRadius: 4,
-            bgcolor: "rgba(255,255,255,0.9)",
-            backdropFilter: "blur(14px)",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
-          }}
+          className={styles.card}
+          onSubmit={handleSubmit}
+          noValidate
         >
-          <Typography fontSize={24} fontWeight={800} mb={0.5}>
-            Recuperar contraseña
-          </Typography>
+          <Box className={styles.header}>
+            <Box className={styles.headerIcon}>
+              <MaterialSymbol
+                icon="lock_reset"
+                size="large"
+              />
+            </Box>
 
-          <Typography fontSize={14} color="text.secondary" mb={3}>
-            Ingresa tu correo y te enviaremos un enlace para cambiar tu contraseña
-          </Typography>
+            <Box className={styles.headerContent}>
+              <Typography
+                component="span"
+                className={styles.eyebrow}
+              >
+                Seguridad de la cuenta
+              </Typography>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2, borderRadius: 3 }}>
-              {error}
-            </Alert>
-          )}
+              <Typography
+                component="h1"
+                className={styles.title}
+              >
+                Recuperar contraseña
+              </Typography>
 
-          {successMessage && (
-            <Alert severity="success" sx={{ mb: 2, borderRadius: 3 }}>
-              {successMessage}
-            </Alert>
-          )}
+              <Typography
+                component="p"
+                className={styles.description}
+              >
+                Ingresa el correo asociado a tu cuenta y te
+                enviaremos un enlace para crear una nueva
+                contraseña.
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box
+            className={styles.messages}
+            aria-live="polite"
+          >
+            {error && (
+              <Alert
+                severity="error"
+                variant="outlined"
+                className={styles.alert}
+              >
+                {error}
+              </Alert>
+            )}
+
+            {successMessage && (
+              <Alert
+                severity="success"
+                variant="outlined"
+                className={styles.alert}
+              >
+                {successMessage}
+              </Alert>
+            )}
+          </Box>
 
           <TextField
-            placeholder="Correo electrónico"
             fullWidth
+            required
             type="email"
+            name="email"
+            label="Correo electrónico"
+            placeholder="correo@ejemplo.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            sx={fieldSx}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <EmailOutlinedIcon sx={{ color: "#9E9E9E", fontSize: 20 }} />
-                </InputAdornment>
-              ),
+            error={showEmailError}
+            helperText={emailHelperText}
+            disabled={loading}
+            autoComplete="email"
+            className={styles.emailField}
+            onBlur={() => setEmailTouched(true)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+
+              if (!emailTouched) {
+                return;
+              }
+
+              setEmailTouched(true);
+            }}
+            slotProps={{
+              htmlInput: {
+                inputMode: "email",
+                maxLength: 150,
+              },
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <MaterialSymbol
+                      icon="mail"
+                      size="medium"
+                      className={styles.fieldIcon}
+                    />
+                  </InputAdornment>
+                ),
+              },
             }}
           />
 
-          <Divider sx={{ my: 3, fontSize: 13, color: "text.disabled" }}>
-            o
+          <Divider className={styles.divider}>
+            Verificación por correo
           </Divider>
 
           <Button
+            type="submit"
             variant="contained"
             fullWidth
             size="large"
-            disabled={loading}
-            onClick={handleSubmit}
-            sx={{
-              borderRadius: "999px",
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: 16,
-              bgcolor: "#1A1A1A",
-              py: 1.5,
-              boxShadow: "none",
-              "&:hover": {
-                bgcolor: "#333",
-                boxShadow: "none",
-              },
-            }}
+            disabled={
+              loading ||
+              emailIsEmpty ||
+              emailIsInvalid
+            }
+            className={styles.submitButton}
+            startIcon={
+              loading ? (
+                <CircularProgress
+                  size={18}
+                  thickness={5}
+                  className={styles.buttonProgress}
+                />
+              ) : (
+                <MaterialSymbol
+                  icon="send"
+                  size="small"
+                />
+              )
+            }
           >
-            {loading ? "Enviando..." : "Enviar correo"}
+            {loading
+              ? "Enviando correo..."
+              : "Enviar correo"}
           </Button>
+
+          <Typography
+            component="p"
+            className={styles.securityMessage}
+          >
+            <MaterialSymbol
+              icon="verified_user"
+              size="small"
+            />
+
+            <span>
+              Por seguridad, el enlace tendrá un tiempo
+              limitado de vigencia.
+            </span>
+          </Typography>
         </Paper>
+
+        <Typography
+          component="p"
+          className={styles.footerText}
+        >
+          ¿Recordaste tu contraseña?{" "}
+          <Button
+            type="button"
+            variant="text"
+            className={styles.loginButton}
+            onClick={() => navigate("/login")}
+          >
+            Iniciar sesión
+          </Button>
+        </Typography>
       </Container>
     </Box>
   );

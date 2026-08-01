@@ -1,0 +1,492 @@
+.loginPage {
+  --login-primary: #007aff;
+  --login-primary-dark: #005fcc;
+  --login-text: #1c1c1e;
+  --login-muted: #71717a;
+  --login-background: #f2f2f7;
+
+  position: relative;
+
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background: linear-gradient(
+    145deg,
+    #f7f8fc 0%,
+    var(--login-background) 48%,
+    #eceef5 100%
+  );
+}
+
+.backgroundDecoration {
+  position: absolute;
+  inset: 0;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.decorationOne,
+.decorationTwo,
+.decorationThree {
+  position: absolute;
+
+  display: block;
+
+  border-radius: 50%;
+}
+
+.decorationOne {
+  top: -170px;
+  left: -130px;
+
+  width: 440px;
+  height: 440px;
+
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.14), transparent 70%);
+}
+
+.decorationTwo {
+  right: -170px;
+  bottom: -210px;
+
+  width: 520px;
+  height: 520px;
+
+  background: radial-gradient(circle, rgba(91, 58, 41, 0.12), transparent 70%);
+}
+
+.decorationThree {
+  top: 18%;
+  right: 11%;
+
+  width: 180px;
+  height: 180px;
+
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.07), transparent 70%);
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logoLink {
+  display: block;
+  margin-bottom: 28px !important;
+
+  border-radius: 18px;
+
+  transition:
+    transform 180ms ease,
+    filter 180ms ease;
+}
+
+.logoLink:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.02);
+}
+
+.logoLink:focus-visible {
+  outline: 3px solid rgba(0, 122, 255, 0.25);
+  outline-offset: 5px;
+}
+
+.logo {
+  width: 128px;
+  max-height: 128px;
+
+  display: block;
+  object-fit:fill;
+
+  border-radius: 18px;
+
+  box-shadow: 0 12px 30px rgba(31, 41, 55, 0.1);
+}
+
+.loginCard {
+  width: 100%;
+  padding: 34px;
+
+  background-color: rgba(255, 255, 255, 0.93) !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.78);
+
+  border-radius: 28px !important;
+
+  box-shadow:
+    0 24px 60px rgba(31, 41, 55, 0.11),
+    0 6px 18px rgba(31, 41, 55, 0.05) !important;
+
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+}
+
+.loginHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.headerIcon {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--login-primary);
+  background-color: rgba(0, 122, 255, 0.1);
+
+  border: 1px solid rgba(0, 122, 255, 0.1);
+  border-radius: 17px;
+}
+
+.adminHeaderIcon {
+  color: #5b3a29;
+  background-color: rgba(91, 58, 41, 0.1);
+  border-color: rgba(91, 58, 41, 0.1);
+}
+
+.headerContent {
+  min-width: 0;
+}
+
+.loginType {
+  display: block;
+  margin-bottom: 5px;
+
+  color: var(--login-primary);
+
+  font-size: 0.67rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.075em !important;
+  text-transform: uppercase;
+}
+
+.adminLoginType {
+  color: #5b3a29;
+}
+
+.title {
+  margin: 0 !important;
+
+  color: var(--login-text);
+
+  font-size: 1.55rem !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.035em !important;
+}
+
+.description {
+  margin: 8px 0 0 !important;
+
+  color: var(--login-muted);
+
+  font-size: 0.82rem !important;
+  line-height: 1.55 !important;
+}
+
+.registerMessage {
+  margin-top: 24px;
+  padding: 12px 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  color: var(--login-muted);
+  background-color: rgba(0, 122, 255, 0.045);
+
+  border: 1px solid rgba(0, 122, 255, 0.07);
+  border-radius: 13px;
+
+  text-align: center;
+}
+
+.registerText {
+  font-size: 0.78rem !important;
+}
+
+.textButton {
+  padding: 0 !important;
+
+  color: var(--login-primary) !important;
+  background: transparent;
+  border: 0;
+
+  font-family: inherit !important;
+  font-size: 0.78rem !important;
+  font-weight: 750 !important;
+
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.textButton:hover {
+  color: var(--login-primary-dark) !important;
+  text-decoration: underline !important;
+}
+
+.formContainer {
+  margin-top: 25px;
+}
+
+.formContainer :global(.MuiTextField-root) {
+  width: 100%;
+}
+
+.formContainer :global(.MuiOutlinedInput-root) {
+  min-height: 52px;
+
+  background-color: #ffffff;
+
+  border-radius: 15px;
+
+  font-size: 0.88rem;
+
+  transition:
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.formContainer :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: #dfe1e7;
+}
+
+.formContainer
+  :global(.MuiOutlinedInput-root:hover)
+  :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: #b9bec8;
+}
+
+.formContainer :global(.MuiOutlinedInput-root.Mui-focused) {
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.formContainer
+  :global(.MuiOutlinedInput-root.Mui-focused)
+  :global(.MuiOutlinedInput-notchedOutline) {
+  border-width: 1px;
+  border-color: var(--login-primary);
+}
+
+.formContainer :global(.MuiInputLabel-root.Mui-focused) {
+  color: var(--login-primary);
+}
+
+.formContainer :global(.MuiButton-root) {
+  min-height: 50px;
+
+  color: #ffffff;
+
+  background: linear-gradient(
+    135deg,
+    var(--login-primary),
+    var(--login-primary-dark)
+  );
+
+  border-radius: 999px;
+
+  font-size: 0.9rem;
+  font-weight: 750;
+  text-transform: none;
+
+  box-shadow: 0 9px 24px rgba(0, 122, 255, 0.27);
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.formContainer :global(.MuiButton-root:hover) {
+  background: linear-gradient(
+    135deg,
+    var(--login-primary),
+    var(--login-primary-dark)
+  );
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 13px 30px rgba(0, 122, 255, 0.38);
+}
+
+.forgotPasswordButton {
+  min-height: 38px;
+  margin-top: 14px !important;
+  padding: 7px 4px !important;
+
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+
+  color: var(--login-primary) !important;
+
+  font-size: 0.79rem !important;
+  font-weight: 650 !important;
+
+  cursor: pointer;
+}
+
+.forgotPasswordButton:hover {
+  color: var(--login-primary-dark) !important;
+  text-decoration: underline !important;
+}
+
+.divider {
+  margin-top: 28px !important;
+  margin-bottom: 0 !important;
+
+  color: #a0a3aa !important;
+
+  font-size: 0.67rem !important;
+  font-weight: 650 !important;
+}
+
+.divider::before,
+.divider::after {
+  border-color: #e5e7eb !important;
+}
+
+.terms {
+  margin: 22px 0 0 !important;
+
+  color: #9a9ca3;
+
+  font-size: 0.69rem !important;
+  line-height: 1.6 !important;
+  text-align: center;
+}
+
+.termsLink {
+  color: var(--login-primary) !important;
+  font-weight: 650 !important;
+}
+
+.termsLink:hover {
+  color: var(--login-primary-dark) !important;
+  text-decoration: underline !important;
+}
+
+.pageFooter {
+  margin-top: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  color: #92959e;
+}
+
+.pageFooterText {
+  color: inherit;
+
+  font-size: 0.7rem !important;
+  font-weight: 550 !important;
+  text-align: center;
+}
+
+@media (max-width: 599px) {
+  .loginPage {
+    min-height: 100dvh;
+    padding: 24px 12px;
+
+    align-items: flex-start;
+  }
+
+  .container {
+    margin: auto;
+  }
+
+  .logoLink {
+    margin-bottom: 21px;
+  }
+
+  .logo {
+    width: 142px;
+    max-height: 82px;
+    border-radius: 15px;
+  }
+
+  .loginCard {
+    padding: 24px 18px;
+
+    border-radius: 23px !important;
+  }
+
+  .loginHeader {
+    gap: 12px;
+  }
+
+  .headerIcon {
+    width: 46px;
+    height: 46px;
+
+    border-radius: 15px;
+  }
+
+  .title {
+    font-size: 1.32rem !important;
+  }
+
+  .description {
+    font-size: 0.78rem !important;
+  }
+
+  .registerMessage {
+    margin-top: 20px;
+    padding: 11px 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .formContainer {
+    margin-top: 21px;
+  }
+
+  .forgotPasswordButton {
+    margin-top: 11px !important;
+  }
+
+  .divider {
+    margin-top: 23px !important;
+  }
+
+  .terms {
+    margin-top: 18px !important;
+  }
+
+  .pageFooter {
+    margin-top: 17px;
+    padding: 0 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logoLink,
+  .formContainer :global(.MuiButton-root) {
+    transition: none;
+  }
+
+  .logoLink:hover,
+  .formContainer :global(.MuiButton-root:hover) {
+    transform: none;
+  }
+}

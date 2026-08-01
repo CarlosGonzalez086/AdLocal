@@ -12,7 +12,7 @@ interface ApiResponse<T> {
 }
 
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}`,
+  baseURL: `https://adlocalapi.onrender.com/api`,
   headers: {
     "Content-Type": "application/json",
   },

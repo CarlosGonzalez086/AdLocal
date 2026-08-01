@@ -1,31 +1,33 @@
 import {
-  Box,
-  Typography,
-  Avatar,
-  Stack,
-  Button,
-  Divider,
-  Link,
-  Chip,
   Accordion,
-  AccordionSummary,
   AccordionDetails,
+  AccordionSummary,
+  Avatar,
+  Box,
+  Button,
+  ButtonBase,
+  Chip,
+  CircularProgress,
+  Divider,
+  IconButton,
+  Link,
   Rating,
+  Stack,
+  Typography,
 } from "@mui/material";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
-import EmailIcon from "@mui/icons-material/Email";
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import StarIcon from "@mui/icons-material/Star";
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import type { ComercioDto } from "../../services/comercioApi";
 import type { ProductoServicioDto } from "../../services/productosServiciosApi";
+
 import ProductoCard from "../ProductosServicios/ProductoCard";
+import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
+
+
 import { DIAS_SEMANA_MAP } from "../../utils/constantes";
 import { estaAbiertoAhora } from "../../utils/generalsFunctions";
-import CategoryIcon from "@mui/icons-material/Category";
+
+import styles from "../../styles/ComercioDetalle.module.css";
 
 interface Props {
   comercio: ComercioDto;
@@ -33,78 +35,93 @@ interface Props {
   loadingProducts: boolean;
 }
 
-/* ─── Badge ─── */
-const BADGE_CONFIG: Record<
-  string,
-  {
-    label: string;
-    icon: string;
-    background: string;
-    color: string;
-    shadow: string;
-  }
-> = {
-  premium: {
-    label: "Premium",
-    icon: "👑",
-    background: "linear-gradient(135deg, #FFD700, #FFB300)",
-    color: "#1c1c1e",
-    shadow: "0 8px 22px rgba(255,193,7,0.45)",
-  },
-  recomendado: {
-    label: "Recomendado",
-    icon: "⭐",
-    background: "linear-gradient(135deg, #FF9800, #FB8C00)",
-    color: "#fff",
-    shadow: "0 8px 20px rgba(255,152,0,0.35)",
-  },
-  esencial: {
-    label: "Esencial",
-    icon: "✨",
-    background: "rgba(255,255,255,0.82)",
-    color: "#111",
-    shadow: "0 6px 16px rgba(0,0,0,0.14)",
-  },
+type BadgeType = "premium" | "recommended" | "essential";
+
+interface BadgeConfig {
+  type: BadgeType;
+  label: string;
+  icon: string;
+}
+
+type CommerceCssVariables = CSSProperties & {
+  "--commerce-primary": string;
+  "--commerce-secondary": string;
 };
 
-const renderBadge = (badge?: string) => {
-  if (!badge) return null;
-  const key = badge.toLowerCase().includes("premium")
-    ? "premium"
-    : badge.toLowerCase().includes("recomendado")
-      ? "recomendado"
-      : "esencial";
-  const cfg = BADGE_CONFIG[key];
+const DEFAULT_LATITUDE = 19.4326;
+const DEFAULT_LONGITUDE = -99.1332;
+
+const getBadgeConfig = (badge?: string): BadgeConfig | null => {
+  if (!badge?.trim()) {
+    return null;
+  }
+
+  const normalizedBadge = badge.trim().toLowerCase();
+
+  if (normalizedBadge.includes("premium")) {
+    return {
+      type: "premium",
+      label: "Premium",
+      icon: "crown",
+    };
+  }
+
+  if (normalizedBadge.includes("recomendado")) {
+    return {
+      type: "recommended",
+      label: "Recomendado",
+      icon: "recommend",
+    };
+  }
+
+  return {
+    type: "essential",
+    label: "Esencial",
+    icon: "verified",
+  };
+};
+
+const getBadgeClassName = (badgeType: BadgeType): string => {
+  const badgeClasses: Record<BadgeType, string> = {
+    premium: styles.premiumBadge,
+    recommended: styles.recommendedBadge,
+    essential: styles.essentialBadge,
+  };
+
+  return badgeClasses[badgeType];
+};
+
+const normalizeRating = (value: unknown): number => {
+  const parsedValue = Number(value);
+
+  if (!Number.isFinite(parsedValue)) {
+    return 0;
+  }
+
+  return Math.min(Math.max(parsedValue, 0), 5);
+};
+
+const normalizePhone = (phone?: string): string => {
+  return phone?.replace(/\D/g, "") ?? "";
+};
+
+const isValidLocation = (lat: number, lng: number): boolean => {
   return (
-    <Box
-      sx={{
-        position: "absolute",
-        top: { xs: 8, sm: 12 },
-        right: { xs: 8, sm: 12 },
-        px: { xs: 1.2, sm: 1.5 },
-        py: { xs: 0.35, sm: 0.45 },
-        borderRadius: 999,
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 0.5,
-        fontSize: { xs: "0.6rem", sm: "0.68rem" },
-        fontWeight: 700,
-        letterSpacing: "0.08em",
-        textTransform: "uppercase",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        background: cfg.background,
-        color: cfg.color,
-        boxShadow: cfg.shadow,
-        border: "1px solid rgba(255,255,255,0.55)",
-        transition: "all 0.25s ease",
-        "&:hover": { transform: "scale(1.06)" },
-        zIndex: 5,
-      }}
-    >
-      {cfg.icon} {cfg.label}
-    </Box>
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
   );
+};
+
+const isDefaultLocation = (lat: number, lng: number): boolean => {
+  const latitudeDifference = Math.abs(lat - DEFAULT_LATITUDE);
+
+  const longitudeDifference = Math.abs(lng - DEFAULT_LONGITUDE);
+
+  return latitudeDifference < 0.000001 && longitudeDifference < 0.000001;
 };
 
 export default function ComercioDetalle({
@@ -112,508 +129,581 @@ export default function ComercioDetalle({
   productos,
   loadingProducts,
 }: Props) {
-  const abiertoAhora = comercio?.horarios
-    ? estaAbiertoAhora(comercio.horarios)
-    : false;
-  const colorPrimario = comercio?.colorPrimario ?? "#6f4e37";
-  const colorSecundario = comercio?.colorSecundario ?? "#3e2723";
-  const horarios = comercio?.horarios || [];
-  const accordionSx = {
-    borderRadius: "16px !important",
-    mb: { xs: 2, sm: 2.5 },
-    background: "rgba(255,255,255,0.90)",
-    backdropFilter: "blur(18px) saturate(180%)",
-    WebkitBackdropFilter: "blur(18px) saturate(180%)",
-    boxShadow: "0 4px 16px rgba(0,0,0,0.07)",
-    border: "1px solid rgba(0,0,0,0.06)",
-    overflow: "hidden",
-    "&:before": { display: "none" },
-    transition: "all .3s cubic-bezier(.4,0,.2,1)",
-    "&:hover": {
-      boxShadow: "0 8px 28px rgba(0,0,0,0.11)",
-      transform: "translateY(-1px)",
-    },
+  const [logoError, setLogoError] = useState(false);
+
+  const [activeImage, setActiveImage] = useState(0);
+
+  const colorPrimario = comercio.colorPrimario || "#6f4e37";
+
+  const colorSecundario = comercio.colorSecundario || "#3e2723";
+
+  const commerceVariables: CommerceCssVariables = {
+    "--commerce-primary": colorPrimario,
+    "--commerce-secondary": colorSecundario,
   };
 
-  const accordionSummarySx = {
-    px: { xs: 2.5, sm: 3 },
-    py: { xs: 1.5, sm: 1.8 },
-    minHeight: 56,
-    "& .MuiAccordionSummary-content": { alignItems: "center", gap: 1 },
+  const badgeConfig = useMemo(
+    () => getBadgeConfig(comercio.badge),
+    [comercio.badge],
+  );
+
+  const horarios = useMemo(() => {
+    return [...(comercio.horarios ?? [])].sort(
+      (firstSchedule, secondSchedule) => firstSchedule.dia - secondSchedule.dia,
+    );
+  }, [comercio.horarios]);
+
+  const abiertoAhora = useMemo(() => {
+    if (horarios.length === 0) {
+      return false;
+    }
+
+    return estaAbiertoAhora(horarios);
+  }, [horarios]);
+
+  const imagenes = useMemo(() => {
+    return (comercio.imagenes ?? []).filter(
+      (image): image is string =>
+        typeof image === "string" && image.trim().length > 0,
+    );
+  }, [comercio.imagenes]);
+
+  const rating = useMemo(
+    () => normalizeRating(comercio.calificacion),
+    [comercio.calificacion],
+  );
+
+  const address = useMemo(() => {
+    const addressParts = [
+      comercio.direccion,
+      comercio.municipioNombre,
+      comercio.estadoNombre,
+    ].filter(
+      (value): value is string =>
+        typeof value === "string" && value.trim().length > 0,
+    );
+
+    return addressParts.length > 0
+      ? `${addressParts.join(", ")}.`
+      : "Dirección no disponible.";
+  }, [comercio.direccion, comercio.municipioNombre, comercio.estadoNombre]);
+
+  const latitude = Number(comercio.lat);
+  const longitude = Number(comercio.lng);
+
+  const hasLocation =
+    isValidLocation(latitude, longitude) &&
+    !isDefaultLocation(latitude, longitude);
+
+  const normalizedPhone = normalizePhone(comercio.telefono);
+
+  const showLogo = Boolean(comercio.logoBase64) && !logoError;
+
+  const commerceInitial =
+    comercio.nombre?.trim().charAt(0).toUpperCase() || "C";
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLogoError(false);
+  }, [comercio.id, comercio.logoBase64]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setActiveImage(0);
+  }, [comercio.id]);
+
+  const handlePreviousImage = () => {
+    setActiveImage((currentIndex) => {
+      if (currentIndex === 0) {
+        return imagenes.length - 1;
+      }
+
+      return currentIndex - 1;
+    });
+  };
+
+  const handleNextImage = () => {
+    setActiveImage((currentIndex) => {
+      if (currentIndex === imagenes.length - 1) {
+        return 0;
+      }
+
+      return currentIndex + 1;
+    });
   };
 
   return (
     <Box
-      sx={{
-        position: "relative",
-        maxWidth: { xs: "100%", sm: 600, md: 860 },
-        width: "100%",
-        mx: "auto",
-        borderRadius: { xs: 3, sm: 4, md: 5 },
-        bgcolor: "rgba(255,255,255,0.92)",
-        backdropFilter: "blur(14px)",
-        border: "1px solid rgba(0,0,0,0.06)",
-        boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
-        overflow: "hidden",
-      }}
+      component="article"
+      className={styles.container}
+      style={commerceVariables}
     >
-      {renderBadge(comercio?.badge)}
+      {badgeConfig && (
+        <Box
+          className={[styles.badge, getBadgeClassName(badgeConfig.type)].join(
+            " ",
+          )}
+        >
+          <MaterialSymbol icon={badgeConfig.icon} size="small" filled />
 
-      {/* ─── HERO ─── */}
-      <Box
-        sx={{
-          width: "100%",
-          px: { xs: 2, sm: 4, md: 6 },
-          py: { xs: 5, sm: 6 },
-          textAlign: "center",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          background: `linear-gradient(135deg, ${colorPrimario}, ${colorSecundario})`,
-          boxShadow: "0 12px 32px rgba(0,0,0,0.20)",
-        }}
-      >
+          <Typography component="span" className={styles.badgeText}>
+            {badgeConfig.label}
+          </Typography>
+        </Box>
+      )}
+
+      <Box component="header" className={styles.hero}>
+        <Box className={styles.heroDecoration} aria-hidden="true">
+          <Box className={styles.heroDecorationOne} />
+
+          <Box className={styles.heroDecorationTwo} />
+        </Box>
+
         <Avatar
-          src={comercio?.logoBase64}
-          sx={{
-            width: { xs: 96, sm: 110, md: 120 },
-            height: { xs: 96, sm: 110, md: 120 },
-            mb: 2,
-            border: "3px solid rgba(255,255,255,0.9)",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
-            backgroundColor: "#fff",
-            transition: "transform 0.3s ease",
-            "&:hover": { transform: "scale(1.04)" },
-          }}
-        />
-
-        <Typography
-          sx={{
-            fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2rem" },
-            fontWeight: 800,
-            color: "#fff",
-            letterSpacing: "-0.5px",
+          src={showLogo ? comercio.logoBase64 : undefined}
+          alt={`Logotipo de ${comercio.nombre}`}
+          className={styles.logo}
+          slotProps={{
+            img: {
+              onError: () => setLogoError(true),
+            },
           }}
         >
-          {comercio?.nombre}
+          {!showLogo && commerceInitial}
+        </Avatar>
+
+        <Typography component="h1" className={styles.name}>
+          {comercio.nombre}
         </Typography>
 
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={0.5}
-          sx={{ mt: 0.5 }}
-        >
-          <Typography
-            sx={{
-              fontSize: "0.85rem",
-              color: "rgba(255,255,255,0.9)",
-              fontWeight: 700,
-            }}
-          >
-            {comercio?.calificacion ?? 0}
+        <Stack direction="row" className={styles.ratingRow}>
+          <Typography component="span" className={styles.ratingValue}>
+            {rating.toFixed(1)}
           </Typography>
+
           <Rating
-            value={comercio?.calificacion ?? 0}
+            value={rating}
             precision={0.5}
             readOnly
             size="small"
-            icon={<StarIcon fontSize="inherit" />}
-            emptyIcon={<StarIcon fontSize="inherit" />}
-            sx={{ color: "#FFD54F" }}
+            className={styles.rating}
+            getLabelText={(value) => `${value} de 5 estrellas`}
+            icon={
+              <MaterialSymbol
+                icon="star"
+                filled
+                className={styles.ratingIcon}
+              />
+            }
+            emptyIcon={
+              <MaterialSymbol icon="star" className={styles.emptyRatingIcon} />
+            }
           />
         </Stack>
 
-        {comercio?.descripcion && (
-          <Typography
-            sx={{
-              mt: 1.5,
-              maxWidth: 520,
-              fontSize: 14,
-              lineHeight: 1.6,
-              color: "rgba(255,255,255,0.85)",
-            }}
-          >
+        {comercio.descripcion && (
+          <Typography component="p" className={styles.description}>
             {comercio.descripcion}
           </Typography>
         )}
 
-        {comercio?.horarios && (
+        {horarios.length > 0 && (
           <Chip
-            icon={<AccessTimeIcon />}
             label={abiertoAhora ? "Abierto ahora" : "Cerrado ahora"}
-            sx={{
-              mt: 2.5,
-              px: 1.5,
-              height: 32,
-              fontWeight: 700,
-              fontSize: "0.78rem",
-              color: "#fff",
-              background: abiertoAhora
-                ? "linear-gradient(135deg, #34C759, #30D158)"
-                : "linear-gradient(135deg, #FF453A, #FF3B30)",
-              boxShadow: "0 4px 14px rgba(0,0,0,0.22)",
-            }}
+            className={[
+              styles.statusChip,
+              abiertoAhora ? styles.openStatus : styles.closedStatus,
+            ].join(" ")}
+            icon={
+              <MaterialSymbol
+                icon={abiertoAhora ? "schedule" : "schedule_off"}
+                size="small"
+              />
+            }
           />
         )}
       </Box>
 
-      <Stack spacing={2} px={{ xs: 2.5, sm: 4 }} py={{ xs: 3, sm: 4 }}>
+      <Stack className={styles.content}>
         <Box
-          sx={{
-            borderRadius: 4,
-            bgcolor: "rgba(255,255,255,0.92)",
-            backdropFilter: "blur(14px)",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.07)",
-            border: "1px solid rgba(0,0,0,0.06)",
-            px: { xs: 2.5, sm: 3 },
-            py: 2.5,
-          }}
+          component="section"
+          className={styles.informationCard}
+          aria-label="Información del comercio"
         >
-          <Stack spacing={1.8}>
-            <Stack direction="row" spacing={1.2} alignItems="flex-start">
-              <LocationOnIcon
-                sx={{ fontSize: 20, mt: "2px", color: "text.disabled" }}
-              />
-              <Typography
-                variant="body2"
-                sx={{ lineHeight: 1.5, fontWeight: 500 }}
-              >
-                {`${comercio?.direccion}, ${comercio?.municipioNombre}, ${comercio?.estadoNombre}.`}
-              </Typography>
-            </Stack>
+          <Stack className={styles.informationList}>
+            <Box className={styles.informationRow}>
+              <Box className={styles.informationIcon}>
+                <MaterialSymbol icon="location_on" size="medium" />
+              </Box>
 
-            {comercio?.telefono && (
-              <Stack direction="row" spacing={1.2} alignItems="center">
-                <WhatsAppIcon sx={{ fontSize: 20, color: "#25D366" }} />
+              <Typography component="p" className={styles.informationText}>
+                {address}
+              </Typography>
+            </Box>
+
+            {comercio.telefono && normalizedPhone && (
+              <Box className={styles.informationRow}>
+                <Box
+                  className={[styles.informationIcon, styles.whatsAppIcon].join(
+                    " ",
+                  )}
+                >
+                  <MaterialSymbol icon="chat" size="medium" filled />
+                </Box>
+
                 <Link
-                  href={`https://wa.me/${comercio.telefono}`}
+                  href={`https://wa.me/${normalizedPhone}`}
                   target="_blank"
+                  rel="noopener noreferrer"
                   underline="none"
-                  sx={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: "text.primary",
-                    transition: "color 0.2s",
-                    "&:hover": { color: "#25D366" },
-                  }}
+                  className={[styles.informationLink, styles.whatsAppLink].join(
+                    " ",
+                  )}
                 >
                   {comercio.telefono}
                 </Link>
-              </Stack>
+              </Box>
             )}
 
-            {comercio?.email && (
-              <Stack direction="row" spacing={1.2} alignItems="center">
-                <EmailIcon sx={{ fontSize: 20, color: "text.disabled" }} />
+            {comercio.email && (
+              <Box className={styles.informationRow}>
+                <Box className={styles.informationIcon}>
+                  <MaterialSymbol icon="mail" size="medium" />
+                </Box>
+
                 <Link
                   href={`mailto:${comercio.email}`}
                   underline="none"
-                  sx={{
-                    fontSize: 14,
-                    fontWeight: 500,
-                    color: "text.primary",
-                    "&:hover": { textDecoration: "underline" },
-                  }}
+                  className={styles.informationLink}
                 >
                   {comercio.email}
                 </Link>
-              </Stack>
+              </Box>
             )}
 
-            {comercio?.tipoComercio && (
-              <Stack direction="row" spacing={1.2} alignItems="center">
-                <CategoryIcon sx={{ fontSize: 20, color: "text.disabled" }} />
-                <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+            {comercio.tipoComercio && (
+              <Box className={styles.informationRow}>
+                <Box className={styles.informationIcon}>
+                  <MaterialSymbol icon="category" size="medium" />
+                </Box>
+
+                <Typography component="p" className={styles.informationText}>
                   {comercio.tipoComercio}
                 </Typography>
-              </Stack>
+              </Box>
             )}
           </Stack>
         </Box>
 
-        <Divider sx={{ opacity: 0.5 }} />
+        <Divider className={styles.divider} />
 
-        {comercio?.imagenes && comercio.imagenes.length > 0 && (
+        {imagenes.length > 0 && (
           <>
-            <Typography fontWeight={700} fontSize="1rem" sx={{ px: 0.5 }}>
-              Imágenes del negocio
-            </Typography>
-
             <Box
-              sx={{
-                borderRadius: 4,
-                overflow: "hidden",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
-                border: "1px solid rgba(0,0,0,0.06)",
-              }}
+              component="section"
+              className={styles.gallerySection}
+              aria-labelledby="commerce-gallery-title"
             >
-              <div
-                id="carouselComercio"
-                className="carousel slide"
-                data-bs-ride="carousel"
-              >
-                <div
-                  className="carousel-indicators"
-                  style={{ marginBottom: 8 }}
-                >
-                  {comercio.imagenes.map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      data-bs-target="#carouselComercio"
-                      data-bs-slide-to={idx}
-                      className={idx === 0 ? "active" : ""}
-                      aria-current={idx === 0 ? "true" : undefined}
-                      aria-label={`Slide ${idx + 1}`}
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        backgroundColor: "rgba(255,255,255,0.8)",
-                      }}
-                    />
-                  ))}
-                </div>
-                <div className="carousel-inner">
-                  {comercio.imagenes.map((img, idx) => (
-                    <div
-                      key={idx}
-                      className={`carousel-item ${idx === 0 ? "active" : ""}`}
-                      style={{ height: 260 }}
-                    >
-                      <img
-                        src={img}
-                        alt={`Imagen ${idx + 1}`}
-                        className="d-block w-100"
-                        style={{ height: "100%", objectFit: "cover" }}
+              <Box className={styles.sectionHeading}>
+                <Box className={styles.sectionHeadingIcon}>
+                  <MaterialSymbol icon="photo_library" size="medium" />
+                </Box>
+
+                <Box>
+                  <Typography
+                    id="commerce-gallery-title"
+                    component="h2"
+                    className={styles.sectionTitle}
+                  >
+                    Imágenes del negocio
+                  </Typography>
+
+                  <Typography component="p" className={styles.sectionSubtitle}>
+                    Conoce las instalaciones y servicios del comercio.
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box className={styles.gallery}>
+                <Box className={styles.galleryImageContainer}>
+                  <Box
+                    component="img"
+                    src={imagenes[activeImage]}
+                    alt={`Imagen ${activeImage + 1} de ${imagenes.length} de ${
+                      comercio.nombre
+                    }`}
+                    className={styles.galleryImage}
+                  />
+
+                  <Box className={styles.galleryOverlay} aria-hidden="true" />
+
+                  <Box className={styles.galleryCounter}>
+                    <MaterialSymbol icon="image" size="small" />
+
+                    <span>
+                      {activeImage + 1} / {imagenes.length}
+                    </span>
+                  </Box>
+
+                  {imagenes.length > 1 && (
+                    <>
+                      <IconButton
+                        type="button"
+                        className={[
+                          styles.galleryButton,
+                          styles.previousButton,
+                        ].join(" ")}
+                        onClick={handlePreviousImage}
+                        aria-label="Mostrar imagen anterior"
+                      >
+                        <MaterialSymbol icon="chevron_left" size="large" />
+                      </IconButton>
+
+                      <IconButton
+                        type="button"
+                        className={[
+                          styles.galleryButton,
+                          styles.nextButton,
+                        ].join(" ")}
+                        onClick={handleNextImage}
+                        aria-label="Mostrar imagen siguiente"
+                      >
+                        <MaterialSymbol icon="chevron_right" size="large" />
+                      </IconButton>
+                    </>
+                  )}
+                </Box>
+
+                {imagenes.length > 1 && (
+                  <Box
+                    className={styles.galleryIndicators}
+                    role="tablist"
+                    aria-label="Seleccionar imagen"
+                  >
+                    {imagenes.map((image, index) => (
+                      <ButtonBase
+                        key={`${image}-${index}`}
+                        type="button"
+                        className={[
+                          styles.galleryIndicator,
+                          activeImage === index
+                            ? styles.galleryIndicatorActive
+                            : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                        onClick={() => setActiveImage(index)}
+                        role="tab"
+                        aria-selected={activeImage === index}
+                        aria-label={`Mostrar imagen ${index + 1}`}
                       />
-                    </div>
-                  ))}
-                </div>
-                <button
-                  className="carousel-control-prev"
-                  type="button"
-                  data-bs-target="#carouselComercio"
-                  data-bs-slide="prev"
-                >
-                  <span
-                    className="carousel-control-prev-icon"
-                    aria-hidden="true"
-                    style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))" }}
-                  />
-                  <span className="visually-hidden">Anterior</span>
-                </button>
-                <button
-                  className="carousel-control-next"
-                  type="button"
-                  data-bs-target="#carouselComercio"
-                  data-bs-slide="next"
-                >
-                  <span
-                    className="carousel-control-next-icon"
-                    aria-hidden="true"
-                    style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))" }}
-                  />
-                  <span className="visually-hidden">Siguiente</span>
-                </button>
-              </div>
+                    ))}
+                  </Box>
+                )}
+              </Box>
             </Box>
 
-            <Divider sx={{ opacity: 0.5 }} />
+            <Divider className={styles.divider} />
           </>
         )}
-        {horarios?.length > 0 && (
-          <Accordion sx={accordionSx}>
+
+        {horarios.length > 0 && (
+          <Accordion elevation={0} className={styles.accordion}>
             <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              sx={accordionSummarySx}
+              className={styles.accordionSummary}
+              expandIcon={<MaterialSymbol icon="expand_more" size="medium" />}
+              aria-controls="commerce-schedule-content"
+              id="commerce-schedule-header"
             >
-              <AccessTimeIcon sx={{ fontSize: 18, color: colorPrimario }} />
-              <Typography
-                fontWeight={700}
-                fontSize={{ xs: "0.95rem", sm: "1rem" }}
-              >
-                Horarios de atención
-              </Typography>
+              <Box className={styles.accordionTitleIcon}>
+                <MaterialSymbol icon="schedule" size="medium" />
+              </Box>
+
+              <Box>
+                <Typography component="h2" className={styles.accordionTitle}>
+                  Horarios de atención
+                </Typography>
+
+                <Typography component="p" className={styles.accordionSubtitle}>
+                  Consulta los días y horarios disponibles.
+                </Typography>
+              </Box>
             </AccordionSummary>
+
             <AccordionDetails
-              sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 2.5 } }}
+              id="commerce-schedule-content"
+              className={styles.accordionDetails}
             >
-              <Stack spacing={1}>
-                {horarios
-                  .sort((a, b) => a.dia - b.dia)
-                  .map((h) => (
-                    <Box
-                      key={h.dia}
-                      sx={{
-                        display: "flex",
-                        flexDirection: { xs: "column", sm: "row" },
-                        justifyContent: "space-between",
-                        alignItems: { xs: "flex-start", sm: "center" },
-                        gap: { xs: 0.5, sm: 1 },
-                        px: 2,
-                        py: 1.2,
-                        borderRadius: 2,
-                        backgroundColor: h.abierto
-                          ? `${colorPrimario}12`
-                          : "rgba(0,0,0,0.03)",
-                      }}
-                    >
-                      <Typography fontWeight={600} fontSize="0.9rem">
-                        {DIAS_SEMANA_MAP[h.dia]}
+              <Stack className={styles.scheduleList}>
+                {horarios.map((schedule) => (
+                  <Box
+                    key={schedule.dia}
+                    className={[
+                      styles.scheduleRow,
+                      schedule.abierto
+                        ? styles.scheduleRowOpen
+                        : styles.scheduleRowClosed,
+                    ].join(" ")}
+                  >
+                    <Box className={styles.scheduleDay}>
+                      <MaterialSymbol
+                        icon={
+                          schedule.abierto ? "calendar_today" : "event_busy"
+                        }
+                        size="small"
+                      />
+
+                      <Typography
+                        component="span"
+                        className={styles.scheduleDayText}
+                      >
+                        {DIAS_SEMANA_MAP[schedule.dia]}
                       </Typography>
-                      {h.abierto ? (
-                        <Typography
-                          sx={{
-                            fontSize: "0.82rem",
-                            color: "text.secondary",
-                            fontWeight: 500,
-                          }}
-                        >
-                          {h.horaAperturaFormateada} – {h.horaCierreFormateada}
-                        </Typography>
-                      ) : (
-                        <Chip
-                          label="Cerrado"
-                          size="small"
-                          variant="outlined"
-                          sx={{ fontSize: "0.7rem", fontWeight: 600 }}
-                        />
-                      )}
                     </Box>
-                  ))}
+
+                    {schedule.abierto ? (
+                      <Typography
+                        component="span"
+                        className={styles.scheduleTime}
+                      >
+                        {schedule.horaAperturaFormateada} –{" "}
+                        {schedule.horaCierreFormateada}
+                      </Typography>
+                    ) : (
+                      <Chip
+                        label="Cerrado"
+                        size="small"
+                        variant="outlined"
+                        className={styles.closedChip}
+                      />
+                    )}
+                  </Box>
+                ))}
               </Stack>
             </AccordionDetails>
           </Accordion>
         )}
 
-        <Accordion sx={accordionSx}>
+        <Accordion elevation={0} className={styles.accordion}>
           <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            sx={accordionSummarySx}
+            className={styles.accordionSummary}
+            expandIcon={<MaterialSymbol icon="expand_more" size="medium" />}
+            aria-controls="commerce-products-content"
+            id="commerce-products-header"
           >
-            <CategoryIcon sx={{ fontSize: 18, color: colorPrimario }} />
-            <Typography
-              fontWeight={700}
-              fontSize={{ xs: "0.95rem", sm: "1rem" }}
-            >
-              Productos / Servicios
-            </Typography>
+            <Box className={styles.accordionTitleIcon}>
+              <MaterialSymbol icon="category" size="medium" />
+            </Box>
+
+            <Box>
+              <Typography component="h2" className={styles.accordionTitle}>
+                Productos y servicios
+              </Typography>
+
+              <Typography component="p" className={styles.accordionSubtitle}>
+                Revisa lo que este comercio tiene disponible.
+              </Typography>
+            </Box>
           </AccordionSummary>
+
           <AccordionDetails
-            sx={{ px: { xs: 1.5, sm: 3 }, pb: { xs: 2.5, sm: 3 } }}
+            id="commerce-products-content"
+            className={[styles.accordionDetails, styles.productsDetails].join(
+              " ",
+            )}
           >
             {loadingProducts ? (
-              <Typography
-                sx={{
-                  textAlign: "center",
-                  color: "text.secondary",
-                  fontSize: "0.875rem",
-                  py: 3,
-                }}
-              >
-                Cargando productos…
-              </Typography>
+              <Box className={styles.productsLoading} aria-live="polite">
+                <CircularProgress
+                  size={32}
+                  thickness={4.5}
+                  className={styles.productsProgress}
+                />
+
+                <Typography
+                  component="p"
+                  className={styles.productsLoadingText}
+                >
+                  Cargando productos y servicios...
+                </Typography>
+              </Box>
             ) : productos.length === 0 ? (
-              <Box textAlign="center" py={3}>
-                <Typography fontSize="1.5rem">📦</Typography>
-                <Typography color="text.secondary" fontSize="0.875rem">
-                  No hay productos disponibles.
+              <Box className={styles.emptyProducts}>
+                <Box className={styles.emptyProductsIcon}>
+                  <MaterialSymbol icon="inventory_2" size="large" />
+                </Box>
+
+                <Typography
+                  component="h3"
+                  className={styles.emptyProductsTitle}
+                >
+                  Sin productos disponibles
+                </Typography>
+
+                <Typography
+                  component="p"
+                  className={styles.emptyProductsDescription}
+                >
+                  Este comercio todavía no ha publicado productos o servicios.
                 </Typography>
               </Box>
             ) : (
-              <Stack spacing={2.2}>
-                {productos.map((p) => (
-                  <Box
-                    key={p.id}
-                    sx={{
-                      borderRadius: 3,
-                      overflow: "hidden",
-                      transition: "transform .25s ease",
-                      "&:hover": { transform: "scale(1.01)" },
-                    }}
-                  >
-                    <ProductoCard producto={p} />
+              <Stack className={styles.productsList}>
+                {productos.map((producto) => (
+                  <Box key={producto.id} className={styles.productItem}>
+                    <ProductoCard producto={producto} />
                   </Box>
                 ))}
               </Stack>
             )}
           </AccordionDetails>
         </Accordion>
-        {comercio.lat !== 19.4326 && comercio.lng !== -99.1332 && (
+
+        {hasLocation && (
           <Box
-            sx={{
-              mt: { xs: 2.5, sm: 3.5 },
-              p: { xs: 1, sm: 1.5 },
-              borderRadius: { xs: 3, sm: 4 },
-
-              background: "rgba(255,255,255,0.88)",
-              backdropFilter: "blur(16px) saturate(180%)",
-              WebkitBackdropFilter: "blur(16px) saturate(180%)",
-
-              boxShadow: {
-                xs: "0 8px 22px rgba(0,0,0,0.08)",
-                sm: "0 14px 32px rgba(0,0,0,0.12)",
-              },
-
-              border: "1px solid rgba(255,255,255,0.6)",
-              overflow: "hidden",
-
-              height: { xs: 220, sm: 280 },
-            }}
+            component="section"
+            className={styles.locationSection}
+            aria-labelledby="commerce-location-title"
           >
-            <MapContainer
-              center={[Number(comercio.lat), Number(comercio.lng)]}
-              zoom={16}
-              style={{ height: "100%", width: "100%" }}
-              dragging={false}
-              scrollWheelZoom={false}
-              doubleClickZoom={false}
-              zoomControl={false}
-              touchZoom={false}
-              keyboard={false}
-              boxZoom={false}
+            <Box className={styles.sectionHeading}>
+              <Box className={styles.sectionHeadingIcon}>
+                <MaterialSymbol icon="map" size="medium" />
+              </Box>
+
+              <Box>
+                <Typography
+                  id="commerce-location-title"
+                  component="h2"
+                  className={styles.sectionTitle}
+                >
+                  Ubicación
+                </Typography>
+
+                <Typography component="p" className={styles.sectionSubtitle}>
+                  Consulta dónde se encuentra el comercio.
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* <Box className={styles.mapContainer}>
+              <MapaComercio lat={latitude} lng={longitude} />
+            </Box> */}
+
+            <Button
+              component="a"
+              href={`https://www.google.com/maps?q=${latitude},${longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="contained"
+              fullWidth
+              className={styles.mapButton}
+              startIcon={<MaterialSymbol icon="directions" size="small" />}
+              endIcon={<MaterialSymbol icon="open_in_new" size="small" />}
             >
-              <TileLayer
-                attribution="&copy; OpenStreetMap"
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Marker position={[Number(comercio.lat), Number(comercio.lng)]} />
-            </MapContainer>
+              Ver ubicación en Google Maps
+            </Button>
           </Box>
         )}
-        <Button
-          fullWidth
-          onClick={() =>
-            window.open(
-              `https://www.google.com/maps?q=${comercio?.lat},${comercio?.lng}`,
-              "_blank",
-            )
-          }
-          sx={{
-            mt: 1,
-            py: { xs: 1.4, sm: 1.6 },
-            borderRadius: 999,
-            fontWeight: 700,
-            fontSize: { xs: "0.875rem", sm: "0.9rem" },
-            textTransform: "none",
-            background: `linear-gradient(135deg, ${colorPrimario}, ${colorSecundario})`,
-            color: "#fff",
-            boxShadow: `0 8px 24px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.3)`,
-            transition: "all 0.25s ease",
-            "&:hover": {
-              transform: "translateY(-2px)",
-              boxShadow: `0 14px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.4)`,
-            },
-            "&:active": { transform: "scale(0.98)" },
-            mb: 1,
-          }}
-        >
-          Ver ubicación en el mapa
-        </Button>
       </Stack>
     </Box>
   );

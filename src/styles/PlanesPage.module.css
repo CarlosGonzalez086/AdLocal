@@ -1,0 +1,421 @@
+.page {
+  --plans-text: #1c1c1e;
+  --plans-muted: #82858d;
+  --plans-primary: #007aff;
+  --plans-error: #ff3b30;
+  --plans-border: rgba(15, 23, 42, 0.08);
+
+  width: 100%;
+  min-width: 0;
+}
+
+/* Carga inicial */
+
+.loadingPage {
+  width: 100%;
+}
+
+.loadingHeader {
+  margin-bottom: 16px;
+  padding: 40px 16px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.titleSkeleton {
+  width: 200px;
+  height: 36px !important;
+  margin-bottom: 12px;
+
+  border-radius: 999px !important;
+}
+
+.subtitleSkeleton {
+  width: min(280px, 90%);
+  height: 18px !important;
+
+  border-radius: 999px !important;
+}
+
+.loadingCardContainer {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.cardSkeleton {
+  width: 100%;
+  height: 380px !important;
+
+  border-radius: 24px !important;
+}
+
+.buttonSkeleton {
+  width: 100%;
+  height: 52px !important;
+  margin-top: 16px;
+
+  border-radius: 999px !important;
+}
+
+.loadingText {
+  margin: 18px 0 0 !important;
+
+  color: var(--plans-muted);
+
+  font-size: 0.73rem !important;
+  font-weight: 600 !important;
+  text-align: center;
+
+  animation: plans-loading-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes plans-loading-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Procesamiento */
+
+.processingBackdrop {
+  z-index: 1310 !important;
+
+  padding: 24px;
+
+  display: flex !important;
+  flex-direction: column;
+  gap: 17px;
+
+  color: var(--plans-text) !important;
+
+  background-color: rgba(255, 255, 255, 0.9) !important;
+
+  backdrop-filter: blur(14px) saturate(150%);
+
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+}
+
+.processingProgress {
+  filter: drop-shadow(0 5px 12px rgba(15, 23, 42, 0.12));
+}
+
+.activationProgress {
+  color: var(--plans-primary) !important;
+}
+
+.cancellationProgress {
+  color: var(--plans-error) !important;
+}
+
+.processingContent {
+  align-items: center;
+
+  gap: 4px !important;
+
+  text-align: center;
+}
+
+.processingTitle {
+  margin: 0 !important;
+
+  color: var(--plans-text);
+
+  font-size: 0.98rem !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+}
+
+.processingDescription {
+  margin: 0 !important;
+
+  color: var(--plans-muted);
+
+  font-size: 0.76rem !important;
+  line-height: 1.45 !important;
+}
+
+/* Encabezado */
+
+.hero {
+  padding: 38px 20px 32px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+}
+
+.heroIcon {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--plans-primary);
+
+  background-color: rgba(0, 122, 255, 0.09);
+
+  border: 1px solid rgba(0, 122, 255, 0.1);
+
+  border-radius: 17px;
+
+  box-shadow: 0 7px 19px rgba(0, 122, 255, 0.1);
+}
+
+.title {
+  margin: 0 !important;
+
+  color: var(--plans-text);
+
+  font-size: 1.85rem !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.04em !important;
+}
+
+.description {
+  margin: 9px 0 0 !important;
+
+  color: var(--plans-muted);
+
+  font-size: 0.84rem !important;
+  line-height: 1.5 !important;
+}
+
+/* Contenido */
+
+.content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+}
+
+.currentPlanContainer {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.availablePlansSection {
+  width: 100%;
+}
+
+/* Cambiar plan */
+
+.changePlanButton {
+  min-height: 49px;
+  margin-top: 17px !important;
+
+  color: #2e3035 !important;
+
+  background-color: rgba(15, 23, 42, 0.045) !important;
+
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+
+  border-radius: 999px !important;
+
+  font-size: 0.84rem !important;
+  font-weight: 750 !important;
+  text-transform: none !important;
+
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.changePlanButton:hover {
+  color: var(--plans-primary) !important;
+
+  background-color: rgba(0, 122, 255, 0.065) !important;
+
+  border-color: rgba(0, 122, 255, 0.17) !important;
+
+  transform: translateY(-1px);
+
+  box-shadow: 0 7px 18px rgba(0, 122, 255, 0.1);
+}
+
+.changePlanButton:active {
+  transform: scale(0.985);
+}
+
+/* Regresar al plan actual */
+
+.returnButtonContainer {
+  margin-bottom: 25px;
+
+  display: flex;
+  justify-content: center;
+}
+
+.returnButton {
+  min-height: 42px;
+  padding-right: 19px !important;
+  padding-left: 19px !important;
+
+  color: var(--plans-primary) !important;
+
+  background-color: rgba(255, 255, 255, 0.8) !important;
+
+  border: 1px solid rgba(0, 122, 255, 0.2) !important;
+
+  border-radius: 999px !important;
+
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+
+  box-shadow: 0 4px 13px rgba(0, 122, 255, 0.06);
+
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.returnButton:hover {
+  background-color: rgba(0, 122, 255, 0.06) !important;
+
+  border-color: rgba(0, 122, 255, 0.35) !important;
+
+  transform: translateX(-2px);
+
+  box-shadow: 0 6px 17px rgba(0, 122, 255, 0.11);
+}
+
+.returnButton:active {
+  transform: scale(0.985);
+}
+
+/* Tablet */
+
+@media (max-width: 899px) {
+  .hero {
+    padding-top: 32px;
+  }
+
+  .title {
+    font-size: 1.65rem !important;
+  }
+
+  .content {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+}
+
+/* Móvil */
+
+@media (max-width: 599px) {
+  .loadingHeader {
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+
+  .cardSkeleton {
+    height: 350px !important;
+
+    border-radius: 20px !important;
+  }
+
+  .hero {
+    padding: 28px 16px 25px;
+  }
+
+  .heroIcon {
+    width: 47px;
+    height: 47px;
+    margin-bottom: 12px;
+
+    border-radius: 15px;
+  }
+
+  .title {
+    font-size: 1.42rem !important;
+  }
+
+  .description {
+    margin-top: 7px !important;
+
+    font-size: 0.76rem !important;
+  }
+
+  .content {
+    padding-right: 13px;
+    padding-bottom: 32px;
+    padding-left: 13px;
+  }
+
+  .changePlanButton {
+    min-height: 47px;
+
+    font-size: 0.8rem !important;
+  }
+
+  .returnButtonContainer {
+    margin-bottom: 20px;
+  }
+
+  .returnButton {
+    min-height: 40px;
+
+    font-size: 0.76rem !important;
+  }
+
+  .processingBackdrop {
+    gap: 15px;
+  }
+
+  .processingTitle {
+    font-size: 0.91rem !important;
+  }
+
+  .processingDescription {
+    font-size: 0.71rem !important;
+  }
+}
+
+/* Sin hover */
+
+@media (hover: none) {
+  .changePlanButton:hover,
+  .returnButton:hover {
+    transform: none;
+  }
+}
+
+/* Animaciones reducidas */
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingText {
+    animation: none;
+  }
+
+  .changePlanButton,
+  .returnButton {
+    transition: none !important;
+  }
+
+  .changePlanButton:hover,
+  .returnButton:hover {
+    transform: none;
+  }
+}

@@ -2,23 +2,30 @@ import {
   AppBar,
   Avatar,
   Box,
+  Chip,
+  Divider,
   IconButton,
+  ListItemIcon,
   Menu,
   MenuItem,
   Toolbar,
   Typography,
   useMediaQuery,
   useTheme,
-  Divider,
-  Chip,
-  ListItemIcon,
 } from "@mui/material";
-import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
-import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
-import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
-import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import { useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
+
+import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
+
+import styles from "../../styles//UserHeader.module.css";
 import type { User } from "../../context/UserContext ";
 
 interface UserHeaderProps {
@@ -29,20 +36,57 @@ interface UserHeaderProps {
   sidebarWidth: number;
 }
 
+type HeaderCssVariables = CSSProperties & {
+  "--sidebar-width": string;
+};
+
 const menuTitles: Record<string, string> = {
   "/app": "Inicio",
   "/app/comercio": "Mis comercios",
+  "/app/comercio/nuevo": "Nuevo comercio",
+  "/app/comercio/editar": "Editar comercio",
   "/app/plan": "Mi plan",
   "/app/pagos": "Pagos",
   "/app/configuracion": "Configuración",
   "/app/perfil": "Mi perfil",
   "/app/productos-servicios": "Productos y servicios",
-  "/app/productos-servicios/comercios": "Productos y servicios de los comercios",
-  "/app/productos-servicios/comercios/comercio": "Productos y servicios del comercio",
+  "/app/productos-servicios/comercios":
+    "Productos y servicios de los comercios",
+  "/app/productos-servicios/comercios/comercio":
+    "Productos y servicios del comercio",
   "/app/tarjetas": "Tarjetas",
-  "/app/comercio/nuevo": "Nuevo comercio",
-  "/app/comercio/editar": "Editar comercio",
   "/app/vistaprevia": "Vista previa",
+};
+
+const normalizePathname = (pathname: string): string => {
+  if (pathname === "/") {
+    return pathname;
+  }
+
+  return pathname.replace(/\/+$/, "");
+};
+
+const getPageTitle = (pathname: string): string => {
+  const normalizedPath = normalizePathname(pathname);
+
+  const exactTitle = menuTitles[normalizedPath];
+
+  if (exactTitle) {
+    return exactTitle;
+  }
+
+  /*
+   * Permite reconocer rutas dinámicas como:
+   *
+   * /app/comercio/editar/15
+   * /app/vistaprevia/20
+   * /app/productos-servicios/comercios/comercio/5
+   */
+  const matchedRoute = Object.entries(menuTitles)
+    .sort(([firstPath], [secondPath]) => secondPath.length - firstPath.length)
+    .find(([route]) => normalizedPath.startsWith(`${route}/`));
+
+  return matchedRoute?.[1] ?? "Panel";
 };
 
 const UserHeader = ({
@@ -54,204 +98,209 @@ const UserHeader = ({
 }: UserHeaderProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const theme = useTheme();
+
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
   const [imgError, setImgError] = useState(false);
 
-  const showImage = !!user?.FotoUrl && !imgError;
+  const menuOpen = Boolean(anchorEl);
 
-  const path = location.pathname;
-  const basePath = path.split("/").slice(0, -1).join("/");
-  const isEditar = path.includes("/editar");
-  const isPSC = path.includes("/comercios/comercio");
-  const isPV = path.includes("/app/vistaprevia");
+  const showImage = Boolean(user?.FotoUrl) && !imgError;
 
-  const pageTitle = isPV
-    ? menuTitles[basePath]
-    : isPSC
-      ? menuTitles[basePath]
-      : isEditar
-        ? menuTitles[basePath]
-        : (menuTitles[path] ?? "");
+  const pageTitle = useMemo(
+    () => getPageTitle(location.pathname),
+    [location.pathname],
+  );
+
+  const userInitial = user?.nombre?.trim().charAt(0).toUpperCase() || "U";
+
+  const headerVariables: HeaderCssVariables = {
+    "--sidebar-width": `${sidebarWidth}px`,
+  };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setImgError(false);
+  }, [user?.FotoUrl]);
+
+  const handleToggleSidebar = () => {
+    if (isMobile) {
+      onMenuClick();
+      return;
+    }
+
+    onToggleCollapse();
+  };
+
+  const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
+  const handleNavigateProfile = () => {
+    handleCloseMenu();
+    navigate("/app/perfil");
+  };
+
+  const handleLogout = () => {
+    handleCloseMenu();
+
+    localStorage.removeItem("token");
+
+    navigate("/login", {
+      replace: true,
+    });
+  };
 
   return (
     <AppBar
       position="fixed"
       elevation={0}
-      sx={{
-        backdropFilter: "blur(20px) saturate(180%)",
-        WebkitBackdropFilter: "blur(20px) saturate(180%)",
-        background: "rgba(255,255,255,0.82)",
-        borderBottom: "1px solid rgba(0,0,0,0.06)",
-        color: "#1c1c1e",
-        width: { xs: "100%", md: `calc(100% - ${sidebarWidth}px)` },
-        ml: { xs: 0, md: `${sidebarWidth}px` },
-        transition: "all .35s cubic-bezier(.4,0,.2,1)",
-        zIndex: (theme) => theme.zIndex.drawer + 1,
-      }}
+      className={styles.appBar}
+      style={headerVariables}
     >
-      <Toolbar
-        sx={{
-          minHeight: { xs: 60, md: 68 },
-          px: { xs: 1.5, md: 3 },
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        {/* Left — toggle + título */}
-        <Box display="flex" alignItems="center" gap={1.2}>
+      <Toolbar className={styles.toolbar}>
+        <Box className={styles.leftSection}>
           <IconButton
-            onClick={isMobile ? onMenuClick : onToggleCollapse}
-            sx={{
-              width: 38,
-              height: 38,
-              borderRadius: 999,
-              bgcolor: "rgba(0,0,0,0.05)",
-              transition: "all 0.2s ease",
-              "&:hover": {
-                bgcolor: "rgba(0,0,0,0.09)",
-                transform: "scale(1.05)",
-              },
-            }}
-          >
-            {isMobile || collapsed
-              ? <MenuRoundedIcon sx={{ fontSize: 20 }} />
-              : <ChevronLeftRoundedIcon sx={{ fontSize: 20 }} />
+            type="button"
+            className={styles.menuButton}
+            onClick={handleToggleSidebar}
+            aria-label={
+              isMobile
+                ? "Abrir menú de navegación"
+                : collapsed
+                  ? "Expandir menú lateral"
+                  : "Contraer menú lateral"
             }
+          >
+            <MaterialSymbol
+              icon={isMobile || collapsed ? "menu" : "chevron_left"}
+              size="medium"
+            />
           </IconButton>
 
           {pageTitle && (
             <Typography
-              sx={{
-                fontSize: { xs: "0.95rem", md: "1.1rem" },
-                fontWeight: 800,
-                color: "#008989",
-                letterSpacing: "-0.3px",
-              }}
+              component="h1"
+              className={styles.pageTitle}
+              title={pageTitle}
             >
               {pageTitle}
             </Typography>
           )}
         </Box>
 
-        {/* Right — rol chip + avatar */}
         {user && (
-          <Box display="flex" alignItems="center" gap={1}>
-            <Chip
-              label={user?.rol}
-              size="small"
-              sx={{
-                px: 1,
-                height: 26,
-                fontSize: "0.7rem",
-                fontWeight: 700,
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                color: "#1c1c1e",
-                bgcolor: "rgba(0,0,0,0.06)",
-                border: "1px solid rgba(0,0,0,0.08)",
-                borderRadius: 999,
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)",
-                display: { xs: "none", sm: "flex" },
-              }}
-            />
+          <Box className={styles.userSection}>
+            <Chip label={user.rol} size="small" className={styles.roleChip} />
 
             <IconButton
-              onClick={(e) => setAnchorEl(e.currentTarget)}
-              sx={{ p: 0.5 }}
+              id="user-menu-button"
+              type="button"
+              className={styles.avatarButton}
+              onClick={handleOpenMenu}
+              aria-label="Abrir menú de usuario"
+              aria-controls={menuOpen ? "user-account-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={menuOpen ? "true" : undefined}
             >
               <Avatar
                 src={showImage ? user.FotoUrl : undefined}
-                onError={() => setImgError(true)}
-                sx={{
-                  width: 36,
-                  height: 36,
-                  fontWeight: 700,
-                  fontSize: "0.9rem",
-                  bgcolor: "#E8692C",
-                  border: "2px solid rgba(255,255,255,0.8)",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                  transition: "transform 0.2s ease",
-                  "&:hover": { transform: "scale(1.06)" },
+                alt={user.nombre ?? "Usuario"}
+                className={styles.avatar}
+                slotProps={{
+                  img: {
+                    onError: () => setImgError(true),
+                    referrerPolicy: "no-referrer",
+                  },
                 }}
               >
-                {!showImage && user.nombre?.[0]}
+                {!showImage && userInitial}
               </Avatar>
             </IconButton>
 
-            {/* Dropdown menu */}
             <Menu
+              id="user-account-menu"
               anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={() => setAnchorEl(null)}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-              PaperProps={{
-                sx: {
-                  borderRadius: 3,
-                  mt: 1,
-                  minWidth: 200,
-                  backdropFilter: "blur(20px)",
-                  bgcolor: "rgba(255,255,255,0.92)",
-                  boxShadow: "0 16px 40px rgba(0,0,0,0.16)",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  overflow: "hidden",
+              open={menuOpen}
+              onClose={handleCloseMenu}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              slotProps={{
+                paper: {
+                  className: styles.menuPaper,
                 },
               }}
             >
-              {/* Info usuario */}
-              <Box px={2} py={1.5}>
-                <Typography fontWeight={700} fontSize="0.875rem" color="text.primary">
-                  {user.nombre}
-                </Typography>
-                <Typography fontSize="0.75rem" color="text.disabled">
-                  {user?.rol}
-                </Typography>
+              <Box className={styles.userInformation}>
+                <Avatar
+                  src={showImage ? user.FotoUrl : undefined}
+                  alt=""
+                  className={styles.menuAvatar}
+                  slotProps={{
+                    img: {
+                      onError: () => setImgError(true),
+                      referrerPolicy: "no-referrer",
+                    },
+                  }}
+                >
+                  {!showImage && userInitial}
+                </Avatar>
+
+                <Box className={styles.userInformationText}>
+                  <Typography component="span" className={styles.userName}>
+                    {user.nombre || "Usuario"}
+                  </Typography>
+
+                  <Typography component="span" className={styles.userRole}>
+                    {user.rol}
+                  </Typography>
+                </Box>
               </Box>
 
-              <Divider sx={{ opacity: 0.6 }} />
+              <Divider className={styles.menuDivider} />
 
               <MenuItem
-                onClick={() => { setAnchorEl(null); navigate("/app/perfil"); }}
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                  px: 2,
-                  py: 1.2,
-                  gap: 1,
-                  "&:hover": { bgcolor: "rgba(0,0,0,0.04)" },
-                }}
+                className={styles.menuItem}
+                onClick={handleNavigateProfile}
               >
-                <ListItemIcon sx={{ minWidth: "auto" }}>
-                  <PersonOutlineRoundedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+                <ListItemIcon className={styles.menuItemIcon}>
+                  <MaterialSymbol icon="person" size="small" />
                 </ListItemIcon>
-                Mi perfil
+
+                <Typography component="span" className={styles.menuItemText}>
+                  Mi perfil
+                </Typography>
               </MenuItem>
 
-              <Divider sx={{ opacity: 0.6 }} />
+              <Divider className={styles.menuDivider} />
 
               <MenuItem
-                onClick={() => {
-                  setAnchorEl(null);
-                  localStorage.removeItem("token");
-                  window.location.href = "/login";
-                }}
-                sx={{
-                  fontWeight: 700,
-                  fontSize: "0.875rem",
-                  px: 2,
-                  py: 1.2,
-                  gap: 1,
-                  color: "error.main",
-                  "&:hover": { bgcolor: "rgba(255,59,48,0.06)" },
-                }}
+                className={[styles.menuItem, styles.logoutMenuItem].join(" ")}
+                onClick={handleLogout}
               >
-                <ListItemIcon sx={{ minWidth: "auto" }}>
-                  <LogoutRoundedIcon sx={{ fontSize: 18, color: "error.main" }} />
+                <ListItemIcon
+                  className={[styles.menuItemIcon, styles.logoutIcon].join(" ")}
+                >
+                  <MaterialSymbol icon="logout" size="small" />
                 </ListItemIcon>
-                Cerrar sesión
+
+                <Typography component="span" className={styles.menuItemText}>
+                  Cerrar sesión
+                </Typography>
               </MenuItem>
             </Menu>
           </Box>

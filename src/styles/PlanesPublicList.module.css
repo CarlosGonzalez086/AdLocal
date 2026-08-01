@@ -1,0 +1,273 @@
+.page {
+  --plans-primary: #007aff;
+  --plans-primary-dark: #005fcc;
+  --plans-background: #f2f2f7;
+  --plans-text: #1c1c1e;
+
+  position: relative;
+
+  width: 100%;
+  min-height: 100vh;
+  padding-bottom: 56px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  color: var(--plans-text);
+
+  background: linear-gradient(
+    145deg,
+    #f8f9fc 0%,
+    var(--plans-background) 48%,
+    #ebedf4 100%
+  );
+}
+
+/* Decoración del fondo */
+
+.backgroundDecoration {
+  position: fixed;
+  inset: 0;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.decorationOne,
+.decorationTwo {
+  position: absolute;
+
+  display: block;
+
+  border-radius: 50%;
+}
+
+.decorationOne {
+  top: -190px;
+  left: -160px;
+
+  width: 480px;
+  height: 480px;
+
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.13), transparent 70%);
+}
+
+.decorationTwo {
+  right: -220px;
+  bottom: -260px;
+
+  width: 620px;
+  height: 620px;
+
+  background: radial-gradient(circle, rgba(91, 58, 41, 0.1), transparent 70%);
+}
+
+/* Barra superior */
+
+.topBar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  width: 100%;
+  min-height: 78px;
+  padding: 18px 28px;
+
+  display: flex;
+  align-items: center;
+
+  background-color: rgba(242, 242, 247, 0.82);
+
+  border-bottom: 1px solid rgba(31, 41, 55, 0.06);
+
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+.backButton {
+  min-height: 42px;
+  padding-right: 20px !important;
+  padding-left: 20px !important;
+
+  color: var(--plans-primary) !important;
+
+  background-color: rgba(255, 255, 255, 0.7) !important;
+
+  border-color: rgba(0, 122, 255, 0.4) !important;
+
+  border-radius: 999px !important;
+
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+
+  box-shadow: 0 5px 18px rgba(31, 41, 55, 0.06);
+
+  transition:
+    transform 180ms ease,
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.backButton:hover {
+  color: var(--plans-primary-dark) !important;
+
+  background-color: rgba(255, 255, 255, 0.96) !important;
+
+  border-color: var(--plans-primary) !important;
+
+  transform: translateY(-1px);
+
+  box-shadow: 0 8px 22px rgba(31, 41, 55, 0.1);
+}
+
+.backButton:active {
+  transform: scale(0.98);
+}
+
+.backButton:focus-visible {
+  outline: 3px solid rgba(0, 122, 255, 0.22);
+
+  outline-offset: 3px;
+}
+
+/* Contenido */
+
+.container {
+  position: relative;
+  z-index: 1;
+}
+
+.logoSection {
+  padding-top: 52px;
+  padding-bottom: 38px;
+
+  display: flex;
+  justify-content: center;
+}
+
+.logoLink {
+  display: block;
+
+  border-radius: 20px;
+
+  transition:
+    transform 180ms ease,
+    filter 180ms ease;
+}
+
+.logoLink:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.02);
+}
+
+.logoLink:focus-visible {
+  outline: 3px solid rgba(0, 122, 255, 0.24);
+
+  outline-offset: 6px;
+}
+
+.logo {
+  width: 200px;
+  max-height: 116px;
+
+  display: block;
+  object-fit: contain;
+
+  border-radius: 18px;
+
+  box-shadow: 0 14px 34px rgba(31, 41, 55, 0.11);
+}
+
+.plansSection {
+  width: 100%;
+}
+
+/*
+  Estilos opcionales para mantener consistencia
+  en componentes MUI dentro del listado.
+*/
+
+.plansSection :global(.MuiCard-root),
+.plansSection :global(.MuiPaper-root) {
+  border-radius: 22px;
+}
+
+.plansSection :global(.MuiButton-root) {
+  text-transform: none;
+}
+
+/* Tablet */
+
+@media (max-width: 899px) {
+  .topBar {
+    min-height: 72px;
+    padding: 15px 20px;
+  }
+
+  .logoSection {
+    padding-top: 42px;
+    padding-bottom: 32px;
+  }
+
+  .logo {
+    width: 180px;
+  }
+}
+
+/* Móvil */
+
+@media (max-width: 599px) {
+  .page {
+    min-height: 100dvh;
+    padding-bottom: 38px;
+  }
+
+  .topBar {
+    min-height: 66px;
+    padding: 12px 14px;
+  }
+
+  .backButton {
+    min-width: 42px;
+    min-height: 42px;
+
+    padding-right: 14px !important;
+    padding-left: 14px !important;
+
+    font-size: 0.78rem !important;
+  }
+
+  .logoSection {
+    padding-top: 30px;
+    padding-bottom: 26px;
+  }
+
+  .logo {
+    width: 158px;
+    max-height: 92px;
+
+    border-radius: 16px;
+  }
+
+  .plansSection {
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+}
+
+/* Animaciones reducidas */
+
+@media (prefers-reduced-motion: reduce) {
+  .backButton,
+  .logoLink {
+    transition: none !important;
+  }
+
+  .backButton:hover,
+  .logoLink:hover {
+    transform: none;
+  }
+}

@@ -1,195 +1,297 @@
 import {
+  Box,
   Card,
   CardContent,
-  Box,
-  Typography,
   Skeleton,
   Stack,
+  Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useComercio } from "../../../hooks/useComercio";
-import { ComercioForm } from "./ComercioForm";
 import { jwtDecode } from "jwt-decode";
-import { defaultJwtClaims, type JwtClaims } from "../../../services/auth.api";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+
+import { useComercio } from "../../../hooks/useComercio";
+
+import { ComercioForm } from "./ComercioForm";
+import { ComercioActionsHeader } from "../../../components/Comercio/ComercioActionsHeader";
 import { ComercioPlanGate } from "../../../components/Comercio/ComercioPlanGate";
 import { ComercioPreviewCard } from "../../../components/Comercio/ComercioPreviewCard";
-import { ComercioActionsHeader } from "../../../components/Comercio/ComercioActionsHeader";
 import { ComerciosTable } from "../../../components/Comercio/ComerciosTable";
-import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
-import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol";
 
-const cardSx = {
-  borderRadius: 5,
-  bgcolor: "rgba(255,255,255,0.92)",
-  backdropFilter: "blur(14px)",
-  border: "1px solid rgba(0,0,0,0.06)",
-  boxShadow: "0 4px 16px rgba(0,0,0,0.07)",
+import { defaultJwtClaims, type JwtClaims } from "../../../services/auth.api";
+
+import styles from "../../../styles/MiComercioPage.module.css";
+
+interface FormPanelProps {
+  icon: string;
+  title: string;
+  description: string;
+  variant: "register" | "edit";
+  children: ReactNode;
+}
+
+const EMPTY_COMMERCE = {
+  id: 0,
+  nombre: "",
+  direccion: "",
+  telefono: "",
+  email: "",
+  descripcion: "",
+  activo: true,
+  lat: 0,
+  lng: 0,
+  logoBase64: "",
+  imagenes: [],
+  colorPrimario: "#007AFF",
+  colorSecundario: "#FF9500",
+  horarios: [],
+  estadoId: 0,
+  municipioId: 0,
+  estadoNombre: "",
+  municipioNombre: "",
+  promedioCalificacion: 0,
+  tipoComercioId: 0,
+  tipoComercio: "",
 };
 
-const formHeaderSx = {
-  display: "flex",
-  alignItems: "center",
-  gap: 1.5,
-  mb: 3,
-  pb: 2.5,
-  borderBottom: "1px solid rgba(0,0,0,0.06)",
+const decodeClaims = (token: string | null): JwtClaims => {
+  if (!token) {
+    return defaultJwtClaims;
+  }
+
+  try {
+    return jwtDecode<JwtClaims>(token);
+  } catch (error) {
+    console.error("No fue posible decodificar el JWT:", error);
+
+    return defaultJwtClaims;
+  }
+};
+
+const getInitialRows = (maxBusinesses: unknown): number => {
+  const parsedValue = Number(maxBusinesses);
+
+  if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+    return 10;
+  }
+
+  return Math.max(Math.floor(parsedValue), 1);
+};
+
+const FormPanel = ({
+  icon,
+  title,
+  description,
+  variant,
+  children,
+}: FormPanelProps) => {
+  return (
+    <Card
+      component="section"
+      elevation={0}
+      className={styles.formCard}
+      aria-labelledby={`${variant}-commerce-title`}
+    >
+      <CardContent className={styles.formContent}>
+        <Box className={styles.formHeader}>
+          <Box
+            className={[
+              styles.formHeaderIcon,
+              variant === "edit"
+                ? styles.editHeaderIcon
+                : styles.registerHeaderIcon,
+            ].join(" ")}
+          >
+            <MaterialSymbol icon={icon} size="medium" />
+          </Box>
+
+          <Box className={styles.formHeaderText}>
+            <Typography
+              id={`${variant}-commerce-title`}
+              component="h1"
+              className={styles.formTitle}
+            >
+              {title}
+            </Typography>
+
+            <Typography component="p" className={styles.formDescription}>
+              {description}
+            </Typography>
+          </Box>
+        </Box>
+
+        {children}
+      </CardContent>
+    </Card>
+  );
+};
+
+const PageSkeleton = () => {
+  return (
+    <Box
+      className={styles.loadingContainer}
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <Skeleton variant="rounded" className={styles.headerSkeleton} />
+
+      <Stack className={styles.rowsSkeleton}>
+        {[1, 2, 3].map((item) => (
+          <Skeleton
+            key={item}
+            variant="rounded"
+            className={styles.rowSkeleton}
+          />
+        ))}
+      </Stack>
+
+      <Typography component="p" className={styles.loadingText}>
+        Cargando información de tus comercios...
+      </Typography>
+    </Box>
+  );
 };
 
 export const MiComercioPage = () => {
   const {
-    comercio, loading, guardar, eliminar,
-    comercios, total, getAllComerciosByUser,
-    eliminarFromTable, guardarColaborador,
+    comercio,
+    loading,
+    guardar,
+    eliminar,
+    comercios,
+    total,
+    getAllComerciosByUser,
+    eliminarFromTable,
+    guardarColaborador,
   } = useComercio();
 
-  const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : defaultJwtClaims;
+  const claims = useMemo(() => decodeClaims(localStorage.getItem("token")), []);
 
   const [editando, setEditando] = useState(false);
-  const imagenes = comercio?.imagenes ?? [];
+
   const [page, setPage] = useState(0);
-  const [rows, setRows] = useState(Number(claims.maxNegocios));
 
-  const isProOrBusiness = claims.planTipo === "PRO" || claims.planTipo === "BUSINESS";
-  const isColaborador   = claims.rol === "Colaborador";
-  const isComercio      = claims.rol === "Comercio";
+  const [rows, setRows] = useState(() => getInitialRows(claims.maxNegocios));
 
-  const isPlanValido =
-    !isProOrBusiness || isColaborador || isComercio;
+  const isProOrBusiness =
+    claims.planTipo === "PRO" || claims.planTipo === "BUSINESS";
+
+  const isColaborador = claims.rol === "Colaborador";
+
+  const shouldLoadCommerceList = isProOrBusiness && !isColaborador;
+
+  const imagenes = comercio?.imagenes ?? [];
 
   useEffect(() => {
-    if (!isColaborador && isProOrBusiness) {
-      getAllComerciosByUser(page, rows);
+    if (!shouldLoadCommerceList) {
+      return;
     }
+
+    void getAllComerciosByUser(page, rows);
+  }, [shouldLoadCommerceList, page, rows, getAllComerciosByUser]);
+
+  const handleRowsPerPageChange = useCallback((value: number) => {
+    const parsedValue = Number(value);
+
+    if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+      return;
+    }
+
+    setRows(Math.floor(parsedValue));
+    setPage(0);
   }, []);
 
-  if (isPlanValido && loading) {
+  const handleUpdateCommerce = useCallback(
+    async (data: Parameters<typeof guardar>[0]) => {
+      await guardar(data);
+      setEditando(false);
+    },
+    [guardar],
+  );
+
+  const handleCancelEdit = useCallback(() => {
+    setEditando(false);
+  }, []);
+
+  if (loading) {
+    return <PageSkeleton />;
+  }
+
+  if (!comercio || comercio.id === 0) {
     return (
-      <Box>
-        <Skeleton variant="rounded" height={88} sx={{ borderRadius: 4, mb: 2.5 }} />
-        <Stack spacing={2}>
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} variant="rounded" height={64} sx={{ borderRadius: 3 }} />
-          ))}
-        </Stack>
-      </Box>
+      <FormPanel
+        icon="add_business"
+        title="Registrar comercio"
+        description="Completa la información necesaria para publicar tu negocio."
+        variant="register"
+      >
+        <ComercioForm
+          initialData={EMPTY_COMMERCE}
+          loading={loading}
+          onSave={guardar}
+          claims={claims}
+          soloVer
+        />
+      </FormPanel>
     );
   }
 
-  if (isPlanValido && comercio.id === 0) {
+  if (editando) {
     return (
-      <Card elevation={0} sx={cardSx}>
-        <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
-          <Box sx={formHeaderSx}>
-            <Box
-              sx={{
-                width: 40, height: 40, borderRadius: 3,
-                background: "linear-gradient(135deg, #1c1c1e, #3a3a3c)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.20)",
-              }}
-            >
-              <StorefrontRoundedIcon sx={{ fontSize: 20, color: "#fff" }} />
-            </Box>
-            <Box>
-              <Typography fontWeight={800} fontSize="1.1rem" letterSpacing="-0.2px">
-                Registrar comercio
-              </Typography>
-              <Typography fontSize="0.72rem" color="text.disabled" mt={0.1}>
-                Completa la información de tu negocio
-              </Typography>
-            </Box>
-          </Box>
-
-          <ComercioForm
-            initialData={{
-              id: 0, nombre: "", direccion: "", telefono: "",
-              email: "", descripcion: "", activo: true,
-              lat: 0, lng: 0, logoBase64: "", imagenes: [],
-              colorPrimario: "#007AFF", colorSecundario: "#FF9500",
-              horarios: [], estadoId: 0, municipioId: 0,
-              estadoNombre: "", municipioNombre: "",
-              promedioCalificacion: 0, tipoComercioId: 0, tipoComercio: "",
-            }}
-            loading={loading}
-            onSave={guardar}
-            claims={claims}
-            soloVer
-          />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (isPlanValido && editando) {
-    return (
-      <Card elevation={0} sx={cardSx}>
-        <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
-          <Box sx={formHeaderSx}>
-            <Box
-              sx={{
-                width: 40, height: 40, borderRadius: 3,
-                background: "linear-gradient(135deg, #007AFF, #005FCC)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 4px 12px rgba(0,122,255,0.28)",
-              }}
-            >
-              <EditRoundedIcon sx={{ fontSize: 20, color: "#fff" }} />
-            </Box>
-            <Box>
-              <Typography fontWeight={800} fontSize="1.1rem" letterSpacing="-0.2px">
-                Editar comercio
-              </Typography>
-              <Typography fontSize="0.72rem" color="text.disabled" mt={0.1}>
-                Actualiza la información de tu negocio
-              </Typography>
-            </Box>
-          </Box>
-
-          <ComercioForm
-            initialData={comercio}
-            loading={loading}
-            onSave={async (data) => {
-              await guardar(data);
-              setEditando(false);
-            }}
-            setEditando={() => setEditando(false)}
-            soloVer
-            claims={claims}
-          />
-        </CardContent>
-      </Card>
+      <FormPanel
+        icon="edit_square"
+        title="Editar comercio"
+        description="Actualiza la información, apariencia y ubicación de tu negocio."
+        variant="edit"
+      >
+        <ComercioForm
+          initialData={comercio}
+          loading={loading}
+          onSave={handleUpdateCommerce}
+          setEditando={handleCancelEdit}
+          soloVer
+          claims={claims}
+        />
+      </FormPanel>
     );
   }
 
   return (
-    <ComercioPlanGate
-      claims={claims}
-      fallback={
-        <ComercioPreviewCard
-          comercio={comercio}
-          claims={claims}
-          imagenes={imagenes}
-          eliminar={eliminar}
-          setEditando={setEditando}
-        />
-      }
-    >
-      <ComercioActionsHeader claims={claims} total={total} />
+    <Box component="main" className={styles.page}>
+      <ComercioPlanGate
+        claims={claims}
+        fallback={
+          <ComercioPreviewCard
+            comercio={comercio}
+            claims={claims}
+            imagenes={imagenes}
+            eliminar={eliminar}
+            setEditando={setEditando}
+          />
+        }
+      >
+        <ComercioActionsHeader claims={claims} total={total} />
 
-      <Box mt={2.5}>
-        <ComerciosTable
-          data={comercios}
-          loading={loading}
-          page={page}
-          rowsPerPage={rows}
-          total={total}
-          onPageChange={setPage}
-          onRowsPerPageChange={(r) => { setRows(r); setPage(0); }}
-          eliminarFromTable={eliminarFromTable}
-          onSaveColaborador={guardarColaborador}
-        />
-      </Box>
-    </ComercioPlanGate>
+        <Box className={styles.tableContainer}>
+          <ComerciosTable
+            data={comercios}
+            loading={loading}
+            page={page}
+            rowsPerPage={rows}
+            total={total}
+            onPageChange={setPage}
+            onRowsPerPageChange={handleRowsPerPageChange}
+            eliminarFromTable={eliminarFromTable}
+            onSaveColaborador={guardarColaborador}
+          />
+        </Box>
+      </ComercioPlanGate>
+    </Box>
   );
 };

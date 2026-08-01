@@ -1,0 +1,571 @@
+.wrapper {
+  --plan-gradient: linear-gradient(135deg, #8e8e93, #636366);
+
+  --plan-badge-gradient: linear-gradient(135deg, #8e8e93, #aeaeb2);
+
+  --plan-glow: rgba(142, 142, 147, 0.2);
+
+  --plan-accent: #8e8e93;
+
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+}
+
+/* Distintivo superior */
+
+.badgeContainer {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 10;
+
+  transform: translateX(-50%);
+}
+
+.badge {
+  min-height: 29px;
+  padding: 6px 15px;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  color: #ffffff;
+
+  background: var(--plan-badge-gradient);
+
+  background-size: 200% auto;
+
+  border: 1px solid rgba(255, 255, 255, 0.27);
+
+  border-radius: 999px;
+
+  box-shadow:
+    0 5px 19px var(--plan-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+  white-space: nowrap;
+
+  animation: plan-badge-shimmer 2.8s linear infinite;
+}
+
+@keyframes plan-badge-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.badgePulse {
+  width: 7px;
+  height: 7px;
+
+  flex-shrink: 0;
+
+  background-color: rgba(255, 255, 255, 0.94);
+
+  border-radius: 50%;
+
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.09);
+
+  animation: plan-badge-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes plan-badge-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.75);
+  }
+}
+
+.badgeText {
+  color: inherit;
+
+  font-size: 0.65rem !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.075em !important;
+  text-shadow: 0 1px 3px rgba(15, 23, 42, 0.22);
+  text-transform: uppercase;
+}
+
+/* Tarjeta */
+
+.card {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background-color: rgba(255, 255, 255, 0.93) !important;
+
+  border: 1px solid rgba(15, 23, 42, 0.07);
+
+  border-radius: 25px !important;
+
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.07) !important;
+
+  backdrop-filter: blur(15px) saturate(160%);
+
+  -webkit-backdrop-filter: blur(15px) saturate(160%);
+
+  transition:
+    transform 250ms ease,
+    border-color 250ms ease,
+    box-shadow 250ms ease !important;
+}
+
+.cardWithBadge {
+  margin-top: 15px;
+}
+
+.activeCard {
+  border-color: color-mix(in srgb, var(--plan-accent) 40%, transparent);
+
+  box-shadow: 0 16px 42px var(--plan-glow) !important;
+}
+
+.card:not(.activeCard):hover {
+  border-color: color-mix(in srgb, var(--plan-accent) 25%, transparent);
+
+  transform: translateY(-6px);
+
+  box-shadow: 0 20px 48px var(--plan-glow) !important;
+}
+
+/* Encabezado */
+
+.header {
+  position: relative;
+
+  min-height: 244px;
+  padding: 27px 25px 24px;
+
+  overflow: hidden;
+
+  color: #ffffff;
+
+  background: var(--plan-gradient);
+}
+
+.headerWithBadge {
+  padding-top: 34px;
+}
+
+.headerDecoration {
+  position: absolute;
+  top: -57px;
+  right: -48px;
+
+  width: 165px;
+  height: 165px;
+
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.14),
+    transparent 69%
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  border-radius: 50%;
+
+  pointer-events: none;
+}
+
+.statusRow {
+  position: relative;
+  z-index: 1;
+
+  margin-bottom: 17px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.planIcon {
+  width: 49px;
+  height: 49px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+
+  background-color: rgba(255, 255, 255, 0.16);
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  border-radius: 15px;
+
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.activeBadge {
+  min-height: 28px;
+  padding: 5px 10px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  color: #ffffff;
+
+  background-color: rgba(255, 255, 255, 0.18);
+
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  border-radius: 999px;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.activeBadgeText {
+  color: inherit;
+
+  font-size: 0.62rem !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase;
+}
+
+.planName {
+  position: relative;
+  z-index: 1;
+
+  margin: 0 !important;
+
+  color: #ffffff;
+
+  font-size: 1.18rem !important;
+  font-weight: 900 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.025em !important;
+
+  text-shadow: 0 2px 6px rgba(15, 23, 42, 0.14);
+}
+
+.duration {
+  position: relative;
+  z-index: 1;
+
+  margin: 5px 0 0 !important;
+
+  color: rgba(255, 255, 255, 0.73);
+
+  font-size: 0.71rem !important;
+  font-weight: 550 !important;
+}
+
+.priceContainer {
+  position: relative;
+  z-index: 1;
+
+  margin-top: 23px;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.price {
+  color: #ffffff;
+
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.045em !important;
+}
+
+.currency {
+  color: rgba(255, 255, 255, 0.82);
+
+  font-size: 0.81rem !important;
+  font-weight: 600 !important;
+}
+
+.taxLabel {
+  margin: 6px 0 0 !important;
+
+  color: rgba(255, 255, 255, 0.62);
+
+  font-size: 0.66rem !important;
+  font-weight: 500 !important;
+}
+
+/* Características */
+
+.content {
+  padding: 23px 25px 10px !important;
+
+  flex: 1;
+}
+
+.content:last-child {
+  padding-bottom: 10px !important;
+}
+
+.features {
+  gap: 10px !important;
+}
+
+/* Acciones */
+
+.actions {
+  padding: 12px 25px 25px !important;
+
+  display: block !important;
+}
+
+.activeActions {
+  width: 100%;
+
+  gap: 10px !important;
+}
+
+.detailsButton,
+.cancelButton,
+.selectButton {
+  min-height: 47px;
+
+  border-radius: 999px !important;
+
+  font-size: 0.81rem !important;
+  font-weight: 750 !important;
+  text-transform: none !important;
+}
+
+.detailsButton {
+  color: #34363b !important;
+
+  background-color: rgba(255, 255, 255, 0.78) !important;
+
+  border-color: rgba(15, 23, 42, 0.14) !important;
+}
+
+.detailsButton:hover {
+  color: var(--plan-accent) !important;
+
+  background-color: color-mix(in srgb, var(--plan-accent) 6%, white) !important;
+
+  border-color: color-mix(
+    in srgb,
+    var(--plan-accent) 24%,
+    transparent
+  ) !important;
+}
+
+.cancelButton {
+  color: #ffffff !important;
+
+  background: linear-gradient(135deg, #ff3b30, #d70015) !important;
+
+  box-shadow: 0 7px 20px rgba(255, 59, 48, 0.28) !important;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.cancelButton:hover {
+  background: linear-gradient(135deg, #ff5148, #d70015) !important;
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 11px 27px rgba(255, 59, 48, 0.39) !important;
+}
+
+.cancelButton:active {
+  transform: scale(0.985);
+}
+
+.selectButton {
+  color: #ffffff !important;
+
+  background: var(--plan-gradient) !important;
+
+  box-shadow: 0 8px 23px var(--plan-glow) !important;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.selectButton:hover {
+  background: var(--plan-gradient) !important;
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 12px 30px var(--plan-glow) !important;
+}
+
+.selectButton:active {
+  transform: scale(0.985);
+}
+
+/* Suscripción cancelada */
+
+.canceledNotice {
+  padding: 13px 14px;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  color: #df352e;
+
+  background-color: rgba(255, 59, 48, 0.065);
+
+  border: 1px solid rgba(255, 59, 48, 0.15);
+
+  border-radius: 14px;
+}
+
+.canceledIcon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  color: #ff3b30;
+
+  background-color: rgba(255, 59, 48, 0.1);
+
+  border-radius: 11px;
+}
+
+.canceledTitle {
+  margin: 1px 0 0 !important;
+
+  color: #df352e;
+
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+}
+
+.canceledDescription {
+  margin: 4px 0 0 !important;
+
+  color: #888b93;
+
+  font-size: 0.65rem !important;
+  line-height: 1.45 !important;
+}
+
+/* Móvil */
+
+@media (max-width: 599px) {
+  .card {
+    border-radius: 21px !important;
+  }
+
+  .header {
+    min-height: 227px;
+    padding: 24px 21px 22px;
+  }
+
+  .headerWithBadge {
+    padding-top: 31px;
+  }
+
+  .planIcon {
+    width: 45px;
+    height: 45px;
+
+    border-radius: 14px;
+  }
+
+  .planName {
+    font-size: 1.08rem !important;
+  }
+
+  .price {
+    font-size: 1.78rem !important;
+  }
+
+  .content {
+    padding: 20px 20px 9px !important;
+  }
+
+  .actions {
+    padding: 11px 20px 21px !important;
+  }
+
+  .detailsButton,
+  .cancelButton,
+  .selectButton {
+    min-height: 45px;
+
+    font-size: 0.77rem !important;
+  }
+
+  .badge {
+    padding-right: 13px;
+    padding-left: 13px;
+  }
+
+  .badgeText {
+    max-width: 200px;
+
+    overflow: hidden;
+
+    font-size: 0.61rem !important;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Sin hover */
+
+@media (hover: none) {
+  .card:not(.activeCard):hover,
+  .cancelButton:hover,
+  .selectButton:hover {
+    transform: none;
+  }
+}
+
+/* Animaciones reducidas */
+
+@media (prefers-reduced-motion: reduce) {
+  .badge,
+  .badgePulse {
+    animation: none;
+  }
+
+  .card,
+  .cancelButton,
+  .selectButton {
+    transition: none !important;
+  }
+
+  .card:not(.activeCard):hover,
+  .cancelButton:hover,
+  .selectButton:hover {
+    transform: none;
+  }
+}

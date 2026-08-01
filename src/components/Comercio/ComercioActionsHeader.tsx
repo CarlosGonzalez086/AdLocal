@@ -1,8 +1,17 @@
-import { Box, Button, Paper, Stack, Typography, LinearProgress } from "@mui/material";
-import type { JwtClaims } from "../../services/auth.api";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import {
+  Box,
+  Button,
+  LinearProgress,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { Link } from "react-router-dom";
+
+import type { JwtClaims } from "../../services/auth.api";
+import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
+
+import styles from "../../styles/ComercioActionsHeader.module.css";
 
 interface Props {
   claims: JwtClaims | null;
@@ -10,124 +19,144 @@ interface Props {
 }
 
 export function ComercioActionsHeader({ claims, total }: Props) {
-  const max = Number(claims?.maxNegocios);
-  const restantes = max - total;
-  const limiteAlcanzado = restantes <= 0;
-  const porcentaje = max > 0 ? (total / max) * 100 : 0;
+  const parsedMax = Number(claims?.maxNegocios);
+
+  const max =
+    Number.isFinite(parsedMax) && parsedMax > 0 ? Math.floor(parsedMax) : 0;
+
+  const totalRegistrados = Math.max(Math.floor(Number(total) || 0), 0);
+
+  const limiteDisponible = max > 0;
+
+  const restantes = limiteDisponible ? Math.max(max - totalRegistrados, 0) : 0;
+
+  const limiteAlcanzado = !limiteDisponible || totalRegistrados >= max;
+
+  const porcentaje = limiteDisponible
+    ? Math.min((totalRegistrados / max) * 100, 100)
+    : 0;
+
+  const statusMessage = !limiteDisponible
+    ? "No fue posible determinar el límite de negocios de tu plan."
+    : limiteAlcanzado
+      ? "Llegaste al límite de negocios de tu plan actual."
+      : `Puedes registrar ${restantes} ${
+          restantes === 1 ? "negocio" : "negocios"
+        } más.`;
 
   return (
     <Paper
+      component="section"
       elevation={0}
-      sx={{
-        mb: 3,
-        p: { xs: 2.5, sm: 3 },
-        borderRadius: 4,
-        border: "1px solid rgba(0,0,0,0.06)",
-        bgcolor: "rgba(255,255,255,0.92)",
-        backdropFilter: "blur(14px)",
-        boxShadow: "0 4px 16px rgba(0,0,0,0.07)",
-      }}
+      className={styles.container}
+      aria-labelledby="commerce-usage-title"
     >
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={2}
-      >
-        {/* Info uso */}
-        <Box flex={1}>
-          <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-            <Typography fontWeight={700} fontSize="0.9rem" color="text.primary">
-              Negocios registrados
-            </Typography>
+      <Stack className={styles.layout}>
+        <Box className={styles.information}>
+          <Box className={styles.header}>
+            <Box className={styles.titleContainer}>
+              <Box className={styles.titleIcon}>
+                <MaterialSymbol icon="storefront" size="medium" filled />
+              </Box>
+
+              <Box>
+                <Typography
+                  id="commerce-usage-title"
+                  component="h2"
+                  className={styles.title}
+                >
+                  Negocios registrados
+                </Typography>
+
+                <Typography component="p" className={styles.subtitle}>
+                  Uso disponible en tu plan actual
+                </Typography>
+              </Box>
+            </Box>
+
             <Box
-              sx={{
-                px: 1.2,
-                py: 0.2,
-                borderRadius: 999,
-                bgcolor: limiteAlcanzado
-                  ? "rgba(255,59,48,0.10)"
-                  : "rgba(52,199,89,0.10)",
-                border: `1px solid ${limiteAlcanzado ? "rgba(255,59,48,0.20)" : "rgba(52,199,89,0.20)"}`,
-              }}
+              className={[
+                styles.counterBadge,
+                limiteAlcanzado
+                  ? styles.counterBadgeLimit
+                  : styles.counterBadgeAvailable,
+              ].join(" ")}
             >
-              <Typography
-                fontSize="0.72rem"
-                fontWeight={700}
-                color={limiteAlcanzado ? "error.main" : "success.main"}
-              >
-                {total} / {max}
+              <Typography component="span" className={styles.counterText}>
+                {totalRegistrados} / {limiteDisponible ? max : "—"}
               </Typography>
             </Box>
-          </Stack>
+          </Box>
 
-          {/* Barra de progreso */}
-          <LinearProgress
-            variant="determinate"
-            value={Math.min(porcentaje, 100)}
-            sx={{
-              height: 6,
-              borderRadius: 999,
-              bgcolor: "rgba(0,0,0,0.06)",
-              "& .MuiLinearProgress-bar": {
-                borderRadius: 999,
-                bgcolor: limiteAlcanzado ? "error.main" : "success.main",
-              },
-            }}
-          />
+          <Box className={styles.progressContainer}>
+            <LinearProgress
+              variant="determinate"
+              value={porcentaje}
+              className={[
+                styles.progress,
+                limiteAlcanzado
+                  ? styles.progressLimit
+                  : styles.progressAvailable,
+              ].join(" ")}
+              aria-label="Uso del límite de negocios"
+              aria-valuetext={
+                limiteDisponible
+                  ? `${totalRegistrados} de ${max} negocios utilizados`
+                  : "Límite de negocios no disponible"
+              }
+            />
 
-          <Typography fontSize="0.75rem" color="text.disabled" mt={0.8}>
-            {limiteAlcanzado
-              ? "Llegaste al límite de negocios de tu plan actual"
-              : `Puedes registrar ${restantes} negocio${restantes !== 1 ? "s" : ""} más`}
-          </Typography>
+            <Box className={styles.progressInformation}>
+              <Typography
+                component="p"
+                className={[
+                  styles.statusMessage,
+                  limiteAlcanzado ? styles.statusMessageLimit : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <MaterialSymbol
+                  icon={limiteAlcanzado ? "info" : "check_circle"}
+                  size="small"
+                  filled={!limiteAlcanzado}
+                />
+
+                <span>{statusMessage}</span>
+              </Typography>
+
+              {limiteDisponible && (
+                <Typography component="span" className={styles.percentage}>
+                  {Math.round(porcentaje)}%
+                </Typography>
+              )}
+            </Box>
+          </Box>
         </Box>
 
-        {/* Botón */}
-        {!limiteAlcanzado ? (
-          <Link to="nuevo" style={{ textDecoration: "none" }}>
+        <Box className={styles.actionContainer}>
+          {!limiteAlcanzado ? (
             <Button
+              component={Link}
+              to="nuevo"
               variant="contained"
-              startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
-              sx={{
-                borderRadius: 999,
-                textTransform: "none",
-                fontWeight: 700,
-                fontSize: "0.875rem",
-                px: 3,
-                py: 1.2,
-                background: "linear-gradient(135deg, #1c1c1e, #3a3a3c)",
-                boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
-                whiteSpace: "nowrap",
-                transition: "all 0.25s ease",
-                "&:hover": {
-                  boxShadow: "0 10px 24px rgba(0,0,0,0.24)",
-                  transform: "translateY(-1px)",
-                },
-                "&:active": { transform: "scale(0.98)" },
-              }}
+              className={styles.createButton}
+              startIcon={<MaterialSymbol icon="add_business" size="small" />}
             >
               Nuevo negocio
             </Button>
-          </Link>
-        ) : (
-          <Button
-            variant="outlined"
-            disabled
-            startIcon={<LockRoundedIcon sx={{ fontSize: 18 }} />}
-            sx={{
-              borderRadius: 999,
-              textTransform: "none",
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              px: 3,
-              py: 1.2,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Límite alcanzado
-          </Button>
-        )}
+          ) : (
+            <Button
+              type="button"
+              variant="outlined"
+              disabled
+              className={styles.limitButton}
+              startIcon={<MaterialSymbol icon="lock" size="small" filled />}
+            >
+              Límite alcanzado
+            </Button>
+          )}
+        </Box>
       </Stack>
     </Paper>
   );

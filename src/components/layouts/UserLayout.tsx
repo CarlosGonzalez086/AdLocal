@@ -1,53 +1,94 @@
 import { Box } from "@mui/material";
-import { useContext, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useState,
+} from "react";
 import { Outlet } from "react-router-dom";
 
-import UserSidebar from "./UserSidebar";
-import UserHeader from "./UserHeader";
-import { UserContext } from "../../context/UserContext ";
-import "../../styles/styles.css";
 
-const drawerWidth = 240;
-const collapsedWidth = 76;
+import UserHeader from "./UserHeader";
+import UserSidebar from "./UserSidebar";
+
+import "../../styles/styles.css";
+import styles from "../../styles/UserLayout.module.css";
+import { UserContext } from "../../context/UserContext ";
+
+const DRAWER_WIDTH = 240;
+const COLLAPSED_WIDTH = 76;
 
 const UserLayout = () => {
   const user = useContext(UserContext);
 
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] =
+    useState(false);
 
-  const sidebarWidth = collapsed ? collapsedWidth : drawerWidth;
+  const [collapsed, setCollapsed] =
+    useState(false);
+
+  const sidebarWidth = collapsed
+    ? COLLAPSED_WIDTH
+    : DRAWER_WIDTH;
+
+  const handleOpenMobileMenu =
+    useCallback(() => {
+      setMobileOpen(true);
+    }, []);
+
+  const handleCloseMobileMenu =
+    useCallback(() => {
+      setMobileOpen(false);
+    }, []);
+
+  const handleToggleCollapse =
+    useCallback(() => {
+      setCollapsed(
+        (currentValue) => !currentValue,
+      );
+    }, []);
 
   return (
-    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+    <Box className={styles.layout}>
+      <Box
+        component="a"
+        href="#user-main-content"
+        className={styles.skipLink}
+      >
+        Ir al contenido principal
+      </Box>
+
       <UserHeader
         user={user}
-        onMenuClick={() => setMobileOpen(true)}
+        onMenuClick={handleOpenMobileMenu}
+        onToggleCollapse={
+          handleToggleCollapse
+        }
         collapsed={collapsed}
-        onToggleCollapse={() => setCollapsed(!collapsed)}
         sidebarWidth={sidebarWidth}
       />
 
-      <Box sx={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
+      <Box className={styles.contentRow}>
         <UserSidebar
-          drawerWidth={drawerWidth}
-          collapsedWidth={collapsedWidth}
+          drawerWidth={DRAWER_WIDTH}
+          collapsedWidth={COLLAPSED_WIDTH}
           mobileOpen={mobileOpen}
-          onCloseMobile={() => setMobileOpen(false)}
+          onCloseMobile={
+            handleCloseMobileMenu
+          }
           collapsed={collapsed}
         />
 
         <Box
+          id="user-main-content"
           component="main"
-          sx={{
-            flexGrow: 1,
-            mt: "68px",
-            overflowY: "auto",
-            px: { xs: 1.5, md: 3 },
-          }}
-          className="p-3"
+          tabIndex={-1}
+          className={styles.mainContent}
         >
-          <Outlet />
+          <Box
+            className={styles.outletContainer}
+          >
+            <Outlet />
+          </Box>
         </Box>
       </Box>
     </Box>

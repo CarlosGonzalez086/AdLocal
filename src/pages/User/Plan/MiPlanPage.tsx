@@ -1,175 +1,300 @@
-import { useContext, useEffect, useState } from "react";
 import {
-  Typography,
+  Backdrop,
   Box,
   Button,
-  useMediaQuery,
   CircularProgress,
-  Backdrop,
   Skeleton,
   Stack,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-
-import { PlanesUserList } from "../../../components/Plan/PlanesUserList";
-import { PlanCard } from "../../../components/Plan/PlanCard";
-import { useSuscripciones } from "../../../hooks/useSuscripciones";
-import { SuscripcionDetalleModal } from "../../../components/Suscripcion/SuscripcionDetalleModal";
-import theme from "../../../theme/theme";
-import { useCheckout } from "../../../hooks/useCheckout";
-import type { JwtClaims } from "../../../services/auth.api";
 import { jwtDecode } from "jwt-decode";
-import { UserContext } from "../../../context/UserContext ";
-import { useActualizarJwt } from "../../../hooks/useActualizarJwt";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import toast from "react-hot-toast";
+
+import { PlanCard } from "../../../components/Plan/PlanCard";
+import { PlanesUserList } from "../../../components/Plan/PlanesUserList";
+import { SuscripcionDetalleModal } from "../../../components/Suscripcion/SuscripcionDetalleModal";
+import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol";
+
+import { useActualizarJwt } from "../../../hooks/useActualizarJwt";
+import { useCheckout } from "../../../hooks/useCheckout";
+import { useSuscripciones } from "../../../hooks/useSuscripciones";
+
+import type { JwtClaims } from "../../../services/auth.api";
+
 import { calcularDiasRestantesDesdeHoy } from "../../../utils/generalsFunctions";
-import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
-import SwapHorizRoundedIcon from "@mui/icons-material/SwapHorizRounded";
 
-const PlanesPage = () => {
-  const { suscripcion, obtenerMiSuscripcion, loading } = useSuscripciones();
-  const { cancelarPlan, isCancel } = useCheckout();
+import styles from "../../../styles/PlanesPage.module.css";
+import { UserContext } from "../../../context/UserContext ";
 
-  const [openDetalle, setOpenDetalle] = useState(false);
-  const [modoCambio, setModoCambio] = useState(false);
-  const [isSubSuccess, setIsSubSuccess] = useState(false);
-  const [showProcessing, setShowProcessing] = useState(false);
+type ProcessingType = "activation" | "cancellation" | null;
 
-  const dataJwt = localStorage.getItem("token");
-  const claims: JwtClaims | null = dataJwt
-    ? jwtDecode<JwtClaims>(dataJwt)
-    : null;
-  const user = useContext(UserContext);
-  const { actualizarJwt } = useActualizarJwt();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-  useEffect(() => {
-    obtenerMiSuscripcion();
-  }, []);
-
-  useEffect(() => {
-    if (isSubSuccess) {
-      const timer = setTimeout(() => obtenerMiSuscripcion(), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [isSubSuccess]);
-
-  useEffect(() => {
-    if ((isSubSuccess || isCancel) && !loading) setShowProcessing(true);
-
-    if (!loading) {
-      const checkEstado = async () => {
-        try {
-          if (!suscripcion) return;
-          let mensaje: string | null = null;
-          if (isSubSuccess) mensaje = "Tu suscripción ya está activa";
-          else if (isCancel)
-            mensaje =
-              "Tu suscripción fue cancelada y seguirá activa hasta el final del periodo";
-          else if (suscripcion.plan?.tipo === "FREE")
-            mensaje = "Tu cuenta ahora tiene el Plan Free activo";
-
-          await actualizarJwt({ email: user.sub, updateJWT: true });
-          if (mensaje) toast.success(mensaje);
-        } catch {
-          toast.error("Error verificando suscripción");
-        } finally {
-          setIsSubSuccess(false);
-          setShowProcessing(false);
-        }
-      };
-      const timer = setTimeout(checkEstado, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [isSubSuccess, isCancel, suscripcion, loading]);
-
-  /* ─── LOADING ─── */
-  if (loading) {
-    return (
-      <Box>
-        {/* Header skeleton */}
-        <Box textAlign="center" py={5} mb={2}>
-          <Skeleton
-            variant="rounded"
-            width={200}
-            height={36}
-            sx={{ borderRadius: 999, mx: "auto", mb: 1.5 }}
-          />
-          <Skeleton
-            variant="rounded"
-            width={280}
-            height={18}
-            sx={{ borderRadius: 999, mx: "auto" }}
-          />
-        </Box>
-        <Box maxWidth={420} mx="auto" px={2}>
-          <Skeleton variant="rounded" height={380} sx={{ borderRadius: 5 }} />
-          <Skeleton
-            variant="rounded"
-            height={52}
-            sx={{ borderRadius: 999, mt: 2 }}
-          />
-        </Box>
-      </Box>
-    );
+const decodeClaims = (token: string | null): JwtClaims | null => {
+  if (!token) {
+    return null;
   }
 
+  try {
+    return jwtDecode<JwtClaims>(token);
+  } catch (error) {
+    console.error("No fue posible decodificar el JWT:", error);
+
+    return null;
+  }
+};
+
+const PlanesPageSkeleton = () => {
   return (
-    <Box>
-      {/* BACKDROP procesando */}
+    <Box className={styles.loadingPage} aria-busy="true" aria-live="polite">
+      <Box className={styles.loadingHeader}>
+        <Skeleton variant="rounded" className={styles.titleSkeleton} />
+
+        <Skeleton variant="rounded" className={styles.subtitleSkeleton} />
+      </Box>
+
+      <Box className={styles.loadingCardContainer}>
+        <Skeleton variant="rounded" className={styles.cardSkeleton} />
+
+        <Skeleton variant="rounded" className={styles.buttonSkeleton} />
+      </Box>
+
+      <Typography component="p" className={styles.loadingText}>
+        Cargando la información de tu plan...
+      </Typography>
+    </Box>
+  );
+};
+
+const PlanesPage = () => {
+  const theme = useTheme();
+
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const user = useContext(UserContext);
+
+  const { suscripcion, obtenerMiSuscripcion, loading } = useSuscripciones();
+
+  const { cancelarPlan, isCancel } = useCheckout();
+
+  const { actualizarJwt } = useActualizarJwt();
+
+  const claims = useMemo(() => decodeClaims(localStorage.getItem("token")), []);
+
+  const [openDetalle, setOpenDetalle] = useState(false);
+
+  const [modoCambio, setModoCambio] = useState(false);
+
+  const [isSubSuccess, setIsSubSuccess] = useState(false);
+
+  const [processingType, setProcessingType] = useState<ProcessingType>(null);
+
+  /*
+   * Se mantienen referencias actualizadas para
+   * evitar que los efectos se repitan si las
+   * funciones de los hooks cambian de identidad.
+   */
+  const obtenerSuscripcionRef = useRef(obtenerMiSuscripcion);
+
+  const actualizarJwtRef = useRef(actualizarJwt);
+
+  const userEmailRef = useRef(user?.sub ?? claims?.sub ?? "");
+
+  useEffect(() => {
+    obtenerSuscripcionRef.current = obtenerMiSuscripcion;
+  }, [obtenerMiSuscripcion]);
+
+  useEffect(() => {
+    actualizarJwtRef.current = actualizarJwt;
+  }, [actualizarJwt]);
+
+  useEffect(() => {
+    userEmailRef.current = user?.sub ?? claims?.sub ?? "";
+  }, [user?.sub, claims?.sub]);
+
+  /*
+   * Consulta inicial de la suscripción.
+   */
+  useEffect(() => {
+    void obtenerSuscripcionRef.current();
+  }, []);
+
+  /*
+   * Detecta una activación o cancelación
+   * completada desde los hooks correspondientes.
+   */
+  useEffect(() => {
+    if (isSubSuccess) {
+      setProcessingType("activation");
+      return;
+    }
+
+    if (isCancel) {
+      setProcessingType("cancellation");
+    }
+  }, [isSubSuccess, isCancel]);
+
+  /*
+   * Actualiza la suscripción y el JWT después
+   * de una operación exitosa.
+   */
+  useEffect(() => {
+    if (!processingType) {
+      return;
+    }
+
+    let active = true;
+
+    const timer = window.setTimeout(async () => {
+      try {
+        await obtenerSuscripcionRef.current();
+
+        const email = userEmailRef.current.trim();
+
+        if (email) {
+          await actualizarJwtRef.current({
+            email,
+            updateJWT: true,
+          });
+        }
+
+        if (!active) {
+          return;
+        }
+
+        if (processingType === "cancellation") {
+          toast.success(
+            "Tu suscripción fue cancelada y seguirá activa hasta el final del periodo.",
+          );
+        } else {
+          toast.success("Tu suscripción ya está activa.");
+        }
+
+        setModoCambio(false);
+        setOpenDetalle(false);
+      } catch (error) {
+        console.error("Error al verificar la suscripción:", error);
+
+        if (active) {
+          toast.error("No fue posible verificar el estado de la suscripción.");
+        }
+      } finally {
+        if (active) {
+          setIsSubSuccess(false);
+          setProcessingType(null);
+        }
+      }
+    }, 1000);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [processingType]);
+
+  const handleOpenDetails = useCallback(() => {
+    setOpenDetalle(true);
+  }, []);
+
+  const handleCloseDetails = useCallback(() => {
+    setOpenDetalle(false);
+  }, []);
+
+  const handleOpenPlans = useCallback(() => {
+    setOpenDetalle(false);
+    setModoCambio(true);
+  }, []);
+
+  const handleReturnToCurrentPlan = useCallback(() => {
+    setModoCambio(false);
+  }, []);
+
+  const showingCurrentPlan = Boolean(suscripcion) && !modoCambio;
+
+  const showingAvailablePlans = !suscripcion || modoCambio;
+
+  const processing = processingType !== null;
+
+  /*
+   * Durante una actualización posterior al
+   * checkout se conserva la página y se muestra
+   * el backdrop. El skeleton solo corresponde
+   * a la carga inicial.
+   */
+  if (loading && !processing && !isSubSuccess && !isCancel) {
+    return <PlanesPageSkeleton />;
+  }
+
+  const pageTitle = showingCurrentPlan ? "Mi plan" : "Planes disponibles";
+
+  const pageDescription = showingCurrentPlan
+    ? "Administra tu suscripción actual."
+    : "Elige el plan que mejor se adapte a tu negocio.";
+
+  return (
+    <Box component="main" className={styles.page}>
       <Backdrop
-        open={showProcessing}
-        sx={{
-          zIndex: (t) => t.zIndex.modal + 10,
-          bgcolor: "rgba(255,255,255,0.88)",
-          backdropFilter: "blur(12px)",
-          flexDirection: "column",
-          gap: 2,
-        }}
+        open={processing}
+        className={styles.processingBackdrop}
+        aria-live="assertive"
       >
         <CircularProgress
           size={52}
           thickness={4}
-          sx={{ color: isCancel ? "#FF3B30" : "#007AFF" }}
+          className={[
+            styles.processingProgress,
+            processingType === "cancellation"
+              ? styles.cancellationProgress
+              : styles.activationProgress,
+          ].join(" ")}
         />
-        <Stack alignItems="center" spacing={0.5}>
-          <Typography fontWeight={800} fontSize="1rem" color="text.primary">
-            {isCancel ? "Procesando cancelación…" : "Activando tu suscripción…"}
+
+        <Stack className={styles.processingContent}>
+          <Typography component="p" className={styles.processingTitle}>
+            {processingType === "cancellation"
+              ? "Procesando cancelación"
+              : "Activando tu suscripción"}
           </Typography>
-          <Typography fontSize="0.8rem" color="text.disabled">
-            Esto solo tomará unos segundos
+
+          <Typography component="p" className={styles.processingDescription}>
+            Estamos actualizando la información de tu cuenta.
           </Typography>
         </Stack>
       </Backdrop>
 
-      {/* HERO HEADER */}
-      <Box
-        sx={{
-          py: { xs: 4, sm: 5 },
-          textAlign: "center",
-          mb: 3,
-        }}
-      >
-        <Typography
-          sx={{
-            fontSize: { xs: "1.5rem", sm: "1.9rem" },
-            fontWeight: 800,
-            color: "#1c1c1e",
-            letterSpacing: "-0.5px",
-          }}
-        >
-          {suscripcion && !modoCambio ? "📋 Mi plan" : "🚀 Planes disponibles"}
+      <Box component="header" className={styles.hero}>
+        <Box className={styles.heroIcon}>
+          <MaterialSymbol
+            icon={showingCurrentPlan ? "contract" : "rocket_launch"}
+            size="large"
+            filled={showingCurrentPlan}
+          />
+        </Box>
+
+        <Typography component="h1" className={styles.title}>
+          {pageTitle}
         </Typography>
-        <Typography fontSize="0.875rem" color="text.disabled" mt={0.8}>
-          {suscripcion && !modoCambio
-            ? "Administra tu suscripción actual"
-            : "Elige el plan que mejor se adapte a tu negocio"}
+
+        <Typography component="p" className={styles.description}>
+          {pageDescription}
         </Typography>
       </Box>
 
-      <Box maxWidth={1200} mx="auto" px={{ xs: 2, md: 3 }}>
-        {/* PLAN ACTUAL */}
+      <Box className={styles.content}>
         {suscripcion && !modoCambio && (
-          <Box maxWidth={440} mx="auto">
+          <Box
+            component="section"
+            className={styles.currentPlanContainer}
+            aria-label="Suscripción actual"
+          >
             {(!isMobile || !openDetalle) && (
               <>
                 <PlanCard
@@ -183,7 +308,7 @@ const PlanesPage = () => {
                   esActivo={suscripcion.activa}
                   isMultiUsuario={suscripcion.plan.isMultiUsuario}
                   onCancelar={cancelarPlan}
-                  onVerDetalle={() => setOpenDetalle(true)}
+                  onVerDetalle={handleOpenDetails}
                   tieneAnalytics={suscripcion.plan.tieneAnalytics}
                   coloresPersonalizados={suscripcion.plan.coloresPersonalizados}
                   soportePrioritario={suscripcion.plan.tieneBadge}
@@ -193,25 +318,11 @@ const PlanesPage = () => {
                 />
 
                 <Button
+                  type="button"
                   fullWidth
-                  onClick={() => setModoCambio(true)}
-                  startIcon={<SwapHorizRoundedIcon sx={{ fontSize: 18 }} />}
-                  sx={{
-                    mt: 2,
-                    py: 1.4,
-                    borderRadius: 999,
-                    textTransform: "none",
-                    fontWeight: 700,
-                    fontSize: "0.9rem",
-                    bgcolor: "rgba(0,0,0,0.05)",
-                    color: "text.primary",
-                    border: "1px solid rgba(0,0,0,0.08)",
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      bgcolor: "rgba(0,0,0,0.09)",
-                      transform: "translateY(-1px)",
-                    },
-                  }}
+                  className={styles.changePlanButton}
+                  onClick={handleOpenPlans}
+                  startIcon={<MaterialSymbol icon="swap_horiz" size="small" />}
                 >
                   Cambiar plan
                 </Button>
@@ -220,36 +331,25 @@ const PlanesPage = () => {
 
             <SuscripcionDetalleModal
               open={openDetalle}
-              onClose={() => setOpenDetalle(false)}
+              onClose={handleCloseDetails}
               suscripcion={suscripcion}
             />
           </Box>
         )}
 
-        {/* LISTA DE PLANES */}
-        {(!suscripcion || modoCambio) && (
-          <>
+        {showingAvailablePlans && (
+          <Box
+            component="section"
+            className={styles.availablePlansSection}
+            aria-label="Planes disponibles"
+          >
             {suscripcion && (
-              <Box textAlign="center" mb={3}>
+              <Box className={styles.returnButtonContainer}>
                 <Button
-                  onClick={() => setModoCambio(false)}
-                  startIcon={<ArrowBackRoundedIcon sx={{ fontSize: 16 }} />}
-                  sx={{
-                    borderRadius: 999,
-                    textTransform: "none",
-                    fontWeight: 600,
-                    fontSize: "0.875rem",
-                    color: "#007AFF",
-                    px: 2.5,
-                    py: 0.9,
-                    border: "1px solid rgba(0,122,255,0.20)",
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      bgcolor: "rgba(0,122,255,0.06)",
-                      borderColor: "rgba(0,122,255,0.35)",
-                      transform: "translateX(-2px)",
-                    },
-                  }}
+                  type="button"
+                  className={styles.returnButton}
+                  onClick={handleReturnToCurrentPlan}
+                  startIcon={<MaterialSymbol icon="arrow_back" size="small" />}
                 >
                   Volver a mi plan
                 </Button>
@@ -257,7 +357,7 @@ const PlanesPage = () => {
             )}
 
             <PlanesUserList setIsSubSuccess={setIsSubSuccess} />
-          </>
+          </Box>
         )}
       </Box>
     </Box>

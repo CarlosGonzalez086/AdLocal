@@ -5,7 +5,7 @@ import type { ApiResponse } from "../api/apiResponse";
    Axios instance
 ============================ */
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/Usuarios`,
+  baseURL: `https://adlocalapi.onrender.com/api/Usuarios`,
   headers: {
     "Content-Type": "application/json",
   },

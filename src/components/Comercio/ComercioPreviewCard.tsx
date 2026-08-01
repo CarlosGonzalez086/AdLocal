@@ -9,27 +9,135 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
+
 import type { JwtClaims } from "../../services/auth.api";
 import type { ComercioDto } from "../../services/comercioApi";
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
-import {
-  LocationOnRounded,
-  PhoneRounded,
-  EmailRounded,
-  AccessTimeRounded,
-  PaletteRounded,
-  EditRounded,
-  DeleteOutlineRounded,
-} from "@mui/icons-material";
+
 import { DIAS_SEMANA_MAP } from "../../utils/constantes";
+
+// import MapaComercio from "./MapaComercio.client";
+import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
+
+import styles from "../../styles/ComercioPreviewCard.module.css";
 
 interface Props {
   comercio: ComercioDto;
   claims: JwtClaims;
   imagenes: string[];
   eliminar: () => void;
-  setEditando: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditando: Dispatch<SetStateAction<boolean>>;
 }
+
+interface InfoRowProps {
+  icon: string;
+  text: string;
+  tone?: "primary" | "success" | "error";
+}
+
+interface SectionTitleProps {
+  icon?: string;
+  text: string;
+  description?: string;
+}
+
+interface SectionCardProps {
+  children: ReactNode;
+}
+
+interface ColorChipProps {
+  label: string;
+  color?: string;
+}
+
+type CommerceCssVariables = CSSProperties & {
+  "--commerce-primary": string;
+  "--commerce-secondary": string;
+};
+
+type ColorChipCssVariables = CSSProperties & {
+  "--color-chip": string;
+};
+
+const DEFAULT_PRIMARY_COLOR = "#007AFF";
+const DEFAULT_SECONDARY_COLOR = "#0051FF";
+
+const isPresent = (value: unknown): boolean => {
+  return value !== null && value !== undefined && String(value).trim() !== "";
+};
+
+const InfoRow = ({ icon, text, tone = "primary" }: InfoRowProps) => {
+  const toneClass = {
+    primary: styles.infoIconPrimary,
+    success: styles.infoIconSuccess,
+    error: styles.infoIconError,
+  }[tone];
+
+  return (
+    <Box className={styles.infoRow}>
+      <Box className={[styles.infoIcon, toneClass].join(" ")}>
+        <MaterialSymbol icon={icon} size="medium" filled={tone === "success"} />
+      </Box>
+
+      <Typography component="p" className={styles.infoText}>
+        {text}
+      </Typography>
+    </Box>
+  );
+};
+
+const SectionCard = ({ children }: SectionCardProps) => {
+  return <Box className={styles.sectionCard}>{children}</Box>;
+};
+
+const SectionTitle = ({ icon, text, description }: SectionTitleProps) => {
+  return (
+    <Box className={styles.sectionHeading}>
+      {icon && (
+        <Box className={styles.sectionIcon}>
+          <MaterialSymbol icon={icon} size="medium" />
+        </Box>
+      )}
+
+      <Box className={styles.sectionHeadingText}>
+        <Typography component="h2" className={styles.sectionTitle}>
+          {text}
+        </Typography>
+
+        {description && (
+          <Typography component="p" className={styles.sectionDescription}>
+            {description}
+          </Typography>
+        )}
+      </Box>
+    </Box>
+  );
+};
+
+const ColorChip = ({ label, color }: ColorChipProps) => {
+  const chipColor = color?.trim() || DEFAULT_PRIMARY_COLOR;
+
+  const chipVariables: ColorChipCssVariables = {
+    "--color-chip": chipColor,
+  };
+
+  return (
+    <Chip
+      label={label}
+      size="small"
+      className={styles.colorChip}
+      style={chipVariables}
+    />
+  );
+};
 
 export function ComercioPreviewCard({
   comercio,
@@ -38,297 +146,314 @@ export function ComercioPreviewCard({
   eliminar,
   setEditando,
 }: Props) {
+  const [logoError, setLogoError] = useState(false);
+
+  const colorPrimario = comercio.colorPrimario?.trim() || DEFAULT_PRIMARY_COLOR;
+
+  const colorSecundario =
+    comercio.colorSecundario?.trim() || DEFAULT_SECONDARY_COLOR;
+
+  const commerceVariables: CommerceCssVariables = {
+    "--commerce-primary": colorPrimario,
+    "--commerce-secondary": colorSecundario,
+  };
+
+  const horariosOrdenados = useMemo(() => {
+    return [...(comercio.horarios ?? [])].sort(
+      (firstSchedule, secondSchedule) => firstSchedule.dia - secondSchedule.dia,
+    );
+  }, [comercio.horarios]);
+
+  const maxFotos = useMemo(() => {
+    const parsedValue = Number(claims.maxFotos);
+
+    if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+      return imagenes.length;
+    }
+
+    return Math.floor(parsedValue);
+  }, [claims.maxFotos, imagenes.length]);
+
+  const imagenesVisibles = useMemo(() => {
+    return imagenes
+      .filter(
+        (image): image is string =>
+          typeof image === "string" && image.trim().length > 0,
+      )
+      .slice(0, maxFotos);
+  }, [imagenes, maxFotos]);
+
+  const address = useMemo(() => {
+    const parts = [
+      comercio.direccion,
+      comercio.municipioNombre,
+      comercio.estadoNombre,
+    ].filter(
+      (value): value is string =>
+        typeof value === "string" && value.trim().length > 0,
+    );
+
+    return parts.join(", ");
+  }, [comercio.direccion, comercio.municipioNombre, comercio.estadoNombre]);
+
+  const latitude = Number(comercio.lat);
+  const longitude = Number(comercio.lng);
+
+  const hasLocation =
+    isPresent(comercio.lat) &&
+    isPresent(comercio.lng) &&
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180;
+
+  const showLogo = Boolean(comercio.logoBase64) && !logoError;
+
+  const commerceInitial =
+    comercio.nombre?.trim().charAt(0).toUpperCase() || "C";
+
+  const hasGalleryOrSchedules =
+    imagenesVisibles.length > 0 || horariosOrdenados.length > 0;
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLogoError(false);
+  }, [comercio.id, comercio.logoBase64]);
+
   return (
     <Card
+      component="article"
       elevation={0}
-      sx={{
-        borderRadius: 5,
-        overflow: "hidden",
-        bgcolor: "rgba(255,255,255,0.92)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(0,0,0,0.06)",
-        boxShadow: "0 20px 48px rgba(0,0,0,0.09)",
-      }}
+      className={styles.card}
+      style={commerceVariables}
     >
-      <Box
-        sx={{
-          background: `linear-gradient(135deg, ${comercio.colorPrimario}, ${comercio.colorSecundario})`,
-          py: { xs: 5, sm: 6 },
-          px: 3,
-          textAlign: "center",
-          position: "relative",
-        }}
-      >
-        <Avatar
-          src={comercio.logoBase64}
-          variant="rounded"
-          sx={{
-            width: { xs: 96, sm: 114 },
-            height: { xs: 96, sm: 114 },
-            mx: "auto",
-            mb: 2,
-            borderRadius: 4,
-            border: "3px solid rgba(255,255,255,0.85)",
-            boxShadow: "0 12px 32px rgba(0,0,0,0.22)",
-          }}
-        />
+      <Box component="header" className={styles.hero}>
+        <Box className={styles.heroDecoration} aria-hidden="true">
+          <Box className={styles.heroDecorationPrimary} />
 
-        <Typography
-          sx={{
-            fontSize: { xs: "1.4rem", sm: "1.7rem" },
-            fontWeight: 800,
-            color: "#fff",
-            letterSpacing: "-0.5px",
+          <Box className={styles.heroDecorationSecondary} />
+        </Box>
+
+        <Avatar
+          src={showLogo ? comercio.logoBase64 : undefined}
+          alt={`Logotipo de ${comercio.nombre}`}
+          variant="rounded"
+          className={styles.logo}
+          slotProps={{
+            img: {
+              onError: () => setLogoError(true),
+            },
           }}
         >
+          {!showLogo && commerceInitial}
+        </Avatar>
+
+        <Typography component="h1" className={styles.commerceName}>
           {comercio.nombre}
         </Typography>
 
         {comercio.descripcion && (
-          <Typography
-            sx={{
-              mt: 1.2,
-              maxWidth: 480,
-              mx: "auto",
-              fontSize: "0.875rem",
-              color: "rgba(255,255,255,0.82)",
-              lineHeight: 1.6,
-            }}
-          >
+          <Typography component="p" className={styles.commerceDescription}>
             {comercio.descripcion}
           </Typography>
         )}
       </Box>
 
-      <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
+      <CardContent className={styles.content}>
         <SectionCard>
-          <Stack spacing={1.8}>
-            {comercio.direccion && (
-              <InfoRow
-                icon={
-                  <LocationOnRounded sx={{ color: "#007AFF", fontSize: 20 }} />
-                }
-                text={`${comercio.direccion}, ${comercio.municipioNombre}, ${comercio.estadoNombre}`}
-              />
+          <SectionTitle
+            icon="contact_page"
+            text="Información del comercio"
+            description="Datos principales que podrán consultar los usuarios."
+          />
+
+          <Stack className={styles.infoList}>
+            {address && (
+              <InfoRow icon="location_on" text={address} tone="primary" />
             )}
+
             {comercio.telefono && (
-              <InfoRow
-                icon={<PhoneRounded sx={{ color: "#34C759", fontSize: 20 }} />}
-                text={comercio.telefono}
-              />
+              <InfoRow icon="call" text={comercio.telefono} tone="success" />
             )}
+
             {comercio.email && (
-              <InfoRow
-                icon={<EmailRounded sx={{ color: "#FF3B30", fontSize: 20 }} />}
-                text={comercio.email}
-              />
+              <InfoRow icon="mail" text={comercio.email} tone="error" />
             )}
           </Stack>
         </SectionCard>
 
-        <>
-          <Divider sx={{ my: 3, opacity: 0.5 }} />
-          <SectionCard>
-            <SectionTitle
-              icon={<PaletteRounded sx={{ color: "#FF9500", fontSize: 18 }} />}
-              text="Colores de marca"
-            />
-            <Stack direction="row" spacing={1.5}>
-              <ColorChip label="Primario" color={comercio.colorPrimario} />
-              <ColorChip label="Secundario" color={comercio.colorSecundario} />
-            </Stack>
-          </SectionCard>
-        </>
+        <Divider className={styles.divider} />
 
-        {(imagenes.length > 0 || comercio.horarios.length > 0) && (
+        <SectionCard>
+          <SectionTitle
+            icon="palette"
+            text="Colores de marca"
+            description="Paleta utilizada en la presentación pública del negocio."
+          />
+
+          <Box className={styles.colorList}>
+            <ColorChip label="Primario" color={colorPrimario} />
+
+            <ColorChip label="Secundario" color={colorSecundario} />
+          </Box>
+        </SectionCard>
+
+        {hasGalleryOrSchedules && (
           <>
-            <Divider sx={{ my: 3, opacity: 0.5 }} />
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                gap: 3,
-              }}
-            >
-              {/* GALERÍA */}
-              {imagenes.length > 0 && (
-                <Box>
-                  <SectionTitle text="🖼️ Galería" />
-                  <Stack spacing={1.5}>
-                    {imagenes.slice(0, claims?.maxFotos).map((img, i) => (
+            <Divider className={styles.divider} />
+
+            <Box className={styles.galleryScheduleGrid}>
+              {imagenesVisibles.length > 0 && (
+                <Box
+                  component="section"
+                  className={styles.gallerySection}
+                  aria-labelledby="preview-gallery-title"
+                >
+                  <SectionTitle
+                    icon="photo_library"
+                    text="Galería"
+                    description={`${imagenesVisibles.length} ${
+                      imagenesVisibles.length === 1
+                        ? "imagen visible"
+                        : "imágenes visibles"
+                    } en este plan.`}
+                  />
+
+                  <Box className={styles.galleryGrid}>
+                    {imagenesVisibles.map((image, index) => (
                       <Box
-                        key={i}
-                        sx={{
-                          borderRadius: 3,
-                          overflow: "hidden",
-                          height: 140,
-                          border: "1px solid rgba(0,0,0,0.06)",
-                          boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
-                          transition:
-                            "transform 0.25s ease, box-shadow 0.25s ease",
-                          "&:hover": {
-                            transform: "scale(1.02)",
-                            boxShadow: "0 10px 28px rgba(0,0,0,0.14)",
-                          },
-                        }}
+                        key={`${image}-${index}`}
+                        className={styles.galleryItem}
                       >
-                        <img
-                          src={img}
-                          alt=""
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
+                        <Box
+                          component="img"
+                          src={image}
+                          alt={`Imagen ${index + 1} de ${comercio.nombre}`}
+                          className={styles.galleryImage}
                         />
+
+                        <Box
+                          className={styles.galleryImageOverlay}
+                          aria-hidden="true"
+                        />
+
+                        <Box className={styles.galleryImageNumber}>
+                          {index + 1}
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
+              {horariosOrdenados.length > 0 && (
+                <Box
+                  component="section"
+                  className={styles.scheduleSection}
+                  aria-labelledby="preview-schedules-title"
+                >
+                  <SectionTitle
+                    icon="schedule"
+                    text="Horarios"
+                    description="Días y horas configurados para la atención."
+                  />
+
+                  <Stack className={styles.scheduleList}>
+                    {horariosOrdenados.map((schedule) => (
+                      <Box
+                        key={schedule.dia}
+                        className={[
+                          styles.scheduleRow,
+                          schedule.abierto
+                            ? styles.scheduleOpen
+                            : styles.scheduleClosed,
+                        ].join(" ")}
+                      >
+                        <Box className={styles.scheduleDay}>
+                          <MaterialSymbol
+                            icon={
+                              schedule.abierto ? "calendar_today" : "event_busy"
+                            }
+                            size="small"
+                          />
+
+                          <Typography
+                            component="span"
+                            className={styles.scheduleDayText}
+                          >
+                            {DIAS_SEMANA_MAP[schedule.dia]}
+                          </Typography>
+                        </Box>
+
+                        {schedule.abierto ? (
+                          <Typography
+                            component="span"
+                            className={styles.scheduleTime}
+                          >
+                            {schedule.horaApertura} – {schedule.horaCierre}
+                          </Typography>
+                        ) : (
+                          <Chip
+                            label="Cerrado"
+                            size="small"
+                            className={styles.closedChip}
+                          />
+                        )}
                       </Box>
                     ))}
                   </Stack>
                 </Box>
               )}
-              {comercio.horarios.length > 0 && (
-                <Box>
-                  <SectionTitle
-                    icon={
-                      <AccessTimeRounded
-                        sx={{ color: "#5856D6", fontSize: 18 }}
-                      />
-                    }
-                    text="Horarios"
-                  />
-                  <Stack spacing={1}>
-                    {comercio.horarios
-                      .sort((a, b) => a.dia - b.dia)
-                      .map((h) => (
-                        <Box
-                          key={h.dia}
-                          sx={{
-                            px: 2,
-                            py: 1.2,
-                            borderRadius: 3,
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            bgcolor: h.abierto
-                              ? "rgba(255,255,255,0.95)"
-                              : "rgba(0,0,0,0.03)",
-                            border: "1px solid",
-                            borderColor: h.abierto
-                              ? "rgba(0,0,0,0.06)"
-                              : "rgba(0,0,0,0.04)",
-                          }}
-                        >
-                          <Typography fontWeight={600} fontSize="0.875rem">
-                            {DIAS_SEMANA_MAP[h.dia]}
-                          </Typography>
-                          {h.abierto ? (
-                            <Typography
-                              fontSize="0.8rem"
-                              color="text.secondary"
-                              fontWeight={500}
-                            >
-                              {h.horaApertura} – {h.horaCierre}
-                            </Typography>
-                          ) : (
-                            <Chip
-                              label="Cerrado"
-                              size="small"
-                              sx={{
-                                height: 22,
-                                fontSize: "0.7rem",
-                                fontWeight: 700,
-                                bgcolor: "rgba(255,59,48,0.10)",
-                                color: "#FF3B30",
-                                borderRadius: 999,
-                              }}
-                            />
-                          )}
-                        </Box>
-                      ))}
-                  </Stack>
-                </Box>
-              )}
             </Box>
           </>
         )}
 
-        {comercio.lat && comercio.lng && (
+        {hasLocation && (
           <>
-            <Divider sx={{ my: 3, opacity: 0.5 }} />
+            <Divider className={styles.divider} />
+
             <Box
-              sx={{
-                height: { xs: 240, sm: 300 },
-                borderRadius: 4,
-                overflow: "hidden",
-                border: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
-              }}
+              component="section"
+              className={styles.mapSection}
+              aria-labelledby="preview-location-title"
             >
-              <MapContainer
-                center={[Number(comercio.lat), Number(comercio.lng)]}
-                zoom={16}
-                style={{ height: "100%", width: "100%" }}
-                dragging={false}
-                scrollWheelZoom={false}
-              >
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <Marker
-                  position={[Number(comercio.lat), Number(comercio.lng)]}
-                />
-              </MapContainer>
+              <SectionTitle
+                icon="map"
+                text="Ubicación"
+                description="Vista previa de la ubicación registrada para el comercio."
+              />
+
+              {/* <Box className={styles.mapContainer}>
+                <MapaComercio lat={latitude} lng={longitude} />
+              </Box> */}
             </Box>
           </>
         )}
 
-        <Divider sx={{ my: 3, opacity: 0.5 }} />
+        <Divider className={styles.divider} />
 
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+        <Stack className={styles.actions}>
           <Button
+            type="button"
             variant="contained"
+            className={styles.editButton}
             onClick={() => setEditando(true)}
-            startIcon={<EditRounded sx={{ fontSize: 18 }} />}
-            sx={{
-              flex: 1,
-              py: 1.4,
-              borderRadius: 999,
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.9rem",
-              background: "linear-gradient(135deg, #007AFF, #0051FF)",
-              boxShadow: "0 8px 22px rgba(0,122,255,0.30)",
-              transition: "all 0.25s ease",
-              "&:hover": {
-                boxShadow: "0 12px 28px rgba(0,122,255,0.42)",
-                transform: "translateY(-1px)",
-              },
-              "&:active": { transform: "scale(0.98)" },
-            }}
+            startIcon={<MaterialSymbol icon="edit" size="small" />}
           >
-            Editar
+            Editar comercio
           </Button>
 
-          {claims?.rol !== "Colaborador" && (
+          {claims.rol !== "Colaborador" && (
             <Button
+              type="button"
               variant="outlined"
-              color="error"
+              className={styles.deleteButton}
               onClick={eliminar}
-              startIcon={<DeleteOutlineRounded sx={{ fontSize: 18 }} />}
-              sx={{
-                flex: 1,
-                py: 1.4,
-                borderRadius: 999,
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: "0.9rem",
-                borderColor: "rgba(255,59,48,0.35)",
-                "&:hover": {
-                  bgcolor: "rgba(255,59,48,0.06)",
-                  borderColor: "#FF3B30",
-                },
-              }}
+              startIcon={<MaterialSymbol icon="delete" size="small" />}
             >
-              Eliminar
+              Eliminar comercio
             </Button>
           )}
         </Stack>
@@ -336,58 +461,3 @@ export function ComercioPreviewCard({
     </Card>
   );
 }
-
-
-const SectionCard = ({ children }: { children: React.ReactNode }) => (
-  <Box
-    sx={{
-      p: { xs: 2, sm: 2.5 },
-      borderRadius: 4,
-      bgcolor: "rgba(255,255,255,0.95)",
-      border: "1px solid rgba(0,0,0,0.06)",
-      boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-    }}
-  >
-    {children}
-  </Box>
-);
-
-const InfoRow = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
-  <Box display="flex" gap={1.5} alignItems="center">
-    {icon}
-    <Typography fontSize="0.875rem" color="text.secondary" fontWeight={500}>
-      {text}
-    </Typography>
-  </Box>
-);
-
-const SectionTitle = ({
-  icon,
-  text,
-}: {
-  icon?: React.ReactNode;
-  text: string;
-}) => (
-  <Box display="flex" alignItems="center" gap={0.8} mb={1.5}>
-    {icon}
-    <Typography fontWeight={700} fontSize="0.9rem" color="text.primary">
-      {text}
-    </Typography>
-  </Box>
-);
-
-const ColorChip = ({ label, color }: { label: string; color: string }) => (
-  <Chip
-    label={label}
-    size="small"
-    sx={{
-      bgcolor: color,
-      color: "#fff",
-      px: 1.5,
-      fontWeight: 700,
-      fontSize: "0.75rem",
-      borderRadius: 999,
-      boxShadow: `0 4px 12px ${color}55`,
-    }}
-  />
-);

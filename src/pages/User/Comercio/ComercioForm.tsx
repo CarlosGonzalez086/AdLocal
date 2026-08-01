@@ -1,83 +1,268 @@
 import {
-  TextField,
-  Button,
-  CircularProgress,
   Avatar,
   Box,
-  Typography,
+  Button,
+  CircularProgress,
   FormControlLabel,
-  Switch,
-  Tabs,
-  Tab,
   Stack,
+  Switch,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+
+import L from "leaflet";
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+
+import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import Swal from "sweetalert2";
+
 import type {
   ComercioDto,
   HorarioComercioDto,
 } from "../../../services/comercioApi";
-import L from "leaflet";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import type { JwtClaims } from "../../../services/auth.api";
+
 import { DIAS_SEMANA } from "../../../utils/constantes";
-import { TimePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
+
 import { SelectEstadoAutocomplete } from "../../../components/Locations/SelectEstadoAutocomplete";
 import { SelectMunicipioAutocomplete } from "../../../components/Locations/SelectMunicipioAutocomplete";
-import type { JwtClaims } from "../../../services/auth.api";
 import { SelectTipoComercioAutocomplete } from "../../../components/TipoComercio/SelectTipoComercioAutocomplete";
+import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol";
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+import styles from "../../../styles/ComercioForm.module.css";
+
+delete (
+  L.Icon.Default.prototype as {
+    _getIconUrl?: unknown;
+  }
+)._getIconUrl;
+
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-const normalizarHorarios = (horarios: HorarioComercioDto[] = []) =>
-  DIAS_SEMANA.map((d) => {
-    const existente = horarios.find((h) => h.dia === d.dia);
+const DEFAULT_LATITUDE = 19.4326;
+const DEFAULT_LONGITUDE = -99.1332;
+
+type EditableTextField =
+  | "nombre"
+  | "direccion"
+  | "telefono"
+  | "email"
+  | "descripcion"
+  | "colorPrimario"
+  | "colorSecundario";
+
+interface Props {
+  initialData: ComercioDto | null;
+  loading?: boolean;
+  onSave:
+    | ((data: ComercioDto) => void)
+    | ((data: ComercioDto) => Promise<void>);
+  soloVer?: boolean;
+  setEditando?: () => void;
+  claims: JwtClaims | null;
+}
+
+interface TabPanelProps {
+  value: number;
+  index: number;
+  labelledBy: string;
+  children: ReactNode;
+}
+
+interface SectionHeaderProps {
+  icon: string;
+  title: string;
+  description?: string;
+}
+
+interface LocationPickerProps {
+  latitude: number;
+  longitude: number;
+  editable: boolean;
+  onLocationChange: (latitude: number, longitude: number) => void;
+}
+
+interface MapViewportProps {
+  latitude: number;
+  longitude: number;
+}
+
+const normalizarHorarios = (
+  horarios: HorarioComercioDto[] = [],
+): HorarioComercioDto[] => {
+  return DIAS_SEMANA.map((day) => {
+    const existingSchedule = horarios.find(
+      (schedule) => schedule.dia === day.dia,
+    );
+
     return (
-      existente ?? {
-        dia: d.dia,
+      existingSchedule ?? {
+        dia: day.dia,
         abierto: false,
         horaApertura: undefined,
         horaCierre: undefined,
       }
     );
   });
+};
 
-const TabPanel = ({
-  value,
-  index,
-  children,
-}: {
-  value: number;
-  index: number;
-  children: React.ReactNode;
-}) =>
-  value === index ? (
+const createFormState = (initialData: ComercioDto | null): ComercioDto => ({
+  id: initialData?.id ?? 0,
+  nombre: initialData?.nombre ?? "",
+  direccion: initialData?.direccion ?? "",
+  telefono: initialData?.telefono ?? "",
+  email: initialData?.email ?? "",
+  descripcion: initialData?.descripcion ?? "",
+  activo: initialData?.activo ?? true,
+  lat: initialData?.lat ?? 0,
+  lng: initialData?.lng ?? 0,
+  logoBase64: initialData?.logoBase64 ?? "",
+  imagenes: initialData?.imagenes ?? [],
+  colorPrimario: initialData?.colorPrimario || "#007AFF",
+  colorSecundario: initialData?.colorSecundario || "#FF9500",
+  horarios: normalizarHorarios(initialData?.horarios),
+  estadoId: initialData?.estadoId ?? 0,
+  municipioId: initialData?.municipioId ?? 0,
+  estadoNombre: initialData?.estadoNombre ?? "",
+  municipioNombre: initialData?.municipioNombre ?? "",
+  promedioCalificacion: initialData?.promedioCalificacion ?? 0,
+  tipoComercioId: initialData?.tipoComercioId ?? 0,
+  tipoComercio: initialData?.tipoComercio ?? "",
+});
+
+const getPositiveInteger = (value: unknown): number => {
+  const parsedValue = Number(value);
+
+  if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+    return 0;
+  }
+
+  return Math.floor(parsedValue);
+};
+
+const isImageFile = (file: File) => {
+  return file.type.startsWith("image/");
+};
+
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+
+      reject(new Error("No fue posible procesar la imagen."));
+    };
+
+    reader.onerror = () => {
+      reject(new Error("Ocurrió un error al leer la imagen."));
+    };
+
+    reader.readAsDataURL(file);
+  });
+};
+
+const TabPanel = ({ value, index, labelledBy, children }: TabPanelProps) => {
+  const active = value === index;
+
+  return (
     <Box
-      sx={{
-        width: "100%",
-        mt: { xs: 1.5, sm: 2.5, md: 3 },
-        px: { xs: 0, sm: 1, md: 2 },
-        boxSizing: "border-box",
-      }}
+      role="tabpanel"
+      hidden={!active}
+      id={`commerce-form-panel-${index}`}
+      aria-labelledby={labelledBy}
+      className={styles.tabPanel}
     >
-      {children}
+      {active && children}
     </Box>
-  ) : null;
+  );
+};
 
-interface Props {
-  initialData: ComercioDto | null;
-  loading?: boolean;
-  onSave: (data: ComercioDto) => void;
-  soloVer?: boolean;
-  setEditando?: () => void;
-  claims: JwtClaims | null;
-}
+const SectionHeader = ({ icon, title, description }: SectionHeaderProps) => {
+  return (
+    <Box className={styles.sectionHeader}>
+      <Box className={styles.sectionIcon}>
+        <MaterialSymbol icon={icon} size="medium" />
+      </Box>
+
+      <Box className={styles.sectionHeaderText}>
+        <Typography component="h2" className={styles.sectionTitle}>
+          {title}
+        </Typography>
+
+        {description && (
+          <Typography component="p" className={styles.sectionDescription}>
+            {description}
+          </Typography>
+        )}
+      </Box>
+    </Box>
+  );
+};
+
+const MapViewport = ({ latitude, longitude }: MapViewportProps) => {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView([latitude, longitude], 15);
+  }, [latitude, longitude, map]);
+
+  return null;
+};
+
+const LocationPicker = ({
+  latitude,
+  longitude,
+  editable,
+  onLocationChange,
+}: LocationPickerProps) => {
+  useMapEvents({
+    click(event) {
+      if (!editable) {
+        return;
+      }
+
+      onLocationChange(event.latlng.lat, event.latlng.lng);
+    },
+  });
+
+  const hasLocation =
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude !== 0 &&
+    longitude !== 0;
+
+  return hasLocation ? <Marker position={[latitude, longitude]} /> : null;
+};
 
 export const ComercioForm = ({
   initialData,
@@ -87,219 +272,340 @@ export const ComercioForm = ({
   setEditando,
   claims,
 }: Props) => {
+  /*
+   * Se conserva el nombre de la prop para no
+   * afectar los componentes que ya la usan.
+   * En el código original, soloVer=true permite
+   * editar los campos.
+   */
+  const editable = soloVer;
+
   const [tab, setTab] = useState(0);
-  const [form, setForm] = useState<ComercioDto>(() => ({
-    ...(initialData ?? ({} as ComercioDto)),
-    id: initialData?.id ?? 0,
-    horarios: normalizarHorarios(initialData?.horarios),
-  }));
+
+  const [form, setForm] = useState<ComercioDto>(() =>
+    createFormState(initialData),
+  );
+
   const [preview, setPreview] = useState<string | null>(
     initialData?.logoBase64 ?? null,
   );
+
   const [galeria, setGaleria] = useState<string[]>(initialData?.imagenes ?? []);
 
+  const maxFotos = useMemo(
+    () => getPositiveInteger(claims?.maxFotos),
+    [claims?.maxFotos],
+  );
+
+  const remainingImages = Math.max(maxFotos - galeria.length, 0);
+
+  const canUploadImages = editable && maxFotos > 0 && remainingImages > 0;
+
   const handleChange =
-    (field: keyof ComercioDto) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      let value = e.target.value;
+    (field: EditableTextField) => (event: ChangeEvent<HTMLInputElement>) => {
+      let value = event.target.value;
+
       if (field === "telefono") {
         value = value.replace(/\D/g, "").slice(0, 10);
       }
-      setForm({ ...form, [field]: value });
+
+      setForm((previousForm) => ({
+        ...previousForm,
+        [field]: value,
+      }));
     };
 
-  const updateHorario = (dia: number, changes: Partial<HorarioComercioDto>) =>
-    setForm((prev) => ({
-      ...prev,
-      horarios: prev.horarios.map((h) =>
-        h.dia === dia ? { ...h, ...changes } : h,
-      ),
-    }));
+  const updateHorario = useCallback(
+    (dia: number, changes: Partial<HorarioComercioDto>) => {
+      setForm((previousForm) => ({
+        ...previousForm,
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-      setForm({ ...form, logoBase64: reader.result as string });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleGaleriaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    if (!files.length) return;
-    const disponibles = Number(claims?.maxFotos) - galeria.length;
-    files.slice(0, disponibles).forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () =>
-        setGaleria((prev) => [...prev, reader.result as string]);
-      reader.readAsDataURL(file);
-    });
-    e.target.value = "";
-  };
-
-  const handleReplaceImage = (
-    index: number,
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const copia = [...galeria];
-      copia[index] = reader.result as string;
-      setGaleria(copia);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const LocationPicker = () => {
-    useMapEvents({
-      click(e) {
-        setForm({ ...form, lat: e.latlng.lat, lng: e.latlng.lng });
-      },
-    });
-    return form.lat && form.lng ? (
-      <Marker position={[form.lat, form.lng]} />
-    ) : null;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave({ ...form, imagenes: galeria });
-  };
-
-  const fieldSx = {
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "12px",
-      bgcolor: "#fff",
-      "& fieldset": { borderColor: "#E0E0E0" },
-      "&:hover fieldset": { borderColor: "#BDBDBD" },
-      "&.Mui-focused fieldset": { borderColor: "#007AFF" },
+        horarios: previousForm.horarios.map((schedule) =>
+          schedule.dia === dia
+            ? {
+                ...schedule,
+                ...changes,
+              }
+            : schedule,
+        ),
+      }));
     },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#007AFF" },
+    [],
+  );
+
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    event.target.value = "";
+
+    if (!file || !editable) {
+      return;
+    }
+
+    if (!isImageFile(file)) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Archivo no válido",
+        text: "Selecciona un archivo de imagen.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#007AFF",
+      });
+
+      return;
+    }
+
+    try {
+      const imageBase64 = await fileToBase64(file);
+
+      setPreview(imageBase64);
+
+      setForm((previousForm) => ({
+        ...previousForm,
+        logoBase64: imageBase64,
+      }));
+    } catch (error) {
+      console.error("Error al cargar el logo:", error);
+
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo cargar el logo",
+        text: "Intenta seleccionar otra imagen.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#FF3B30",
+      });
+    }
+  };
+
+  const handleGaleriaChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+
+    event.target.value = "";
+
+    if (!editable || files.length === 0 || remainingImages <= 0) {
+      return;
+    }
+
+    const validFiles = files.filter(isImageFile).slice(0, remainingImages);
+
+    if (validFiles.length === 0) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Archivos no válidos",
+        text: "Selecciona uno o más archivos de imagen.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#007AFF",
+      });
+
+      return;
+    }
+
+    try {
+      const imagesBase64 = await Promise.all(validFiles.map(fileToBase64));
+
+      setGaleria((currentGallery) => [...currentGallery, ...imagesBase64]);
+    } catch (error) {
+      console.error("Error al cargar la galería:", error);
+
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudieron cargar las imágenes",
+        text: "Revisa los archivos seleccionados e inténtalo nuevamente.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#FF3B30",
+      });
+    }
+  };
+
+  const handleReplaceImage = async (
+    index: number,
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+
+    event.target.value = "";
+
+    if (!file || !editable) {
+      return;
+    }
+
+    if (!isImageFile(file)) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Archivo no válido",
+        text: "Selecciona un archivo de imagen.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#007AFF",
+      });
+
+      return;
+    }
+
+    try {
+      const imageBase64 = await fileToBase64(file);
+
+      setGaleria((currentGallery) => {
+        const updatedGallery = [...currentGallery];
+
+        updatedGallery[index] = imageBase64;
+
+        return updatedGallery;
+      });
+    } catch (error) {
+      console.error("Error al reemplazar la imagen:", error);
+
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo reemplazar la imagen",
+        text: "Intenta seleccionar otra imagen.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#FF3B30",
+      });
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    if (!editable) {
+      return;
+    }
+
+    setGaleria((currentGallery) =>
+      currentGallery.filter((_, currentIndex) => currentIndex !== index),
+    );
+  };
+
+  const handleLocationChange = useCallback(
+    (latitude: number, longitude: number) => {
+      setForm((previousForm) => ({
+        ...previousForm,
+        lat: latitude,
+        lng: longitude,
+      }));
+    },
+    [],
+  );
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (loading) {
+      return;
+    }
+
+    await onSave({
+      ...form,
+      imagenes: galeria,
+    });
   };
 
   useEffect(() => {
-    setForm({
-      ...(initialData ?? ({} as ComercioDto)),
-      id: initialData?.id ?? 0,
-      horarios: normalizarHorarios(initialData?.horarios),
-    });
+    const nextForm = createFormState(initialData);
+
+    setForm(nextForm);
+
     setPreview(initialData?.logoBase64 ?? null);
+
     setGaleria(initialData?.imagenes ?? []);
   }, [initialData]);
 
+  const mapLatitude = Number(form.lat) || DEFAULT_LATITUDE;
+
+  const mapLongitude = Number(form.lng) || DEFAULT_LONGITUDE;
+
+  const hasSelectedLocation = Number(form.lat) !== 0 && Number(form.lng) !== 0;
+
   return (
-    <Box
-      sx={{
-        width: "100%",
-        px: { xs: 1, sm: 2, md: 3 },
-        mt: { xs: 2, sm: 3, md: 4 },
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      <Box sx={{ width: "100%", maxWidth: { xs: "100%", md: 900 } }}>
-        {/* Tabs pill */}
-        <Box
-          sx={{
-            overflowX: "auto",
-            "&::-webkit-scrollbar": { display: "none" },
-            scrollbarWidth: "none",
-            mb: { xs: 2.5, sm: 3 },
-          }}
-        >
+    <Box className={styles.page}>
+      <Box className={styles.formContainer}>
+        <Box className={styles.tabsScroller}>
           <Tabs
             value={tab}
-            onChange={(_, v) => setTab(v)}
+            onChange={(_, newValue: number) => setTab(newValue)}
             variant="scrollable"
             scrollButtons={false}
-            TabIndicatorProps={{ style: { display: "none" } }}
-            sx={{
-              minHeight: { xs: 40, sm: 46 },
-              bgcolor: "#F2F2F7",
-              borderRadius: 999,
-              p: 0.7,
-              width: "fit-content",
-              mx: "auto",
-              ".MuiTabs-flexContainer": { gap: 0.5 },
-              ".MuiTab-root": {
-                textTransform: "none",
-                fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                fontWeight: 600,
-                minHeight: { xs: 34, sm: 38 },
-                px: { xs: 2, sm: 2.5 },
-                borderRadius: 999,
-                color: "text.secondary",
-                transition: "all 0.22s ease",
-                "&.Mui-selected": {
-                  color: "#fff",
-                  bgcolor: "#1c1c1e",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.18)",
-                },
+            aria-label="Secciones del formulario del comercio"
+            className={styles.tabs}
+            slotProps={{
+              indicator: {
+                className: styles.hiddenIndicator,
               },
             }}
           >
-            <Tab label="⚙️ General" />
-            <Tab label="🖼️ Galería" />
-            <Tab label="🕐 Horarios" />
-            <Tab label="📍 Ubicación" />
+            <Tab
+              id="commerce-form-tab-general"
+              aria-controls="commerce-form-panel-0"
+              icon={<MaterialSymbol icon="settings" size="small" />}
+              iconPosition="start"
+              label="General"
+              className={styles.tab}
+            />
+
+            <Tab
+              id="commerce-form-tab-gallery"
+              aria-controls="commerce-form-panel-1"
+              icon={<MaterialSymbol icon="photo_library" size="small" />}
+              iconPosition="start"
+              label="Galería"
+              className={styles.tab}
+            />
+
+            <Tab
+              id="commerce-form-tab-schedules"
+              aria-controls="commerce-form-panel-2"
+              icon={<MaterialSymbol icon="schedule" size="small" />}
+              iconPosition="start"
+              label="Horarios"
+              className={styles.tab}
+            />
+
+            <Tab
+              id="commerce-form-tab-location"
+              aria-controls="commerce-form-panel-3"
+              icon={<MaterialSymbol icon="location_on" size="small" />}
+              iconPosition="start"
+              label="Ubicación"
+              className={styles.tab}
+            />
           </Tabs>
         </Box>
 
-        <form onSubmit={handleSubmit}>
-          {/* ================= GENERAL ================= */}
-          <TabPanel value={tab} index={0}>
-            <Box
-              sx={{
-                bgcolor: "rgba(255,255,255,0.92)",
-                backdropFilter: "blur(14px)",
-                borderRadius: 4,
-                border: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-                p: { xs: 2.5, sm: 3 },
-                mb: 2,
-              }}
-            >
-              {/* Avatar */}
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  mb: 3,
-                }}
-              >
-                <Box sx={{ position: "relative" }}>
-                  <Avatar
-                    src={preview ?? undefined}
-                    sx={{
-                      width: { xs: 96, sm: 110 },
-                      height: { xs: 96, sm: 110 },
-                      border: "3px solid rgba(255,255,255,0.9)",
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.14)",
-                    }}
-                  />
-                </Box>
-                {soloVer && (
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <TabPanel
+            value={tab}
+            index={0}
+            labelledBy="commerce-form-tab-general"
+          >
+            <Box className={styles.sectionCard}>
+              <SectionHeader
+                icon="storefront"
+                title="Información general"
+                description="Configura los datos principales que podrán consultar los usuarios."
+              />
+
+              <Box className={styles.logoSection}>
+                <Avatar
+                  src={preview || undefined}
+                  alt={
+                    preview
+                      ? `Logotipo de ${form.nombre || "comercio"}`
+                      : "Sin logotipo"
+                  }
+                  className={styles.logoPreview}
+                >
+                  {!preview && (
+                    <MaterialSymbol icon="storefront" size="large" />
+                  )}
+                </Avatar>
+
+                {editable && (
                   <Button
                     component="label"
                     variant="outlined"
                     size="small"
-                    sx={{
-                      mt: 1.5,
-                      borderRadius: 999,
-                      textTransform: "none",
-                      fontWeight: 600,
-                      fontSize: "0.8rem",
-                      borderColor: "rgba(0,0,0,0.15)",
-                      color: "text.secondary",
-                      "&:hover": { bgcolor: "rgba(0,0,0,0.04)" },
-                    }}
+                    className={styles.uploadLogoButton}
+                    startIcon={<MaterialSymbol icon="upload" size="small" />}
                   >
-                    Subir logo
+                    {preview ? "Cambiar logo" : "Subir logo"}
+
                     <input
                       hidden
                       type="file"
@@ -310,23 +616,50 @@ export const ComercioForm = ({
                 )}
               </Box>
 
-              <Stack spacing={2}>
-                {[
-                  { label: "Nombre", key: "nombre" as const },
-                  { label: "Dirección", key: "direccion" as const },
-                  { label: "Teléfono", key: "telefono" as const },
-                  { label: "Email", key: "email" as const },
-                ].map(({ label, key }) => (
-                  <TextField
-                    key={key}
-                    label={label}
-                    value={(form as any)[key] ?? ""}
-                    onChange={handleChange(key as keyof ComercioDto)}
-                    fullWidth
-                    disabled={!soloVer}
-                    sx={fieldSx}
-                  />
-                ))}
+              <Stack className={styles.fieldsStack}>
+                <TextField
+                  label="Nombre"
+                  value={form.nombre ?? ""}
+                  onChange={handleChange("nombre")}
+                  fullWidth
+                  required
+                  disabled={!editable}
+                  className={styles.field}
+                />
+
+                <TextField
+                  label="Dirección"
+                  value={form.direccion ?? ""}
+                  onChange={handleChange("direccion")}
+                  fullWidth
+                  disabled={!editable}
+                  className={styles.field}
+                />
+
+                <TextField
+                  label="Teléfono"
+                  value={form.telefono ?? ""}
+                  onChange={handleChange("telefono")}
+                  fullWidth
+                  disabled={!editable}
+                  className={styles.field}
+                  slotProps={{
+                    htmlInput: {
+                      inputMode: "numeric",
+                      maxLength: 10,
+                    },
+                  }}
+                />
+
+                <TextField
+                  type="email"
+                  label="Correo electrónico"
+                  value={form.email ?? ""}
+                  onChange={handleChange("email")}
+                  fullWidth
+                  disabled={!editable}
+                  className={styles.field}
+                />
 
                 <TextField
                   label="Descripción"
@@ -334,304 +667,375 @@ export const ComercioForm = ({
                   onChange={handleChange("descripcion")}
                   fullWidth
                   multiline
-                  rows={3}
-                  disabled={!soloVer}
-                  sx={fieldSx}
+                  rows={4}
+                  disabled={!editable}
+                  className={styles.field}
                 />
               </Stack>
             </Box>
 
-            <Box
-              sx={{
-                bgcolor: "rgba(255,255,255,0.92)",
-                backdropFilter: "blur(14px)",
-                borderRadius: 4,
-                border: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-                p: { xs: 2.5, sm: 3 },
-                mb: 2,
-              }}
-            >
-              <Typography
-                fontWeight={700}
-                fontSize="0.875rem"
-                color="text.secondary"
-                mb={2}
-              >
-                Ubicación
-              </Typography>
-              <Stack spacing={2}>
-                <SelectEstadoAutocomplete
-                  value={form.estadoId}
-                  onChange={(estadoId) =>
-                    setForm((p) => ({ ...p, estadoId, municipioId: 0 }))
-                  }
-                />
-                <SelectMunicipioAutocomplete
-                  estadoId={form.estadoId}
-                  value={form.municipioId}
-                  onChange={(id) => setForm((p) => ({ ...p, municipioId: id }))}
-                />
-                <SelectTipoComercioAutocomplete
-                  value={form.tipoComercioId}
-                  onChange={(id) =>
-                    setForm((prev) => ({ ...prev, tipoComercioId: id }))
-                  }
-                />
-              </Stack>
-            </Box>
+            <Box className={styles.sectionCard}>
+              <SectionHeader
+                icon="location_city"
+                title="Clasificación y región"
+                description="Selecciona el estado, municipio y tipo de comercio."
+              />
 
-            <Box
-              sx={{
-                bgcolor: "rgba(255,255,255,0.92)",
-                backdropFilter: "blur(14px)",
-                borderRadius: 4,
-                border: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-                p: { xs: 2.5, sm: 3 },
-              }}
-            >
-              <Typography
-                fontWeight={700}
-                fontSize="0.875rem"
-                color="text.secondary"
-                mb={2}
-              >
-                Colores de marca
-              </Typography>
               <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                  gap: 2,
-                }}
+                className={editable ? undefined : styles.readOnlySection}
+                aria-disabled={!editable}
               >
+                <Stack className={styles.fieldsStack}>
+                  <SelectEstadoAutocomplete
+                    value={form.estadoId}
+                    onChange={(estadoId) => {
+                      if (!editable) {
+                        return;
+                      }
+
+                      setForm((previousForm) => ({
+                        ...previousForm,
+                        estadoId,
+                        municipioId: 0,
+                      }));
+                    }}
+                  />
+
+                  <SelectMunicipioAutocomplete
+                    estadoId={form.estadoId}
+                    value={form.municipioId}
+                    onChange={(municipioId) => {
+                      if (!editable) {
+                        return;
+                      }
+
+                      setForm((previousForm) => ({
+                        ...previousForm,
+                        municipioId,
+                      }));
+                    }}
+                  />
+
+                  <SelectTipoComercioAutocomplete
+                    value={form.tipoComercioId}
+                    onChange={(tipoComercioId) => {
+                      if (!editable) {
+                        return;
+                      }
+
+                      setForm((previousForm) => ({
+                        ...previousForm,
+                        tipoComercioId,
+                      }));
+                    }}
+                  />
+                </Stack>
+              </Box>
+            </Box>
+
+            <Box className={styles.sectionCard}>
+              <SectionHeader
+                icon="palette"
+                title="Colores de marca"
+                description="Personaliza la apariencia pública del comercio."
+              />
+
+              <Box className={styles.colorGrid}>
                 <TextField
                   type="color"
                   label="Color primario"
-                  value={form.colorPrimario ?? "#007AFF"}
+                  value={form.colorPrimario || "#007AFF"}
                   onChange={handleChange("colorPrimario")}
                   fullWidth
-                  disabled={!soloVer}
-                  sx={fieldSx}
+                  disabled={!editable}
+                  className={[styles.field, styles.colorField].join(" ")}
+                  slotProps={{
+                    inputLabel: {
+                      shrink: true,
+                    },
+                  }}
                 />
+
                 <TextField
                   type="color"
                   label="Color secundario"
-                  value={form.colorSecundario ?? "#FF9500"}
+                  value={form.colorSecundario || "#FF9500"}
                   onChange={handleChange("colorSecundario")}
                   fullWidth
-                  disabled={!soloVer}
-                  sx={fieldSx}
+                  disabled={!editable}
+                  className={[styles.field, styles.colorField].join(" ")}
+                  slotProps={{
+                    inputLabel: {
+                      shrink: true,
+                    },
+                  }}
                 />
               </Box>
             </Box>
           </TabPanel>
 
-          {/* ================= GALERÍA ================= */}
-          <TabPanel value={tab} index={1}>
-            <Box
-              sx={{
-                bgcolor: "rgba(255,255,255,0.92)",
-                backdropFilter: "blur(14px)",
-                borderRadius: 4,
-                border: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-                p: { xs: 2.5, sm: 3 },
-              }}
-            >
-              <Button
-                variant="outlined"
-                component="label"
-                disabled={
-                  !soloVer || galeria.length >= Number(claims?.maxFotos)
-                }
-                fullWidth
-                sx={{
-                  mb: 3,
-                  py: 1.4,
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 600,
-                  borderColor: "rgba(0,0,0,0.15)",
-                  color: "text.secondary",
-                  "&:hover": { bgcolor: "rgba(0,0,0,0.03)" },
-                }}
-              >
-                📷 Subir imágenes ({galeria.length}/{Number(claims?.maxFotos)})
-                <input
-                  hidden
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleGaleriaChange}
-                />
-              </Button>
+          <TabPanel
+            value={tab}
+            index={1}
+            labelledBy="commerce-form-tab-gallery"
+          >
+            <Box className={styles.sectionCard}>
+              <SectionHeader
+                icon="photo_library"
+                title="Galería del comercio"
+                description="Agrega imágenes de las instalaciones, productos o servicios."
+              />
 
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "repeat(2, 1fr)",
-                    sm: "repeat(3, 1fr)",
-                    md: "repeat(4, 1fr)",
-                  },
-                  gap: 2,
-                }}
-              >
-                {galeria.map((img, i) => (
-                  <Box key={i} textAlign="center">
-                    <Avatar
-                      src={img}
-                      variant="rounded"
-                      sx={{
-                        width: "100%",
-                        aspectRatio: "1 / 1",
-                        height: "auto",
-                        borderRadius: 3,
-                        boxShadow: "0 4px 14px rgba(0,0,0,0.10)",
-                        border: "1px solid rgba(0,0,0,0.06)",
-                      }}
-                    />
-                    {soloVer && (
-                      <Button
-                        size="small"
-                        component="label"
-                        variant="outlined"
-                        sx={{
-                          mt: 1,
-                          fontSize: "0.7rem",
-                          textTransform: "none",
-                          borderRadius: 999,
-                          borderColor: "rgba(0,0,0,0.12)",
-                          color: "text.secondary",
-                        }}
-                      >
-                        Reemplazar
-                        <input
-                          hidden
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleReplaceImage(i, e)}
-                        />
-                      </Button>
-                    )}
+              {editable && (
+                <Button
+                  variant="outlined"
+                  component="label"
+                  disabled={!canUploadImages}
+                  fullWidth
+                  className={styles.uploadGalleryButton}
+                  startIcon={
+                    <MaterialSymbol icon="add_photo_alternate" size="small" />
+                  }
+                >
+                  Subir imágenes ({galeria.length}/{maxFotos})
+                  <input
+                    hidden
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleGaleriaChange}
+                  />
+                </Button>
+              )}
+
+              {maxFotos <= 0 && editable && (
+                <Typography
+                  component="p"
+                  className={styles.galleryLimitMessage}
+                >
+                  Tu plan no tiene imágenes de galería disponibles.
+                </Typography>
+              )}
+
+              {galeria.length === 0 ? (
+                <Box className={styles.emptyGallery}>
+                  <Box className={styles.emptyGalleryIcon}>
+                    <MaterialSymbol icon="imagesmode" size="large" />
                   </Box>
-                ))}
-              </Box>
+
+                  <Typography
+                    component="h3"
+                    className={styles.emptyGalleryTitle}
+                  >
+                    Galería vacía
+                  </Typography>
+
+                  <Typography
+                    component="p"
+                    className={styles.emptyGalleryDescription}
+                  >
+                    Las imágenes agregadas al comercio aparecerán aquí.
+                  </Typography>
+                </Box>
+              ) : (
+                <Box className={styles.galleryGrid}>
+                  {galeria.map((image, index) => (
+                    <Box
+                      key={`${image.slice(0, 30)}-${index}`}
+                      className={styles.galleryItem}
+                    >
+                      <Avatar
+                        src={image}
+                        alt={`Imagen ${index + 1} de la galería`}
+                        variant="rounded"
+                        className={styles.galleryImage}
+                      />
+
+                      {editable && (
+                        <Box className={styles.galleryActions}>
+                          <Button
+                            component="label"
+                            size="small"
+                            variant="outlined"
+                            className={styles.replaceButton}
+                            startIcon={
+                              <MaterialSymbol icon="sync" size="small" />
+                            }
+                          >
+                            Reemplazar
+                            <input
+                              hidden
+                              type="file"
+                              accept="image/*"
+                              onChange={(event) =>
+                                void handleReplaceImage(index, event)
+                              }
+                            />
+                          </Button>
+
+                          <Button
+                            type="button"
+                            size="small"
+                            className={styles.removeButton}
+                            onClick={() => handleRemoveImage(index)}
+                            aria-label={`Eliminar imagen ${index + 1}`}
+                          >
+                            <MaterialSymbol icon="delete" size="small" />
+                          </Button>
+                        </Box>
+                      )}
+                    </Box>
+                  ))}
+                </Box>
+              )}
             </Box>
           </TabPanel>
 
-          {/* ================= HORARIOS ================= */}
-          <TabPanel value={tab} index={2}>
-            <Stack spacing={1.5}>
-              {DIAS_SEMANA.map((d) => {
-                const horario = form.horarios.find((h) => h.dia === d.dia)!;
+          <TabPanel
+            value={tab}
+            index={2}
+            labelledBy="commerce-form-tab-schedules"
+          >
+            <Box className={styles.schedulePageHeader}>
+              <SectionHeader
+                icon="schedule"
+                title="Horarios de atención"
+                description="Indica los días y las horas de operación del comercio."
+              />
+            </Box>
+
+            <Stack className={styles.scheduleList}>
+              {DIAS_SEMANA.map((day) => {
+                const schedule = form.horarios.find(
+                  (item) => item.dia === day.dia,
+                );
+
+                if (!schedule) {
+                  return null;
+                }
+
                 return (
                   <Box
-                    key={d.dia}
-                    sx={{
-                      p: { xs: 2, sm: 2.5 },
-                      borderRadius: 4,
-                      bgcolor: horario.abierto
-                        ? "rgba(255,255,255,0.95)"
-                        : "rgba(0,0,0,0.03)",
-                      border: "1px solid",
-                      borderColor: horario.abierto
-                        ? "rgba(0,0,0,0.07)"
-                        : "rgba(0,0,0,0.04)",
-                      boxShadow: horario.abierto
-                        ? "0 2px 12px rgba(0,0,0,0.06)"
-                        : "none",
-                      transition: "all 0.2s ease",
-                    }}
+                    key={day.dia}
+                    className={[
+                      styles.scheduleCard,
+                      schedule.abierto
+                        ? styles.scheduleCardOpen
+                        : styles.scheduleCardClosed,
+                    ].join(" ")}
                   >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: horario.abierto ? 2 : 0,
-                      }}
-                    >
-                      <Typography fontWeight={700} fontSize="0.9rem">
-                        {d.label}
-                      </Typography>
+                    <Box className={styles.scheduleHeader}>
+                      <Box className={styles.scheduleDay}>
+                        <Box className={styles.scheduleDayIcon}>
+                          <MaterialSymbol
+                            icon={
+                              schedule.abierto
+                                ? "event_available"
+                                : "event_busy"
+                            }
+                            size="small"
+                          />
+                        </Box>
+
+                        <Typography
+                          component="h3"
+                          className={styles.scheduleDayTitle}
+                        >
+                          {day.label}
+                        </Typography>
+                      </Box>
+
                       <FormControlLabel
+                        className={styles.scheduleControl}
                         control={
                           <Switch
-                            checked={horario.abierto}
-                            disabled={!soloVer}
+                            checked={schedule.abierto}
+                            disabled={!editable}
                             size="small"
-                            onChange={(e) =>
-                              updateHorario(d.dia, {
-                                abierto: e.target.checked,
-                                ...(!e.target.checked && {
+                            className={styles.scheduleSwitch}
+                            onChange={(event) => {
+                              const abierto = event.target.checked;
+
+                              updateHorario(day.dia, {
+                                abierto,
+
+                                ...(!abierto && {
                                   horaApertura: undefined,
+
                                   horaCierre: undefined,
                                 }),
-                              })
-                            }
+                              });
+                            }}
                           />
                         }
                         label={
                           <Typography
-                            fontSize="0.8rem"
-                            fontWeight={600}
-                            color={
-                              horario.abierto ? "success.main" : "text.disabled"
-                            }
+                            component="span"
+                            className={[
+                              styles.scheduleStatus,
+                              schedule.abierto
+                                ? styles.openStatus
+                                : styles.closedStatus,
+                            ].join(" ")}
                           >
-                            {horario.abierto ? "Abierto" : "Cerrado"}
+                            {schedule.abierto ? "Abierto" : "Cerrado"}
                           </Typography>
                         }
-                        sx={{ mr: 0 }}
                       />
                     </Box>
 
-                    {horario.abierto && (
+                    {schedule.abierto && (
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <Box
-                          sx={{
-                            display: "grid",
-                            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                            gap: 2,
-                          }}
-                        >
+                        <Box className={styles.timeGrid}>
                           <TimePicker
                             label="Apertura"
                             ampm={false}
-                            disabled={!soloVer || !horario.abierto}
+                            disabled={!editable}
                             value={
-                              horario.horaApertura
-                                ? dayjs(`2000-01-01T${horario.horaApertura}`)
+                              schedule.horaApertura
+                                ? dayjs(`2000-01-01T${schedule.horaApertura}`)
                                 : null
                             }
-                            onChange={(v) =>
-                              updateHorario(d.dia, {
-                                horaApertura: v?.format("HH:mm"),
-                              })
-                            }
+                            onChange={(value) => {
+                              if (!editable) {
+                                return;
+                              }
+
+                              updateHorario(day.dia, {
+                                horaApertura: value?.format("HH:mm"),
+                              });
+                            }}
                             slotProps={{
-                              textField: { fullWidth: true, sx: fieldSx },
+                              textField: {
+                                fullWidth: true,
+                                className: styles.field,
+                              },
                             }}
                           />
+
                           <TimePicker
                             label="Cierre"
                             ampm={false}
-                            disabled={!soloVer || !horario.abierto}
+                            disabled={!editable}
                             value={
-                              horario.horaCierre
-                                ? dayjs(`2000-01-01T${horario.horaCierre}`)
+                              schedule.horaCierre
+                                ? dayjs(`2000-01-01T${schedule.horaCierre}`)
                                 : null
                             }
-                            onChange={(v) =>
-                              updateHorario(d.dia, {
-                                horaCierre: v?.format("HH:mm"),
-                              })
-                            }
+                            onChange={(value) => {
+                              if (!editable) {
+                                return;
+                              }
+
+                              updateHorario(day.dia, {
+                                horaCierre: value?.format("HH:mm"),
+                              });
+                            }}
                             slotProps={{
-                              textField: { fullWidth: true, sx: fieldSx },
+                              textField: {
+                                fullWidth: true,
+                                className: styles.field,
+                              },
                             }}
                           />
                         </Box>
@@ -643,53 +1047,89 @@ export const ComercioForm = ({
             </Stack>
           </TabPanel>
 
-          {/* ================= MAPA ================= */}
-          <TabPanel value={tab} index={3}>
-            <Box
-              sx={{
-                width: "100%",
-                aspectRatio: "16 / 9",
-                maxHeight: 420,
-                borderRadius: 4,
-                overflow: "hidden",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
-                border: "1px solid rgba(0,0,0,0.06)",
-              }}
-            >
-              <MapContainer
-                center={[form.lat || 19.4326, form.lng || -99.1332]}
-                zoom={15}
-                style={{ height: "100%", width: "100%" }}
-              >
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <LocationPicker />
-              </MapContainer>
+          <TabPanel
+            value={tab}
+            index={3}
+            labelledBy="commerce-form-tab-location"
+          >
+            <Box className={styles.sectionCard}>
+              <SectionHeader
+                icon="map"
+                title="Ubicación en el mapa"
+                description={
+                  editable
+                    ? "Selecciona el punto exacto donde se encuentra el comercio."
+                    : "Ubicación registrada para el comercio."
+                }
+              />
+
+              {editable && (
+                <Box className={styles.mapInstructions}>
+                  <MaterialSymbol icon="touch_app" size="small" />
+
+                  <Typography
+                    component="p"
+                    className={styles.mapInstructionsText}
+                  >
+                    Presiona sobre el mapa para colocar o mover el marcador.
+                  </Typography>
+                </Box>
+              )}
+
+              <Box className={styles.mapContainer}>
+                <MapContainer
+                  center={[mapLatitude, mapLongitude]}
+                  zoom={15}
+                  className={styles.map}
+                  dragging={editable}
+                  scrollWheelZoom={editable}
+                  doubleClickZoom={editable}
+                  touchZoom={editable}
+                  keyboard={editable}
+                  boxZoom={editable}
+                >
+                  <TileLayer
+                    attribution="&copy; OpenStreetMap contributors"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+
+                  <MapViewport
+                    latitude={mapLatitude}
+                    longitude={mapLongitude}
+                  />
+
+                  <LocationPicker
+                    latitude={Number(form.lat) || 0}
+                    longitude={Number(form.lng) || 0}
+                    editable={editable}
+                    onLocationChange={handleLocationChange}
+                  />
+                </MapContainer>
+              </Box>
+
+              {hasSelectedLocation && (
+                <Box className={styles.coordinates}>
+                  <MaterialSymbol icon="my_location" size="small" />
+
+                  <Typography
+                    component="span"
+                    className={styles.coordinatesText}
+                  >
+                    {Number(form.lat).toFixed(6)}, {Number(form.lng).toFixed(6)}
+                  </Typography>
+                </Box>
+              )}
             </Box>
           </TabPanel>
 
-          {/* ================= BOTONES ================= */}
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column-reverse", sm: "row" },
-              justifyContent: "flex-end",
-              gap: 1.5,
-              mt: 4,
-            }}
-          >
-            {soloVer && (
+          <Box className={styles.formActions}>
+            {editable && setEditando && (
               <Button
+                type="button"
                 variant="outlined"
+                className={styles.cancelButton}
                 onClick={setEditando}
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 3,
-                  borderColor: "rgba(0,0,0,0.15)",
-                  color: "text.secondary",
-                  "&:hover": { bgcolor: "rgba(0,0,0,0.04)" },
-                }}
+                disabled={loading}
               >
                 Cancelar
               </Button>
@@ -699,35 +1139,34 @@ export const ComercioForm = ({
               type="submit"
               variant="contained"
               disabled={loading}
-              sx={{
-                borderRadius: 999,
-                textTransform: "none",
-                fontWeight: 700,
-                px: 4,
-                py: 1.4,
-                fontSize: "0.9rem",
-                background: "linear-gradient(135deg, #1c1c1e, #3a3a3c)",
-                boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
-                "&:hover": {
-                  boxShadow: "0 10px 24px rgba(0,0,0,0.24)",
-                  transform: "translateY(-1px)",
-                },
-                "&:active": { transform: "scale(0.98)" },
-                transition: "all 0.25s ease",
-              }}
+              className={styles.submitButton}
+              startIcon={
+                loading ? undefined : (
+                  <MaterialSymbol
+                    icon={form.id > 0 ? "save" : "add_business"}
+                    size="small"
+                  />
+                )
+              }
             >
               {loading ? (
-                <CircularProgress
-                  size={20}
-                  thickness={4}
-                  sx={{ color: "#fff" }}
-                />
-              ) : (
+                <>
+                  <CircularProgress
+                    size={19}
+                    thickness={4.5}
+                    className={styles.submitProgress}
+                  />
+
+                  <span>Guardando...</span>
+                </>
+              ) : form.id > 0 ? (
                 "Guardar cambios"
+              ) : (
+                "Registrar comercio"
               )}
             </Button>
           </Box>
-        </form>
+        </Box>
       </Box>
     </Box>
   );

@@ -1,52 +1,16 @@
-import axios from "axios";
-
-const api = axios.create({
-  baseURL: `https://adlocalapi.onrender.com/api/locations`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  }
-);
-
-
+import { httpUsuario } from "../api/httpUsuario";
 export interface StateDto {
   id: number;
   name: string;
 }
-
 export interface MunicipalityDto {
   id: number;
   name: string;
   estadoId: number;
 }
-
-
 export const locationsApi = {
-  getAllStates: () => api.get("/states"),
+  getAllStates: () => httpUsuario.get("/locations/states"),
 
   getMunicipalitiesByState: (stateId: number) =>
-    api.get(`/states/${stateId}/municipalities`),
+    httpUsuario.get(`/locations/states/${stateId}/municipalities`),
 };

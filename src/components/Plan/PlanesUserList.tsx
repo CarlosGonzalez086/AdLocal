@@ -1,5 +1,5 @@
-import { Box, Fade, Skeleton, Typography } from "@mui/material";
-import { jwtDecode } from "jwt-decode";
+import { Skeleton } from "@mui/material";
+
 import {
   useCallback,
   useEffect,
@@ -9,36 +9,18 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-
 import { usePlanes } from "../../hooks/usePlanes";
-
-import type { JwtClaims } from "../../services/auth.api";
-import type { PlanCreateDto } from "../../services/planApi";
-
-import { ConfirmarSuscripcionModalV3 } from "../../pages/User/Plan/ConfirmarSuscripcionModalV3";
-
+import { ConfirmarSuscripcionModalV3 } from "../../User/Pages/Plan/ConfirmarSuscripcionModalV3";
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
 import { PlanCard } from "./PlanCard";
-
-import styles from "../../styles/PlanesUserList.module.css";
+import type { PlanCreateDto } from "../../services/planPublicApi";
+import type { JwtPayload } from "../../User/Auth/PrivateRouteUsuario";
 
 interface Props {
   setIsSubSuccess: Dispatch<SetStateAction<boolean>>;
+  user: JwtPayload | null;
 }
 
-const decodeClaims = (token: string | null): JwtClaims | null => {
-  if (!token) {
-    return null;
-  }
-
-  try {
-    return jwtDecode<JwtClaims>(token);
-  } catch (error) {
-    console.error("No fue posible decodificar el JWT:", error);
-
-    return null;
-  }
-};
 
 const normalizePlanType = (type?: string): string => {
   return type?.trim().toUpperCase() || "";
@@ -54,71 +36,66 @@ const normalizePrice = (price: unknown): number => {
   return parsedPrice;
 };
 
+
 const PlansSkeleton = () => {
   return (
-    <Box
-      className={styles.loadingContainer}
-      aria-live="polite"
-      aria-busy="true"
-    >
-      <Box className={styles.loadingGrid}>
+    <div className="plansUserLoading" aria-live="polite" aria-busy="true">
+      <div className="row g-4">
         {[1, 2, 3].map((item) => (
-          <Box key={item} className={styles.loadingItem}>
-            <Skeleton variant="rounded" className={styles.cardSkeleton} />
+          <div key={item} className="col-12 col-md-6 col-xl-4">
+            <div className="plansUserLoadingItem">
+              <Skeleton variant="rounded" className="plansUserCardSkeleton" />
 
-            <Skeleton variant="rounded" className={styles.actionSkeleton} />
-          </Box>
+              <Skeleton variant="rounded" className="plansUserActionSkeleton" />
+            </div>
+          </div>
         ))}
-      </Box>
+      </div>
 
-      <Typography component="p" className={styles.loadingText}>
+      <p className="plansUserLoadingText fz-h4 fw-regular mb-0">
         Consultando los planes disponibles...
-      </Typography>
-    </Box>
+      </p>
+    </div>
   );
 };
+
 
 const EmptyPlans = () => {
   return (
-    <Box
-      component="section"
-      className={styles.emptyState}
+    <div
+      className="plansUserEmptyState"
       aria-labelledby="empty-user-plans-title"
     >
-      <Box className={styles.emptyIcon}>
+      <div className="plansUserEmptyIcon">
         <MaterialSymbol icon="inventory_2" size="large" />
-      </Box>
+      </div>
 
-      <Typography
+      <h2
         id="empty-user-plans-title"
-        component="h2"
-        className={styles.emptyTitle}
+        className="plansUserEmptyTitle fz-h2 fw-bold mb-2"
       >
         No hay planes disponibles
-      </Typography>
+      </h2>
 
-      <Typography component="p" className={styles.emptyDescription}>
+      <p className="plansUserEmptyDescription fz-h4 fw-regular mb-0">
         Por el momento no existen planes de pago disponibles. Intenta nuevamente
         más tarde.
-      </Typography>
-    </Box>
+      </p>
+    </div>
   );
 };
 
-export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
-  const { planesUser, loading, listAllPlanesUser } = usePlanes();
 
-  const claims = useMemo(() => decodeClaims(localStorage.getItem("token")), []);
+export const PlanesUserList = ({ setIsSubSuccess, user }: Props) => {
+  const { planesUser, loading, listAllPlanesUser } = usePlanes();
 
   const [openModal, setOpenModal] = useState(false);
 
   const [planSeleccionado, setPlanSeleccionado] =
     useState<PlanCreateDto | null>(null);
 
-  /*
-   * Evita que el efecto inicial se repita si la
-   * función del hook cambia de referencia.
-   */
+
+
   const listPlansRef = useRef(listAllPlanesUser);
 
   useEffect(() => {
@@ -129,6 +106,8 @@ export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
     void listPlansRef.current();
   }, []);
 
+
+
   const planesDisponibles = useMemo(() => {
     return [...(planesUser ?? [])]
       .filter((plan) => normalizePlanType(plan.tipo) !== "FREE")
@@ -138,15 +117,20 @@ export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
       );
   }, [planesUser]);
 
+
   const handleSelectPlan = useCallback((plan: PlanCreateDto) => {
     setPlanSeleccionado(plan);
+
     setOpenModal(true);
   }, []);
 
   const handleCloseModal = useCallback(() => {
     setOpenModal(false);
+
     setPlanSeleccionado(null);
   }, []);
+
+
 
   if (loading) {
     return <PlansSkeleton />;
@@ -156,17 +140,18 @@ export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
     return <EmptyPlans />;
   }
 
+
+
   return (
     <>
-      <Fade in timeout={400}>
-        <Box
-          component="section"
-          className={styles.container}
-          aria-label="Planes de suscripción disponibles"
-        >
-          <Box className={styles.plansGrid}>
-            {planesDisponibles.map((plan) => (
-              <Box key={plan.id} className={styles.planItem}>
+      <div
+        className="plansUserContainer"
+        aria-label="Planes de suscripción disponibles"
+      >
+        <div className="row g-4">
+          {planesDisponibles.map((plan) => (
+            <div key={plan.id} className="col-12 col-md-6 col-xl-4">
+              <div className="plansUserItem h-100">
                 <PlanCard
                   nombre={plan.nombre}
                   tipo={plan.tipo}
@@ -181,14 +166,14 @@ export const PlanesUserList = ({ setIsSubSuccess }: Props) => {
                   coloresPersonalizados={plan.coloresPersonalizados}
                   soportePrioritario={plan.tieneBadge}
                   onSelect={() => handleSelectPlan(plan)}
-                  claims={claims}
+                  user={user}
                   badgeTexto={plan.badgeTexto || ""}
                 />
-              </Box>
-            ))}
-          </Box>
-        </Box>
-      </Fade>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {planSeleccionado && (
         <ConfirmarSuscripcionModalV3

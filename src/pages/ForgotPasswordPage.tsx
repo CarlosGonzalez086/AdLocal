@@ -13,72 +13,85 @@ import {
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { useForgetPassword } from "../hooks/useForgetPassword";
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
 
 import styles from "../styles/ForgotPasswordPage.module.css";
+import { useAdmin } from "../hooks/useAdmin";
+import { useUser } from "../hooks/useUser";
+import Swal from "sweetalert2";
 
 const LOGO_URL =
   "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function ForgotPasswordPage() {
+interface Props {
+  type: "admin" | "user";
+}
+
+export default function ForgotPasswordPage({ type }: Props) {
   const [email, setEmail] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
 
   const navigate = useNavigate();
-
-  const {
-    forgetPassword,
-    loading,
-    error,
-    successMessage,
-  } = useForgetPassword();
-
+  const isAdmin = type === "admin";
+  const admin = useAdmin();
+  const user = useUser();
+  const loading = isAdmin ? admin.loading : user.loading;
   const cleanEmail = email.trim();
-
   const emailIsEmpty = cleanEmail.length === 0;
-
-  const emailIsInvalid =
-    !emailIsEmpty && !EMAIL_REGEX.test(cleanEmail);
-
-  const showEmailError =
-    emailTouched && (emailIsEmpty || emailIsInvalid);
-
+  const emailIsInvalid = !emailIsEmpty && !EMAIL_REGEX.test(cleanEmail);
+  const showEmailError = emailTouched && (emailIsEmpty || emailIsInvalid);
   const emailHelperText = showEmailError
     ? emailIsEmpty
       ? "El correo electrónico es obligatorio."
       : "Ingresa un correo electrónico válido."
     : "Te enviaremos las instrucciones a este correo.";
+  const [error, setError] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setEmailTouched(true);
 
-    if (
-      emailIsEmpty ||
-      emailIsInvalid ||
-      loading
-    ) {
+    if (emailIsEmpty || emailIsInvalid || loading) {
       return;
     }
 
-    await forgetPassword(cleanEmail);
+    try {
+      const response = isAdmin
+        ? await admin.forgetPassword({ email: cleanEmail })
+        : await user.forgetPassword({ email: cleanEmail });
+
+      const data = response as any;
+
+      if (data.codigo !== "200") {
+        setError(data.mensaje || "Ocurrió un error inesperado.");
+        setSuccessMessage("");
+        return;
+      }
+      setSuccessMessage(data.mensaje);
+      Swal.fire({
+        icon: "success",
+        title: "Correo enviado",
+        text: data.mensaje,
+      });
+    } catch (error: any) {
+      console.error(error);
+      setError(error.message || "Ocurrió un error inesperado.");
+      setSuccessMessage("");
+      Swal.fire({
+        icon: "error",
+        title: "Error al enviar correo",
+        text: error.message || "Ocurrió un error inesperado.",
+      });
+    }
   };
 
   return (
-    <Box
-      component="main"
-      className={styles.page}
-    >
-      <Box
-        className={styles.backgroundDecoration}
-        aria-hidden="true"
-      >
+    <Box component="main" className={styles.page}>
+      <Box className={styles.backgroundDecoration} aria-hidden="true">
         <Box className={styles.decorationOne} />
         <Box className={styles.decorationTwo} />
       </Box>
@@ -87,21 +100,15 @@ export default function ForgotPasswordPage() {
         type="button"
         variant="outlined"
         className={styles.backButton}
-        onClick={() => navigate("/login")}
-        startIcon={
-          <MaterialSymbol
-            icon="arrow_back_ios_new"
-            size="small"
-          />
+        onClick={() =>
+          navigate(type === "user" ? "/usuario/login" : "/admin/login")
         }
+        startIcon={<MaterialSymbol icon="arrow_back_ios_new" size="small" />}
       >
         Regresar
       </Button>
 
-      <Container
-        maxWidth="xs"
-        className={styles.container}
-      >
+      <Container maxWidth="xs" className={styles.container}>
         <Box
           component="a"
           href="/"
@@ -125,42 +132,26 @@ export default function ForgotPasswordPage() {
         >
           <Box className={styles.header}>
             <Box className={styles.headerIcon}>
-              <MaterialSymbol
-                icon="lock_reset"
-                size="large"
-              />
+              <MaterialSymbol icon="lock_reset" size="large" />
             </Box>
 
             <Box className={styles.headerContent}>
-              <Typography
-                component="span"
-                className={styles.eyebrow}
-              >
+              <Typography component="span" className={styles.eyebrow}>
                 Seguridad de la cuenta
               </Typography>
 
-              <Typography
-                component="h1"
-                className={styles.title}
-              >
+              <Typography component="h1" className={styles.title}>
                 Recuperar contraseña
               </Typography>
 
-              <Typography
-                component="p"
-                className={styles.description}
-              >
-                Ingresa el correo asociado a tu cuenta y te
-                enviaremos un enlace para crear una nueva
-                contraseña.
+              <Typography component="p" className={styles.description}>
+                Ingresa el correo asociado a tu cuenta y te enviaremos un enlace
+                para crear una nueva contraseña.
               </Typography>
             </Box>
           </Box>
 
-          <Box
-            className={styles.messages}
-            aria-live="polite"
-          >
+          <Box className={styles.messages} aria-live="polite">
             {error && (
               <Alert
                 severity="error"
@@ -224,20 +215,14 @@ export default function ForgotPasswordPage() {
             }}
           />
 
-          <Divider className={styles.divider}>
-            Verificación por correo
-          </Divider>
+          <Divider className={styles.divider}>Verificación por correo</Divider>
 
           <Button
             type="submit"
             variant="contained"
             fullWidth
             size="large"
-            disabled={
-              loading ||
-              emailIsEmpty ||
-              emailIsInvalid
-            }
+            disabled={loading || emailIsEmpty || emailIsInvalid}
             className={styles.submitButton}
             startIcon={
               loading ? (
@@ -247,38 +232,23 @@ export default function ForgotPasswordPage() {
                   className={styles.buttonProgress}
                 />
               ) : (
-                <MaterialSymbol
-                  icon="send"
-                  size="small"
-                />
+                <MaterialSymbol icon="send" size="small" />
               )
             }
           >
-            {loading
-              ? "Enviando correo..."
-              : "Enviar correo"}
+            {loading ? "Enviando correo..." : "Enviar correo"}
           </Button>
 
-          <Typography
-            component="p"
-            className={styles.securityMessage}
-          >
-            <MaterialSymbol
-              icon="verified_user"
-              size="small"
-            />
+          <Typography component="p" className={styles.securityMessage}>
+            <MaterialSymbol icon="verified_user" size="small" />
 
             <span>
-              Por seguridad, el enlace tendrá un tiempo
-              limitado de vigencia.
+              Por seguridad, el enlace tendrá un tiempo limitado de vigencia.
             </span>
           </Typography>
         </Paper>
 
-        <Typography
-          component="p"
-          className={styles.footerText}
-        >
+        <Typography component="p" className={styles.footerText}>
           ¿Recordaste tu contraseña?{" "}
           <Button
             type="button"

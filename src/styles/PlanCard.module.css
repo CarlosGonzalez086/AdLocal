@@ -48,7 +48,7 @@
 
   white-space: nowrap;
 
-  animation: plan-badge-shimmer 2.8s linear infinite;
+ 
 }
 
 @keyframes plan-badge-shimmer {
@@ -73,7 +73,7 @@
 
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.09);
 
-  animation: plan-badge-pulse 1.6s ease-in-out infinite;
+
 }
 
 @keyframes plan-badge-pulse {
@@ -553,9 +553,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .badge,
-  .badgePulse {
-    animation: none;
-  }
+
 
   .card,
   .cancelButton,

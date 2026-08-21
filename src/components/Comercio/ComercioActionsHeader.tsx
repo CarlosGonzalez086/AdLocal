@@ -1,20 +1,11 @@
-import {
-  Box,
-  Button,
-  LinearProgress,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Button, LinearProgress } from "@mui/material";
 import { Link } from "react-router-dom";
 
-import type { JwtClaims } from "../../services/auth.api";
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
-
-import styles from "../../styles/ComercioActionsHeader.module.css";
+import type { JwtPayload } from "../../User/Auth/PrivateRouteUsuario";
 
 interface Props {
-  claims: JwtClaims | null;
+  claims: JwtPayload | null;
   total: number;
 }
 
@@ -44,120 +35,117 @@ export function ComercioActionsHeader({ claims, total }: Props) {
           restantes === 1 ? "negocio" : "negocios"
         } más.`;
 
+  const counterClass = limiteAlcanzado
+    ? "commerceCounterBadge commerceCounterBadgeLimit"
+    : "commerceCounterBadge commerceCounterBadgeAvailable";
+
+  const progressClass = limiteAlcanzado
+    ? "commerceUsageProgress commerceUsageProgressLimit"
+    : "commerceUsageProgress commerceUsageProgressAvailable";
+
+  const statusClass = limiteAlcanzado
+    ? "commerceStatusMessage commerceStatusMessageLimit d-flex align-items-center gap-2 mb-0 fz-h4 fw-medium"
+    : "commerceStatusMessage d-flex align-items-center gap-2 mb-0 fz-h4 fw-medium";
+
   return (
-    <Paper
-      component="section"
-      elevation={0}
-      className={styles.container}
+    <section
+      className="commerceActionsHeader"
       aria-labelledby="commerce-usage-title"
     >
-      <Stack className={styles.layout}>
-        <Box className={styles.information}>
-          <Box className={styles.header}>
-            <Box className={styles.titleContainer}>
-              <Box className={styles.titleIcon}>
-                <MaterialSymbol icon="storefront" size="medium" filled />
-              </Box>
+      <div className="row g-4 align-items-center">
+        {/* INFORMACIÓN */}
+        <div className="col-12 col-lg">
+          <div className="commerceActionsInformation">
+            {/* HEADER */}
+            <div className="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+              <div className="d-flex align-items-center gap-3">
+                <div className="commerceActionsTitleIcon flex-shrink-0">
+                  <MaterialSymbol icon="storefront" size="medium" filled />
+                </div>
 
-              <Box>
-                <Typography
-                  id="commerce-usage-title"
-                  component="h2"
-                  className={styles.title}
-                >
-                  Negocios registrados
-                </Typography>
+                <div>
+                  <h2
+                    id="commerce-usage-title"
+                    className="mb-1 fz-h2 fw-bold commerceActionsTitle"
+                  >
+                    Negocios registrados
+                  </h2>
 
-                <Typography component="p" className={styles.subtitle}>
-                  Uso disponible en tu plan actual
-                </Typography>
-              </Box>
-            </Box>
+                  <p className="mb-0 fz-h4 fw-regular commerceActionsSubtitle">
+                    Uso disponible en tu plan actual
+                  </p>
+                </div>
+              </div>
 
-            <Box
-              className={[
-                styles.counterBadge,
-                limiteAlcanzado
-                  ? styles.counterBadgeLimit
-                  : styles.counterBadgeAvailable,
-              ].join(" ")}
-            >
-              <Typography component="span" className={styles.counterText}>
-                {totalRegistrados} / {limiteDisponible ? max : "—"}
-              </Typography>
-            </Box>
-          </Box>
+              <div className={counterClass}>
+                <span className="fz-h3 fw-bold">
+                  {totalRegistrados} / {limiteDisponible ? max : "—"}
+                </span>
+              </div>
+            </div>
 
-          <Box className={styles.progressContainer}>
-            <LinearProgress
-              variant="determinate"
-              value={porcentaje}
-              className={[
-                styles.progress,
-                limiteAlcanzado
-                  ? styles.progressLimit
-                  : styles.progressAvailable,
-              ].join(" ")}
-              aria-label="Uso del límite de negocios"
-              aria-valuetext={
-                limiteDisponible
-                  ? `${totalRegistrados} de ${max} negocios utilizados`
-                  : "Límite de negocios no disponible"
-              }
-            />
+            {/* PROGRESO */}
+            <div className="commerceProgressContainer mt-4">
+              <LinearProgress
+                variant="determinate"
+                value={porcentaje}
+                className={progressClass}
+                aria-label="Uso del límite de negocios"
+                aria-valuetext={
+                  limiteDisponible
+                    ? `${totalRegistrados} de ${max} negocios utilizados`
+                    : "Límite de negocios no disponible"
+                }
+              />
 
-            <Box className={styles.progressInformation}>
-              <Typography
-                component="p"
-                className={[
-                  styles.statusMessage,
-                  limiteAlcanzado ? styles.statusMessageLimit : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
+              <div className="d-flex align-items-center justify-content-between gap-3 mt-2">
+                <p className={statusClass}>
+                  <MaterialSymbol
+                    icon={limiteAlcanzado ? "info" : "check_circle"}
+                    size="small"
+                    filled={!limiteAlcanzado}
+                  />
+
+                  <span>{statusMessage}</span>
+                </p>
+
+                {limiteDisponible && (
+                  <span className="commerceUsagePercentage fz-h4 fw-semibold flex-shrink-0">
+                    {Math.round(porcentaje)}%
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ACCIÓN */}
+        <div className="col-12 col-lg-auto">
+          <div className="d-grid d-lg-block">
+            {!limiteAlcanzado ? (
+              <Button
+                component={Link}
+                to="nuevo"
+                variant="contained"
+                className="commerceCreateButton"
+                startIcon={<MaterialSymbol icon="add_business" size="small" />}
               >
-                <MaterialSymbol
-                  icon={limiteAlcanzado ? "info" : "check_circle"}
-                  size="small"
-                  filled={!limiteAlcanzado}
-                />
-
-                <span>{statusMessage}</span>
-              </Typography>
-
-              {limiteDisponible && (
-                <Typography component="span" className={styles.percentage}>
-                  {Math.round(porcentaje)}%
-                </Typography>
-              )}
-            </Box>
-          </Box>
-        </Box>
-
-        <Box className={styles.actionContainer}>
-          {!limiteAlcanzado ? (
-            <Button
-              component={Link}
-              to="nuevo"
-              variant="contained"
-              className={styles.createButton}
-              startIcon={<MaterialSymbol icon="add_business" size="small" />}
-            >
-              Nuevo negocio
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="outlined"
-              disabled
-              className={styles.limitButton}
-              startIcon={<MaterialSymbol icon="lock" size="small" filled />}
-            >
-              Límite alcanzado
-            </Button>
-          )}
-        </Box>
-      </Stack>
-    </Paper>
+                Nuevo negocio
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outlined"
+                disabled
+                className="commerceLimitButton"
+                startIcon={<MaterialSymbol icon="lock" size="small" filled />}
+              >
+                Límite alcanzado
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

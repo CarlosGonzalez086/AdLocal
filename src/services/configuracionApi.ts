@@ -1,30 +1,5 @@
-import axios from "axios";
+import { httpAdmin } from "../api/httpAdmin";
 
-const api = axios.create({
-  baseURL: `https://adlocalapi.onrender.com/api/Configuracion`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  },
-);
-
-// DTOs
 export interface StripeConfiguracionDto {
   publishableKey: string;
   secretKey: string;
@@ -36,10 +11,21 @@ export interface ClavesConfigDto {
   ip2locationKey: string;
 }
 
+export interface ComisionMarketplaceDto {
+  porcentaje: number;
+  montoFijo: number;
+  activa: boolean;
+}
+
 export const configuracionApi = {
-  guardarStripe: (data: StripeConfiguracionDto) => api.post("/stripe", data),
+  guardarStripe: (data: StripeConfiguracionDto) =>
+    httpAdmin.post("/Configuracion/stripe", data),
 
-  guardarClaves: (data: ClavesConfigDto) => api.post("/claves", data),
+  guardarClaves: (data: ClavesConfigDto) =>
+    httpAdmin.post("/Configuracion/claves", data),
 
-  obtenerTodas: () => api.get("/listar"),
+  obtenerTodas: () => httpAdmin.get("/Configuracion/listar"),
+
+  guardarComisionMarketplace: (data: ComisionMarketplaceDto) =>
+    httpAdmin.post("/Configuracion/comision-marketplace", data),
 };

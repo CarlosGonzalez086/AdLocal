@@ -1,12 +1,9 @@
 import { useState, useEffect, useContext } from "react";
 import Swal from "sweetalert2";
-import {
-  profileUserApi,
-  type ProfileUser,
-  type ProfileUserUpdateDto,
-} from "../services/userProfileApi";
 import { UserContext } from "../context/UserContext ";
 import { useActualizarJwt } from "./useActualizarJwt";
+import type { ProfileUser, ProfileUserUpdateDto } from "../types/User/UserAuth";
+import { profileUserApi } from "../services/userProfileApi";
 
 export const useUserProfile = () => {
   const [profile, setProfile] = useState<ProfileUser>({
@@ -39,7 +36,7 @@ export const useUserProfile = () => {
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al cargar el perfil",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);
@@ -63,7 +60,7 @@ export const useUserProfile = () => {
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al actualizar el perfil",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);
@@ -82,7 +79,7 @@ export const useUserProfile = () => {
       Swal.fire(
         "Error",
         "Solo se permiten imágenes JPEG, JPG, PNG o WEBP",
-        "error"
+        "error",
       );
       return;
     }
@@ -128,7 +125,7 @@ export const useUserProfile = () => {
       Swal.fire(
         "Error",
         "Ocurrió un error inesperado al subir la foto",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);

@@ -1,0 +1,3 @@
+export interface CuentaAdLocal { uuid: string; banco: string; beneficiario: string; numeroCuenta?: string | null; clabe?: string | null; numeroTarjeta?: string | null; instrucciones?: string | null; principal: boolean; }
+export interface PagoComision { uuid: string; comercioId: number; comercio: string; periodo: string; metodoPago: string; monto: number; estatus: number; comentario?: string | null; fechaCreacion: string; comisionesIncluidas: number; }
+export interface EstadoComisionesComercio { comercioId: number; comercio: string; pendienteSemana: number; pendienteMes: number; pagoEnRevision?: PagoComision | null; }

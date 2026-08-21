@@ -1,9 +1,7 @@
 import { useState, useCallback } from "react";
 import Swal from "sweetalert2";
-import {
-  usersService,
-  type UsuarioConSuscripcionDto,
-} from "../services/usersApi";
+import type { UsuarioConSuscripcionDto } from "../types/Admin/usuarios";
+import { usersService } from "../services/usersApi";
 
 interface ListarParams {
   page: number;

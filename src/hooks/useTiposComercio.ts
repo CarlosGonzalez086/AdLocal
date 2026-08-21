@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
 import Swal from "sweetalert2";
-import {
-  tipoComercioApi,
-  type TipoComercioCreateDto,
-  type TipoComercioDto,
-} from "../services/tipoComercioApi";
+import type {
+  TipoComercioCreateDto,
+  TipoComercioDto,
+} from "../types/Admin/tipoComercio";
+import { tipoComercioApi } from "../services/tipoComercioApi";
 
 interface ListarParams {
   page: number;
@@ -18,24 +18,37 @@ export const useTiposComercio = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const [tiposSelect, setTiposSelect] = useState<{ id: number; nombre: string }[]>([]);
+  const [tiposSelect, setTiposSelect] = useState<
+    { id: number; nombre: string }[]
+  >([]);
   const [loadingSelect, setLoadingSelect] = useState(false);
 
-  const listar = useCallback(async ({ page, rows, orderBy, search }: ListarParams) => {
-    setLoading(true);
-    try {
-      const { data } = await tipoComercioApi.getAllPaged(page, rows, orderBy, search);
-      setTipos(data.respuesta?.items ?? []);
-      setTotal(data.respuesta?.totalItems ?? 0);
-    } catch (error) {
-      console.error(error);
-      Swal.fire("Error", "No se pudo cargar los tipos de comercio", "error");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const listar = useCallback(
+    async ({ page, rows, orderBy, search }: ListarParams) => {
+      setLoading(true);
+      try {
+        const { data } = await tipoComercioApi.getAllPaged(
+          page,
+          rows,
+          orderBy,
+          search,
+        );
+        setTipos(data.respuesta?.items ?? []);
+        setTotal(data.respuesta?.totalItems ?? 0);
+      } catch (error) {
+        console.error(error);
+        Swal.fire("Error", "No se pudo cargar los tipos de comercio", "error");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
-  const guardar = async (tipo: TipoComercioCreateDto, refrescarParams: ListarParams) => {
+  const guardar = async (
+    tipo: TipoComercioCreateDto,
+    refrescarParams: ListarParams,
+  ) => {
     setLoading(true);
     try {
       if (tipo.id) {
@@ -95,7 +108,11 @@ export const useTiposComercio = () => {
       setTiposSelect(data.respuesta ?? []);
     } catch (error) {
       console.error(error);
-      Swal.fire("Error", "No se pudo cargar los tipos de comercio para select", "error");
+      Swal.fire(
+        "Error",
+        "No se pudo cargar los tipos de comercio para select",
+        "error",
+      );
     } finally {
       setLoadingSelect(false);
     }

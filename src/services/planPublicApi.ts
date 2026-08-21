@@ -1,11 +1,5 @@
-import axios from "axios";
+import { httpUsuarioPublico } from "../api/httpUsuarioPublico";
 
-const apiPublic = axios.create({
-  baseURL: `https://adlocalapi.onrender.com/api/planes`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
 
 export interface PlanCreateDto {
   id?: number;
@@ -29,5 +23,5 @@ export interface PlanCreateDto {
 }
 
 export const planPublicApi = {
-  getAllPlanesUser: () => apiPublic.get("/AllPlanesUser"),
+  getAllPlanesUser: () => httpUsuarioPublico.get("/planes/AllPlanesUser"),
 };

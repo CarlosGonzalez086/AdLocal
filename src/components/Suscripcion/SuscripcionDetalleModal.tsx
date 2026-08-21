@@ -1,26 +1,12 @@
-import {
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogContent,
-  Divider,
-  IconButton,
-  TextField,
-  Typography,
-} from "@mui/material";
-import type { CSSProperties, ReactElement } from "react";
-
+import type { CSSProperties } from "react";
+import { Button, TextField } from "@mui/material";
 import type { SuscripcionDto } from "../../services/suscripcionApi";
-
 import {
   calcularDiasRestantesDesdeHoy,
   utcToLocal,
 } from "../../utils/generalsFunctions";
-
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
-
-import styles from "../../styles/SuscripcionDetalleModal.module.css";
+import { GenericModal } from "../GenericModal";
 
 interface Props {
   open: boolean;
@@ -123,19 +109,19 @@ const formatPrice = (value: unknown): string => {
 
 const LimitBox = ({ label, value, icon }: LimitBoxProps) => {
   return (
-    <Box className={styles.limitBox}>
-      <Box className={styles.limitIcon}>
+    <div className="subscriptionDetailLimitBox">
+      <div className="subscriptionDetailLimitIcon">
         <MaterialSymbol icon={icon} size="medium" />
-      </Box>
+      </div>
 
-      <Typography component="strong" className={styles.limitValue}>
+      <strong className="subscriptionDetailLimitValue fz-h2 fw-bold">
         {normalizeLimit(value)}
-      </Typography>
+      </strong>
 
-      <Typography component="span" className={styles.limitLabel}>
+      <span className="subscriptionDetailLimitLabel fz-h5 fw-regular">
         {label}
-      </Typography>
-    </Box>
+      </span>
+    </div>
   );
 };
 
@@ -195,17 +181,20 @@ export const SuscripcionDetalleModal = ({
   );
 
   const remainingDaysLabel =
-    remainingDays > 0
-      ? remainingDays === 1
+    remainingDays > 40
+      ? "De por vida"
+      : remainingDays === 1
         ? "1 día restante"
-        : `${remainingDays} días restantes`
-      : "Periodo finalizado";
+        : remainingDays > 0
+          ? `${remainingDays} días restantes`
+          : "Periodo finalizado";
 
   const benefits: Benefit[] = [
     ...(plan.permiteCatalogo
       ? [
           {
             label: "Catálogo público",
+
             icon: "inventory_2",
           },
         ]
@@ -215,6 +204,7 @@ export const SuscripcionDetalleModal = ({
       ? [
           {
             label: "Colores personalizados",
+
             icon: "palette",
           },
         ]
@@ -224,6 +214,7 @@ export const SuscripcionDetalleModal = ({
       ? [
           {
             label: "Analytics",
+
             icon: "monitoring",
           },
         ]
@@ -233,6 +224,7 @@ export const SuscripcionDetalleModal = ({
       ? [
           {
             label: plan.badgeTexto?.trim() || "Distintivo especial",
+
             icon: "workspace_premium",
           },
         ]
@@ -242,6 +234,7 @@ export const SuscripcionDetalleModal = ({
       ? [
           {
             label: "Multiusuario",
+
             icon: "group",
           },
         ]
@@ -249,272 +242,240 @@ export const SuscripcionDetalleModal = ({
   ];
 
   return (
-    <Dialog
+    <GenericModal
       open={open}
       onClose={onClose}
+      title={plan.nombre}
+      subtitle={`Plan ${planType}`}
+      icon={planConfig.icon}
       maxWidth="sm"
-      fullWidth
-      aria-labelledby="subscription-detail-title"
-      slotProps={{
-        paper: {
-          className: styles.dialogPaper,
-          style: modalVariables,
-        },
-
-        backdrop: {
-          className: styles.dialogBackdrop,
-        },
-      }}
+      secondaryLabel="Cerrar"
+      hideActions
     >
-      <Box component="header" className={styles.header}>
-        <Box className={styles.headerDecoration} aria-hidden="true" />
+      <div className="subscriptionDetail mt-4" style={modalVariables}>
+        <div className="subscriptionDetailStatuses">
+          <div
+            className={[
+              "subscriptionDetailStatusBadge",
 
-        <Box className={styles.headerContent}>
-          <Box className={styles.planHeading}>
-            <Box className={styles.planIcon}>
-              <MaterialSymbol icon={planConfig.icon} size="large" filled />
-            </Box>
-
-            <Box className={styles.planHeadingText}>
-              <Typography
-                id="subscription-detail-title"
-                component="h2"
-                className={styles.planName}
-              >
-                {plan.nombre}
-              </Typography>
-
-              <Typography component="p" className={styles.planType}>
-                Plan {planType}
-              </Typography>
-
-              <Box className={styles.statuses}>
-                <Box
-                  className={[
-                    styles.statusBadge,
-                    isActive
-                      ? styles.activeStatus
-                      : isCanceled
-                        ? styles.canceledStatus
-                        : styles.inactiveStatus,
-                  ].join(" ")}
-                >
-                  <MaterialSymbol icon={statusIcon} size="small" filled />
-
-                  <Typography component="span" className={styles.statusText}>
-                    {statusLabel}
-                  </Typography>
-                </Box>
-
-                <Box
-                  className={[
-                    styles.statusBadge,
-                    suscripcion.autoRenew
-                      ? styles.autoRenewStatus
-                      : styles.noRenewStatus,
-                  ].join(" ")}
-                >
-                  <MaterialSymbol
-                    icon={suscripcion.autoRenew ? "autorenew" : "event_busy"}
-                    size="small"
-                  />
-
-                  <Typography component="span" className={styles.statusText}>
-                    {suscripcion.autoRenew
-                      ? "Auto-renovación"
-                      : "Sin renovación"}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-
-          <IconButton
-            type="button"
-            onClick={onClose}
-            className={styles.closeButton}
-            aria-label="Cerrar detalle de suscripción"
+              isActive
+                ? "subscriptionDetailStatusActive"
+                : isCanceled
+                  ? "subscriptionDetailStatusCanceled"
+                  : "subscriptionDetailStatusInactive",
+            ].join(" ")}
           >
-            <MaterialSymbol icon="close" size="small" />
-          </IconButton>
-        </Box>
-      </Box>
+            <MaterialSymbol icon={statusIcon} size="small" filled />
 
-      <DialogContent className={styles.content}>
-        <Box className={styles.priceCard}>
-          <Box className={styles.priceIcon}>
+            <span className="subscriptionDetailStatusText fz-h5 fw-semibold">
+              {statusLabel}
+            </span>
+          </div>
+
+          <div
+            className={[
+              "subscriptionDetailStatusBadge",
+
+              suscripcion.autoRenew
+                ? "subscriptionDetailStatusAutoRenew"
+                : "subscriptionDetailStatusNoRenew",
+            ].join(" ")}
+          >
+            <MaterialSymbol
+              icon={suscripcion.autoRenew ? "autorenew" : "event_busy"}
+              size="small"
+            />
+
+            <span className="subscriptionDetailStatusText fz-h5 fw-semibold">
+              {suscripcion.autoRenew ? "Auto-renovación" : "Sin renovación"}
+            </span>
+          </div>
+        </div>
+
+        <div className="subscriptionDetailPriceCard">
+          <div className="subscriptionDetailPriceIcon">
             <MaterialSymbol icon="payments" size="medium" />
-          </Box>
+          </div>
 
-          <Box className={styles.priceInformation}>
-            <Box className={styles.priceRow}>
-              <Typography component="strong" className={styles.price}>
-                ${formatPrice(plan.precio)}
-              </Typography>
+          <div className="subscriptionDetailPriceInformation">
+            <div className="d-flex align-items-baseline gap-1">
+              <strong className="subscriptionDetailPrice fw-bold">
+                {Number(plan.precio) === 0
+                  ? "Gratis"
+                  : `$${formatPrice(plan.precio)}`}
+              </strong>
 
-              <Typography component="span" className={styles.currency}>
-                MXN
-              </Typography>
-            </Box>
+              {Number(plan.precio) > 0 && (
+                <span className="subscriptionDetailCurrency fz-h5 fw-semibold">
+                  MXN
+                </span>
+              )}
+            </div>
 
-            <Typography component="p" className={styles.remainingDays}>
+            <p className="subscriptionDetailRemainingDays fz-h5 fw-regular mb-0">
               {remainingDaysLabel}
-            </Typography>
-          </Box>
-        </Box>
+            </p>
+          </div>
+        </div>
 
-        <Box
-          component="section"
-          className={styles.section}
+        <div
+          className="subscriptionDetailSection"
           aria-labelledby="plan-capacities-title"
         >
-          <Box className={styles.sectionHeader}>
-            <Box className={styles.sectionIcon}>
+          <div className="subscriptionDetailSectionHeader">
+            <div className="subscriptionDetailSectionIcon">
               <MaterialSymbol icon="tune" size="small" />
-            </Box>
+            </div>
 
-            <Typography
+            <h3
               id="plan-capacities-title"
-              component="h3"
-              className={styles.sectionTitle}
+              className="subscriptionDetailSectionTitle fz-h3 fw-semibold mb-0"
             >
               Capacidades del plan
-            </Typography>
-          </Box>
+            </h3>
+          </div>
 
-          <Box className={styles.limitsGrid}>
-            <LimitBox
-              label="Negocios"
-              value={plan.maxNegocios}
-              icon="storefront"
-            />
+          <div className="row g-3">
+            <div className="col-12 col-sm-4">
+              <LimitBox
+                label="Negocios"
+                value={plan.maxNegocios}
+                icon="storefront"
+              />
+            </div>
 
-            <LimitBox
-              label="Productos"
-              value={plan.maxProductos}
-              icon="inventory_2"
-            />
+            <div className="col-12 col-sm-4">
+              <LimitBox
+                label="Productos"
+                value={plan.maxProductos}
+                icon="inventory_2"
+              />
+            </div>
 
-            <LimitBox
-              label="Fotos"
-              value={plan.maxFotos}
-              icon="photo_library"
-            />
-          </Box>
-        </Box>
+            <div className="col-12 col-sm-4">
+              <LimitBox
+                label="Fotos"
+                value={plan.maxFotos}
+                icon="photo_library"
+              />
+            </div>
+          </div>
+        </div>
 
         {benefits.length > 0 && (
-          <Box
-            component="section"
-            className={styles.section}
+          <div
+            className="subscriptionDetailSection"
             aria-labelledby="plan-benefits-title"
           >
-            <Box className={styles.sectionHeader}>
-              <Box className={styles.sectionIcon}>
+            <div className="subscriptionDetailSectionHeader">
+              <div className="subscriptionDetailSectionIcon">
                 <MaterialSymbol icon="stars" size="small" />
-              </Box>
+              </div>
 
-              <Typography
+              <h3
                 id="plan-benefits-title"
-                component="h3"
-                className={styles.sectionTitle}
+                className="subscriptionDetailSectionTitle fz-h3 fw-semibold mb-0"
               >
                 Beneficios incluidos
-              </Typography>
-            </Box>
+              </h3>
+            </div>
 
-            <Box className={styles.benefits}>
+            <div className="subscriptionDetailBenefits">
               {benefits.map((benefit) => (
-                <Chip
+                <div
                   key={`${benefit.icon}-${benefit.label}`}
-                  icon={
-                    (
-                      <MaterialSymbol icon={benefit.icon} size="small" />
-                    ) as ReactElement
-                  }
-                  label={benefit.label}
-                  size="small"
-                  className={styles.benefitChip}
-                />
+                  className="subscriptionDetailBenefit"
+                >
+                  <MaterialSymbol
+                    icon={benefit.icon}
+                    size="small"
+                    className="subscriptionDetailBenefitIcon"
+                  />
+
+                  <span className="subscriptionDetailBenefitText fz-h5 fw-medium">
+                    {benefit.label}
+                  </span>
+                </div>
               ))}
-            </Box>
-          </Box>
+            </div>
+          </div>
         )}
 
-        <Divider className={styles.divider} />
+        <div className="subscriptionDetailDivider" />
 
-        <Box
-          component="section"
-          className={styles.section}
+        <div
+          className="subscriptionDetailSection"
           aria-labelledby="subscription-period-title"
         >
-          <Box className={styles.sectionHeader}>
-            <Box className={styles.sectionIcon}>
+          <div className="subscriptionDetailSectionHeader">
+            <div className="subscriptionDetailSectionIcon">
               <MaterialSymbol icon="calendar_month" size="small" />
-            </Box>
+            </div>
 
-            <Typography
+            <h3
               id="subscription-period-title"
-              component="h3"
-              className={styles.sectionTitle}
+              className="subscriptionDetailSectionTitle fz-h3 fw-semibold mb-0"
             >
               Periodo de suscripción
-            </Typography>
-          </Box>
+            </h3>
+          </div>
 
-          <Box className={styles.datesGrid}>
-            <TextField
-              label="Inicio"
-              value={utcToLocal(suscripcion.fechaInicio)}
-              fullWidth
-              disabled
-              className={styles.dateField}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <MaterialSymbol
-                      icon="event_available"
-                      size="small"
-                      className={styles.inputIcon}
-                    />
-                  ),
-                },
-              }}
-            />
+          <div className="row g-3">
+            <div className="col-12 col-sm-6">
+              <TextField
+                label="Inicio"
+                value={utcToLocal(suscripcion.fechaInicio)}
+                fullWidth
+                disabled
+                className="adlocalTextField subscriptionDetailDateField"
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <MaterialSymbol
+                        icon="event_available"
+                        size="small"
+                        className="subscriptionDetailInputIcon"
+                      />
+                    ),
+                  },
+                }}
+              />
+            </div>
 
-            <TextField
-              label="Fin"
-              value={utcToLocal(suscripcion.fechaFin)}
-              fullWidth
-              disabled
-              className={styles.dateField}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <MaterialSymbol
-                      icon="event"
-                      size="small"
-                      className={styles.inputIcon}
-                    />
-                  ),
-                },
-              }}
-            />
-          </Box>
-        </Box>
-      </DialogContent>
+            <div className="col-12 col-sm-6">
+              <TextField
+                label="Fin"
+                value={utcToLocal(suscripcion.fechaFin)}
+                fullWidth
+                disabled
+                className="adlocalTextField subscriptionDetailDateField"
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <MaterialSymbol
+                        icon="event"
+                        size="small"
+                        className="subscriptionDetailInputIcon"
+                      />
+                    ),
+                  },
+                }}
+              />
+            </div>
+          </div>
+        </div>
 
-      <Box component="footer" className={styles.footer}>
-        <Button
-          type="button"
-          fullWidth
-          onClick={onClose}
-          className={styles.closeAction}
-          startIcon={<MaterialSymbol icon="check" size="small" />}
-        >
-          Cerrar
-        </Button>
-      </Box>
-    </Dialog>
+        <div className="d-flex justify-content-end mt-4">
+          <Button
+            className="btn-adlocal btn-adlocal--solid fz-h4 fw-semibold subscriptionDetailCloseButton"
+            onClick={onClose}
+          >
+            <MaterialSymbol icon="check" size="small" />
+
+            <span>Cerrar</span>
+          </Button>
+        </div>
+      </div>
+    </GenericModal>
   );
 };

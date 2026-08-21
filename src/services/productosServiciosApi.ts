@@ -1,62 +1,32 @@
-import axios from "axios";
-import type { ApiResponse } from "../api/apiResponse";
-
-const api = axios.create({
-  baseURL: `https://adlocalapi.onrender.com/api/ProductosServicios`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  },
-);
-
-export interface ProductoServicioDto {
-  id?: number;
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  activo: boolean;
-  stock: number;
-  imagenBase64?: string;
-  idComercio: number;
-}
-
-export interface PagedResponse<T> {
-  items: T[];
-  totalItems: number;
-}
+import type { ApiResponse, PaginatedResponse } from "../api/apiResponse";
+import { httpUsuario } from "../api/httpUsuario";
+import type { ProductoServicioDto } from "../types/User/productosServicios";
 
 export const productosServiciosApi = {
   crear: (data: ProductoServicioDto) =>
-    api.post<ApiResponse<ProductoServicioDto>>("", data),
+    httpUsuario.post<ApiResponse<ProductoServicioDto>>(
+      "/ProductosServicios",
+      data,
+    ),
 
   actualizar: (id: number, data: ProductoServicioDto) =>
-    api.put<ApiResponse<ProductoServicioDto>>(`/${id}`, data),
+    httpUsuario.put<ApiResponse<ProductoServicioDto>>(
+      `/ProductosServicios/${id}`,
+      data,
+    ),
 
   eliminar: (id: number, idComercio: number) =>
-    api.delete<ApiResponse<null>>(`/${id}/idComercio/${idComercio}`),
+    httpUsuario.delete<ApiResponse<null>>(
+      `/ProductosServicios/${id}/idComercio/${idComercio}`,
+    ),
 
   desactivar: (id: number, idComercio: number) =>
-    api.put<ApiResponse<null>>(`desactivar/${id}/idComercio/${idComercio}`),
+    httpUsuario.put<ApiResponse<null>>(
+      `/ProductosServicios/desactivar/${id}/idComercio/${idComercio}`,
+    ),
 
-  getById: (id: number) => api.get<ApiResponse<ProductoServicioDto>>(`/${id}`),
+  getById: (id: number) =>
+    httpUsuario.get<ApiResponse<ProductoServicioDto>>(`/${id}`),
 
   getAllPaged: (params?: {
     page?: number;
@@ -65,8 +35,13 @@ export const productosServiciosApi = {
     search?: string;
     idComercio?: number;
   }) =>
-    api.get<ApiResponse<PagedResponse<ProductoServicioDto>>>("", { params }),
+    httpUsuario.get<ApiResponse<PaginatedResponse<ProductoServicioDto>>>(
+      "/ProductosServicios",
+      { params },
+    ),
 
   getAllByComercio: (idComercio: number) =>
-    api.get<ApiResponse<ProductoServicioDto[]>>(`/comercio/${idComercio}`),
+    httpUsuario.get<ApiResponse<ProductoServicioDto[]>>(
+      `/ProductosServicios/comercio/${idComercio}`,
+    ),
 };

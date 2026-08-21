@@ -9,13 +9,15 @@ import {
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-import { adminApi } from "../api/admin.api";
-import { authApi } from "../api/authApi";
-import LoginForm from "../components/forms/LoginForm";
+import { useAdmin } from "../hooks/useAdmin";
+import { useUser } from "../hooks/useUser";
 
-import styles from "../styles/LoginPage.module.css";
+import LoginForm from "../components/forms/LoginForm";
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
 
+import styles from "../styles/LoginPage.module.css";
+import { setLocalStorageJWTAdmin } from "../utils/storageAdmin";
+import { setLocalStorageJWTUsuario } from "../utils/storageUsuario";
 
 const LOGO_URL =
   "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
@@ -24,32 +26,39 @@ interface Props {
   type: "admin" | "user";
 }
 
-interface LoginError {
-  response?: {
-    data?: {
-      mensaje?: string;
-    };
-  };
-}
-
 export default function LoginPage({ type }: Props) {
   const navigate = useNavigate();
 
   const isAdmin = type === "admin";
 
+  // Siempre se ejecutan los hooks
+  const admin = useAdmin();
+  const user = useUser();
+
+  const loading = isAdmin ? admin.loading : user.loading;
+
   const handleLogin = async (data: any) => {
     try {
       const response = isAdmin
-        ? await adminApi.loginAdmin(data)
-        : await authApi.login(data);
+        ? await admin.loginAdmin(data)
+        : await user.loginUser(data);
 
-      const token = response.data?.respuesta?.token;
-
+      const token = response.respuesta.token;
+      console.log(token);
       if (!token) {
-        throw new Error("La respuesta no contiene un token de autenticación.");
+        await Swal.fire({
+          icon: "error",
+          title: "Error al iniciar sesión",
+          text: "Por favor, inténtalo nuevamente.",
+        });
+        return;
       }
 
-      localStorage.setItem("token", token);
+      if (isAdmin) {
+        setLocalStorageJWTAdmin(token);
+      } else {
+        setLocalStorageJWTUsuario(token);
+      }
 
       await Swal.fire({
         icon: "success",
@@ -62,21 +71,12 @@ export default function LoginPage({ type }: Props) {
         showConfirmButton: false,
       });
 
-      navigate(isAdmin ? "/Admin" : "/app", {
+      navigate(isAdmin ? "/admin/app/inicio" : "/usuario/app/inicio", {
         replace: true,
       });
-    } catch (error: unknown) {
-      const apiError = error as LoginError;
-
-      await Swal.fire({
-        icon: "error",
-        title: "No pudimos iniciar sesión",
-        text:
-          apiError.response?.data?.mensaje ??
-          "Correo o contraseña incorrectos.",
-        confirmButtonText: "Intentar nuevamente",
-        confirmButtonColor: "#007AFF",
-      });
+    } catch (error) {
+      console.error(error);
+      // El hook ya muestra el mensaje de error.
     }
   };
 
@@ -156,7 +156,13 @@ export default function LoginPage({ type }: Props) {
                 type="button"
                 underline="none"
                 className={styles.textButton}
-                onClick={() => navigate("/registro")}
+                onClick={() =>
+                  navigate(
+                    type === "user"
+                      ? "/usuario/crear-cuenta"
+                      : "/admin/crear-cuenta",
+                  )
+                }
               >
                 Crear cuenta
               </Link>
@@ -164,7 +170,7 @@ export default function LoginPage({ type }: Props) {
           )}
 
           <Box className={styles.formContainer}>
-            <LoginForm onSubmit={handleLogin} />
+            <LoginForm onSubmit={handleLogin} loading={loading} />
           </Box>
 
           <Link
@@ -172,10 +178,15 @@ export default function LoginPage({ type }: Props) {
             type="button"
             underline="none"
             className={styles.forgotPasswordButton}
-            onClick={() => navigate("/recuperar-contrasena")}
+            onClick={() =>
+              navigate(
+                type === "user"
+                  ? "/usuario/recuperar-contrasena"
+                  : "/admin/recuperar-contrasena",
+              )
+            }
           >
             <MaterialSymbol icon="lock_reset" size="small" />
-
             <span>¿Olvidaste tu contraseña?</span>
           </Link>
 

@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import Swal from "sweetalert2";
-import { planApi, type PlanCreateDto } from "../services/planApi";
+import type { PlanCreateDto } from "../types/Admin/planes";
+import { planApi } from "../services/planApi";
 
 interface ListarParams {
   page: number;
@@ -33,13 +34,13 @@ export const usePlanes = () => {
         Swal.fire(
           "Error",
           "No se pudo cargar la información de los planes",
-          "error"
+          "error",
         );
       } finally {
         setLoading(false);
       }
     },
-    []
+    [],
   );
 
   const listAllPlanesUser = useCallback(async () => {
@@ -51,7 +52,7 @@ export const usePlanes = () => {
       Swal.fire(
         "Error",
         "No se pudo cargar la información de los planes",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);
@@ -60,7 +61,7 @@ export const usePlanes = () => {
 
   const guardar = async (
     plan: PlanCreateDto,
-    refrescarParams: ListarParams
+    refrescarParams: ListarParams,
   ): Promise<void> => {
     setLoading(true);
     try {
@@ -111,6 +112,6 @@ export const usePlanes = () => {
     guardar,
     eliminar,
     listAllPlanesUser,
-    planesUser
+    planesUser,
   };
 };

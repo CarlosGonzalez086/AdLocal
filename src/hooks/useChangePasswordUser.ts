@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
-import { profileUserApi, type ChangeUserPasswordDto } from "../services/userProfileApi";
+import type { ChangeUserPasswordDto } from "../types/User/UserAuth";
+import { profileUserApi } from "../services/userProfileApi";
+
 
 
 

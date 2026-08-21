@@ -3,13 +3,14 @@
   --header-text: #1c1c1e;
   --header-primary: #008989;
   --header-border: rgba(15, 23, 42, 0.07);
+  --header-primary-light: #e9e5e0;
 
   width: 100% !important;
   margin-left: 0;
 
   color: var(--header-text) !important;
 
-  background-color: var(--header-background) !important;
+  background-color:var(--header-primary-light) !important;
 
   border-bottom: 1px solid var(--header-border);
 
@@ -38,6 +39,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+
 }
 
 /* Sección izquierda */

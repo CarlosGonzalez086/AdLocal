@@ -6,10 +6,6 @@ import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
 export default function NotFoundPage() {
   const navigate = useNavigate();
 
-  const handleGoHome = () => {
-    navigate("/app");
-  };
-
   const handleGoBack = () => {
     navigate(-1);
   };
@@ -80,8 +76,6 @@ export default function NotFoundPage() {
                 >
                   Regresar
                 </Button>
-
- 
               </div>
             </div>
           </div>

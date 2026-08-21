@@ -13,11 +13,12 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { GenericTable, type TableColumn } from "../layouts/GenericTable";
 import DeleteIcon from "@mui/icons-material/Delete";
-import type { ProfileUser } from "../../services/userProfileApi";
 import { useEffect, useState } from "react";
 import { useComercio } from "../../hooks/useComercio";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockIcon from "@mui/icons-material/Lock";
+import type { ProfileUser } from "../../types/User/UserAuth";
+
 
 interface Props {
   open: boolean;

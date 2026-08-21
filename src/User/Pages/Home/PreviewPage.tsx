@@ -7,9 +7,8 @@ import Swal from "sweetalert2";
 import { useActualizarJwt } from "../../../hooks/useActualizarJwt";
 import { useComercio } from "../../../hooks/useComercio";
 import { useComercioVisitasStats } from "../../../hooks/useComercioVisitasStats";
-import { useUsoCodigoReferido } from "../../../hooks/useUsoCodigoReferido";
 
-import CodigoReferido from "../../../components/User/CodigoReferido";
+
 import ComercioCard from "../../../components/Comercio/ComercioCard";
 import ComercioCardBasico from "../../../components/Comercio/ComercioCardBasico";
 import ComercioDetalle from "../../../components/Comercio/ComercioDetalle";
@@ -75,7 +74,7 @@ const SectionHeader: FC<SectionHeaderProps> = ({
 export default function PreviewPage({ user }: PreviewPageProps) {
   const { comercio, loading, comercios, getAllComerciosByUser } = useComercio();
 
-  const { contarPorCodigo } = useUsoCodigoReferido();
+  // const { contarPorCodigo } = useUsoCodigoReferido();
 
   const { actualizarJwt } = useActualizarJwt();
 
@@ -83,7 +82,7 @@ export default function PreviewPage({ user }: PreviewPageProps) {
      STATE
   ============================================ */
 
-  const [totalUsoCodigo, setTotalUsoCodigo] = useState(0);
+
 
   const [productos, setProductos] = useState<ProductoServicioDto[]>([]);
 
@@ -217,29 +216,29 @@ export default function PreviewPage({ user }: PreviewPageProps) {
      CÓDIGO REFERIDO
   ============================================ */
 
-  useEffect(() => {
-    const codigoReferido = user?.codigoReferido;
+  // useEffect(() => {
+  //   const codigoReferido = user?.codigoReferido;
 
-    if (!codigoReferido) {
-      setTotalUsoCodigo(0);
+  //   if (!codigoReferido) {
+  //     setTotalUsoCodigo(0);
 
-      return;
-    }
+  //     return;
+  //   }
 
-    const obtenerTotalReferidos = async () => {
-      try {
-        const total = await contarPorCodigo(codigoReferido);
+  //   const obtenerTotalReferidos = async () => {
+  //     try {
+  //       const total = await contarPorCodigo(codigoReferido);
 
-        setTotalUsoCodigo(total);
-      } catch (error) {
-        console.error("Error al consultar el código referido:", error);
+  //       setTotalUsoCodigo(total);
+  //     } catch (error) {
+  //       console.error("Error al consultar el código referido:", error);
 
-        setTotalUsoCodigo(0);
-      }
-    };
+  //       setTotalUsoCodigo(0);
+  //     }
+  //   };
 
-    void obtenerTotalReferidos();
-  }, [user?.codigoReferido, contarPorCodigo]);
+  //   void obtenerTotalReferidos();
+  // }, [user?.codigoReferido, contarPorCodigo]);
 
   /* ============================================
      COMERCIOS PRO / BUSINESS

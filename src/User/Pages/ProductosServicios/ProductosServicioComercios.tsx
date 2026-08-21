@@ -1,5 +1,4 @@
 import { jwtDecode } from "jwt-decode";
-import type { JwtClaims } from "../../../services/auth.api";
 import { useComercio } from "../../../hooks/useComercio";
 import { useEffect } from "react";
 import Swal from "sweetalert2";
@@ -8,6 +7,7 @@ import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
 import ComercioCard from "../../../components/Comercio/ComercioCard";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
+import type { JwtClaims } from "../../../types/claims";
 
 export default function ProductosServicioComercios() {
   const dataJwt = localStorage.getItem("token");

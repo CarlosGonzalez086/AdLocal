@@ -43,7 +43,8 @@ export default function LoginPage({ type }: Props) {
         ? await admin.loginAdmin(data)
         : await user.loginUser(data);
 
-      const token = response.respuesta.token;
+      const loginResponse = response as any;
+      const token = loginResponse?.respuesta?.token ?? loginResponse?.token;
       console.log(token);
       if (!token) {
         await Swal.fire({

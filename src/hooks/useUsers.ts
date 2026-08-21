@@ -26,7 +26,7 @@ export const useUsers = () => {
           search,
         });
 
-        setUsers(resp.data.respuesta.data);
+        setUsers(resp.data.respuesta.items);
         setTotal(resp.data.respuesta.totalRecords);
       } catch (error) {
         console.error(error);

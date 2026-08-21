@@ -1,5 +1,6 @@
 import { Box, Typography, Stack } from "@mui/material";
-import type { ProductoServicioDto } from "../../services/productosServiciosApi";
+import type { ProductoServicioDto } from "../../types/User/productosServicios";
+
 
 
 interface Props {

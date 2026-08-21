@@ -11,7 +11,6 @@ import {
 import { normalizeComercioData } from "../utils/generalsFunctions";
 import { UserContext } from "../context/UserContext ";
 import { useNavigate } from "react-router-dom";
-import type { ProfileUser } from "../services/userProfileApi";
 import {
   comercioDtoDefault,
   type ColaborarDto,
@@ -19,6 +18,7 @@ import {
   type ComercioDtoListItem,
 } from "../types/User/comercio";
 import { comercioApi } from "../services/comercioApi";
+import type { ProfileUser } from "../types/User/UserAuth";
 
 export interface ListarParamsComercio {
   page: number;
@@ -185,7 +185,7 @@ export const useComercio = () => {
         return;
       }
 
-      setComercios(data.respuesta.data || []);
+      setComercios(data.respuesta.items || []);
       setTotal(data.respuesta.totalRecords || 0);
     } catch (error) {
       console.error(error);
@@ -383,7 +383,7 @@ export const useComercio = () => {
         return;
       }
 
-      setUsersColaboradores(data.respuesta.data || []);
+      setUsersColaboradores(data.respuesta.items || []);
       setTotalColaboradores(data.respuesta.totalRecords || 0);
     } catch (error) {
       console.error(error);

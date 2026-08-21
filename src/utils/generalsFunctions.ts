@@ -1,4 +1,4 @@
-import type { ComercioDto, HorarioComercioDto } from "../services/comercioApi";
+import type { ComercioDto, HorarioComercioDto } from "../types/User/comercio";
 
 export const utcToLocal = (utcDate: string | Date): string => {
   if (!utcDate) return "";
@@ -14,9 +14,7 @@ export const utcToLocal = (utcDate: string | Date): string => {
   return `${day}/${month}/${year}`;
 };
 
-export const calcularDiasRestantesDesdeHoy = (
-  fechaFin: string,
-): number => {
+export const calcularDiasRestantesDesdeHoy = (fechaFin: string): number => {
   const hoy = new Date();
   const fin = new Date(fechaFin);
 
@@ -29,7 +27,6 @@ export const calcularDiasRestantesDesdeHoy = (
 
   return dias;
 };
-
 
 export const estaAbiertoAhora = (
   horarios: ComercioDto["horarios"] | undefined,

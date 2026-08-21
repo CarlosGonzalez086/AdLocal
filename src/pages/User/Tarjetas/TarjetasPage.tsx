@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  Typography,
-  Stack,
-  Skeleton,
-} from "@mui/material";
+import { Box, Button, Typography, Stack, Skeleton } from "@mui/material";
 import type { CrearTarjetaDto, TarjetaDto } from "../../../services/tarjetaApi";
 import { useTarjetas } from "../../../hooks/useTarjetas";
 import { CardTarjeta } from "../../../components/Tarjeta/CardTarjeta";
@@ -22,12 +16,16 @@ const cardSx = {
 };
 
 export const TarjetasPage: React.FC = () => {
-  const { tarjetas, listar, crear, setDefault, eliminar, loading } = useTarjetas();
+  const { tarjetas, listar, crear, setDefault, eliminar, loading } =
+    useTarjetas();
   const [creando, setCreando] = useState(false);
   const [editando, setEditando] = useState(false);
-  const [tarjetaSeleccionada, setTarjetaSeleccionada] = useState<TarjetaDto | null>(null);
+  const [tarjetaSeleccionada, setTarjetaSeleccionada] =
+    useState<TarjetaDto | null>(null);
 
-  useEffect(() => { listar(); }, []);
+  useEffect(() => {
+    listar();
+  }, []);
 
   const handleSave = async (data: CrearTarjetaDto) => {
     await crear(data);
@@ -40,16 +38,29 @@ export const TarjetasPage: React.FC = () => {
   if (loading) {
     return (
       <Box>
-        <Skeleton variant="rounded" height={88} sx={{ borderRadius: 4, mb: 2.5 }} />
+        <Skeleton
+          variant="rounded"
+          height={88}
+          sx={{ borderRadius: 4, mb: 2.5 }}
+        />
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2,1fr)", lg: "repeat(3,1fr)" },
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2,1fr)",
+              lg: "repeat(3,1fr)",
+            },
             gap: 2,
           }}
         >
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} variant="rounded" height={180} sx={{ borderRadius: 4 }} />
+            <Skeleton
+              key={i}
+              variant="rounded"
+              height={180}
+              sx={{ borderRadius: 4 }}
+            />
           ))}
         </Box>
       </Box>
@@ -79,10 +90,17 @@ export const TarjetasPage: React.FC = () => {
                   justifyContent: "center",
                 }}
               >
-                <CreditCardRoundedIcon sx={{ fontSize: 22, color: "#007AFF" }} />
+                <CreditCardRoundedIcon
+                  sx={{ fontSize: 22, color: "#007AFF" }}
+                />
               </Box>
               <Box>
-                <Typography fontWeight={800} fontSize="1.05rem" color="text.primary" letterSpacing="-0.2px">
+                <Typography
+                  fontWeight={800}
+                  fontSize="1.05rem"
+                  color="text.primary"
+                  letterSpacing="-0.2px"
+                >
                   Mis tarjetas
                 </Typography>
                 <Typography fontSize="0.75rem" color="text.disabled">
@@ -134,7 +152,9 @@ export const TarjetasPage: React.FC = () => {
               boxShadow: "none",
             }}
           >
-            <Typography fontSize="2.5rem" lineHeight={1}>💳</Typography>
+            <Typography fontSize="2.5rem" lineHeight={1}>
+              💳
+            </Typography>
             <Typography fontWeight={700} fontSize="1rem" color="text.primary">
               No tienes tarjetas registradas
             </Typography>
@@ -202,7 +222,10 @@ export const TarjetasPage: React.FC = () => {
       <TarjetaModal
         open={editando}
         tarjeta={tarjetaSeleccionada}
-        onClose={() => { setEditando(false); setTarjetaSeleccionada(null); }}
+        onClose={() => {
+          setEditando(false);
+          setTarjetaSeleccionada(null);
+        }}
         onSave={handleSave}
         loading={loading}
       />

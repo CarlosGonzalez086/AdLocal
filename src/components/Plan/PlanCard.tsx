@@ -1,88 +1,119 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Button } from "@mui/material";
 import type { CSSProperties } from "react";
-
-import type { JwtClaims } from "../../services/auth.api";
 
 import { Feature } from "../Feature";
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
 
-import styles from "../../styles/PlanCard.module.css";
+import type { JwtPayload } from "../../User/Auth/PrivateRouteUsuario";
 
 export interface PlanCardProps {
   nombre: string;
+
   tipo: string;
+
   dias: number;
+
   precio: number;
+
   maxNegocios: number;
+
   maxProductos: number;
+
   maxFotos: number;
+
   permiteCatalogo: boolean;
+
   tieneAnalytics: boolean;
+
   isMultiUsuario: boolean;
+
   coloresPersonalizados: boolean;
+
   soportePrioritario: boolean;
+
   onSelect?: () => void;
+
   esActivo?: boolean;
+
   onCancelar?: () => void;
+
   onVerDetalle?: () => void;
-  claims?: JwtClaims | null;
+
+  user?: JwtPayload | null;
+
   isPublic?: boolean;
+
   badgeTexto: string;
 }
 
 interface PlanVisualConfig {
   gradient: string;
+
   badgeGradient: string;
+
   glow: string;
+
   accent: string;
+
   icon: string;
 }
 
 type PlanCssVariables = CSSProperties & {
   "--plan-gradient": string;
+
   "--plan-badge-gradient": string;
+
   "--plan-glow": string;
+
   "--plan-accent": string;
 };
 
 const PLAN_CONFIG: Record<string, PlanVisualConfig> = {
   BASIC: {
     gradient: "linear-gradient(135deg, #007AFF, #005FCC)",
+
     badgeGradient: "linear-gradient(135deg, #007AFF, #00D2FF)",
+
     glow: "rgba(0, 122, 255, 0.28)",
+
     accent: "#007AFF",
+
     icon: "bolt",
   },
 
   PRO: {
     gradient: "linear-gradient(135deg, #5856D6, #3634A3)",
+
     badgeGradient: "linear-gradient(135deg, #5856D6, #BF5AF2)",
+
     glow: "rgba(88, 86, 214, 0.28)",
+
     accent: "#5856D6",
+
     icon: "rocket_launch",
   },
 
   BUSINESS: {
     gradient: "linear-gradient(135deg, #FF9500, #CC7700)",
+
     badgeGradient: "linear-gradient(135deg, #FF9500, #FF6B00)",
+
     glow: "rgba(255, 149, 0, 0.28)",
+
     accent: "#FF9500",
+
     icon: "business_center",
   },
 
   FREE: {
     gradient: "linear-gradient(135deg, #8E8E93, #636366)",
+
     badgeGradient: "linear-gradient(135deg, #8E8E93, #AEAEB2)",
+
     glow: "rgba(142, 142, 147, 0.2)",
+
     accent: "#8E8E93",
+
     icon: "verified",
   },
 };
@@ -141,7 +172,7 @@ export const PlanCard = ({
   esActivo = false,
   onCancelar,
   onVerDetalle,
-  claims,
+  user,
   isPublic = false,
   badgeTexto,
 }: PlanCardProps) => {
@@ -159,9 +190,10 @@ export const PlanCard = ({
     "--plan-accent": planConfig.accent,
   };
 
-  const claimsWithStatus = claims as
-    | (JwtClaims & {
+  const claimsWithStatus = user as
+    | (JwtPayload & {
         estado?: string;
+
         esatdo?: string;
       })
     | null
@@ -178,7 +210,7 @@ export const PlanCard = ({
   const isCanceled =
     subscriptionStatus === "cancelada" || subscriptionStatus === "canceling";
 
-  const currentPlanType = normalizePlanType(claims?.planTipo);
+  const currentPlanType = normalizePlanType(user?.planTipo);
 
   const isSamePlan = currentPlanType === planType;
 
@@ -198,34 +230,49 @@ export const PlanCard = ({
   const features = [
     {
       label: `Hasta ${normalizeLimit(maxNegocios)} negocios`,
+
       active: true,
     },
+
     {
       label: `Hasta ${normalizeLimit(maxProductos)} productos por negocio`,
+
       active: true,
     },
+
     {
       label: `Hasta ${normalizeLimit(maxFotos)} fotos por negocio`,
+
       active: true,
     },
+
     {
       label: "Catálogo público",
+
       active: permiteCatalogo,
     },
+
     {
       label: "Analytics",
+
       active: tieneAnalytics,
     },
+
     {
       label: "Multiusuario",
+
       active: isMultiUsuario,
     },
+
     {
       label: "Colores personalizados",
+
       active: coloresPersonalizados,
     },
+
     {
       label: "Soporte prioritario",
+
       active: soportePrioritario,
     },
   ];
@@ -241,81 +288,80 @@ export const PlanCard = ({
   const showActions = !isPublic && (showActiveActions || canSelect);
 
   return (
-    <Box className={styles.wrapper} style={planVariables}>
+    <div className="planCardWrapper" style={planVariables}>
       {showBadge && (
-        <Box className={styles.badgeContainer}>
-          <Box className={styles.badge}>
-            <Box className={styles.badgePulse} aria-hidden="true" />
+        <div className="planCardBadgeContainer">
+          <div className="planCardBadge">
+            <span className="planCardBadgePulse" aria-hidden="true" />
 
-            <Typography component="span" className={styles.badgeText}>
+            <span className="planCardBadgeText fz-h5 fw-semibold">
               {normalizedBadge}
-            </Typography>
-          </Box>
-        </Box>
+            </span>
+          </div>
+        </div>
       )}
 
-      <Card
-        component="article"
-        elevation={0}
+      <div
         className={[
-          styles.card,
-          esActivo ? styles.activeCard : "",
-          showBadge ? styles.cardWithBadge : "",
+          "planCard",
+
+          esActivo ? "planCardActive" : "",
+
+          showBadge ? "planCardWithBadge" : "",
         ]
           .filter(Boolean)
           .join(" ")}
       >
-        <Box
-          component="header"
-          className={[styles.header, showBadge ? styles.headerWithBadge : ""]
+        <div
+          className={[
+            "planCardHeader",
+
+            showBadge ? "planCardHeaderWithBadge" : "",
+          ]
             .filter(Boolean)
             .join(" ")}
         >
-          <Box className={styles.headerDecoration} aria-hidden="true" />
+          <div className="planCardHeaderDecoration" aria-hidden="true" />
 
-          <Box className={styles.statusRow}>
-            <Box className={styles.planIcon}>
+          <div className="d-flex align-items-center justify-content-between gap-3 position-relative">
+            <div className="planCardIcon">
               <MaterialSymbol icon={planConfig.icon} size="large" filled />
-            </Box>
+            </div>
 
             {esActivo && (
-              <Box className={styles.activeBadge}>
+              <div className="planCardActiveBadge">
                 <MaterialSymbol icon="check_circle" size="small" filled />
 
-                <Typography component="span" className={styles.activeBadgeText}>
+                <span className="planCardActiveBadgeText fz-h5 fw-semibold">
                   Activo
-                </Typography>
-              </Box>
+                </span>
+              </div>
             )}
-          </Box>
+          </div>
 
-          <Typography component="h2" className={styles.planName}>
-            {nombre}
-          </Typography>
+          <h2 className="planCardName fz-h1 fw-bold mb-1">{nombre}</h2>
 
-          <Typography component="p" className={styles.duration}>
+          <p className="planCardDuration fz-h5 fw-regular mb-0">
             {durationLabel}
-          </Typography>
+          </p>
 
-          <Box className={styles.priceContainer}>
-            <Box className={styles.priceRow}>
-              <Typography component="span" className={styles.price}>
+          <div className="planCardPriceContainer">
+            <div className="d-flex align-items-baseline gap-1">
+              <span className="planCardPrice fw-bold">
                 ${formatPrice(precio)}
-              </Typography>
+              </span>
 
-              <Typography component="span" className={styles.currency}>
-                MXN
-              </Typography>
-            </Box>
+              <span className="planCardCurrency fz-h5 fw-semibold">MXN</span>
+            </div>
 
-            <Typography component="p" className={styles.taxLabel}>
+            <p className="planCardTaxLabel fz-h6 fw-regular mb-0">
               IVA incluido
-            </Typography>
-          </Box>
-        </Box>
+            </p>
+          </div>
+        </div>
 
-        <CardContent className={styles.content}>
-          <Stack className={styles.features}>
+        <div className="planCardContent">
+          <div className="d-flex flex-column gap-2 planCardFeatures">
             {features.map((feature) => (
               <Feature
                 key={feature.label}
@@ -323,19 +369,19 @@ export const PlanCard = ({
                 active={feature.active}
               />
             ))}
-          </Stack>
-        </CardContent>
+          </div>
+        </div>
 
         {showActions && (
-          <CardActions className={styles.actions}>
+          <div className="planCardActions">
             {esActivo ? (
-              <Stack className={styles.activeActions}>
+              <div className="d-flex flex-column gap-2">
                 {onVerDetalle && (
                   <Button
                     type="button"
                     variant="outlined"
                     fullWidth
-                    className={styles.detailsButton}
+                    className="btn-adlocal fz-h4 fw-semibold"
                     onClick={onVerDetalle}
                     startIcon={
                       <MaterialSymbol icon="receipt_long" size="small" />
@@ -346,34 +392,28 @@ export const PlanCard = ({
                 )}
 
                 {isCanceled ? (
-                  <Box className={styles.canceledNotice}>
-                    <Box className={styles.canceledIcon}>
+                  <div className="planCardCanceledNotice">
+                    <div className="planCardCanceledIcon flex-shrink-0">
                       <MaterialSymbol icon="event_busy" size="medium" />
-                    </Box>
+                    </div>
 
-                    <Box>
-                      <Typography
-                        component="p"
-                        className={styles.canceledTitle}
-                      >
+                    <div>
+                      <p className="planCardCanceledTitle fz-h4 fw-semibold mb-1">
                         Suscripción cancelada
-                      </Typography>
+                      </p>
 
-                      <Typography
-                        component="p"
-                        className={styles.canceledDescription}
-                      >
+                      <p className="planCardCanceledDescription fz-h5 fw-regular mb-0">
                         Tu plan seguirá activo hasta el final del periodo.
-                      </Typography>
-                    </Box>
-                  </Box>
+                      </p>
+                    </div>
+                  </div>
                 ) : (
                   canCancel && (
                     <Button
                       type="button"
-                      variant="contained"
+                      variant="outlined"
                       fullWidth
-                      className={styles.cancelButton}
+                      className="btn-adlocal btn-adlocal--danger fz-h4 fw-semibold"
                       onClick={onCancelar}
                       startIcon={<MaterialSymbol icon="cancel" size="small" />}
                     >
@@ -381,7 +421,7 @@ export const PlanCard = ({
                     </Button>
                   )
                 )}
-              </Stack>
+              </div>
             ) : (
               canSelect && (
                 <Button
@@ -389,7 +429,7 @@ export const PlanCard = ({
                   variant="contained"
                   size="large"
                   fullWidth
-                  className={styles.selectButton}
+                  className="btn-adlocal btn-adlocal--solid fz-h4 fw-semibold"
                   onClick={onSelect}
                   startIcon={
                     <MaterialSymbol
@@ -402,9 +442,9 @@ export const PlanCard = ({
                 </Button>
               )
             )}
-          </CardActions>
+          </div>
         )}
-      </Card>
-    </Box>
+      </div>
+    </div>
   );
 };

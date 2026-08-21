@@ -1,191 +1,64 @@
-import axios from "axios";
-import type { ApiResponse } from "../api/apiResponse";
-import type { PagedResponse } from "./productosServiciosApi";
-import type { ProfileUser } from "./userProfileApi";
+import type { ApiResponse, PaginatedResponse } from "../api/apiResponse";
+import { httpUsuario } from "../api/httpUsuario";
+import type {
+  ColaborarDto,
+  ComercioCreateDto,
+  ComercioDto,
+  ComercioDtoListItem,
+  ComercioUpdateDto,
+} from "../types/User/comercio";
+import type { ProfileUser } from "../types/User/UserAuth";
 
-const api = axios.create({
-  baseURL: `https://adlocalapi.onrender.com/api/comercios`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-api.interceptors.response.use(
-  (r) => r,
-  (e) => {
-    if (e.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-    return Promise.reject(e);
-  },
-);
-
-export interface HorarioComercioDto {
-  dia: number;
-  abierto: boolean;
-  horaApertura?: string | null;
-  horaCierre?: string | null;
-  horaAperturaFormateada?: string;
-  horaCierreFormateada?: string;
-}
-
-export interface ComercioCreateDto {
-  nombre: string;
-  direccion?: string;
-  telefono?: string;
-  email?: string;
-  descripcion?: string;
-  logoBase64?: string;
-  imagenes?: string[];
-  lat: number;
-  lng: number;
-  colorPrimario?: string;
-  colorSecundario?: string;
-  activo?: boolean;
-  horarios?: HorarioComercioDto[];
-  estadoId?: number;
-  municipioId?: number;
-}
-
-export interface ComercioUpdateDto {
-  id: number;
-  nombre?: string | null;
-  direccion?: string | null;
-  telefono?: string | null;
-  email?: string | null;
-  descripcion?: string | null;
-  logoBase64?: string | null;
-  imagenes?: string[] | null;
-  lat?: number | null;
-  lng?: number | null;
-  colorPrimario?: string | null;
-  colorSecundario?: string | null;
-  activo?: boolean | null;
-  horarios?: HorarioComercioDto[] | null;
-  estadoId?: number | null;
-  municipioId?: number | null;
-}
-
-export interface ComercioDto {
-  id: number;
-  nombre: string;
-  direccion: string;
-  telefono: string;
-  email: string;
-  descripcion: string;
-  logoBase64: string;
-  imagenes: string[];
-  lat: number;
-  lng: number;
-  colorPrimario: string;
-  colorSecundario: string;
-  activo: boolean;
-  horarios: HorarioComercioDto[];
-  estadoId: number;
-  municipioId: number;
-  estadoNombre: string;
-  municipioNombre: string;
-  promedioCalificacion: number;
-  calificacion?: number;
-  badge?: string;
-  tipoComercioId: number;
-  tipoComercio:string;
-}
-
-export const comercioDtoDefault: ComercioDto = {
-  id: 0,
-  nombre: "",
-  direccion: "",
-  telefono: "",
-  email: "",
-  descripcion: "",
-  logoBase64: "",
-  imagenes: [],
-  lat: 19.4326,
-  lng: -99.1332,
-  colorPrimario: "#007AFF",
-  colorSecundario: "#FF9500",
-  activo: true,
-  horarios: [],
-  estadoId: 0,
-  municipioId: 0,
-  estadoNombre: "",
-  municipioNombre: "",
-  promedioCalificacion: 0,
-  tipoComercioId: 0,
-  tipoComercio:"",
-};
-
-export interface ComercioDtoListItem {
-  id: number;
-  nombre: string;
-  idUsuario: number;
-  descripcion?: string;
-  telefono?: string;
-  email?: string;
-  direccion?: string;
-  logoUrl?: string;
-  lat?: number;
-  lng?: number;
-  colorPrimario?: string;
-  colorSecundario?: string;
-  activo: boolean;
-  fechaCreacion: string;
-  estadoNombre: string;
-  municipioNombre: string;
-  promedioCalificacion: number;
-  badge: string;
-  idColaborador:number;
-}
-
-export interface ColaborarDto {
-  idComercio: number;
-  nombre: string;
-  correo: string;
-}
 
 export const comercioApi = {
-  getMine: () => api.get<ApiResponse<ComercioDto>>("/mine"),
+  getMine: () => httpUsuario.get<ApiResponse<ComercioDto>>("/comercios/mine"),
   getTotalComerciosByIdUsuario: () =>
-    api.get<ApiResponse<object>>("/getTotalComerciosByIdUsuario"),
+    httpUsuario.get<ApiResponse<object>>(
+      "/comercios/getTotalComerciosByIdUsuario",
+    ),
 
   crear: (data: ComercioCreateDto) =>
-    api.post<ApiResponse<ComercioDto>>("", data),
+    httpUsuario.post<ApiResponse<ComercioDto>>("/comercios", data),
 
   actualizar: (data: ComercioUpdateDto) =>
-    api.put<ApiResponse<ComercioDto>>("", data),
+    httpUsuario.put<ApiResponse<ComercioDto>>("/comercios", data),
 
-  eliminar: (id: number) => api.delete<ApiResponse<null>>(`/${id}`),
+  eliminar: (id: number) =>
+    httpUsuario.delete<ApiResponse<null>>(`/comercios/${id}`),
   getAllComerciosByUser: (page = 1, pageSize = 10) =>
-    api.get<ApiResponse<PagedResponse<ComercioDtoListItem>>>(
-      "/getAllComerciosByUser",
+    httpUsuario.get<ApiResponse<PaginatedResponse<ComercioDtoListItem>>>(
+      "/comercios/getAllComerciosByUser",
       {
         params: { page, pageSize },
       },
     ),
-  getById: (id: number) => api.get<ApiResponse<ComercioDto>>(`/${id}`),
+  getById: (id: number) =>
+    httpUsuario.get<ApiResponse<ComercioDto>>(`/comercios/${id}`),
   guardarColaborador: (data: ColaborarDto) =>
-    api.post<ApiResponse<object>>("/guardarColaborador", data),
+    httpUsuario.post<ApiResponse<object>>(
+      "/comercios/guardarColaborador",
+      data,
+    ),
   getAllColaboradores: (idComercio = 0, page = 1, pageSize = 10) =>
-    api.get<ApiResponse<PagedResponse<ProfileUser>>>("/getAllColaboradores", {
-      params: { idComercio, page, pageSize },
-    }),
-  toggleAccesoColaborador: (idColaborador: number, idComercio: number) =>
-    api.put<ApiResponse<object>>(`toggleAccesoColaborador`, null, {
-      params: {
-        idColaborador,
-        idComercio,
+    httpUsuario.get<ApiResponse<PaginatedResponse<ProfileUser>>>(
+      "/comercios/getAllColaboradores",
+      {
+        params: { idComercio, page, pageSize },
       },
-    }),
+    ),
+  toggleAccesoColaborador: (idColaborador: number, idComercio: number) =>
+    httpUsuario.put<ApiResponse<object>>(
+      `/comercios/toggleAccesoColaborador`,
+      null,
+      {
+        params: {
+          idColaborador,
+          idComercio,
+        },
+      },
+    ),
   eliminarColaborador: (idColaborador: number, idComercio: number) =>
-    api.delete<ApiResponse<object>>(`eliminarColaborador`, {
+    httpUsuario.delete<ApiResponse<object>>(`/comercios/eliminarColaborador`, {
       params: {
         idColaborador,
         idComercio,

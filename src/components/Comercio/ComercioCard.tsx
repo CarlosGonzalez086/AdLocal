@@ -1,20 +1,8 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Rating,
-  Stack,
-  Typography,
-} from "@mui/material";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { Avatar, Button, Rating } from "@mui/material";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
-
-import type { ComercioDtoListItem } from "../../services/comercioApi";
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
-
-import styles from "../../styles/ComercioCard.module.css";
+import type { ComercioDtoListItem } from "../../types/User/comercio";
 
 interface Props {
   comercio: ComercioDtoListItem;
@@ -66,9 +54,11 @@ const getBadgeConfig = (badge?: string): BadgeConfig | null => {
 
 const getBadgeClassName = (type: BadgeType): string => {
   const badgeClasses: Record<BadgeType, string> = {
-    premium: styles.premiumBadge,
-    recommended: styles.recommendedBadge,
-    essential: styles.essentialBadge,
+    premium: "commerceCardPremiumBadge",
+
+    recommended: "commerceCardRecommendedBadge",
+
+    essential: "commerceCardEssentialBadge",
   };
 
   return badgeClasses[type];
@@ -87,37 +77,27 @@ export default function ComercioCard({
 
   const showImage = Boolean(comercio.logoUrl) && !imageError;
 
-  const badgeConfig = useMemo(
-    () => getBadgeConfig(comercio.badge),
-    [comercio.badge],
+  const badgeConfig = getBadgeConfig(comercio.badge);
+
+  const addressParts = [
+    comercio.direccion,
+    comercio.municipioNombre,
+    comercio.estadoNombre,
+  ].filter(
+    (value): value is string =>
+      typeof value === "string" && value.trim().length > 0,
   );
 
-  const address = useMemo(() => {
-    const addressParts = [
-      comercio.direccion,
-      comercio.municipioNombre,
-      comercio.estadoNombre,
-    ].filter(
-      (value): value is string =>
-        typeof value === "string" && value.trim().length > 0,
-    );
+  const address =
+    addressParts.length > 0
+      ? `${addressParts.join(", ")}.`
+      : "Dirección no disponible.";
 
-    if (addressParts.length === 0) {
-      return "Dirección no disponible.";
-    }
+  const parsedRating = Number(comercio.promedioCalificacion);
 
-    return `${addressParts.join(", ")}.`;
-  }, [comercio.direccion, comercio.municipioNombre, comercio.estadoNombre]);
-
-  const rating = useMemo(() => {
-    const value = Number(comercio.promedioCalificacion);
-
-    if (!Number.isFinite(value)) {
-      return 0;
-    }
-
-    return Math.min(Math.max(value, 0), 5);
-  }, [comercio.promedioCalificacion]);
+  const rating = Number.isFinite(parsedRating)
+    ? Math.min(Math.max(parsedRating, 0), 5)
+    : 0;
 
   const commerceInitial =
     comercio.nombre?.trim().charAt(0).toUpperCase() || "C";
@@ -137,47 +117,44 @@ export default function ComercioCard({
   };
 
   return (
-    <Card
-      component="article"
-      elevation={0}
-      className={styles.card}
-      style={commerceVariables}
-    >
+    <div className="commerceCard" style={commerceVariables}>
       {!isProductOrServiceCreation && badgeConfig && (
-        <Box
-          className={[styles.badge, getBadgeClassName(badgeConfig.type)].join(
-            " ",
-          )}
+        <div
+          className={`commerceCardBadge ${getBadgeClassName(badgeConfig.type)}`}
         >
           <MaterialSymbol icon={badgeConfig.icon} size="small" filled />
 
-          <Typography component="span" className={styles.badgeText}>
+          <span className="fz-h5 fw-semibold commerceCardBadgeText">
             {badgeConfig.label}
-          </Typography>
-        </Box>
+          </span>
+        </div>
       )}
 
-      <Box className={styles.media}>
+      <div className="commerceCardMedia">
         {showImage ? (
-          <Box
-            component="img"
+          <Avatar
             src={comercio.logoUrl}
-            alt=""
-            className={styles.coverImage}
-            onError={() => setImageError(true)}
+            alt={`Imagen de ${comercio.nombre}`}
+            variant="square"
+            className="commerceCardCoverImage"
+            slotProps={{
+              img: {
+                onError: () => setImageError(true),
+              },
+            }}
           />
         ) : (
-          <Box className={styles.fallbackImage} aria-hidden="true">
+          <div className="commerceCardFallbackImage" aria-hidden="true">
             <MaterialSymbol icon="storefront" size="large" />
-          </Box>
+          </div>
         )}
 
-        <Box className={styles.mediaOverlay} aria-hidden="true" />
+        <div className="commerceCardMediaOverlay" aria-hidden="true" />
 
         <Avatar
           src={showImage ? comercio.logoUrl : undefined}
           alt={`Logotipo de ${comercio.nombre}`}
-          className={styles.avatar}
+          className="commerceCardAvatar"
           slotProps={{
             img: {
               onError: () => setImageError(true),
@@ -187,78 +164,77 @@ export default function ComercioCard({
           {!showImage && commerceInitial}
         </Avatar>
 
-        <Typography
-          component="h3"
-          className={styles.commerceName}
+        <h3
+          className="commerceCardName fz-h2 fw-bold mb-0"
           title={comercio.nombre}
         >
           {comercio.nombre}
-        </Typography>
-      </Box>
+        </h3>
+      </div>
 
-      <CardContent className={styles.content}>
-        <Stack className={styles.information}>
+      <div className="commerceCardContent">
+        <div className="commerceCardInformation">
           {!isProductOrServiceCreation && (
             <>
-              <Typography component="p" className={styles.address}>
+              <p className="commerceCardAddress d-flex align-items-start gap-2 mb-3 fz-h4 fw-regular">
                 <MaterialSymbol
                   icon="location_on"
                   size="small"
-                  className={styles.addressIcon}
+                  className="commerceCardAddressIcon flex-shrink-0"
                 />
 
                 <span>{address}</span>
-              </Typography>
+              </p>
 
-              <Stack direction="row" className={styles.ratingRow}>
-                <Typography component="span" className={styles.ratingValue}>
+              <div className="d-flex align-items-center gap-2 flex-wrap">
+                <span className="commerceCardRatingValue fz-h3 fw-bold">
                   {rating.toFixed(1)}
-                </Typography>
+                </span>
 
                 <Rating
                   value={rating}
                   precision={0.5}
                   readOnly
                   size="small"
-                  className={styles.rating}
+                  className="commerceCardRating"
                   getLabelText={(value) => `${value} de 5 estrellas`}
                   icon={
                     <MaterialSymbol
                       icon="star"
                       filled
-                      className={styles.ratingIcon}
+                      className="commerceCardRatingIcon"
                     />
                   }
                   emptyIcon={
                     <MaterialSymbol
                       icon="star"
-                      className={styles.emptyRatingIcon}
+                      className="commerceCardEmptyRatingIcon"
                     />
                   }
                 />
 
-                <Typography component="span" className={styles.ratingLabel}>
+                <span className="commerceCardRatingLabel fz-h5 fw-regular">
                   Calificación
-                </Typography>
-              </Stack>
+                </span>
+              </div>
             </>
           )}
-        </Stack>
+        </div>
 
-        <Box className={styles.actionContainer}>
+        <div className="commerceCardActionContainer">
           <Button
             component={Link}
             to={linkTo}
             variant="outlined"
             fullWidth
-            className={styles.actionButton}
+            className="commerceCardActionButton"
             endIcon={<MaterialSymbol icon="arrow_forward_ios" size="small" />}
             aria-label={`${buttonLabel}: ${comercio.nombre}`}
           >
             {buttonLabel}
           </Button>
-        </Box>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 }

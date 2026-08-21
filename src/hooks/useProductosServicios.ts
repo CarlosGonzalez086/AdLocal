@@ -1,9 +1,7 @@
 import { useState, useCallback } from "react";
 import Swal from "sweetalert2";
-import {
-  productosServiciosApi,
-  type ProductoServicioDto,
-} from "../services/productosServiciosApi";
+import type { ProductoServicioDto } from "../types/User/productosServicios";
+import { productosServiciosApi } from "../services/productosServiciosApi";
 
 interface ListarParams {
   page: number;
@@ -36,7 +34,7 @@ export const useProductosServicios = () => {
         }
 
         setProductos(data.respuesta.items ?? []);
-        setTotal(data.respuesta.totalItems ?? 0);
+        setTotal(data.respuesta.totalRecords ?? 0);
       } finally {
         setLoading(false);
       }
@@ -74,10 +72,7 @@ export const useProductosServicios = () => {
     setLoading(true);
     try {
       const { data } = producto.id
-        ? await productosServiciosApi.actualizar(
-            producto.id,
-            producto,
-          )
+        ? await productosServiciosApi.actualizar(producto.id, producto)
         : await productosServiciosApi.crear(producto);
 
       if (data.codigo !== "200") {
@@ -97,7 +92,11 @@ export const useProductosServicios = () => {
     }
   };
 
-  const eliminar = async (id: number,idComercio:number, refrescarParams?: ListarParams) => {
+  const eliminar = async (
+    id: number,
+    idComercio: number,
+    refrescarParams?: ListarParams,
+  ) => {
     const result = await Swal.fire({
       title: "Eliminar producto o servicio",
       text: "Esta acción eliminará el producto o servicio de forma permanente y no se puede deshacer.",
@@ -112,7 +111,7 @@ export const useProductosServicios = () => {
 
     setLoading(true);
     try {
-      const { data } = await productosServiciosApi.eliminar(id,idComercio);
+      const { data } = await productosServiciosApi.eliminar(id, idComercio);
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");
@@ -133,7 +132,7 @@ export const useProductosServicios = () => {
 
   const desactivar = async (
     id: number,
-    idComercio:number,
+    idComercio: number,
     activo: boolean,
     refrescarParams?: ListarParams,
   ) => {
@@ -154,7 +153,7 @@ export const useProductosServicios = () => {
     if (!result.isConfirmed) return;
     setLoading(true);
     try {
-      const { data } = await productosServiciosApi.desactivar(id,idComercio);
+      const { data } = await productosServiciosApi.desactivar(id, idComercio);
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");

@@ -4,6 +4,7 @@
   --sidebar-text: #3a2419;
   --sidebar-muted: #8d817a;
   --sidebar-border: rgba(15, 23, 42, 0.07);
+  --sidebar-primary-light: #e9e5e0;
 }
 
 .desktopDrawer {
@@ -57,6 +58,7 @@
 
   display: flex;
   flex-direction: column;
+  background-color: var(--sidebar-primary-light);
 }
 
 /* Logo */
@@ -90,14 +92,12 @@
 }
 
 .logoLink {
-  max-width: 100%;
-
   display: flex;
   align-items: center;
   justify-content: center;
 
   border-radius: 18px;
-
+  border: 1px solid var(--sidebar-primary);
   transition:
     transform 180ms ease,
     filter 180ms ease;
@@ -115,14 +115,14 @@
 }
 
 .logo {
-  width: 80%;
+  width: 100%;
   max-width: 190px;
   max-height: 90px;
 
   display: block;
   object-fit: contain;
 
-  border-radius: 17px;
+  border-radius: 18px;
 
   transition:
     width 350ms ease,
@@ -264,7 +264,9 @@
   padding-right: 0 !important;
   padding-left: 0 !important;
 
-  justify-content: center;
+  justify-content: center !important;
+
+  align-items: center;
 }
 
 .menuButtonCollapsed:hover {
@@ -288,7 +290,7 @@
 }
 
 .menuIconCollapsed {
-  margin-right: 0;
+  margin-right: 0 !important;
 }
 
 .menuText {

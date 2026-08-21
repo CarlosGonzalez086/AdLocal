@@ -1,61 +1,5 @@
-import axios from "axios";
-
-const api = axios.create({
-  baseURL: `https://adlocalapi.onrender.com/api/planes`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  },
-);
-
-export interface PlanCreateDto {
-  id?: number;
-
-  // Básico
-  nombre: string;
-  precio: number;
-  duracionDias: number;
-  tipo: "FREE" | "BASIC" | "PRO" | "BUSINESS";
-
-  // Capacidades
-  maxNegocios: number;
-  maxProductos: number;
-  maxFotos: number;
-  stripePriceId: string;
-  // Features
-  nivelVisibilidad: number; // 0 - 100
-  permiteCatalogo: boolean;
-  coloresPersonalizados: boolean;
-  tieneBadge: boolean;
-  badgeTexto?: string | null;
-  tieneAnalytics: boolean;
-  isMultiUsuario: boolean;
-}
-
-export type PlanFormErrors = Partial<Record<keyof PlanCreateDto, string>>;
+import { httpAdmin } from "../api/httpAdmin";
+import type { PlanCreateDto } from "../types/Admin/planes";
 
 export const planApi = {
   getAll: (params?: {
@@ -63,15 +7,16 @@ export const planApi = {
     pageSize?: number;
     orderBy?: string;
     search?: string;
-  }) => api.get("", { params }),
+  }) => httpAdmin.get("/planes", { params }),
 
-  getAllPlanesUser: () => api.get("/AllPlanesUser"),
+  getAllPlanesUser: () => httpAdmin.get("/planes/AllPlanesUser"),
 
-  getById: (id: number) => api.get(`/${id}`),
+  getById: (id: number) => httpAdmin.get(`/planes/${id}`),
 
-  crear: (data: PlanCreateDto) => api.post("", data),
+  crear: (data: PlanCreateDto) => httpAdmin.post("/planes", data),
 
-  actualizar: (id: number, data: PlanCreateDto) => api.put(`/${id}`, data),
+  actualizar: (id: number, data: PlanCreateDto) =>
+    httpAdmin.put(`/planes/${id}`, data),
 
-  eliminar: (id: number) => api.delete(`/${id}`),
+  eliminar: (id: number) => httpAdmin.delete(`/planes/${id}`),
 };

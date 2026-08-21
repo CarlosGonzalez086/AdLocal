@@ -1,47 +1,19 @@
-import axios from "axios";
 import type { ApiResponse } from "../api/apiResponse";
+import { httpUsuario } from "../api/httpUsuario";
 
-const api = axios.create({
-  baseURL: `https://adlocalapi.onrender.com/api/UsoCodigoReferido`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  },
-);
 
 export const usoCodigoReferidoService = {
   misUsos() {
-    return api.get<ApiResponse<object>>("/mis-usos");
+    return httpUsuario.get<ApiResponse<object>>("/UsoCodigoReferido/mis-usos");
   },
 
   contarPorCodigo(codigo: string) {
-    return api.get<ApiResponse<object>>("/contar", {
+    return httpUsuario.get<ApiResponse<object>>("/UsoCodigoReferido/contar", {
       params: { codigo },
     });
   },
 
   totalUsos() {
-    return api.get<ApiResponse<object>>("/total");
+    return httpUsuario.get<ApiResponse<object>>("/UsoCodigoReferido/total");
   },
 };

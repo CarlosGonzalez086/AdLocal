@@ -1,66 +1,32 @@
-import axios from "axios";
 import type { ApiResponse } from "../api/apiResponse";
-
-const api = axios.create({
-  baseURL: `https://adlocalapi.onrender.com/api/TiposComercio`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  },
-);
-
-export interface TipoComercioCreateDto {
-  id?: number;
-  nombre: string;
-  descripcion?: string | null;
-  activo: boolean;
-}
-
-export interface TipoComercioDto {
-  id: number;
-  nombre: string;
-  descripcion?: string | null;
-  activo: boolean;
-}
+import { httpAdmin } from "../api/httpAdmin";
+import { httpUsuario } from "../api/httpUsuario";
+import type {
+  TipoComercioCreateDto,
+  TipoComercioDto,
+} from "../types/Admin/tipoComercio";
 
 export const tipoComercioApi = {
   getAllPaged: (page = 1, pageSize = 10, orderBy = "recent", search = "") =>
-    api.get<ApiResponse<{ items: TipoComercioDto[]; totalItems: number }>>(
-      `/getAllPaged?page=${page}&pageSize=${pageSize}&orderBy=${orderBy}&search=${search}`,
+    httpAdmin.get<
+      ApiResponse<{ items: TipoComercioDto[]; totalItems: number }>
+    >(
+      `/TiposComercio/getAllPaged?page=${page}&pageSize=${pageSize}&orderBy=${orderBy}&search=${search}`,
     ),
 
-  getById: (id: number) => api.get<ApiResponse<TipoComercioDto>>(`/${id}`),
+  getById: (id: number) =>
+    httpAdmin.get<ApiResponse<TipoComercioDto>>(`/TiposComercio/${id}`),
 
   crear: (data: TipoComercioCreateDto) =>
-    api.post<ApiResponse<TipoComercioDto>>("", data),
+    httpAdmin.post<ApiResponse<TipoComercioDto>>("/TiposComercio", data),
 
   actualizar: (id: number, data: TipoComercioCreateDto) =>
-    api.put<ApiResponse<TipoComercioDto>>(`/${id}`, data),
+    httpAdmin.put<ApiResponse<TipoComercioDto>>(`/TiposComercio/${id}`, data),
 
-  eliminar: (id: number) => api.delete<ApiResponse<boolean>>(`/${id}`),
+  eliminar: (id: number) =>
+    httpAdmin.delete<ApiResponse<boolean>>(`/TiposComercio/${id}`),
   getAllForSelect: () =>
-    api.get<ApiResponse<TipoComercioDto[]>>(`/getAllForSelect`),
+    httpUsuario.get<ApiResponse<TipoComercioDto[]>>(
+      `/TiposComercio/getAllForSelect`,
+    ),
 };

@@ -1,18 +1,7 @@
-import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  Rating,
-  Stack,
-  Typography,
-} from "@mui/material";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
-
-import type { ComercioDto } from "../../services/comercioApi";
+import { Avatar, Rating } from "@mui/material";
+import { useEffect, useState, type CSSProperties } from "react";
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
-
-import styles from "../../styles/ComercioCardBasico.module.css";
+import type { ComercioDto } from "../../types/User/comercio";
 
 interface Props {
   comercio: ComercioDto;
@@ -63,9 +52,11 @@ const getBadgeConfig = (badge?: string): BadgeConfig | null => {
 
 const getBadgeClassName = (badgeType: BadgeType): string => {
   const classes: Record<BadgeType, string> = {
-    premium: styles.premiumBadge,
-    recommended: styles.recommendedBadge,
-    essential: styles.essentialBadge,
+    premium: "commerceBasicPremiumBadge",
+
+    recommended: "commerceBasicRecommendedBadge",
+
+    essential: "commerceBasicEssentialBadge",
   };
 
   return classes[badgeType];
@@ -81,35 +72,27 @@ export default function ComercioCardBasico({ comercio }: Props) {
 
   const showImage = Boolean(comercio.logoBase64) && !imageError;
 
-  const badgeConfig = useMemo(
-    () => getBadgeConfig(comercio.badge),
-    [comercio.badge],
+  const badgeConfig = getBadgeConfig(comercio.badge);
+
+  const addressParts = [
+    comercio.direccion,
+    comercio.municipioNombre,
+    comercio.estadoNombre,
+  ].filter(
+    (value): value is string =>
+      typeof value === "string" && value.trim().length > 0,
   );
 
-  const address = useMemo(() => {
-    const parts = [
-      comercio.direccion,
-      comercio.municipioNombre,
-      comercio.estadoNombre,
-    ].filter(
-      (value): value is string =>
-        typeof value === "string" && value.trim().length > 0,
-    );
-
-    return parts.length > 0
-      ? `${parts.join(", ")}.`
+  const address =
+    addressParts.length > 0
+      ? `${addressParts.join(", ")}.`
       : "Dirección no disponible.";
-  }, [comercio.direccion, comercio.municipioNombre, comercio.estadoNombre]);
 
-  const rating = useMemo(() => {
-    const parsedRating = Number(comercio.promedioCalificacion);
+  const parsedRating = Number(comercio.promedioCalificacion);
 
-    if (!Number.isFinite(parsedRating)) {
-      return 0;
-    }
-
-    return Math.min(Math.max(parsedRating, 0), 5);
-  }, [comercio.promedioCalificacion]);
+  const rating = Number.isFinite(parsedRating)
+    ? Math.min(Math.max(parsedRating, 0), 5)
+    : 0;
 
   const commerceInitial =
     comercio.nombre?.trim().charAt(0).toUpperCase() || "C";
@@ -121,47 +104,46 @@ export default function ComercioCardBasico({ comercio }: Props) {
   };
 
   return (
-    <Card
-      component="article"
-      elevation={0}
-      className={styles.card}
-      style={commerceVariables}
-    >
+    <div className="commerceBasicCard" style={commerceVariables}>
       {badgeConfig && (
-        <Box
-          className={[styles.badge, getBadgeClassName(badgeConfig.type)].join(
-            " ",
-          )}
+        <div
+          className={`commerceBasicBadge ${getBadgeClassName(
+            badgeConfig.type,
+          )}`}
         >
           <MaterialSymbol icon={badgeConfig.icon} size="small" filled />
 
-          <Typography component="span" className={styles.badgeText}>
+          <span className="commerceBasicBadgeText fz-h5 fw-semibold">
             {badgeConfig.label}
-          </Typography>
-        </Box>
+          </span>
+        </div>
       )}
 
-      <Box className={styles.media}>
+      <div className="commerceBasicMedia">
         {showImage ? (
-          <Box
-            component="img"
+          <Avatar
             src={comercio.logoBase64}
-            alt=""
-            className={styles.coverImage}
-            onError={() => setImageError(true)}
+            alt={`Imagen de ${comercio.nombre}`}
+            variant="square"
+            className="commerceBasicCoverImage"
+            slotProps={{
+              img: {
+                onError: () => setImageError(true),
+              },
+            }}
           />
         ) : (
-          <Box className={styles.fallbackImage} aria-hidden="true">
+          <div className="commerceBasicFallbackImage" aria-hidden="true">
             <MaterialSymbol icon="storefront" size="large" />
-          </Box>
+          </div>
         )}
 
-        <Box className={styles.mediaOverlay} aria-hidden="true" />
+        <div className="commerceBasicMediaOverlay" aria-hidden="true" />
 
         <Avatar
           src={showImage ? comercio.logoBase64 : undefined}
           alt={`Logotipo de ${comercio.nombre}`}
-          className={styles.avatar}
+          className="commerceBasicAvatar"
           slotProps={{
             img: {
               onError: () => setImageError(true),
@@ -171,76 +153,78 @@ export default function ComercioCardBasico({ comercio }: Props) {
           {!showImage && commerceInitial}
         </Avatar>
 
-        <Typography
-          component="h3"
-          className={styles.commerceName}
+        <h3
+          className="commerceBasicName fz-h2 fw-bold mb-0"
           title={comercio.nombre}
         >
           {comercio.nombre}
-        </Typography>
-      </Box>
+        </h3>
+      </div>
 
-      <CardContent className={styles.content}>
-        <Stack className={styles.information}>
-          <Box className={styles.addressRow}>
+      <div className="commerceBasicContent">
+        <div className="commerceBasicInformation">
+          <div className="d-flex align-items-start gap-2 mb-3">
             <MaterialSymbol
               icon="location_on"
               size="small"
-              className={styles.addressIcon}
+              className="commerceBasicAddressIcon flex-shrink-0"
             />
 
-            <Typography component="p" className={styles.address}>
+            <p className="commerceBasicAddress mb-0 fz-h4 fw-regular">
               {address}
-            </Typography>
-          </Box>
+            </p>
+          </div>
 
-          <Stack direction="row" className={styles.ratingRow}>
-            <Typography component="span" className={styles.ratingValue}>
+          <div className="d-flex align-items-center gap-2 flex-wrap">
+            <span className="commerceBasicRatingValue fz-h3 fw-bold">
               {rating.toFixed(1)}
-            </Typography>
+            </span>
 
             <Rating
               value={rating}
               precision={0.5}
               readOnly
               size="small"
-              className={styles.rating}
+              className="commerceBasicRating"
               getLabelText={(value) => `${value} de 5 estrellas`}
               icon={
                 <MaterialSymbol
                   icon="star"
                   filled
-                  className={styles.ratingIcon}
+                  className="commerceBasicRatingIcon"
                 />
               }
               emptyIcon={
                 <MaterialSymbol
                   icon="star"
-                  className={styles.emptyRatingIcon}
+                  className="commerceBasicEmptyRatingIcon"
                 />
               }
             />
 
-            <Typography component="span" className={styles.ratingLabel}>
+            <span className="commerceBasicRatingLabel fz-h5 fw-regular">
               Calificación
-            </Typography>
-          </Stack>
-        </Stack>
+            </span>
+          </div>
+        </div>
 
-        <Box className={styles.actionContainer}>
-          <Box className={styles.action} aria-hidden="true">
-            <Typography component="span" className={styles.actionText}>
+        <div className="commerceBasicActionContainer">
+          <div
+            className="commerceBasicAction d-flex align-items-center justify-content-between gap-2"
+            aria-hidden="true"
+          >
+            <span className="commerceBasicActionText fz-h4 fw-semibold">
               Ver más detalles
-            </Typography>
+            </span>
 
             <MaterialSymbol
               icon="arrow_forward_ios"
               size="small"
-              className={styles.actionIcon}
+              className="commerceBasicActionIcon"
             />
-          </Box>
-        </Box>
-      </CardContent>
-    </Card>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

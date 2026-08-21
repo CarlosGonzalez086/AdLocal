@@ -1,15 +1,15 @@
-import type { JwtClaims } from "../../services/auth.api";
+import type { JwtPayload } from "../../User/Auth/PrivateRouteUsuario";
 
 interface Props {
-  claims: JwtClaims | null;
+  user: JwtPayload | null;
   children: React.ReactNode;
   fallback: React.ReactNode;
 }
 
-export function ComercioPlanGate({ claims, children, fallback }: Props) {
+export function ComercioPlanGate({ user, children, fallback }: Props) {
   const permitido =
-    claims?.rol !== "Colaborador" &&
-    (claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS");
+    user?.rol !== "Colaborador" &&
+    (user?.planTipo === "PRO" || user?.planTipo === "BUSINESS");
 
   return <>{permitido ? children : fallback}</>;
 }

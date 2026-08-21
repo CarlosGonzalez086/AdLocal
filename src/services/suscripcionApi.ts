@@ -1,34 +1,5 @@
-import axios from "axios";
 import type { ApiResponse } from "../api/apiResponse";
-
-const api = axios.create({
-  baseURL: `https://adlocalapi.onrender.com/api/Suscripciones`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  },
-);
+import { httpUsuario } from "../api/httpUsuario";
 
 export interface SuscripcionCreateDto {
   planId: number;
@@ -103,14 +74,18 @@ export const defaultSuscripcion: SuscripcionDto = {
 
   estado: "FREE",
   activa: false,
-  autoRenew:false,
+  autoRenew: false,
 };
 
 export const suscripcionApi = {
   contratar: (data: SuscripcionCreateDto) =>
-    api.post<ApiResponse<null>>("/crear", data),
+    httpUsuario.post<ApiResponse<null>>("/Suscripciones/crear", data),
 
-  miSuscripcion: () => api.get<ApiResponse<SuscripcionDto>>("/mi-suscripcion"),
+  miSuscripcion: () =>
+    httpUsuario.get<ApiResponse<SuscripcionDto>>(
+      "/Suscripciones/mi-suscripcion",
+    ),
 
-  cancelar: () => api.post<ApiResponse<null>>("/cancelar"),
+  cancelar: () =>
+    httpUsuario.post<ApiResponse<null>>("/Suscripciones/cancelar"),
 };

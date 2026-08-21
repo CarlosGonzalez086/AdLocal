@@ -1,25 +1,18 @@
-import {
-  Avatar,
-  IconButton,
-  Paper,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Avatar, IconButton, Tooltip } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import GroupIcon from "@mui/icons-material/Group";
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import { GenericTable, type TableColumn } from "../layouts/GenericTable";
+import ModalAgregarColaborador from "../User/ModalAgregarColaborador";
+import ModalColaboradores from "../User/ModalColaboradores";
+import type { ListarParamsComercio } from "../../hooks/useComercio";
 import type {
   ColaborarDto,
   ComercioDtoListItem,
-} from "../../services/comercioApi";
-import { GenericTable, type TableColumn } from "../layouts/GenericTable";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Link } from "react-router-dom";
-import type { ListarParamsComercio } from "../../hooks/useComercio";
-import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
-import { useState } from "react";
-import ModalAgregarColaborador from "../User/ModalAgregarColaborador";
-import GroupIcon from "@mui/icons-material/Group";
-import ModalColaboradores from "../User/ModalColaboradores";
+} from "../../types/User/comercio";
 
 interface Props {
   data: ComercioDtoListItem[];
@@ -27,34 +20,48 @@ interface Props {
   page: number;
   rowsPerPage: number;
   total: number;
-  onPageChange: (p: number) => void;
-  onRowsPerPageChange: (r: number) => void;
+
+  onPageChange: (page: number) => void;
+
+  onRowsPerPageChange: (rows: number) => void;
+
   eliminarFromTable: (
     id: number,
     refrescarParams: ListarParamsComercio,
   ) => void;
+
   onSaveColaborador: (data: ColaborarDto) => void;
 }
 
 export function ComerciosTable(props: Props) {
-  const [openModal, setOpenModal] = useState<boolean>(false);
-  const [openModalColaboradores, setOpenModalColaboradores] =
-    useState<boolean>(false);
-  const [idRow, setIdRow] = useState<number>(0);
+  const [openModal, setOpenModal] = useState(false);
+
+  const [openModalColaboradores, setOpenModalColaboradores] = useState(false);
+
+  const [idRow, setIdRow] = useState(0);
+
   const columns: TableColumn<ComercioDtoListItem>[] = [
     {
       key: "Nombre",
       label: "Nombre",
-      render: (p) => (
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <Avatar src={p.logoUrl} sx={{ width: 32, height: 32 }} />
-          <Typography fontWeight={600}>{p.nombre}</Typography>
-        </Stack>
+
+      render: (comercio) => (
+        <div className="d-flex align-items-center gap-2">
+          <Avatar
+            src={comercio.logoUrl}
+            alt={`Logotipo de ${comercio.nombre}`}
+            className="commerceTableAvatar"
+          />
+
+          <span className="fz-h4 fw-semibold commerceTableBusinessName">
+            {comercio.nombre}
+          </span>
+        </div>
       ),
     },
     {
       key: "telefono",
-      label: "Telefono",
+      label: "Teléfono",
     },
     {
       key: "email",
@@ -62,174 +69,172 @@ export function ComerciosTable(props: Props) {
     },
     {
       key: "direccion",
-      label: "Direccion",
+      label: "Dirección",
     },
   ];
-  const HandleOpenModal = (id: number) => {
+
+  const handleOpenModal = (id: number) => {
+    setIdRow(id);
     setOpenModal(true);
-    setIdRow(id);
   };
-  const HandleOpenModalColaboradores = (id: number) => {
+
+  const handleOpenCollaboratorsModal = (id: number) => {
+    setIdRow(id);
+
     setOpenModalColaboradores(true);
-    setIdRow(id);
   };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setIdRow(0);
+  };
+
+  const handleCloseCollaboratorsModal = () => {
+    setOpenModalColaboradores(false);
+
+    setIdRow(0);
+  };
+
+  const handleDelete = (id: number) => {
+    props.eliminarFromTable(id, {
+      page: props.page,
+
+      rowsPerPage: props.rowsPerPage,
+    });
+  };
+
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        borderRadius: 3,
-        border: "1px solid rgba(0,0,0,0.08)",
-        overflow: "hidden",
-      }}
-    >
+    <div className="commerceTableContainer">
       <GenericTable<ComercioDtoListItem>
         {...props}
         columns={columns}
         emptyText="No hay comercios registrados"
-        actions={(p) => (
-          <Stack direction="row" spacing={0.5}>
+        actions={(comercio) => (
+          <div className="d-flex align-items-center gap-1">
             <Tooltip
               title="Editar negocio"
               arrow
               enterDelay={300}
-              componentsProps={{
+              placement="top"
+              slotProps={{
                 tooltip: {
-                  sx: {
-                    borderRadius: 3,
-                    fontSize: 12,
-                    fontWeight: 500,
-                  },
+                  className: "commerceTableTooltip",
                 },
               }}
-              placement="top"
             >
-              <Link
-                to={`editar/${p.id}`}
-                className="d-block"
-                style={{ textDecoration: "none" }}
-              >
-                <IconButton size="small">
-                  <EditIcon />
+              <span>
+                <IconButton
+                  component={Link}
+                  to={`editar/${comercio.id}`}
+                  size="small"
+                  className="commerceTableActionButton"
+                  aria-label={`Editar ${comercio.nombre}`}
+                >
+                  <EditIcon fontSize="small" />
                 </IconButton>
-              </Link>
+              </span>
             </Tooltip>
 
             <Tooltip
               title="Eliminar negocio"
               arrow
               enterDelay={300}
-              componentsProps={{
+              placement="top"
+              slotProps={{
                 tooltip: {
-                  sx: {
-                    borderRadius: 3,
-                    fontSize: 12,
-                    fontWeight: 500,
-                  },
+                  className: "commerceTableTooltip",
                 },
               }}
-              placement="top"
             >
-              <IconButton
-                size="small"
-                color="error"
-                onClick={() =>
-                  props.eliminarFromTable(p.id, {
-                    page: props.page,
-                    rowsPerPage: props.rowsPerPage,
-                  })
-                }
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
-            {p.idColaborador == 0 ? (
-              <>
-                {" "}
-                <Tooltip
-                  title="Agregar colaborador"
-                  arrow
-                  enterDelay={300}
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        borderRadius: 3,
-                        fontSize: 12,
-                        fontWeight: 500,
-                      },
-                    },
-                  }}
-                  placement="top"
+              <span>
+                <IconButton
+                  type="button"
+                  size="small"
+                  color="error"
+                  className="commerceTableActionButton commerceTableDeleteButton"
+                  onClick={() => handleDelete(comercio.id)}
+                  aria-label={`Eliminar ${comercio.nombre}`}
                 >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+
+            {comercio.idColaborador === 0 && (
+              <Tooltip
+                title="Agregar colaborador"
+                arrow
+                enterDelay={300}
+                placement="top"
+                slotProps={{
+                  tooltip: {
+                    className: "commerceTableTooltip",
+                  },
+                }}
+              >
+                <span>
                   <IconButton
+                    type="button"
                     size="small"
-                    onClick={() => HandleOpenModal(p.id)}
+                    className="commerceTableActionButton"
+                    onClick={() => handleOpenModal(comercio.id)}
+                    aria-label={`Agregar colaborador a ${comercio.nombre}`}
                   >
-                    <ManageAccountsIcon />
+                    <ManageAccountsIcon fontSize="small" />
                   </IconButton>
-                </Tooltip>
-              </>
-            ) : (
-              <></>
+                </span>
+              </Tooltip>
             )}
 
             <Tooltip
               title="Ver colaboradores"
               arrow
               enterDelay={300}
-              componentsProps={{
+              placement="top"
+              slotProps={{
                 tooltip: {
-                  sx: {
-                    borderRadius: 3,
-                    fontSize: 12,
-                    fontWeight: 500,
-                  },
+                  className: "commerceTableTooltip",
                 },
               }}
-              placement="top"
             >
-              <IconButton
-                size="small"
-                onClick={() => HandleOpenModalColaboradores(p.id)}
-              >
-                <GroupIcon />
-              </IconButton>
+              <span>
+                <IconButton
+                  type="button"
+                  size="small"
+                  className="commerceTableActionButton"
+                  onClick={() => handleOpenCollaboratorsModal(comercio.id)}
+                  aria-label={`Ver colaboradores de ${comercio.nombre}`}
+                >
+                  <GroupIcon fontSize="small" />
+                </IconButton>
+              </span>
             </Tooltip>
-          </Stack>
+          </div>
         )}
       />
+
       {openModal && (
-        <>
-          {" "}
-          <ModalAgregarColaborador
-            open={openModal}
-            onSubmit={(e) => {
-              props.onSaveColaborador({
-                idComercio: e.idComercio,
-                nombre: e.nombre,
-                correo: e.correo,
-              });
-            }}
-            onClose={() => {
-              setOpenModal(false);
-              setIdRow(0);
-            }}
-            id={idRow}
-          />
-        </>
+        <ModalAgregarColaborador
+          open={openModal}
+          id={idRow}
+          onSubmit={(colaborador) => {
+            props.onSaveColaborador({
+              idComercio: colaborador.idComercio,
+              nombre: colaborador.nombre,
+              correo: colaborador.correo,
+            });
+          }}
+          onClose={handleCloseModal}
+        />
       )}
+
       {openModalColaboradores && (
-        <>
-          {" "}
-          <ModalColaboradores
-            open={openModalColaboradores}
-            onClose={() => {
-              setOpenModalColaboradores(false);
-              setIdRow(0);
-            }}
-            id={idRow}
-          />
-        </>
+        <ModalColaboradores
+          open={openModalColaboradores}
+          id={idRow}
+          onClose={handleCloseCollaboratorsModal}
+        />
       )}
-    </Paper>
+    </div>
   );
 }

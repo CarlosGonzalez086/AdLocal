@@ -14,48 +14,44 @@ import {
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { useForgetPassword } from "../hooks/useForgetPassword";
-
 import styles from "../styles/ResetPasswordPage.module.css";
 
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
+import { useAdmin } from "../hooks/useAdmin";
+import { useUser } from "../hooks/useUser";
 
 const LOGO_URL =
   "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
 
 export default function ResetPasswordPage() {
-  const { token } = useParams<{
+  const { token, type } = useParams<{
     token: string;
+    type: "admin" | "user";
   }>();
 
   const navigate = useNavigate();
+  const isAdmin = type === "admin";
+  const admin = useAdmin();
+  const user = useUser();
+  const loading = isAdmin ? admin.loading : user.loading;
 
-  const { checkToken, newPassword, loading, error, successMessage } =
-    useForgetPassword();
+  // const { checkToken, newPassword, loading, error, successMessage } =
+  //   useForgetPassword();
 
   const [codigo, setCodigo] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
   const [tokenValido, setTokenValido] = useState<boolean | null>(null);
-
   const [validatingToken, setValidatingToken] = useState(true);
-
   const [codigoTouched, setCodigoTouched] = useState(false);
-
   const [passwordTouched, setPasswordTouched] = useState(false);
-
   const cleanCode = codigo.trim();
-
   const codigoIsInvalid = codigoTouched && cleanCode.length === 0;
-
   const passwordIsInvalid = passwordTouched && password.length === 0;
-
   const formIsInvalid = cleanCode.length === 0 || password.length === 0;
+  const [error, setError] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
-  /*
-   * Validar el token recibido en la URL.
-   */
   useEffect(() => {
     let componentMounted = true;
 
@@ -64,6 +60,7 @@ export default function ResetPasswordPage() {
         if (componentMounted) {
           setTokenValido(false);
           setValidatingToken(false);
+          setError("El enlace de recuperación no es válido.");
         }
 
         return;
@@ -72,7 +69,9 @@ export default function ResetPasswordPage() {
       try {
         setValidatingToken(true);
 
-        const esValido = await checkToken(token);
+        const esValido = isAdmin
+          ? await admin.checkToken(token)
+          : await user.checkToken(token);
 
         if (componentMounted) {
           setTokenValido(Boolean(esValido));
@@ -127,10 +126,31 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    await newPassword({
-      codigo: cleanCode,
-      passwordNueva: password,
-    });
+    try {
+      const response = isAdmin
+        ? await admin.newPassword({
+            codigo: cleanCode,
+            passwordNueva: password,
+          })
+        : await user.newPassword({
+            codigo: cleanCode,
+            passwordNueva: password,
+          });
+
+      const data = response as any;
+
+      if (data.codigo !== "200") {
+        setError(data.mensaje || "Ocurrió un error inesperado.");
+        setSuccessMessage("");
+        return;
+      }
+
+      setSuccessMessage(data.mensaje);
+    } catch (error: any) {
+      console.error(error);
+      setError(error.message || "Ocurrió un error inesperado.");
+      setSuccessMessage("");
+    }
   };
 
   return (

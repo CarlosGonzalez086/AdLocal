@@ -1,22 +1,21 @@
 import {
   TextField,
-  Button,
   Alert,
   Stack,
   InputAdornment,
   IconButton,
 } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { adminLoginSchema } from "../../schemas/admin.schema";
 import { useState } from "react";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+
+import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
 
 interface LoginFormProps {
   onSubmit: (data: LoginFormData) => Promise<void>;
+  loading?: boolean;
 }
 
 type LoginFormData = {
@@ -24,63 +23,60 @@ type LoginFormData = {
   password: string;
 };
 
-export default function LoginForm({ onSubmit }: LoginFormProps) {
+export default function LoginForm({
+  onSubmit,
+  loading = false,
+}: LoginFormProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(adminLoginSchema),
   });
 
   const handleFormSubmit = async (data: LoginFormData) => {
     setErrorMsg(null);
+
     try {
       await onSubmit(data);
     } catch (error: any) {
       setErrorMsg(
-        error?.response?.data?.mensaje ||
-          error?.message ||
-          "Error al iniciar sesión"
+        error?.response?.data?.mensaje ??
+          error?.message ??
+          "Error al iniciar sesión",
       );
     }
-  };
-
-  const fieldSx = {
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "12px",
-      bgcolor: "#fff",
-      "& fieldset": { borderColor: "#E0E0E0" },
-      "&:hover fieldset": { borderColor: "#BDBDBD" },
-      "&.Mui-focused fieldset": { borderColor: "#007AFF" },
-    },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#007AFF" },
   };
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)}>
       <Stack spacing={2}>
         {errorMsg && (
-          <Alert severity="error" sx={{ borderRadius: 3 }}>
+          <Alert severity="error" className="auth-alert">
             {errorMsg}
           </Alert>
         )}
 
         <TextField
-          placeholder="Email"
+          placeholder="Correo electrónico"
           type="email"
           fullWidth
           {...register("email")}
           error={!!errors.email}
           helperText={errors.email?.message}
-          sx={fieldSx}
+          className="auth-field"
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <EmailOutlinedIcon sx={{ color: "#9E9E9E", fontSize: 20 }} />
+                <MaterialSymbol
+                  icon="mail"
+                  size="small"
+                  className="auth-field-icon"
+                />
               </InputAdornment>
             ),
           }}
@@ -93,11 +89,15 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           {...register("password")}
           error={!!errors.password}
           helperText={errors.password?.message}
-          sx={fieldSx}
+          className="auth-field"
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <LockOutlinedIcon sx={{ color: "#9E9E9E", fontSize: 20 }} />
+                <MaterialSymbol
+                  icon="lock"
+                  size="small"
+                  className="auth-field-icon"
+                />
               </InputAdornment>
             ),
             endAdornment: (
@@ -107,39 +107,27 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
                   edge="end"
                   size="small"
                 >
-                  {showPassword ? (
-                    <VisibilityOffOutlinedIcon sx={{ color: "#9E9E9E", fontSize: 20 }} />
-                  ) : (
-                    <VisibilityOutlinedIcon sx={{ color: "#9E9E9E", fontSize: 20 }} />
-                  )}
+                  <MaterialSymbol
+                    icon={showPassword ? "visibility_off" : "visibility"}
+                    size="small"
+                    className="auth-field-icon"
+                  />
                 </IconButton>
               </InputAdornment>
             ),
           }}
         />
 
-        <Button
+        <LoadingButton
           type="submit"
-          variant="contained"
           fullWidth
-          disabled={isSubmitting}
           size="large"
-          sx={{
-            borderRadius: "999px",
-            textTransform: "none",
-            fontWeight: 700,
-            fontSize: 16,
-            bgcolor: "#1A1A1A",
-            py: 1.5,
-            boxShadow: "none",
-            "&:hover": {
-              bgcolor: "#333",
-              boxShadow: "none",
-            },
-          }}
+          loading={loading}
+          loadingPosition="center"
+          className="auth-submit-btn fz-h3 fw-bold"
         >
-          {isSubmitting ? "Entrando..." : "Login"}
-        </Button>
+          Iniciar sesión
+        </LoadingButton>
       </Stack>
     </form>
   );

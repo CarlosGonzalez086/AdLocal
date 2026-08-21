@@ -1,11 +1,7 @@
-import { Box, Typography } from "@mui/material";
 import type { ApexOptions } from "apexcharts";
-import { useMemo, type FC } from "react";
+import { type FC } from "react";
 import Chart from "react-apexcharts";
-
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
-
-import styles from "../../styles/ComercioVisitasCharts.module.css";
 
 interface VisitData {
   dia?: string;
@@ -56,22 +52,30 @@ const buildChartOptions = (
 ): ApexOptions => ({
   chart: {
     type: "bar",
+
     toolbar: {
       show: false,
     },
+
     zoom: {
       enabled: false,
     },
+
     fontFamily:
       "Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+
     foreColor: "#74777f",
+
     animations: {
       enabled: true,
+
       speed: 500,
+
       animateGradually: {
         enabled: true,
         delay: 80,
       },
+
       dynamicAnimation: {
         enabled: true,
         speed: 350,
@@ -88,21 +92,31 @@ const buildChartOptions = (
   plotOptions: {
     bar: {
       borderRadius: 7,
+
       borderRadiusApplication: "end",
+
       columnWidth: "48%",
+
       distributed: false,
     },
   },
 
   fill: {
     type: "gradient",
+
     gradient: {
       type: "vertical",
+
       shadeIntensity: 0.15,
+
       gradientToColors: [colorSecondary],
+
       inverseColors: false,
+
       opacityFrom: 1,
+
       opacityTo: 0.82,
+
       stops: [0, 100],
     },
   },
@@ -113,23 +127,33 @@ const buildChartOptions = (
 
   xaxis: {
     categories,
+
     axisBorder: {
       show: false,
     },
+
     axisTicks: {
       show: false,
     },
+
     labels: {
       rotate: -35,
+
       rotateAlways: categories.length > 5,
+
       hideOverlappingLabels: true,
+
       trim: false,
+
       style: {
         colors: "#7b7e86",
+
         fontSize: "11px",
+
         fontWeight: 550,
       },
     },
+
     tooltip: {
       enabled: false,
     },
@@ -137,13 +161,19 @@ const buildChartOptions = (
 
   yaxis: {
     min: 0,
+
     forceNiceScale: true,
+
     decimalsInFloat: 0,
+
     labels: {
       formatter: (value: number) => Math.round(value).toString(),
+
       style: {
         colors: "#9a9da4",
+
         fontSize: "11px",
+
         fontWeight: 500,
       },
     },
@@ -151,8 +181,11 @@ const buildChartOptions = (
 
   grid: {
     show: true,
+
     borderColor: "rgba(15, 23, 42, 0.08)",
+
     strokeDashArray: 4,
+
     padding: {
       top: 4,
       right: 8,
@@ -163,10 +196,14 @@ const buildChartOptions = (
 
   tooltip: {
     enabled: true,
+
     followCursor: true,
+
     theme: "light",
+
     y: {
       formatter: formatVisitLabel,
+
       title: {
         formatter: () => "",
       },
@@ -179,6 +216,7 @@ const buildChartOptions = (
         type: "lighten",
       },
     },
+
     active: {
       filter: {
         type: "none",
@@ -189,26 +227,34 @@ const buildChartOptions = (
   responsive: [
     {
       breakpoint: 600,
+
       options: {
         chart: {
           height: 290,
         },
+
         plotOptions: {
           bar: {
             columnWidth: "58%",
+
             borderRadius: 5,
           },
         },
+
         xaxis: {
           labels: {
             rotate: -45,
+
             fontSize: "10px",
           },
         },
+
         grid: {
           padding: {
             right: 2,
+
             left: 0,
+
             bottom: 16,
           },
         },
@@ -226,64 +272,55 @@ const ChartSection: FC<ChartSectionProps> = ({
   color,
   colorSecondary,
 }) => {
-  const total = useMemo(
-    () =>
-      values.reduce(
-        (accumulator, currentValue) => accumulator + currentValue,
-        0,
-      ),
-    [values],
+  const total = values.reduce(
+    (accumulator, currentValue) => accumulator + currentValue,
+    0,
   );
 
   const hasData = categories.length > 0 && values.length > 0;
 
-  const options = useMemo(
-    () => buildChartOptions(categories, color, colorSecondary),
-    [categories, color, colorSecondary],
-  );
+  const options = buildChartOptions(categories, color, colorSecondary);
 
-  const series = useMemo<ApexAxisChartSeries>(
-    () => [
-      {
-        name: "Visitas",
-        data: values,
-      },
-    ],
-    [values],
-  );
+  const series: ApexAxisChartSeries = [
+    {
+      name: "Visitas",
+
+      data: values,
+    },
+  ];
 
   return (
-    <Box component="section" className={styles.chartSection}>
-      <Box className={styles.sectionHeader}>
-        <Box className={styles.titleContainer}>
-          <Box className={styles.titleIcon}>
+    <div className="commerceVisitsChartSection h-100">
+      <div className="d-flex flex-column flex-sm-row align-items-sm-start justify-content-between gap-3 mb-4">
+        <div className="d-flex align-items-start gap-3">
+          <div className="commerceVisitsChartTitleIcon flex-shrink-0">
             <MaterialSymbol icon={icon} size="medium" />
-          </Box>
+          </div>
 
-          <Box className={styles.titleText}>
-            <Typography component="h3" className={styles.title}>
+          <div>
+            <h3 className="commerceVisitsChartTitle fz-h3 fw-bold mb-1">
               {title}
-            </Typography>
+            </h3>
 
-            <Typography component="p" className={styles.description}>
+            <p className="commerceVisitsChartDescription fz-h4 fw-regular mb-0">
               {description}
-            </Typography>
-          </Box>
-        </Box>
+            </p>
+          </div>
+        </div>
 
-        <Box className={styles.totalBadge}>
-          <Typography component="span" className={styles.totalLabel}>
+        <div className="commerceVisitsTotalBadge flex-shrink-0">
+          <span className="commerceVisitsTotalLabel fz-h5 fw-medium">
             Total
-          </Typography>
+          </span>
 
-          <Typography component="strong" className={styles.totalValue}>
+          <strong className="commerceVisitsTotalValue fz-h2 fw-bold">
             {total.toLocaleString("es-MX")}
-          </Typography>
-        </Box>
-      </Box>
+          </strong>
+        </div>
+      </div>
 
       {hasData ? (
-        <Box className={styles.chartContainer}>
+        <div className="commerceVisitsChartContainer">
           <Chart
             type="bar"
             width="100%"
@@ -291,23 +328,23 @@ const ChartSection: FC<ChartSectionProps> = ({
             series={series}
             options={options}
           />
-        </Box>
+        </div>
       ) : (
-        <Box className={styles.emptyState}>
-          <Box className={styles.emptyIcon}>
+        <div className="commerceVisitsEmptyState">
+          <div className="commerceVisitsEmptyIcon">
             <MaterialSymbol icon="query_stats" size="large" />
-          </Box>
+          </div>
 
-          <Typography component="h4" className={styles.emptyTitle}>
+          <h4 className="commerceVisitsEmptyTitle fz-h3 fw-bold mb-2">
             Sin visitas registradas
-          </Typography>
+          </h4>
 
-          <Typography component="p" className={styles.emptyDescription}>
+          <p className="commerceVisitsEmptyDescription fz-h4 fw-regular mb-0">
             Todavía no hay información disponible para este periodo.
-          </Typography>
-        </Box>
+          </p>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 
@@ -315,89 +352,76 @@ export default function ComercioVisitasCharts({
   ultimaSemana,
   ultimosTresMeses,
 }: Props) {
-  const weeklyData = useMemo<VisitData[]>(
-    () =>
-      (ultimaSemana ?? []).map((item) => ({
-        dia: item.dia?.trim() || "Sin fecha",
+  /* ============================================
+     WEEKLY
+  ============================================ */
 
-        total: normalizeValue(item.total),
-      })),
-    [ultimaSemana],
-  );
+  const weeklyData: VisitData[] = (ultimaSemana ?? []).map((item) => ({
+    dia: item.dia?.trim() || "Sin fecha",
 
-  const monthlyData = useMemo<VisitData[]>(
-    () =>
-      (ultimosTresMeses ?? []).map((item) => ({
-        mes: item.mes?.trim() || "Sin mes",
+    total: normalizeValue(item.total),
+  }));
 
-        total: normalizeValue(item.total),
-      })),
-    [ultimosTresMeses],
-  );
+  const weeklyCategories = weeklyData.map((item) => item.dia ?? "");
 
-  const weeklyCategories = useMemo(
-    () => weeklyData.map((item) => item.dia ?? ""),
-    [weeklyData],
-  );
+  const weeklyValues = weeklyData.map((item) => item.total);
 
-  const weeklyValues = useMemo(
-    () => weeklyData.map((item) => item.total),
-    [weeklyData],
-  );
+  const monthlyData: VisitData[] = (ultimosTresMeses ?? []).map((item) => ({
+    mes: item.mes?.trim() || "Sin mes",
 
-  const monthlyCategories = useMemo(
-    () => monthlyData.map((item) => item.mes ?? ""),
-    [monthlyData],
-  );
+    total: normalizeValue(item.total),
+  }));
 
-  const monthlyValues = useMemo(
-    () => monthlyData.map((item) => item.total),
-    [monthlyData],
-  );
+  const monthlyCategories = monthlyData.map((item) => item.mes ?? "");
+
+  const monthlyValues = monthlyData.map((item) => item.total);
 
   return (
-    <Box
-      component="section"
-      className={styles.container}
+    <div
+      className="commerceVisitsContainer"
       aria-label="Estadísticas de visitas del comercio"
     >
-      <Box className={styles.header}>
-        <Box className={styles.headerIcon}>
+      <div className="d-flex align-items-start gap-3 mb-4">
+        <div className="commerceVisitsHeaderIcon flex-shrink-0">
           <MaterialSymbol icon="monitoring" size="medium" filled />
-        </Box>
+        </div>
 
-        <Box>
-          <Typography component="h2" className={styles.headerTitle}>
+        <div>
+          <h2 className="commerceVisitsHeaderTitle fz-h2 fw-bold mb-1">
             Rendimiento de visitas
-          </Typography>
+          </h2>
 
-          <Typography component="p" className={styles.headerDescription}>
+          <p className="commerceVisitsHeaderDescription fz-h4 fw-regular mb-0">
             Consulta la actividad reciente de tu comercio y compara su alcance.
-          </Typography>
-        </Box>
-      </Box>
+          </p>
+        </div>
+      </div>
 
-      <Box className={styles.chartsGrid}>
-        <ChartSection
-          title="Última semana"
-          description="Visitas recibidas durante los últimos siete días."
-          icon="date_range"
-          categories={weeklyCategories}
-          values={weeklyValues}
-          color="#007AFF"
-          colorSecondary="#5AC8FA"
-        />
+      <div className="row g-4">
+        <div className="col-12 col-xl-6">
+          <ChartSection
+            title="Última semana"
+            description="Visitas recibidas durante los últimos siete días."
+            icon="date_range"
+            categories={weeklyCategories}
+            values={weeklyValues}
+            color="#007AFF"
+            colorSecondary="#5AC8FA"
+          />
+        </div>
 
-        <ChartSection
-          title="Últimos tres meses"
-          description="Evolución mensual de las visitas al comercio."
-          icon="calendar_month"
-          categories={monthlyCategories}
-          values={monthlyValues}
-          color="#34C759"
-          colorSecondary="#30D158"
-        />
-      </Box>
-    </Box>
+        <div className="col-12 col-xl-6">
+          <ChartSection
+            title="Últimos tres meses"
+            description="Evolución mensual de las visitas al comercio."
+            icon="calendar_month"
+            categories={monthlyCategories}
+            values={monthlyValues}
+            color="#34C759"
+            colorSecondary="#30D158"
+          />
+        </div>
+      </div>
+    </div>
   );
 }

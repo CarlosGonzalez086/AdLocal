@@ -1,7 +1,9 @@
 import { useContext, useState } from "react";
 import { UserContext } from "../context/UserContext ";
-import type { AxiosInstance } from "axios";
-import axios from "axios";
+import { httpAdmin } from "../api/httpAdmin";
+import { httpUsuario } from "../api/httpUsuario";
+import { setLocalStorageJWTAdmin } from "../utils/storageAdmin";
+import { setLocalStorageJWTUsuario } from "../utils/storageUsuario";
 
 export interface ActualizarJwtParams {
   email: string;
@@ -30,30 +32,6 @@ export const useActualizarJwt = () => {
   const [error, setError] = useState<string | null>(null);
   const user = useContext(UserContext);
 
-  const api: AxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("token");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    return config;
-  });
-
-  api.interceptors.response.use(
-    (r) => r,
-    (e) => {
-      if (e.response?.status === 401) {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-      }
-      return Promise.reject(e);
-    },
-  );
-
   const actualizarJwt = async (params: ActualizarJwtParams) => {
     setLoading(true);
     setError(null);
@@ -66,10 +44,17 @@ export const useActualizarJwt = () => {
           ? `${import.meta.env.VITE_API_URL}/Admin/actualizar-jwt`
           : `${import.meta.env.VITE_API_URL}/auth/actualizar-jwt`;
 
+      const api = user.rol === "Admin" ? httpAdmin : httpUsuario;
+
       const { data } = await api.post<ActualizarJwtResponse>(url, params);
 
       if (data.respuesta?.token) {
-        localStorage.setItem("token", data.respuesta.token);
+        const isAdmin = user.rol === "Admin";
+        if (isAdmin) {
+          setLocalStorageJWTAdmin(data.respuesta?.token);
+        } else {
+          setLocalStorageJWTUsuario(data.respuesta?.token);
+        }
       }
 
       return data;

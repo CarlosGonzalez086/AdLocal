@@ -1,0 +1,89 @@
+.dialogPaper {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+}
+
+.dialogBackdrop {
+  background: rgba(10, 10, 12, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.dialogTitle {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.titleIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 122, 255, 0.1);
+  color: #007aff;
+}
+
+.titleText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1c1c1e;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: #6e6e73;
+  margin: 0;
+}
+
+.dialogContent {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dialogActions {
+  padding: 16px 28px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  gap: 8px;
+}
+
+.closeButton {
+  text-transform: none;
+  font-weight: 600;
+  color: #6e6e73;
+  border-radius: 10px;
+  padding: 8px 18px;
+}
+
+.saveButton {
+  text-transform: none;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 8px 22px;
+  background: linear-gradient(135deg, #007aff 0%, #005fcc 100%);
+  box-shadow: 0 6px 16px rgba(0, 122, 255, 0.3);
+  transition: box-shadow 0.2s ease;
+}
+
+.saveButton:hover {
+  box-shadow: 0 8px 20px rgba(0, 122, 255, 0.4);
+}
+
+.saveProgress {
+  color: #fff;
+  margin-right: 8px;
+}

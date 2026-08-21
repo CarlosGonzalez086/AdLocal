@@ -1,37 +1,21 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Avatar, Button, Chip } from "@mui/material";
+
 import {
   useEffect,
-  useMemo,
   useState,
   type CSSProperties,
   type Dispatch,
   type ReactNode,
   type SetStateAction,
 } from "react";
-
-import type { JwtClaims } from "../../services/auth.api";
-import type { ComercioDto } from "../../services/comercioApi";
-
 import { DIAS_SEMANA_MAP } from "../../utils/constantes";
-
-// import MapaComercio from "./MapaComercio.client";
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
-
-import styles from "../../styles/ComercioPreviewCard.module.css";
+import type { ComercioDto } from "../../types/User/comercio";
+import type { JwtPayload } from "../../User/Auth/PrivateRouteUsuario";
 
 interface Props {
   comercio: ComercioDto;
-  claims: JwtClaims;
+  user: JwtPayload | null;
   imagenes: string[];
   eliminar: () => void;
   setEditando: Dispatch<SetStateAction<boolean>>;
@@ -76,49 +60,49 @@ const isPresent = (value: unknown): boolean => {
 
 const InfoRow = ({ icon, text, tone = "primary" }: InfoRowProps) => {
   const toneClass = {
-    primary: styles.infoIconPrimary,
-    success: styles.infoIconSuccess,
-    error: styles.infoIconError,
+    primary: "commercePreviewInfoIconPrimary",
+
+    success: "commercePreviewInfoIconSuccess",
+
+    error: "commercePreviewInfoIconError",
   }[tone];
 
   return (
-    <Box className={styles.infoRow}>
-      <Box className={[styles.infoIcon, toneClass].join(" ")}>
+    <div className="d-flex align-items-center gap-3">
+      <div className={`commercePreviewInfoIcon ${toneClass} flex-shrink-0`}>
         <MaterialSymbol icon={icon} size="medium" filled={tone === "success"} />
-      </Box>
+      </div>
 
-      <Typography component="p" className={styles.infoText}>
-        {text}
-      </Typography>
-    </Box>
+      <p className="commercePreviewInfoText mb-0 fz-h4 fw-regular">{text}</p>
+    </div>
   );
 };
 
 const SectionCard = ({ children }: SectionCardProps) => {
-  return <Box className={styles.sectionCard}>{children}</Box>;
+  return <div className="commercePreviewSectionCard">{children}</div>;
 };
 
 const SectionTitle = ({ icon, text, description }: SectionTitleProps) => {
   return (
-    <Box className={styles.sectionHeading}>
+    <div className="d-flex align-items-start gap-3 mb-4">
       {icon && (
-        <Box className={styles.sectionIcon}>
+        <div className="commercePreviewSectionIcon flex-shrink-0">
           <MaterialSymbol icon={icon} size="medium" />
-        </Box>
+        </div>
       )}
 
-      <Box className={styles.sectionHeadingText}>
-        <Typography component="h2" className={styles.sectionTitle}>
+      <div className="flex-grow-1">
+        <h2 className="commercePreviewSectionTitle fz-h2 fw-bold mb-1">
           {text}
-        </Typography>
+        </h2>
 
         {description && (
-          <Typography component="p" className={styles.sectionDescription}>
+          <p className="commercePreviewSectionDescription fz-h4 fw-regular mb-0">
             {description}
-          </Typography>
+          </p>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 
@@ -133,7 +117,7 @@ const ColorChip = ({ label, color }: ColorChipProps) => {
     <Chip
       label={label}
       size="small"
-      className={styles.colorChip}
+      className="commercePreviewColorChip"
       style={chipVariables}
     />
   );
@@ -141,7 +125,7 @@ const ColorChip = ({ label, color }: ColorChipProps) => {
 
 export function ComercioPreviewCard({
   comercio,
-  claims,
+  user,
   imagenes,
   eliminar,
   setEditando,
@@ -155,48 +139,41 @@ export function ComercioPreviewCard({
 
   const commerceVariables: CommerceCssVariables = {
     "--commerce-primary": colorPrimario,
+
     "--commerce-secondary": colorSecundario,
   };
 
-  const horariosOrdenados = useMemo(() => {
-    return [...(comercio.horarios ?? [])].sort(
-      (firstSchedule, secondSchedule) => firstSchedule.dia - secondSchedule.dia,
-    );
-  }, [comercio.horarios]);
+  const horariosOrdenados = [...(comercio.horarios ?? [])].sort(
+    (firstSchedule, secondSchedule) => firstSchedule.dia - secondSchedule.dia,
+  );
 
-  const maxFotos = useMemo(() => {
-    const parsedValue = Number(claims.maxFotos);
+  const parsedMaxFotos = Number(user?.maxFotos);
 
-    if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
-      return imagenes.length;
-    }
+  const maxFotos =
+    Number.isFinite(parsedMaxFotos) && parsedMaxFotos > 0
+      ? Math.floor(parsedMaxFotos)
+      : imagenes.length;
 
-    return Math.floor(parsedValue);
-  }, [claims.maxFotos, imagenes.length]);
+  const imagenesVisibles = imagenes
+    .filter(
+      (image): image is string =>
+        typeof image === "string" && image.trim().length > 0,
+    )
+    .slice(0, maxFotos);
 
-  const imagenesVisibles = useMemo(() => {
-    return imagenes
-      .filter(
-        (image): image is string =>
-          typeof image === "string" && image.trim().length > 0,
-      )
-      .slice(0, maxFotos);
-  }, [imagenes, maxFotos]);
+  const addressParts = [
+    comercio.direccion,
+    comercio.municipioNombre,
+    comercio.estadoNombre,
+  ].filter(
+    (value): value is string =>
+      typeof value === "string" && value.trim().length > 0,
+  );
 
-  const address = useMemo(() => {
-    const parts = [
-      comercio.direccion,
-      comercio.municipioNombre,
-      comercio.estadoNombre,
-    ].filter(
-      (value): value is string =>
-        typeof value === "string" && value.trim().length > 0,
-    );
-
-    return parts.join(", ");
-  }, [comercio.direccion, comercio.municipioNombre, comercio.estadoNombre]);
+  const address = addressParts.join(", ");
 
   const latitude = Number(comercio.lat);
+
   const longitude = Number(comercio.lng);
 
   const hasLocation =
@@ -223,24 +200,19 @@ export function ComercioPreviewCard({
   }, [comercio.id, comercio.logoBase64]);
 
   return (
-    <Card
-      component="article"
-      elevation={0}
-      className={styles.card}
-      style={commerceVariables}
-    >
-      <Box component="header" className={styles.hero}>
-        <Box className={styles.heroDecoration} aria-hidden="true">
-          <Box className={styles.heroDecorationPrimary} />
+    <div className="commercePreviewCard" style={commerceVariables}>
+      <div className="commercePreviewHero">
+        <div className="commercePreviewHeroDecoration" aria-hidden="true">
+          <div className="commercePreviewHeroDecorationPrimary" />
 
-          <Box className={styles.heroDecorationSecondary} />
-        </Box>
+          <div className="commercePreviewHeroDecorationSecondary" />
+        </div>
 
         <Avatar
           src={showLogo ? comercio.logoBase64 : undefined}
           alt={`Logotipo de ${comercio.nombre}`}
           variant="rounded"
-          className={styles.logo}
+          className="commercePreviewLogo"
           slotProps={{
             img: {
               onError: () => setLogoError(true),
@@ -250,18 +222,18 @@ export function ComercioPreviewCard({
           {!showLogo && commerceInitial}
         </Avatar>
 
-        <Typography component="h1" className={styles.commerceName}>
+        <h1 className="commercePreviewCommerceName fz-h1 fw-bold mb-2">
           {comercio.nombre}
-        </Typography>
+        </h1>
 
         {comercio.descripcion && (
-          <Typography component="p" className={styles.commerceDescription}>
+          <p className="commercePreviewCommerceDescription fz-h4 fw-regular mb-0">
             {comercio.descripcion}
-          </Typography>
+          </p>
         )}
-      </Box>
+      </div>
 
-      <CardContent className={styles.content}>
+      <div className="commercePreviewContent">
         <SectionCard>
           <SectionTitle
             icon="contact_page"
@@ -269,7 +241,7 @@ export function ComercioPreviewCard({
             description="Datos principales que podrán consultar los usuarios."
           />
 
-          <Stack className={styles.infoList}>
+          <div className="d-flex flex-column gap-3">
             {address && (
               <InfoRow icon="location_on" text={address} tone="primary" />
             )}
@@ -281,10 +253,10 @@ export function ComercioPreviewCard({
             {comercio.email && (
               <InfoRow icon="mail" text={comercio.email} tone="error" />
             )}
-          </Stack>
+          </div>
         </SectionCard>
 
-        <Divider className={styles.divider} />
+        <hr className="commercePreviewDivider" />
 
         <SectionCard>
           <SectionTitle
@@ -293,130 +265,134 @@ export function ComercioPreviewCard({
             description="Paleta utilizada en la presentación pública del negocio."
           />
 
-          <Box className={styles.colorList}>
+          <div className="d-flex flex-wrap gap-2">
             <ColorChip label="Primario" color={colorPrimario} />
 
             <ColorChip label="Secundario" color={colorSecundario} />
-          </Box>
+          </div>
         </SectionCard>
 
         {hasGalleryOrSchedules && (
           <>
-            <Divider className={styles.divider} />
+            <hr className="commercePreviewDivider" />
 
-            <Box className={styles.galleryScheduleGrid}>
+            <div className="row g-4">
+              {/* GALLERY */}
+
               {imagenesVisibles.length > 0 && (
-                <Box
-                  component="section"
-                  className={styles.gallerySection}
-                  aria-labelledby="preview-gallery-title"
-                >
-                  <SectionTitle
-                    icon="photo_library"
-                    text="Galería"
-                    description={`${imagenesVisibles.length} ${
-                      imagenesVisibles.length === 1
-                        ? "imagen visible"
-                        : "imágenes visibles"
-                    } en este plan.`}
-                  />
+                <div className="col-12 col-xl-7">
+                  <div
+                    className="commercePreviewGallerySection"
+                    aria-labelledby="preview-gallery-title"
+                  >
+                    <SectionTitle
+                      icon="photo_library"
+                      text="Galería"
+                      description={`${imagenesVisibles.length} ${
+                        imagenesVisibles.length === 1
+                          ? "imagen visible"
+                          : "imágenes visibles"
+                      } en este plan.`}
+                    />
 
-                  <Box className={styles.galleryGrid}>
-                    {imagenesVisibles.map((image, index) => (
-                      <Box
-                        key={`${image}-${index}`}
-                        className={styles.galleryItem}
-                      >
-                        <Box
-                          component="img"
-                          src={image}
-                          alt={`Imagen ${index + 1} de ${comercio.nombre}`}
-                          className={styles.galleryImage}
-                        />
+                    <div className="row g-3">
+                      {imagenesVisibles.map((image, index) => (
+                        <div
+                          key={`${image}-${index}`}
+                          className="col-12 col-sm-6"
+                        >
+                          <div className="commercePreviewGalleryItem">
+                            <Avatar
+                              src={image}
+                              alt={`Imagen ${index + 1} de ${comercio.nombre}`}
+                              variant="square"
+                              className="commercePreviewGalleryImage"
+                            />
 
-                        <Box
-                          className={styles.galleryImageOverlay}
-                          aria-hidden="true"
-                        />
+                            <div
+                              className="commercePreviewGalleryImageOverlay"
+                              aria-hidden="true"
+                            />
 
-                        <Box className={styles.galleryImageNumber}>
-                          {index + 1}
-                        </Box>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
+                            <div className="commercePreviewGalleryImageNumber fz-h5 fw-semibold">
+                              {index + 1}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               )}
 
               {horariosOrdenados.length > 0 && (
-                <Box
-                  component="section"
-                  className={styles.scheduleSection}
-                  aria-labelledby="preview-schedules-title"
+                <div
+                  className={
+                    imagenesVisibles.length > 0 ? "col-12 col-xl-5" : "col-12"
+                  }
                 >
-                  <SectionTitle
-                    icon="schedule"
-                    text="Horarios"
-                    description="Días y horas configurados para la atención."
-                  />
+                  <div
+                    className="commercePreviewScheduleSection"
+                    aria-labelledby="preview-schedules-title"
+                  >
+                    <SectionTitle
+                      icon="schedule"
+                      text="Horarios"
+                      description="Días y horas configurados para la atención."
+                    />
 
-                  <Stack className={styles.scheduleList}>
-                    {horariosOrdenados.map((schedule) => (
-                      <Box
-                        key={schedule.dia}
-                        className={[
-                          styles.scheduleRow,
-                          schedule.abierto
-                            ? styles.scheduleOpen
-                            : styles.scheduleClosed,
-                        ].join(" ")}
-                      >
-                        <Box className={styles.scheduleDay}>
-                          <MaterialSymbol
-                            icon={
-                              schedule.abierto ? "calendar_today" : "event_busy"
-                            }
-                            size="small"
-                          />
+                    <div className="d-flex flex-column gap-2">
+                      {horariosOrdenados.map((schedule) => (
+                        <div
+                          key={schedule.dia}
+                          className={`commercePreviewScheduleRow d-flex align-items-center justify-content-between gap-3 ${
+                            schedule.abierto
+                              ? "commercePreviewScheduleOpen"
+                              : "commercePreviewScheduleClosed"
+                          }`}
+                        >
+                          <div className="d-flex align-items-center gap-2">
+                            <MaterialSymbol
+                              icon={
+                                schedule.abierto
+                                  ? "calendar_today"
+                                  : "event_busy"
+                              }
+                              size="small"
+                            />
 
-                          <Typography
-                            component="span"
-                            className={styles.scheduleDayText}
-                          >
-                            {DIAS_SEMANA_MAP[schedule.dia]}
-                          </Typography>
-                        </Box>
+                            <span className="commercePreviewScheduleDayText fz-h4 fw-semibold">
+                              {DIAS_SEMANA_MAP[schedule.dia]}
+                            </span>
+                          </div>
 
-                        {schedule.abierto ? (
-                          <Typography
-                            component="span"
-                            className={styles.scheduleTime}
-                          >
-                            {schedule.horaApertura} – {schedule.horaCierre}
-                          </Typography>
-                        ) : (
-                          <Chip
-                            label="Cerrado"
-                            size="small"
-                            className={styles.closedChip}
-                          />
-                        )}
-                      </Box>
-                    ))}
-                  </Stack>
-                </Box>
+                          {schedule.abierto ? (
+                            <span className="commercePreviewScheduleTime fz-h4 fw-medium">
+                              {schedule.horaApertura} – {schedule.horaCierre}
+                            </span>
+                          ) : (
+                            <Chip
+                              label="Cerrado"
+                              size="small"
+                              className="commercePreviewClosedChip"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               )}
-            </Box>
+            </div>
           </>
         )}
 
         {hasLocation && (
           <>
-            <Divider className={styles.divider} />
+            <hr className="commercePreviewDivider" />
 
-            <Box
-              component="section"
-              className={styles.mapSection}
+            <div
+              className="commercePreviewMapSection"
               aria-labelledby="preview-location-title"
             >
               <SectionTitle
@@ -425,39 +401,43 @@ export function ComercioPreviewCard({
                 description="Vista previa de la ubicación registrada para el comercio."
               />
 
-              {/* <Box className={styles.mapContainer}>
-                <MapaComercio lat={latitude} lng={longitude} />
-              </Box> */}
-            </Box>
+              <div className="commercePreviewCoordinates d-flex align-items-center gap-2">
+                <MaterialSymbol icon="my_location" size="small" />
+
+                <span className="fz-h4 fw-medium">
+                  {latitude.toFixed(6)}, {longitude.toFixed(6)}
+                </span>
+              </div>
+            </div>
           </>
         )}
 
-        <Divider className={styles.divider} />
+        <hr className="commercePreviewDivider" />
 
-        <Stack className={styles.actions}>
+        <div className="d-flex flex-column flex-sm-row justify-content-end gap-2">
           <Button
             type="button"
             variant="contained"
-            className={styles.editButton}
+            className="btn-adlocal--solid"
             onClick={() => setEditando(true)}
             startIcon={<MaterialSymbol icon="edit" size="small" />}
           >
             Editar comercio
           </Button>
 
-          {claims.rol !== "Colaborador" && (
+          {user?.rol !== "Colaborador" && (
             <Button
               type="button"
               variant="outlined"
-              className={styles.deleteButton}
+              className="btn-adlocal--ghost"
               onClick={eliminar}
               startIcon={<MaterialSymbol icon="delete" size="small" />}
             >
               Eliminar comercio
             </Button>
           )}
-        </Stack>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,43 +1,5 @@
-import axios from "axios";
 import type { ApiResponse } from "../api/apiResponse";
-
-const api = axios.create({
-  baseURL: `https://adlocalapi.onrender.com/api/ComercioVisitas`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-
-    const message =
-      error.response?.data?.mensaje ||
-      error.response?.data?.message ||
-      "Error en la petición";
-
-    throw new Error(message);
-  },
-);
+import { httpUsuario } from "../api/httpUsuario";
 
 export interface VisitasPorDiaDto {
   dia: string;
@@ -54,8 +16,9 @@ export interface ComercioVisitasStatsDto {
   ultimosTresMeses: VisitasPorMesDto[];
 }
 
-
 export const comercioVisitasApi = {
   getStats: (comercioId: number) =>
-    api.get<ApiResponse<ComercioVisitasStatsDto>>(`/${comercioId}/stats`),
+    httpUsuario.get<ApiResponse<ComercioVisitasStatsDto>>(
+      `/ComercioVisitas/${comercioId}/stats`,
+    ),
 };

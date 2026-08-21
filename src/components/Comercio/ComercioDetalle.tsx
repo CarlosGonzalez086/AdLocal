@@ -3,31 +3,18 @@ import {
   AccordionDetails,
   AccordionSummary,
   Avatar,
-  Box,
   Button,
-  ButtonBase,
   Chip,
-  CircularProgress,
-  Divider,
   IconButton,
-  Link,
   Rating,
-  Stack,
-  Typography,
 } from "@mui/material";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
-
-import type { ComercioDto } from "../../services/comercioApi";
-import type { ProductoServicioDto } from "../../services/productosServiciosApi";
-
+import { useEffect, useState, type CSSProperties } from "react";
 import ProductoCard from "../ProductosServicios/ProductoCard";
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
-
-
 import { DIAS_SEMANA_MAP } from "../../utils/constantes";
 import { estaAbiertoAhora } from "../../utils/generalsFunctions";
-
-import styles from "../../styles/ComercioDetalle.module.css";
+import type { ProductoServicioDto } from "../../types/User/productosServicios";
+import type { ComercioDto } from "../../types/User/comercio";
 
 interface Props {
   comercio: ComercioDto;
@@ -83,9 +70,11 @@ const getBadgeConfig = (badge?: string): BadgeConfig | null => {
 
 const getBadgeClassName = (badgeType: BadgeType): string => {
   const badgeClasses: Record<BadgeType, string> = {
-    premium: styles.premiumBadge,
-    recommended: styles.recommendedBadge,
-    essential: styles.essentialBadge,
+    premium: "commerceDetailPremiumBadge",
+
+    recommended: "commerceDetailRecommendedBadge",
+
+    essential: "commerceDetailEssentialBadge",
   };
 
   return badgeClasses[badgeType];
@@ -101,20 +90,16 @@ const normalizeRating = (value: unknown): number => {
   return Math.min(Math.max(parsedValue, 0), 5);
 };
 
-const normalizePhone = (phone?: string): string => {
-  return phone?.replace(/\D/g, "") ?? "";
-};
+const normalizePhone = (phone?: string): string =>
+  phone?.replace(/\D/g, "") ?? "";
 
-const isValidLocation = (lat: number, lng: number): boolean => {
-  return (
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    lat >= -90 &&
-    lat <= 90 &&
-    lng >= -180 &&
-    lng <= 180
-  );
-};
+const isValidLocation = (lat: number, lng: number): boolean =>
+  Number.isFinite(lat) &&
+  Number.isFinite(lng) &&
+  lat >= -90 &&
+  lat <= 90 &&
+  lng >= -180 &&
+  lng <= 180;
 
 const isDefaultLocation = (lat: number, lng: number): boolean => {
   const latitudeDifference = Math.abs(lat - DEFAULT_LATITUDE);
@@ -139,56 +124,41 @@ export default function ComercioDetalle({
 
   const commerceVariables: CommerceCssVariables = {
     "--commerce-primary": colorPrimario,
+
     "--commerce-secondary": colorSecundario,
   };
 
-  const badgeConfig = useMemo(
-    () => getBadgeConfig(comercio.badge),
-    [comercio.badge],
+  const badgeConfig = getBadgeConfig(comercio.badge);
+
+  const horarios = [...(comercio.horarios ?? [])].sort(
+    (firstSchedule, secondSchedule) => firstSchedule.dia - secondSchedule.dia,
   );
 
-  const horarios = useMemo(() => {
-    return [...(comercio.horarios ?? [])].sort(
-      (firstSchedule, secondSchedule) => firstSchedule.dia - secondSchedule.dia,
-    );
-  }, [comercio.horarios]);
+  const abiertoAhora = horarios.length > 0 ? estaAbiertoAhora(horarios) : false;
 
-  const abiertoAhora = useMemo(() => {
-    if (horarios.length === 0) {
-      return false;
-    }
-
-    return estaAbiertoAhora(horarios);
-  }, [horarios]);
-
-  const imagenes = useMemo(() => {
-    return (comercio.imagenes ?? []).filter(
-      (image): image is string =>
-        typeof image === "string" && image.trim().length > 0,
-    );
-  }, [comercio.imagenes]);
-
-  const rating = useMemo(
-    () => normalizeRating(comercio.calificacion),
-    [comercio.calificacion],
+  const imagenes = (comercio.imagenes ?? []).filter(
+    (image): image is string =>
+      typeof image === "string" && image.trim().length > 0,
   );
 
-  const address = useMemo(() => {
-    const addressParts = [
-      comercio.direccion,
-      comercio.municipioNombre,
-      comercio.estadoNombre,
-    ].filter(
-      (value): value is string =>
-        typeof value === "string" && value.trim().length > 0,
-    );
+  const rating = normalizeRating(comercio.calificacion);
 
-    return addressParts.length > 0
+  const addressParts = [
+    comercio.direccion,
+    comercio.municipioNombre,
+    comercio.estadoNombre,
+  ].filter(
+    (value): value is string =>
+      typeof value === "string" && value.trim().length > 0,
+  );
+
+  const address =
+    addressParts.length > 0
       ? `${addressParts.join(", ")}.`
       : "Dirección no disponible.";
-  }, [comercio.direccion, comercio.municipioNombre, comercio.estadoNombre]);
 
   const latitude = Number(comercio.lat);
+
   const longitude = Number(comercio.lng);
 
   const hasLocation =
@@ -213,56 +183,41 @@ export default function ComercioDetalle({
   }, [comercio.id]);
 
   const handlePreviousImage = () => {
-    setActiveImage((currentIndex) => {
-      if (currentIndex === 0) {
-        return imagenes.length - 1;
-      }
-
-      return currentIndex - 1;
-    });
+    setActiveImage((currentIndex) =>
+      currentIndex === 0 ? imagenes.length - 1 : currentIndex - 1,
+    );
   };
 
   const handleNextImage = () => {
-    setActiveImage((currentIndex) => {
-      if (currentIndex === imagenes.length - 1) {
-        return 0;
-      }
-
-      return currentIndex + 1;
-    });
+    setActiveImage((currentIndex) =>
+      currentIndex === imagenes.length - 1 ? 0 : currentIndex + 1,
+    );
   };
 
   return (
-    <Box
-      component="article"
-      className={styles.container}
-      style={commerceVariables}
-    >
+    <div className="commerceDetailContainer" style={commerceVariables}>
       {badgeConfig && (
-        <Box
-          className={[styles.badge, getBadgeClassName(badgeConfig.type)].join(
-            " ",
-          )}
+        <div
+          className={`commerceDetailBadge ${getBadgeClassName(
+            badgeConfig.type,
+          )}`}
         >
           <MaterialSymbol icon={badgeConfig.icon} size="small" filled />
 
-          <Typography component="span" className={styles.badgeText}>
-            {badgeConfig.label}
-          </Typography>
-        </Box>
+          <span className="fz-h5 fw-semibold">{badgeConfig.label}</span>
+        </div>
       )}
 
-      <Box component="header" className={styles.hero}>
-        <Box className={styles.heroDecoration} aria-hidden="true">
-          <Box className={styles.heroDecorationOne} />
-
-          <Box className={styles.heroDecorationTwo} />
-        </Box>
+      <div className="commerceDetailHero">
+        <div className="commerceDetailHeroDecoration" aria-hidden="true">
+          <div className="commerceDetailHeroDecorationOne" />
+          <div className="commerceDetailHeroDecorationTwo" />
+        </div>
 
         <Avatar
           src={showLogo ? comercio.logoBase64 : undefined}
           alt={`Logotipo de ${comercio.nombre}`}
-          className={styles.logo}
+          className="commerceDetailLogo"
           slotProps={{
             img: {
               onError: () => setLogoError(true),
@@ -272,48 +227,52 @@ export default function ComercioDetalle({
           {!showLogo && commerceInitial}
         </Avatar>
 
-        <Typography component="h1" className={styles.name}>
+        <h1 className="commerceDetailName fz-h1 fw-bold mb-2">
           {comercio.nombre}
-        </Typography>
+        </h1>
 
-        <Stack direction="row" className={styles.ratingRow}>
-          <Typography component="span" className={styles.ratingValue}>
+        <div className="d-flex align-items-center justify-content-center gap-2 mb-3">
+          <span className="commerceDetailRatingValue fz-h3 fw-bold">
             {rating.toFixed(1)}
-          </Typography>
+          </span>
 
           <Rating
             value={rating}
             precision={0.5}
             readOnly
             size="small"
-            className={styles.rating}
+            className="commerceDetailRating"
             getLabelText={(value) => `${value} de 5 estrellas`}
             icon={
               <MaterialSymbol
                 icon="star"
                 filled
-                className={styles.ratingIcon}
+                className="commerceDetailRatingIcon"
               />
             }
             emptyIcon={
-              <MaterialSymbol icon="star" className={styles.emptyRatingIcon} />
+              <MaterialSymbol
+                icon="star"
+                className="commerceDetailEmptyRatingIcon"
+              />
             }
           />
-        </Stack>
+        </div>
 
         {comercio.descripcion && (
-          <Typography component="p" className={styles.description}>
+          <p className="commerceDetailDescription fz-h4 fw-regular mb-3">
             {comercio.descripcion}
-          </Typography>
+          </p>
         )}
 
         {horarios.length > 0 && (
           <Chip
             label={abiertoAhora ? "Abierto ahora" : "Cerrado ahora"}
-            className={[
-              styles.statusChip,
-              abiertoAhora ? styles.openStatus : styles.closedStatus,
-            ].join(" ")}
+            className={
+              abiertoAhora
+                ? "commerceDetailStatusChip commerceDetailOpenStatus"
+                : "commerceDetailStatusChip commerceDetailClosedStatus"
+            }
             icon={
               <MaterialSymbol
                 icon={abiertoAhora ? "schedule" : "schedule_off"}
@@ -322,137 +281,126 @@ export default function ComercioDetalle({
             }
           />
         )}
-      </Box>
+      </div>
 
-      <Stack className={styles.content}>
-        <Box
-          component="section"
-          className={styles.informationCard}
+      <div className="commerceDetailContent">
+        <div
+          className="commerceDetailInformationCard"
           aria-label="Información del comercio"
         >
-          <Stack className={styles.informationList}>
-            <Box className={styles.informationRow}>
-              <Box className={styles.informationIcon}>
+          <div className="d-flex flex-column gap-3">
+            <div className="d-flex align-items-center gap-3">
+              <div className="commerceDetailInformationIcon flex-shrink-0">
                 <MaterialSymbol icon="location_on" size="medium" />
-              </Box>
+              </div>
 
-              <Typography component="p" className={styles.informationText}>
+              <p className="commerceDetailInformationText mb-0 fz-h4 fw-regular">
                 {address}
-              </Typography>
-            </Box>
+              </p>
+            </div>
 
             {comercio.telefono && normalizedPhone && (
-              <Box className={styles.informationRow}>
-                <Box
-                  className={[styles.informationIcon, styles.whatsAppIcon].join(
-                    " ",
-                  )}
-                >
+              <div className="d-flex align-items-center gap-3">
+                <div className="commerceDetailInformationIcon commerceDetailWhatsAppIcon flex-shrink-0">
                   <MaterialSymbol icon="chat" size="medium" filled />
-                </Box>
+                </div>
 
-                <Link
+                <a
                   href={`https://wa.me/${normalizedPhone}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  underline="none"
-                  className={[styles.informationLink, styles.whatsAppLink].join(
-                    " ",
-                  )}
+                  className="commerceDetailInformationLink commerceDetailWhatsAppLink fz-h4 fw-medium"
                 >
                   {comercio.telefono}
-                </Link>
-              </Box>
+                </a>
+              </div>
             )}
 
             {comercio.email && (
-              <Box className={styles.informationRow}>
-                <Box className={styles.informationIcon}>
+              <div className="d-flex align-items-center gap-3">
+                <div className="commerceDetailInformationIcon flex-shrink-0">
                   <MaterialSymbol icon="mail" size="medium" />
-                </Box>
+                </div>
 
-                <Link
+                <a
                   href={`mailto:${comercio.email}`}
-                  underline="none"
-                  className={styles.informationLink}
+                  className="commerceDetailInformationLink fz-h4 fw-medium"
                 >
                   {comercio.email}
-                </Link>
-              </Box>
+                </a>
+              </div>
             )}
 
             {comercio.tipoComercio && (
-              <Box className={styles.informationRow}>
-                <Box className={styles.informationIcon}>
+              <div className="d-flex align-items-center gap-3">
+                <div className="commerceDetailInformationIcon flex-shrink-0">
                   <MaterialSymbol icon="category" size="medium" />
-                </Box>
+                </div>
 
-                <Typography component="p" className={styles.informationText}>
+                <p className="commerceDetailInformationText mb-0 fz-h4 fw-regular">
                   {comercio.tipoComercio}
-                </Typography>
-              </Box>
+                </p>
+              </div>
             )}
-          </Stack>
-        </Box>
+          </div>
+        </div>
 
-        <Divider className={styles.divider} />
+        <hr className="commerceDetailDivider" />
 
         {imagenes.length > 0 && (
           <>
-            <Box
-              component="section"
-              className={styles.gallerySection}
+            <div
+              className="commerceDetailGallerySection"
               aria-labelledby="commerce-gallery-title"
             >
-              <Box className={styles.sectionHeading}>
-                <Box className={styles.sectionHeadingIcon}>
+              <div className="d-flex align-items-start gap-3 mb-4">
+                <div className="commerceDetailSectionHeadingIcon flex-shrink-0">
                   <MaterialSymbol icon="photo_library" size="medium" />
-                </Box>
+                </div>
 
-                <Box>
-                  <Typography
+                <div>
+                  <h2
                     id="commerce-gallery-title"
-                    component="h2"
-                    className={styles.sectionTitle}
+                    className="commerceDetailSectionTitle fz-h2 fw-bold mb-1"
                   >
                     Imágenes del negocio
-                  </Typography>
+                  </h2>
 
-                  <Typography component="p" className={styles.sectionSubtitle}>
+                  <p className="commerceDetailSectionSubtitle fz-h4 fw-regular mb-0">
                     Conoce las instalaciones y servicios del comercio.
-                  </Typography>
-                </Box>
-              </Box>
+                  </p>
+                </div>
+              </div>
 
-              <Box className={styles.gallery}>
-                <Box className={styles.galleryImageContainer}>
-                  <Box
-                    component="img"
+              <div className="commerceDetailGallery">
+                <div className="commerceDetailGalleryImageContainer">
+                  <Avatar
                     src={imagenes[activeImage]}
                     alt={`Imagen ${activeImage + 1} de ${imagenes.length} de ${
                       comercio.nombre
                     }`}
-                    className={styles.galleryImage}
+                    variant="square"
+                    className="commerceDetailGalleryImage"
                   />
 
-                  <Box className={styles.galleryOverlay} aria-hidden="true" />
+                  <div
+                    className="commerceDetailGalleryOverlay"
+                    aria-hidden="true"
+                  />
 
-                  <Box className={styles.galleryCounter}>
+                  <div className="commerceDetailGalleryCounter d-flex align-items-center gap-1">
                     <MaterialSymbol icon="image" size="small" />
 
-                    <span>
+                    <span className="fz-h5 fw-semibold">
                       {activeImage + 1} / {imagenes.length}
                     </span>
-                  </Box>
+                  </div>
 
                   {imagenes.length > 1 && (
                     <>
                       <IconButton
                         type="button"
-                        className={[
-                          styles.galleryButton,
-                          styles.previousButton,
-                        ].join(" ")}
+                        className="commerceDetailGalleryButton commerceDetailPreviousButton"
                         onClick={handlePreviousImage}
                         aria-label="Mostrar imagen anterior"
                       >
@@ -461,10 +409,7 @@ export default function ComercioDetalle({
 
                       <IconButton
                         type="button"
-                        className={[
-                          styles.galleryButton,
-                          styles.nextButton,
-                        ].join(" ")}
+                        className="commerceDetailGalleryButton commerceDetailNextButton"
                         onClick={handleNextImage}
                         aria-label="Mostrar imagen siguiente"
                       >
@@ -472,80 +417,78 @@ export default function ComercioDetalle({
                       </IconButton>
                     </>
                   )}
-                </Box>
+                </div>
 
                 {imagenes.length > 1 && (
-                  <Box
-                    className={styles.galleryIndicators}
+                  <div
+                    className="commerceDetailGalleryIndicators d-flex justify-content-center gap-2 mt-3"
                     role="tablist"
                     aria-label="Seleccionar imagen"
                   >
                     {imagenes.map((image, index) => (
-                      <ButtonBase
+                      <button
                         key={`${image}-${index}`}
                         type="button"
-                        className={[
-                          styles.galleryIndicator,
+                        className={`commerceDetailGalleryIndicator ${
                           activeImage === index
-                            ? styles.galleryIndicatorActive
-                            : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
+                            ? "commerceDetailGalleryIndicatorActive"
+                            : ""
+                        }`}
                         onClick={() => setActiveImage(index)}
                         role="tab"
                         aria-selected={activeImage === index}
                         aria-label={`Mostrar imagen ${index + 1}`}
                       />
                     ))}
-                  </Box>
+                  </div>
                 )}
-              </Box>
-            </Box>
+              </div>
+            </div>
 
-            <Divider className={styles.divider} />
+            <hr className="commerceDetailDivider" />
           </>
         )}
 
         {horarios.length > 0 && (
-          <Accordion elevation={0} className={styles.accordion}>
+          <Accordion elevation={0} className="commerceDetailAccordion">
             <AccordionSummary
-              className={styles.accordionSummary}
+              className="commerceDetailAccordionSummary"
               expandIcon={<MaterialSymbol icon="expand_more" size="medium" />}
               aria-controls="commerce-schedule-content"
-              id="commerce-schedule-header"
+              id="commerce-schedule-div"
             >
-              <Box className={styles.accordionTitleIcon}>
-                <MaterialSymbol icon="schedule" size="medium" />
-              </Box>
+              <div className="d-flex align-items-center gap-3">
+                <div className="commerceDetailAccordionTitleIcon">
+                  <MaterialSymbol icon="schedule" size="medium" />
+                </div>
 
-              <Box>
-                <Typography component="h2" className={styles.accordionTitle}>
-                  Horarios de atención
-                </Typography>
+                <div>
+                  <h2 className="commerceDetailAccordionTitle fz-h2 fw-bold mb-1">
+                    Horarios de atención
+                  </h2>
 
-                <Typography component="p" className={styles.accordionSubtitle}>
-                  Consulta los días y horarios disponibles.
-                </Typography>
-              </Box>
+                  <p className="commerceDetailAccordionSubtitle fz-h4 fw-regular mb-0">
+                    Consulta los días y horarios disponibles.
+                  </p>
+                </div>
+              </div>
             </AccordionSummary>
 
             <AccordionDetails
               id="commerce-schedule-content"
-              className={styles.accordionDetails}
+              className="commerceDetailAccordionDetails"
             >
-              <Stack className={styles.scheduleList}>
+              <div className="d-flex flex-column gap-2">
                 {horarios.map((schedule) => (
-                  <Box
+                  <div
                     key={schedule.dia}
-                    className={[
-                      styles.scheduleRow,
+                    className={`commerceDetailScheduleRow d-flex align-items-center justify-content-between gap-3 ${
                       schedule.abierto
-                        ? styles.scheduleRowOpen
-                        : styles.scheduleRowClosed,
-                    ].join(" ")}
+                        ? "commerceDetailScheduleRowOpen"
+                        : "commerceDetailScheduleRowClosed"
+                    }`}
                   >
-                    <Box className={styles.scheduleDay}>
+                    <div className="d-flex align-items-center gap-2">
                       <MaterialSymbol
                         icon={
                           schedule.abierto ? "calendar_today" : "event_busy"
@@ -553,141 +496,123 @@ export default function ComercioDetalle({
                         size="small"
                       />
 
-                      <Typography
-                        component="span"
-                        className={styles.scheduleDayText}
-                      >
+                      <span className="commerceDetailScheduleDayText fz-h4 fw-semibold">
                         {DIAS_SEMANA_MAP[schedule.dia]}
-                      </Typography>
-                    </Box>
+                      </span>
+                    </div>
 
                     {schedule.abierto ? (
-                      <Typography
-                        component="span"
-                        className={styles.scheduleTime}
-                      >
+                      <span className="commerceDetailScheduleTime fz-h4 fw-medium">
                         {schedule.horaAperturaFormateada} –{" "}
                         {schedule.horaCierreFormateada}
-                      </Typography>
+                      </span>
                     ) : (
                       <Chip
                         label="Cerrado"
                         size="small"
                         variant="outlined"
-                        className={styles.closedChip}
+                        className="commerceDetailClosedChip"
                       />
                     )}
-                  </Box>
+                  </div>
                 ))}
-              </Stack>
+              </div>
             </AccordionDetails>
           </Accordion>
         )}
 
-        <Accordion elevation={0} className={styles.accordion}>
+        <Accordion elevation={0} className="commerceDetailAccordion mt-3">
           <AccordionSummary
-            className={styles.accordionSummary}
+            className="commerceDetailAccordionSummary"
             expandIcon={<MaterialSymbol icon="expand_more" size="medium" />}
             aria-controls="commerce-products-content"
-            id="commerce-products-header"
+            id="commerce-products-div"
           >
-            <Box className={styles.accordionTitleIcon}>
-              <MaterialSymbol icon="category" size="medium" />
-            </Box>
+            <div className="d-flex align-items-center gap-3">
+              <div className="commerceDetailAccordionTitleIcon">
+                <MaterialSymbol icon="category" size="medium" />
+              </div>
 
-            <Box>
-              <Typography component="h2" className={styles.accordionTitle}>
-                Productos y servicios
-              </Typography>
+              <div>
+                <h2 className="commerceDetailAccordionTitle fz-h2 fw-bold mb-1">
+                  Productos y servicios
+                </h2>
 
-              <Typography component="p" className={styles.accordionSubtitle}>
-                Revisa lo que este comercio tiene disponible.
-              </Typography>
-            </Box>
+                <p className="commerceDetailAccordionSubtitle fz-h4 fw-regular mb-0">
+                  Revisa lo que este comercio tiene disponible.
+                </p>
+              </div>
+            </div>
           </AccordionSummary>
 
           <AccordionDetails
             id="commerce-products-content"
-            className={[styles.accordionDetails, styles.productsDetails].join(
-              " ",
-            )}
+            className="commerceDetailAccordionDetails"
           >
             {loadingProducts ? (
-              <Box className={styles.productsLoading} aria-live="polite">
-                <CircularProgress
-                  size={32}
-                  thickness={4.5}
-                  className={styles.productsProgress}
+              <div
+                className="commerceDetailProductsLoading d-flex flex-column align-items-center justify-content-center"
+                aria-live="polite"
+              >
+                <div
+                  className="spinner-border"
+                  role="status"
+                  aria-hidden="true"
                 />
 
-                <Typography
-                  component="p"
-                  className={styles.productsLoadingText}
-                >
+                <p className="commerceDetailProductsLoadingText fz-h4 fw-medium mb-0 mt-3">
                   Cargando productos y servicios...
-                </Typography>
-              </Box>
+                </p>
+              </div>
             ) : productos.length === 0 ? (
-              <Box className={styles.emptyProducts}>
-                <Box className={styles.emptyProductsIcon}>
+              <div className="commerceDetailEmptyProducts">
+                <div className="commerceDetailEmptyProductsIcon">
                   <MaterialSymbol icon="inventory_2" size="large" />
-                </Box>
+                </div>
 
-                <Typography
-                  component="h3"
-                  className={styles.emptyProductsTitle}
-                >
+                <h3 className="commerceDetailEmptyProductsTitle fz-h3 fw-bold mb-2">
                   Sin productos disponibles
-                </Typography>
+                </h3>
 
-                <Typography
-                  component="p"
-                  className={styles.emptyProductsDescription}
-                >
+                <p className="commerceDetailEmptyProductsDescription fz-h4 fw-regular mb-0">
                   Este comercio todavía no ha publicado productos o servicios.
-                </Typography>
-              </Box>
+                </p>
+              </div>
             ) : (
-              <Stack className={styles.productsList}>
+              <div className="row g-3">
                 {productos.map((producto) => (
-                  <Box key={producto.id} className={styles.productItem}>
+                  <div key={producto.id} className="col-12 col-md-6 col-xl-4">
                     <ProductoCard producto={producto} />
-                  </Box>
+                  </div>
                 ))}
-              </Stack>
+              </div>
             )}
           </AccordionDetails>
         </Accordion>
 
         {hasLocation && (
-          <Box
-            component="section"
-            className={styles.locationSection}
+          <div
+            className="commerceDetailLocationSection mt-4"
             aria-labelledby="commerce-location-title"
           >
-            <Box className={styles.sectionHeading}>
-              <Box className={styles.sectionHeadingIcon}>
+            <div className="d-flex align-items-start gap-3 mb-4">
+              <div className="commerceDetailSectionHeadingIcon flex-shrink-0">
                 <MaterialSymbol icon="map" size="medium" />
-              </Box>
+              </div>
 
-              <Box>
-                <Typography
+              <div>
+                <h2
                   id="commerce-location-title"
-                  component="h2"
-                  className={styles.sectionTitle}
+                  className="commerceDetailSectionTitle fz-h2 fw-bold mb-1"
                 >
                   Ubicación
-                </Typography>
+                </h2>
 
-                <Typography component="p" className={styles.sectionSubtitle}>
+                <p className="commerceDetailSectionSubtitle fz-h4 fw-regular mb-0">
                   Consulta dónde se encuentra el comercio.
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* <Box className={styles.mapContainer}>
-              <MapaComercio lat={latitude} lng={longitude} />
-            </Box> */}
+                </p>
+              </div>
+            </div>
 
             <Button
               component="a"
@@ -696,15 +621,15 @@ export default function ComercioDetalle({
               rel="noopener noreferrer"
               variant="contained"
               fullWidth
-              className={styles.mapButton}
+              className="commerceDetailMapButton"
               startIcon={<MaterialSymbol icon="directions" size="small" />}
               endIcon={<MaterialSymbol icon="open_in_new" size="small" />}
             >
               Ver ubicación en Google Maps
             </Button>
-          </Box>
+          </div>
         )}
-      </Stack>
-    </Box>
+      </div>
+    </div>
   );
 }

@@ -8,14 +8,12 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-
-import { adminApi } from "../api/admin.api";
-import { authApi, sendWelcomeEmail } from "../api/authApi";
-
-import AdminForm from "../components/forms/AdminForm";
+import { sendWelcomeEmail } from "../api/authApi";
+import { useAdmin } from "../hooks/useAdmin";
+import { useUser } from "../hooks/useUser";
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
-
 import styles from "../styles/RegisterPage.module.css";
+import FormRegister from "../components/forms/FormRegister";
 
 const LOGO_URL =
   "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
@@ -24,47 +22,28 @@ interface Props {
   type: "admin" | "user";
 }
 
-interface ApiError {
-  response?: {
-    data?: {
-      mensaje?: string;
-    };
-  };
-}
-
-const getErrorMessage = (error: unknown) => {
-  const apiError = error as ApiError;
-
-  return (
-    apiError.response?.data?.mensaje ??
-    "Error al crear la cuenta. Inténtalo nuevamente."
-  );
-};
-
 export default function RegisterPage({ type }: Props) {
   const navigate = useNavigate();
 
   const isAdmin = type === "admin";
 
+  const admin = useAdmin();
+  const user = useUser();
+
+  const loading = isAdmin ? admin.loading : user.loading;
+
   const handleCreate = async (data: any) => {
     try {
       const response = isAdmin
-        ? await adminApi.crearAdmin(data)
-        : await authApi.registroUsuario(data);
+        ? await admin.crearAdmin(data)
+        : await user.crearUser(data);
 
-      const createdAccount = response.data?.respuesta;
-
-      const apiMessage =
-        response.data?.mensaje ??
-        (isAdmin
-          ? "El administrador fue creado correctamente."
-          : "La cuenta fue creada correctamente.");
+      const createdAccount: any = response?.respuesta;
 
       let welcomeEmailFailed = false;
 
       if (!isAdmin) {
         const accountName = createdAccount?.nombre;
-
         const accountEmail = createdAccount?.email;
 
         if (accountName && accountEmail) {
@@ -83,34 +62,22 @@ export default function RegisterPage({ type }: Props) {
         }
       }
 
-      await Swal.fire({
-        icon: welcomeEmailFailed ? "warning" : "success",
+      if (welcomeEmailFailed) {
+        await Swal.fire({
+          icon: "warning",
+          title: "Cuenta creada",
+          text: "La cuenta fue creada correctamente, pero no fue posible enviar el correo de bienvenida.",
+          confirmButtonText: "Continuar",
+          confirmButtonColor: "#007AFF",
+        });
+      }
 
-        title: isAdmin ? "Administrador creado" : "Cuenta creada",
-
-        text: welcomeEmailFailed
-          ? `${apiMessage} Sin embargo, no fue posible enviar el correo de bienvenida.`
-          : apiMessage,
-
-        confirmButtonText: "Continuar",
-        confirmButtonColor: "#007AFF",
-      });
-
-      navigate(isAdmin ? "/login/admin" : "/login", {
+      navigate(isAdmin ? "/admin/login" : "/usuario/login", {
         replace: true,
       });
-    } catch (error: unknown) {
-      console.error("Error al crear la cuenta:", error);
-
-      await Swal.fire({
-        icon: "error",
-        title: isAdmin
-          ? "No se pudo crear el administrador"
-          : "No se pudo crear la cuenta",
-        text: getErrorMessage(error),
-        confirmButtonText: "Intentar nuevamente",
-        confirmButtonColor: "#007AFF",
-      });
+    } catch (error) {
+      console.error(error);
+      // Los hooks ya muestran el mensaje de error correspondiente.
     }
   };
 
@@ -124,7 +91,7 @@ export default function RegisterPage({ type }: Props) {
 
       <Container maxWidth="xs" className={styles.container}>
         <Link
-          href="/"
+          href={type === "admin" ? "/admin/login" : "/usuario/login"}
           underline="none"
           className={styles.logoLink}
           aria-label="Ir al inicio de ADLocal"
@@ -187,7 +154,9 @@ export default function RegisterPage({ type }: Props) {
                 type="button"
                 underline="none"
                 className={styles.loginLink}
-                onClick={() => navigate("/login")}
+                onClick={() =>
+                  navigate(type === "user" ? "/usuario/login" : "/admin/login")
+                }
               >
                 Inicia sesión
               </Link>
@@ -195,10 +164,11 @@ export default function RegisterPage({ type }: Props) {
           )}
 
           <Box className={styles.formContainer}>
-            <AdminForm
+            <FormRegister
               onSubmit={handleCreate}
               type={type}
               isFormCode={type === "user"}
+              loading={loading}
             />
           </Box>
 

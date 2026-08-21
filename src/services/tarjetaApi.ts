@@ -1,34 +1,6 @@
-import axios from "axios";
 import type { ApiResponse } from "../api/apiResponse";
+import { httpUsuario } from "../api/httpUsuario";
 
-
-const api = axios.create({
-  baseURL: `https://adlocalapi.onrender.com/api/tarjetas`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  }
-);
-
-// DTOs
 export interface CrearTarjetaDto {
   paymentMethodId: string;
   isDefault: boolean;
@@ -49,14 +21,14 @@ export interface TarjetaDto {
 
 export const tarjetaApi = {
   listar: () =>
-    api.get<ApiResponse<TarjetaDto[]>>(""),
+    httpUsuario.get<ApiResponse<TarjetaDto[]>>("/tarjetas"),
 
   crear: (data: CrearTarjetaDto) =>
-    api.post<ApiResponse<TarjetaDto>>("", data),
+    httpUsuario.post<ApiResponse<TarjetaDto>>("/tarjetas", data),
 
   setDefault: (id: number) =>
-    api.put<ApiResponse<null>>(`/${id}/default`),
+    httpUsuario.put<ApiResponse<null>>(`/tarjetas/${id}/default`),
 
   eliminar: (id: number) =>
-    api.delete<ApiResponse<null>>(`/${id}`),
+    httpUsuario.delete<ApiResponse<null>>(`/tarjetas/${id}`),
 };

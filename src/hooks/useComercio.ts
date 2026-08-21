@@ -1,12 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import Swal from "sweetalert2";
-import {
-  comercioApi,
-  comercioDtoDefault,
-  type ColaborarDto,
-  type ComercioDto,
-  type ComercioDtoListItem,
-} from "../services/comercioApi";
+
 import { useActualizarJwt } from "./useActualizarJwt";
 
 import {
@@ -18,6 +12,13 @@ import { normalizeComercioData } from "../utils/generalsFunctions";
 import { UserContext } from "../context/UserContext ";
 import { useNavigate } from "react-router-dom";
 import type { ProfileUser } from "../services/userProfileApi";
+import {
+  comercioDtoDefault,
+  type ColaborarDto,
+  type ComercioDto,
+  type ComercioDtoListItem,
+} from "../types/User/comercio";
+import { comercioApi } from "../services/comercioApi";
 
 export interface ListarParamsComercio {
   page: number;
@@ -184,8 +185,8 @@ export const useComercio = () => {
         return;
       }
 
-      setComercios(data.respuesta.items || []);
-      setTotal(data.respuesta.totalItems || 0);
+      setComercios(data.respuesta.data || []);
+      setTotal(data.respuesta.totalRecords || 0);
     } catch (error) {
       console.error(error);
       Swal.fire("Error", "No se pudieron cargar los comercios", "error");
@@ -224,7 +225,6 @@ export const useComercio = () => {
 
     try {
       const normalizedData = normalizeComercioData(data);
-      
 
       if (comercioPage?.id) {
         const result = comercioUpdateSchema.safeParse({
@@ -383,8 +383,8 @@ export const useComercio = () => {
         return;
       }
 
-      setUsersColaboradores(data.respuesta.items || []);
-      setTotalColaboradores(data.respuesta.totalItems || 0);
+      setUsersColaboradores(data.respuesta.data || []);
+      setTotalColaboradores(data.respuesta.totalRecords || 0);
     } catch (error) {
       console.error(error);
       Swal.fire("Error", "No se pudieron cargar los colaboradores", "error");
@@ -421,7 +421,7 @@ export const useComercio = () => {
       );
 
       if (data.codigo !== "200") {
-        Swal.fire("Error", data.mensaje, "error",);
+        Swal.fire("Error", data.mensaje, "error");
         return;
       }
 

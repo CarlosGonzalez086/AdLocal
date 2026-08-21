@@ -1,6 +1,5 @@
 import { httpUsuarioPublico } from "../api/httpUsuarioPublico";
 
-
 export interface PlanCreateDto {
   id?: number;
 

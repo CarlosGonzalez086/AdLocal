@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 import { UserContext } from "../context/UserContext ";
 import { useActualizarJwt } from "./useActualizarJwt";
 import type { ProfileUser, ProfileUserUpdateDto } from "../types/User/UserAuth";
-import { profileUserApi } from "../services/userProfileApi";
+import { profileUserApi } from "../services/profileUserApi";
 
 export const useUserProfile = () => {
   const [profile, setProfile] = useState<ProfileUser>({

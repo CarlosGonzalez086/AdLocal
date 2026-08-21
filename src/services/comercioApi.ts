@@ -9,7 +9,6 @@ import type {
 } from "../types/User/comercio";
 import type { ProfileUser } from "../types/User/UserAuth";
 
-
 export const comercioApi = {
   getMine: () => httpUsuario.get<ApiResponse<ComercioDto>>("/comercios/mine"),
   getTotalComerciosByIdUsuario: () =>

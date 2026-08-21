@@ -2,12 +2,9 @@ import { useState, useCallback } from "react";
 import Swal from "sweetalert2";
 import { planPublicApi, type PlanCreateDto } from "../services/planPublicApi";
 
-
-
 export const usePlanesPublicos = () => {
   const [planes, setPlanes] = useState<PlanCreateDto[]>([]);
   const [loading, setLoading] = useState(false);
-
 
   const listAllPlanesUser = useCallback(async () => {
     setLoading(true);

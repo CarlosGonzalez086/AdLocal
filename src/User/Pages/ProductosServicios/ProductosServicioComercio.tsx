@@ -24,6 +24,9 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ToggleOnRoundedIcon from "@mui/icons-material/ToggleOnRounded";
 import ToggleOffRoundedIcon from "@mui/icons-material/ToggleOffRounded";
 import ButtonBack from "../../../components/ButtonBack";
+import { ModalidadProductoServicio, TipoProductoServicio, type ProductoServicioDto } from "../../../types/User/productosServicios";
+import type { JwtClaims } from "../../../types/claims";
+import { jwtDecode } from "jwt-decode";
 
 const cardSx = {
   borderRadius: 4,
@@ -41,13 +44,36 @@ export function ProductosServicioComercio() {
     : null;
 
   const initialForm: ProductoServicioDto = {
+    id: undefined,
+    uuid: undefined,
+
     nombre: "",
     descripcion: "",
-    precio: 0,
+
+    tipo: TipoProductoServicio.Producto,
+    modalidad: ModalidadProductoServicio.Compra,
+
+    precio: null,
+    precioDesde: null,
+
+    manejaStock: false,
+    stock: null,
+
+    disponible: true,
+
+    permiteDomicilio: true,
+    permiteRecoger: true,
+
+    duracionMinutos: null,
+
     activo: true,
-    stock: 0,
+    visible: true,
+
+    codigoInterno: null,
+
     imagenBase64: "",
-    idComercio: id ? Number(id) : 0,
+
+    idComercio: 0,
   };
 
   const { productos, total, loading, listar, guardar, eliminar, desactivar } =
@@ -77,7 +103,7 @@ export function ProductosServicioComercio() {
       label: "Precio",
       render: (p) => (
         <Typography fontWeight={600} fontSize="0.875rem">
-          ${p.precio.toLocaleString()}
+          ${p.precio}
         </Typography>
       ),
     },
@@ -233,13 +259,24 @@ export function ProductosServicioComercio() {
                 onClick={() => {
                   setProducto({
                     id: p.id,
+                    uuid: p.uuid,
                     idComercio: producto.idComercio,
                     imagenBase64: p.imagenBase64,
                     precio: p.precio,
+                    precioDesde: p.precioDesde,
                     nombre: p.nombre,
                     stock: p.stock,
                     descripcion: p.descripcion,
                     activo: p.activo,
+                    visible: p.visible,
+                    tipo: p.tipo,
+                    modalidad: p.modalidad,
+                    manejaStock: p.manejaStock,
+                    disponible: p.disponible,
+                    permiteDomicilio: p.permiteDomicilio,
+                    permiteRecoger: p.permiteRecoger,
+                    duracionMinutos: p.duracionMinutos,
+                    codigoInterno: p.codigoInterno,
                   });
                   setOpen(true);
                 }}

@@ -23,7 +23,7 @@ export const useSuscripcionesAdmin = () => {
         pageSize: rows,
       });
 
-      setSuscripciones(resp.data.respuesta.data);
+      setSuscripciones(resp.data.respuesta.items);
       setTotal(resp.data.respuesta.totalRecords);
     } catch (error) {
       console.error(error);

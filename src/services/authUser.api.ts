@@ -17,7 +17,10 @@ export const authUser = {
     return httpUsuarioPublico.post<ApiResponse<null>>("/Usuario/login", data);
   },
   forgetPassword: (data: EmailUserDto) =>
-    httpUsuarioPublico.post<ApiResponse<null>>("/Usuario/forget-password", data),
+    httpUsuarioPublico.post<ApiResponse<null>>(
+      "/Usuario/forget-password",
+      data,
+    ),
   newPassword: (data: NewPasswordDto) =>
     httpUsuarioPublico.post<ApiResponse<null>>("/Usuario/new-password", data),
   checkToken: (token: string) =>

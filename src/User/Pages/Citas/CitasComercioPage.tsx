@@ -88,21 +88,40 @@ export function CitasComercioPage() {
     nombreAtiende: string,
     motivo: string,
   ) => {
-    if (!seleccionada) return;
+    if (!seleccionada) {
+      return {
+        noClose: true,
+      };
+    }
+
     setLoading(true);
+
     try {
       const r = await citasComercioApi.actualizar(
         comercioId,
         seleccionada.uuid,
-        { estado, nombreAtiende, motivo },
+        {
+          estado,
+          nombreAtiende,
+          motivo,
+        },
       );
+
       setCitas((v) =>
         v.map((c) => (c.uuid === seleccionada.uuid ? r.data.respuesta : c)),
       );
-      setSeleccionada(null);
+
       await Swal.fire("Actualizada", "La cita fue actualizada.", "success");
+
+      return {
+        success: true,
+      };
     } catch {
       setError("No fue posible actualizar la cita.");
+
+      return {
+        noClose: true,
+      };
     } finally {
       setLoading(false);
     }
@@ -171,7 +190,7 @@ export function CitasComercioPage() {
         cita={seleccionada}
         loading={loading}
         onClose={() => setSeleccionada(null)}
-        onSave={(e, a, m) => void guardar(e, a, m)}
+        onSave={(estado, atiende, motivo) => guardar(estado, atiende, motivo)}
       />
     </div>
   );

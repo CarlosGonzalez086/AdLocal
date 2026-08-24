@@ -9,6 +9,11 @@ import type {
   CuentaBancariaComercioUpdateDto,
 } from "../types/User/pagosComercio";
 
+export interface ModalActionResult {
+  noClose?: boolean;
+  success?: boolean;
+}
+
 export const useCuentasBancariasComercio = () => {
   const [cuentas, setCuentas] = useState<CuentaBancariaComercioDto[]>([]);
 
@@ -41,7 +46,7 @@ export const useCuentasBancariasComercio = () => {
 
   const crear = async (
     dto: CuentaBancariaComercioCreateDto,
-  ): Promise<boolean> => {
+  ): Promise<ModalActionResult> => {
     setLoading(true);
 
     try {
@@ -49,14 +54,19 @@ export const useCuentasBancariasComercio = () => {
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");
-        return false;
+
+        return {
+          noClose: true,
+        };
       }
 
       Swal.fire("Éxito", data.mensaje, "success");
 
       await listar();
 
-      return true;
+      return {
+        success: true,
+      };
     } catch (error: any) {
       Swal.fire(
         "Error",
@@ -65,7 +75,9 @@ export const useCuentasBancariasComercio = () => {
         "error",
       );
 
-      return false;
+      return {
+        noClose: true,
+      };
     } finally {
       setLoading(false);
     }
@@ -74,7 +86,7 @@ export const useCuentasBancariasComercio = () => {
   const actualizar = async (
     uuid: string,
     dto: CuentaBancariaComercioUpdateDto,
-  ): Promise<boolean> => {
+  ): Promise<ModalActionResult> => {
     setLoading(true);
 
     try {
@@ -82,14 +94,19 @@ export const useCuentasBancariasComercio = () => {
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");
-        return false;
+
+        return {
+          noClose: true,
+        };
       }
 
       Swal.fire("Éxito", data.mensaje, "success");
 
       await listar();
 
-      return true;
+      return {
+        success: true,
+      };
     } catch (error: any) {
       Swal.fire(
         "Error",
@@ -98,7 +115,9 @@ export const useCuentasBancariasComercio = () => {
         "error",
       );
 
-      return false;
+      return {
+        noClose: true,
+      };
     } finally {
       setLoading(false);
     }

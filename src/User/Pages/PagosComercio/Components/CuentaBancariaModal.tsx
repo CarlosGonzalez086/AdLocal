@@ -7,6 +7,7 @@ import type {
   CuentaBancariaComercioUpdateDto,
 } from "../../../../types/User/pagosComercio";
 import { GenericModal } from "../../../../components/GenericModal";
+import type { ModalActionResult } from "../../../../hooks/useCuentasBancariasComercio";
 
 interface Props {
   open: boolean;
@@ -17,12 +18,12 @@ interface Props {
 
   onClose: () => void;
 
-  onCrear: (dto: CuentaBancariaComercioCreateDto) => Promise<boolean>;
+  onCrear: (dto: CuentaBancariaComercioCreateDto) => Promise<ModalActionResult>;
 
   onActualizar: (
     uuid: string,
     dto: CuentaBancariaComercioUpdateDto,
-  ) => Promise<boolean>;
+  ) => Promise<ModalActionResult>;
 }
 
 interface FormState {
@@ -141,10 +142,10 @@ export const CuentaBancariaModal = ({
       return;
     }
 
-    let success = false;
+    let result: ModalActionResult;
 
     if (cuenta) {
-      success = await onActualizar(cuenta.uuid, {
+      result = await onActualizar(cuenta.uuid, {
         banco: form.banco.trim(),
 
         beneficiario: form.beneficiario.trim(),
@@ -160,7 +161,7 @@ export const CuentaBancariaModal = ({
         activo: form.activo,
       });
     } else {
-      success = await onCrear({
+      result = await onCrear({
         banco: form.banco.trim(),
 
         beneficiario: form.beneficiario.trim(),
@@ -175,7 +176,7 @@ export const CuentaBancariaModal = ({
       });
     }
 
-    if (success) {
+    if (!result?.noClose) {
       onClose();
     }
   };

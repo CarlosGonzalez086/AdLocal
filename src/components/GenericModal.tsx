@@ -64,8 +64,6 @@ interface Props {
 
   showCloseButton?: boolean;
 
-  zIndex?: number;
-
   children: ReactNode;
 }
 
@@ -109,8 +107,6 @@ export const GenericModal = ({
   showDivider = false,
 
   showCloseButton = true,
-
-  zIndex = 1059,
 
   children,
 }: Props) => {

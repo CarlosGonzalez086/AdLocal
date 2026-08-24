@@ -5,17 +5,13 @@ import {
   Switch,
   TextField,
 } from "@mui/material";
-
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
-
 import {
   ModalidadProductoServicio,
   TipoProductoServicio,
   type ProductoServicioDto,
 } from "../../types/User/productosServicios";
-
 import { GenericModal } from "../GenericModal";
-
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
 
 interface Props {
@@ -23,7 +19,7 @@ interface Props {
 
   onClose: () => void;
 
-  onSave: (data: ProductoServicioDto) => Promise<void>;
+  onSave: (data: ProductoServicioDto) => Promise<any> | any;
 
   producto: ProductoServicioDto;
 
@@ -281,6 +277,7 @@ export const ProductoServicioModal = ({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    console.log("Entro");
 
     if (soloVer) {
       return;
@@ -290,17 +287,16 @@ export const ProductoServicioModal = ({
       return;
     }
 
-    await onSave({
+    const data = await onSave({
       ...form,
-
       nombre: form.nombre.trim(),
-
       descripcion: form.descripcion.trim(),
-
       codigoInterno: form.codigoInterno?.trim() || null,
     });
 
-    onClose();
+    if (!data?.noClose) {
+      onClose();
+    }
   };
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -353,7 +349,7 @@ export const ProductoServicioModal = ({
         soloVer
           ? undefined
           : {
-              label: form.id ? "Guardar cambios" : "Guardar",
+              label: form.id ? "Actualizar" : "Guardar",
 
               loadingLabel: "Guardando...",
 

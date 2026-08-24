@@ -1,9 +1,4 @@
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   FormControl,
   InputLabel,
   MenuItem,
@@ -16,6 +11,7 @@ import {
   type CitaDto,
   type EstadoCita as EstadoCitaType,
 } from "../../../../types/User/citas";
+import { GenericModal } from "../../../../components/GenericModal";
 
 const estados = [
   [EstadoCita.Pendiente, "Pendiente"],
@@ -25,108 +21,131 @@ const estados = [
   [EstadoCita.Cancelada, "Cancelada"],
   [EstadoCita.NoAsistio, "No asistió"],
 ] as const;
-export function CitaDetalleModal({
-  cita,
-  loading,
-  onClose,
-  onSave,
-}: {
+
+interface Props {
   cita: CitaDto | null;
+
   loading: boolean;
+
   onClose: () => void;
+
   onSave: (
     estado: EstadoCitaType,
     nombreAtiende: string,
     motivo: string,
-  ) => void;
-}) {
+  ) => Promise<any> | any;
+}
+
+export function CitaDetalleModal({ cita, loading, onClose, onSave }: Props) {
   const [estado, setEstado] = useState<EstadoCitaType>(EstadoCita.Pendiente);
+
   const [atiende, setAtiende] = useState("");
+
   const [motivo, setMotivo] = useState("");
+
   useEffect(() => {
-    if (cita) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setEstado(cita.estado);
-      setAtiende(cita.nombreAtiende ?? "");
-      setMotivo("");
+    if (!cita) {
+      return;
     }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEstado(cita.estado);
+
+    setAtiende(cita.nombreAtiende ?? "");
+
+    setMotivo("");
   }, [cita]);
+
+  const handleSave = async () => {
+    if (estado === EstadoCita.Cancelada && !motivo.trim()) {
+      return {
+        noClose: true,
+      };
+    }
+
+    const result = await onSave(estado, atiende.trim(), motivo.trim());
+
+    return result;
+  };
+
   return (
-    <Dialog
+    <GenericModal
       open={Boolean(cita)}
-      onClose={loading ? undefined : onClose}
-      fullWidth
+      onClose={onClose}
+      title="Detalle de la cita"
+      subtitle="Consulta la información y actualiza el estado de la cita."
+      icon="event"
       maxWidth="sm"
+      loading={loading}
+      secondaryLabel="Cerrar"
+      primaryAction={{
+        label: "Guardar cambios",
+        loadingLabel: "Guardando...",
+        icon: "save",
+        type: "button",
+        disabled: estado === EstadoCita.Cancelada && !motivo.trim(),
+        onClick: handleSave,
+      }}
     >
-      <DialogTitle className="fz-h2 fw-semibold">
-        Detalle de la cita
-      </DialogTitle>
-      <DialogContent>
-        <div className="d-flex flex-column gap-3 pt-2">
-          <div className="appointment-detail-card p-3 gap-2">
-            <h3 className="fz-h3 fw-semibold mb-2">{cita?.servicio}</h3>
-            <p className="mb-1">
-              <strong>Persona atendida:</strong> {cita?.nombrePersona}
-            </p>
-            <p className="mb-1">
-              <strong>Reservó:</strong> {cita?.cliente}
-            </p>
-            <p className="mb-1">
-              <strong>Teléfono:</strong>{" "}
-              {cita?.telefonoCliente || "No registrado"}
-            </p>
-            <p className="mb-0">
-              <strong>Notas:</strong> {cita?.notasCliente || "Sin notas"}
-            </p>
-          </div>
+      <div className="d-flex flex-column gap-3 pt-2">
+        <div className="appointment-detail-card p-3 gap-2">
+          <h3 className="fz-h3 fw-semibold mb-2">{cita?.servicio}</h3>
+
+          <p className="mb-1">
+            <strong>Persona atendida:</strong> {cita?.nombrePersona}
+          </p>
+
+          <p className="mb-1">
+            <strong>Reservó:</strong> {cita?.cliente}
+          </p>
+
+          <p className="mb-1">
+            <strong>Teléfono:</strong>{" "}
+            {cita?.telefonoCliente || "No registrado"}
+          </p>
+
+          <p className="mb-0">
+            <strong>Notas:</strong> {cita?.notasCliente || "Sin notas"}
+          </p>
+        </div>
+
+        <TextField
+          label="Nombre de quien atenderá"
+          value={atiende}
+          onChange={(event) => setAtiende(event.target.value)}
+          fullWidth
+        />
+
+        <FormControl fullWidth>
+          <InputLabel>Estado</InputLabel>
+
+          <Select
+            label="Estado"
+            value={estado}
+            onChange={(event) =>
+              setEstado(Number(event.target.value) as EstadoCitaType)
+            }
+          >
+            {estados.map(([value, label]) => (
+              <MenuItem key={value} value={value}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {estado === EstadoCita.Cancelada && (
           <TextField
-            label="Nombre de quien atenderá"
-            value={atiende}
-            onChange={(e) => setAtiende(e.target.value)}
+            label="Motivo de cancelación"
+            value={motivo}
+            onChange={(event) => setMotivo(event.target.value)}
+            multiline
+            minRows={2}
+            required
             fullWidth
           />
-          <FormControl fullWidth>
-            <InputLabel>Estado</InputLabel>
-            <Select
-              label="Estado"
-              value={estado}
-              onChange={(e) =>
-                setEstado(Number(e.target.value) as EstadoCitaType)
-              }
-            >
-              {estados.map(([v, l]) => (
-                <MenuItem key={v} value={v}>
-                  {l}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {estado === EstadoCita.Cancelada && (
-            <TextField
-              label="Motivo de cancelación"
-              value={motivo}
-              onChange={(e) => setMotivo(e.target.value)}
-              multiline
-              minRows={2}
-              required
-            />
-          )}
-        </div>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={loading}>
-          Cerrar
-        </Button>
-        <Button
-          className="btn-adlocal"
-          disabled={
-            loading || (estado === EstadoCita.Cancelada && !motivo.trim())
-          }
-          onClick={() => onSave(estado, atiende, motivo)}
-        >
-          Guardar cambios
-        </Button>
-      </DialogActions>
-    </Dialog>
+        )}
+      </div>
+    </GenericModal>
   );
 }

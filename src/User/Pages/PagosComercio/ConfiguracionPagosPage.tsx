@@ -9,27 +9,18 @@ import { CuentasBancariasComercio } from "./Components/CuentasBancariasComercio"
 export const ConfiguracionPagosPage = () => {
   const {
     configuracion,
-
     loading: loadingConfiguracion,
-
     obtener,
-
     guardar,
   } = useConfiguracionPagoComercio();
 
   const {
     cuentas,
-
     loading: loadingCuentas,
-
     listar,
-
     crear,
-
     actualizar,
-
     eliminar,
-
     establecerPrincipal,
   } = useCuentasBancariasComercio();
 

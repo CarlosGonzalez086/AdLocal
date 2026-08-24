@@ -10,10 +10,6 @@
 }
 
 .dialogTitle {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 24px 28px 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -56,9 +52,7 @@
 }
 
 .dialogActions {
-  padding: 16px 28px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  gap: 8px;
 }
 
 .closeButton {

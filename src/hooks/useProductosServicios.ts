@@ -70,6 +70,7 @@ export const useProductosServicios = () => {
     refrescarParams?: ListarParams,
   ) => {
     setLoading(true);
+
     try {
       const { data } = producto.id
         ? await productosServiciosApi.actualizar(producto.id, producto)
@@ -77,7 +78,10 @@ export const useProductosServicios = () => {
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");
-        return;
+
+        return {
+          noClose: true,
+        };
       }
 
       Swal.fire("Éxito", data.mensaje, "success");
@@ -85,8 +89,20 @@ export const useProductosServicios = () => {
       if (refrescarParams) {
         await listar(refrescarParams);
       }
+
+      return {
+        success: true,
+      };
     } catch (error: any) {
-      Swal.fire("Error", error.response.data.mensaje, "error");
+      Swal.fire(
+        "Error",
+        error?.response?.data?.mensaje ?? "Ocurrió un error al guardar.",
+        "error",
+      );
+
+      return {
+        noClose: true,
+      };
     } finally {
       setLoading(false);
     }

@@ -6,23 +6,24 @@ import { CuentasBancariasTable } from "./CuentasBancariasTable";
 
 import { CuentaBancariaModal } from "./CuentaBancariaModal";
 import type {
-    CuentaBancariaComercioCreateDto,
+  CuentaBancariaComercioCreateDto,
   CuentaBancariaComercioDto,
   CuentaBancariaComercioUpdateDto,
 } from "../../../../types/User/pagosComercio";
 import MaterialSymbol from "../../../../components/UI/MaterialSymbol/MaterialSymbol";
+import type { ModalActionResult } from "../../../../hooks/useCuentasBancariasComercio";
 
 interface Props {
   cuentas: CuentaBancariaComercioDto[];
 
   loading: boolean;
 
-  onCrear: (dto: CuentaBancariaComercioCreateDto) => Promise<boolean>;
+  onCrear: (dto: CuentaBancariaComercioCreateDto) => Promise<ModalActionResult>;
 
   onActualizar: (
     uuid: string,
     dto: CuentaBancariaComercioUpdateDto,
-  ) => Promise<boolean>;
+  ) => Promise<ModalActionResult>;
 
   onEliminar: (cuenta: CuentaBancariaComercioDto) => void;
 

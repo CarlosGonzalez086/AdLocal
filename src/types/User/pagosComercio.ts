@@ -6,6 +6,8 @@ export interface ConfiguracionPagoComercioDto {
   aceptaTransferencia: boolean;
 
   instruccionesTransferencia: string | null;
+  costoEnvio: number;
+  compraMinimaEnvioGratis: number | null;
 
   activo: boolean;
 

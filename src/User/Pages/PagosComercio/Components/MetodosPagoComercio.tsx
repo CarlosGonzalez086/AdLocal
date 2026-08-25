@@ -17,6 +17,8 @@ const initialForm: ConfiguracionPagoComercioDto = {
   aceptaTransferencia: false,
 
   instruccionesTransferencia: "",
+  costoEnvio: 0,
+  compraMinimaEnvioGratis: null,
 
   activo: true,
 };
@@ -168,6 +170,23 @@ export const MetodosPagoComercio = ({
               />
             </div>
           )}
+
+          <div className="col-12">
+            <div className="pagoComercioOptions p-3">
+              <div className="mb-3">
+                <h3 className="fz-h4 fw-semibold mb-1">Tarifa de entrega a domicilio</h3>
+                <p className="pagoComercioDescription fz-h5 fw-regular mb-0">Define el costo que cobrarás por cada envío. Este monto se mostrará separado del subtotal y quedará guardado en el pedido.</p>
+              </div>
+              <div className="row g-3">
+                <div className="col-12 col-md-6">
+                  <TextField label="Costo de envío" type="number" value={form.costoEnvio} fullWidth disabled={loading} slotProps={{htmlInput:{min:0,step:"0.01"}}} onChange={event=>setForm(current=>({...current,costoEnvio:Math.max(0,Number(event.target.value)||0)}))}/>
+                </div>
+                <div className="col-12 col-md-6">
+                  <TextField label="Envío gratis desde (opcional)" type="number" value={form.compraMinimaEnvioGratis??""} fullWidth disabled={loading} slotProps={{htmlInput:{min:0,step:"0.01"}}} onChange={event=>setForm(current=>({...current,compraMinimaEnvioGratis:event.target.value===""?null:Math.max(0,Number(event.target.value)||0)}))}/>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="col-12">
             <div className="pagoComercioOptions p-3">

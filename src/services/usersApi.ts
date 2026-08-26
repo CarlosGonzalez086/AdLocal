@@ -1,7 +1,6 @@
 import type { ApiResponse, PaginatedResponse } from "../api/apiResponse";
 import { httpAdmin } from "../api/httpAdmin";
 import type {
-  UsuarioConSuscripcionDto,
   UsuarioDto,
 } from "../types/Admin/usuarios";
 
@@ -13,7 +12,7 @@ export const usersService = {
     search?: string;
   }) {
     return httpAdmin.get<
-      ApiResponse<PaginatedResponse<UsuarioConSuscripcionDto>>
+      ApiResponse<PaginatedResponse<UsuarioDto>>
     >("/Usuarios", {
       params,
     });

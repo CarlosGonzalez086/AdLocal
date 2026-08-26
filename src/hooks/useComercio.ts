@@ -186,7 +186,7 @@ export const useComercio = () => {
       }
 
       setComercios(data.respuesta.items || []);
-      setTotal(data.respuesta.totalRecords || 0);
+      setTotal(data.respuesta.totalItems || 0);
     } catch (error) {
       console.error(error);
       Swal.fire("Error", "No se pudieron cargar los comercios", "error");
@@ -384,7 +384,7 @@ export const useComercio = () => {
       }
 
       setUsersColaboradores(data.respuesta.items || []);
-      setTotalColaboradores(data.respuesta.totalRecords || 0);
+      setTotalColaboradores(data.respuesta.totalItems || 0);
     } catch (error) {
       console.error(error);
       Swal.fire("Error", "No se pudieron cargar los colaboradores", "error");

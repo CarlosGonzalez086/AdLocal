@@ -4,7 +4,8 @@ export interface ApiResponse<T> {
   respuesta: T;
 }
 export interface PaginatedResponse<T> {
-  totalRecords: number;
+  totalItems: number;
+  totalPages: number;
   page: number;
   pageSize: number;
   items: T[];

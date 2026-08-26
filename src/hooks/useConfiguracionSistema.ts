@@ -6,6 +6,7 @@ import {
   configuracionApi,
   type ClavesConfigDto,
   type ComisionMarketplaceDto,
+  type EmailConfiguracionDto,
   type StripeConfiguracionDto,
 } from "../services/configuracionApi";
 
@@ -115,17 +116,43 @@ export const useConfiguracionSistema = () => {
       setLoading(false);
     }
   };
+  const guardarEmail = async (dto: EmailConfiguracionDto) => {
+    try {
+      setLoading(true);
+
+      await configuracionApi.guardarEmail(dto);
+
+      await Swal.fire(
+        "Guardado",
+        "Configuración de correo actualizada",
+        "success",
+      );
+
+      await cargar();
+
+      return true;
+    } catch (error) {
+      console.error(error);
+
+      await Swal.fire(
+        "Error",
+        "No se pudo guardar la configuración de correo",
+        "error",
+      );
+
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
     loading,
     configuraciones,
-
     cargar,
-
     guardarStripe,
-
     guardarClaves,
-
     guardarComisionMarketplace,
+    guardarEmail,
   };
 };

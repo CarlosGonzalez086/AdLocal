@@ -16,6 +16,14 @@ export interface ComisionMarketplaceDto {
   montoFijo: number;
   activa: boolean;
 }
+export interface EmailConfiguracionDto {
+  host: string;
+  port: number;
+  user: string;
+  key: string;
+  from: string;
+  fromNombre: string;
+}
 
 export const configuracionApi = {
   guardarStripe: (data: StripeConfiguracionDto) =>
@@ -28,4 +36,6 @@ export const configuracionApi = {
 
   guardarComisionMarketplace: (data: ComisionMarketplaceDto) =>
     httpAdmin.post("/Configuracion/comision-marketplace", data),
+  guardarEmail: (data: EmailConfiguracionDto) =>
+    httpAdmin.post("/Configuracion/correo", data),
 };

@@ -34,7 +34,7 @@ export const useProductosServicios = () => {
         }
 
         setProductos(data.respuesta.items ?? []);
-        setTotal(data.respuesta.totalRecords ?? 0);
+        setTotal(data.respuesta.totalItems ?? 0);
       } finally {
         setLoading(false);
       }

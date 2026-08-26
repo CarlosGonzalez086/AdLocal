@@ -24,7 +24,7 @@ export const useSuscripcionesAdmin = () => {
       });
 
       setSuscripciones(resp.data.respuesta.items);
-      setTotal(resp.data.respuesta.totalRecords);
+      setTotal(resp.data.respuesta.totalItems);
     } catch (error) {
       console.error(error);
       Swal.fire(

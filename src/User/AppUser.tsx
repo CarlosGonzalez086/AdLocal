@@ -67,7 +67,7 @@ export default function AppUser() {
       />
 
       <Route
-        path="/restablecer-contrasena"
+        path="restablecer-contrasena/:token/:type"
         element={
           <PublicRouteUsuario>
             <ResetPasswordPage />

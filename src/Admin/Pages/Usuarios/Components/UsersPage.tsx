@@ -1,9 +1,6 @@
 import { Box, Paper, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
-import type {
-  SuscripcionDto,
-  UsuarioDto,
-} from "../../../../types/Admin/usuarios";
+import type { UsuarioDto } from "../../../../types/Admin/usuarios";
 import { useUsers } from "../../../../hooks/useUsers";
 import { SearchInput } from "../../../../components/SearchInput";
 import { OrderSelect } from "../../../../components/OrderSelect";
@@ -13,41 +10,53 @@ import { UserModal } from "./UserModal";
 export const UsersPageAdmin = () => {
   const initialForm: UsuarioDto = {
     id: 0,
+    uuid: "",
+
     nombre: "",
     email: "",
+    telefono: null,
     fotoUrl: null,
-    fechaCreacion: "",
-  };
 
-  const initialSuscripcion: SuscripcionDto = {
-    id: 0,
-    status: "active",
-    currentPeriodStart: "",
-    currentPeriodEnd: "",
-    autoRenew: false,
-    plan: {
-      id: 0,
-      nombre: "",
-      tipo: "FREE",
-      precio: 0,
-      maxFotos: 0,
-    },
+    rol: "",
+    activo: true,
+    emailVerificado: false,
+
+    codigo: null,
+    codigoReferido: null,
+
+    comercioId: null,
+
+    stripeCustomerId: null,
+    token: null,
+
+    redeemMonthFree: false,
+    redeemRewards: false,
+
+    fechaCreacion: "",
+    fechaActualizacion: null,
+    ultimoAcceso: null,
+
+    comercios: [],
+    direcciones: [],
+    suscripciones: [],
   };
 
   const { total, loading, listar, users } = useUsers();
 
   const [page, setPage] = useState(0);
   const [rows, setRows] = useState(10);
-  const [orderBy, setOrderBy] = useState<"recent" | "old" | "az" | "za">(
-    "recent",
-  );
-  const [search, setSearch] = useState("");
   const [view, setView] = useState(false);
   const [user, setUser] = useState<UsuarioDto>(initialForm);
-  const [sub, setSub] = useState<SuscripcionDto>(initialSuscripcion);
+  const [orderBy, setOrderBy] = useState<"recent" | "old" | "az" | "za">("recent",);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    listar({ page, rows, orderBy, search });
+    listar({
+      page,
+      rows,
+      orderBy,
+      search,
+    });
   }, [page, rows, orderBy, search, listar]);
 
   return (
@@ -89,8 +98,7 @@ export const UsersPageAdmin = () => {
             setPage(0);
           }}
           onView={(row) => {
-            setUser(row.usuario);
-            setSub(row.suscripcion);
+            setUser(row);
             setView(true);
           }}
         />
@@ -101,9 +109,7 @@ export const UsersPageAdmin = () => {
         onClose={() => {
           setView(false);
           setUser(initialForm);
-          setSub(initialSuscripcion);
         }}
-        suscripcion={sub}
         usuario={user}
         soloVer
       />

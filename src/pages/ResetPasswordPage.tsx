@@ -106,7 +106,7 @@ export default function ResetPasswordPage() {
     }
 
     const redirectTimeout = window.setTimeout(() => {
-      navigate("/login", {
+      navigate("usuario/login", {
         replace: true,
       });
     }, 2000);

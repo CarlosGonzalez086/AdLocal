@@ -1,67 +1,48 @@
-import {
-  Avatar,
-  Box,
-  Chip,
-  Divider,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Avatar, TextField, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import type {
-  SuscripcionDto,
-  UsuarioDto,
-} from "../../../../types/Admin/usuarios";
+import type { UsuarioDto } from "../../../../types/Admin/usuarios";
 import { GenericModal } from "../../../../components/GenericModal";
 
 interface Props {
   open: boolean;
   onClose: () => void;
   usuario: UsuarioDto;
-  suscripcion?: SuscripcionDto;
   soloVer?: boolean;
 }
 
-const getStatusLabel = (status: SuscripcionDto["status"]) => {
-  switch (status) {
-    case "active":
-      return "Activa";
-    case "canceling":
-      return "Cancelada al finalizar el periodo";
-    case "canceled":
-      return "Cancelada";
-    default:
-      return status;
-  }
-};
-
-const getStatusColor = (status: SuscripcionDto["status"]) => {
-  switch (status) {
-    case "active":
-      return "success";
-    case "canceling":
-      return "warning";
-    case "canceled":
-      return "default";
-    default:
-      return "default";
-  }
-};
-
-export const UserModal = ({
-  open,
-  onClose,
-  usuario,
-  suscripcion,
-  soloVer,
-}: Props) => {
+export const UserModal = ({ open, onClose, usuario, soloVer }: Props) => {
   const initialForm = useMemo(
     () => ({
-      id: usuario.id,
+      id: usuario.id ?? 0,
+      uuid: usuario.uuid ?? "",
+
       nombre: usuario.nombre ?? "",
       email: usuario.email ?? "",
+      telefono: usuario.telefono ?? null,
       fotoUrl: usuario.fotoUrl ?? null,
+
+      rol: usuario.rol ?? "",
+      activo: usuario.activo ?? true,
+      emailVerificado: usuario.emailVerificado ?? false,
+
+      codigo: usuario.codigo ?? null,
+      codigoReferido: usuario.codigoReferido ?? null,
+
+      comercioId: usuario.comercioId ?? null,
+
+      stripeCustomerId: usuario.stripeCustomerId ?? null,
+      token: usuario.token ?? null,
+
+      redeemMonthFree: usuario.redeemMonthFree ?? false,
+      redeemRewards: usuario.redeemRewards ?? false,
+
       fechaCreacion: usuario.fechaCreacion ?? "",
+      fechaActualizacion: usuario.fechaActualizacion ?? null,
+      ultimoAcceso: usuario.ultimoAcceso ?? null,
+
+      comercios: usuario.comercios ?? [],
+      direcciones: usuario.direcciones ?? [],
+      suscripciones: usuario.suscripciones ?? [],
     }),
     [usuario],
   );
@@ -85,89 +66,85 @@ export const UserModal = ({
       maxWidth="sm"
       secondaryLabel="Cerrar"
     >
-      <Box className="card-adlocal mt-3">
-        <Avatar src={form.fotoUrl ?? undefined} className="avatar">
-          {!form.fotoUrl && form.nombre?.charAt(0).toUpperCase()}
-        </Avatar>
-        <Typography className="fz-h3 fw-bold">{form.nombre}</Typography>
-      </Box>
+      <div className="card-adlocal mt-3">
+        <div className="row g-3">
+          <div className="col-12">
+            <div className="d-flex align-items-center gap-3">
+              <Avatar src={form.fotoUrl ?? undefined} className="avatar">
+                {!form.fotoUrl && form.nombre?.charAt(0).toUpperCase()}
+              </Avatar>
 
-      <Divider className="divider" />
+              <Typography className="fz-h3 fw-bold">{form.nombre}</Typography>
+            </div>
+          </div>
 
-      <Box className="card-adlocal mt-3">
-        <TextField label="Nombre" value={form.nombre} disabled fullWidth />
-        <TextField
-          label="Correo electrónico"
-          value={form.email}
-          disabled
-          fullWidth
-        />
-
-        {form.fechaCreacion && (
-          <TextField
-            label="Fecha de creación"
-            value={new Date(form.fechaCreacion).toLocaleDateString()}
-            disabled
-            fullWidth
-          />
-        )}
-      </Box>
-
-      {suscripcion && (
-        <>
-          <Divider className="divider" />
-
-          <Box className="card-adlocal mt-3">
+          <div className="col-12">
             <TextField
-              label="Plan"
-              value={suscripcion.plan.nombre}
+              label="Correo electrónico"
+              value={form.email}
               disabled
               fullWidth
             />
+          </div>
 
-            <Stack spacing={0.5}>
-              <Typography className="fz-h5 fw-regular" color="text.secondary">
-                Estado de la suscripción
-              </Typography>
-              <Chip
-                size="small"
-                label={getStatusLabel(suscripcion.status)}
-                color={getStatusColor(suscripcion.status)}
-                sx={{ alignSelf: "flex-start" }}
+          {form.telefono && (
+            <div className="col-12">
+              <TextField
+                label="Teléfono"
+                value={form.telefono}
+                disabled
+                fullWidth
               />
-            </Stack>
+            </div>
+          )}
 
+          {form.rol && (
+            <div className="col-12">
+              <TextField label="Rol" value={form.rol} disabled fullWidth />
+            </div>
+          )}
+
+          {form.fechaCreacion && (
+            <div className="col-12">
+              <TextField
+                label="Fecha de creación"
+                value={new Date(form.fechaCreacion).toLocaleDateString("es-MX")}
+                disabled
+                fullWidth
+              />
+            </div>
+          )}
+
+          <div className="col-12">
             <TextField
-              label="Renovación"
-              value={
-                suscripcion.autoRenew
-                  ? "Renovación automática"
-                  : "No se renovará automáticamente"
-              }
+              label="Estado"
+              value={form.activo ? "Activo" : "Inactivo"}
               disabled
               fullWidth
             />
+          </div>
 
+          <div className="col-12">
             <TextField
-              label="Inicio del periodo"
-              value={new Date(
-                suscripcion.currentPeriodStart,
-              ).toLocaleDateString()}
+              label="Correo verificado"
+              value={form.emailVerificado ? "Verificado" : "Pendiente"}
               disabled
               fullWidth
             />
+          </div>
 
-            <TextField
-              label="Fin del periodo"
-              value={new Date(
-                suscripcion.currentPeriodEnd,
-              ).toLocaleDateString()}
-              disabled
-              fullWidth
-            />
-          </Box>
-        </>
-      )}
+          {form.ultimoAcceso && (
+            <div className="col-12">
+              <TextField
+                label="Último acceso"
+                value={new Date(form.ultimoAcceso).toLocaleString("es-MX")}
+                disabled
+                fullWidth
+              />
+            </div>
+          )}
+        </div>
+      </div>
     </GenericModal>
   );
 };

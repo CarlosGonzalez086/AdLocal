@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const httpAdminPublico = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}api/`,
+  baseURL: `https://adlocalapi.onrender.com/api/`,
   headers: {
     "Content-Type": "application/json",
   },

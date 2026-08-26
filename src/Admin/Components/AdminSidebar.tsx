@@ -100,11 +100,11 @@ const AdminSidebar = ({
       icon: "account_balance",
       path: "/admin/app/cuentas-adlocal",
     },
-    {
-      text: "Historial",
-      icon: "history",
-      path: "/admin/app/historial-suscripciones",
-    },
+    // {
+    //   text: "Historial",
+    //   icon: "history",
+    //   path: "/admin/app/historial-suscripciones",
+    // },
   ];
 
   const normalizePath = (path: string) => {

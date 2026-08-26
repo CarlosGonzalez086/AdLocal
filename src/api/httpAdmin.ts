@@ -5,7 +5,7 @@ import {
 } from "../utils/storageAdmin";
 
 export const httpAdmin = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}api/`,
+  baseURL: `https://adlocalapi.onrender.com/api/`,
 });
 
 httpAdmin.interceptors.request.use(

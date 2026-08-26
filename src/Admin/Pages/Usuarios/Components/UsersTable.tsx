@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import type { UsuarioConSuscripcionDto } from "../../../../types/Admin/usuarios";
+import type { UsuarioDto } from "../../../../types/Admin/usuarios";
 import {
   GenericTable,
   type TableColumn,
@@ -16,22 +16,15 @@ import {
 import { utcToLocal } from "../../../../utils/generalsFunctions";
 
 interface Props {
-  users: UsuarioConSuscripcionDto[];
+  users: UsuarioDto[];
   total: number;
   loading: boolean;
   page: number;
   rows: number;
   onPageChange: (page: number) => void;
   onRowsPerPageChange: (rows: number) => void;
-  onView: (row: UsuarioConSuscripcionDto) => void;
+  onView: (row: UsuarioDto) => void;
 }
-
-const TIPO_COLOR: Record<string, string> = {
-  FREE: "#8e8e93",
-  BASIC: "#0a84ff",
-  PRO: "#af52de",
-  BUSINESS: "#ff9f0a",
-};
 
 export const UsersTable = ({
   users,
@@ -43,11 +36,11 @@ export const UsersTable = ({
   onRowsPerPageChange,
   onView,
 }: Props) => {
-  const columns: TableColumn<UsuarioConSuscripcionDto>[] = [
+  const columns: TableColumn<UsuarioDto>[] = [
     {
       key: "fechaCreacion",
       label: "Registro",
-      render: ({ usuario }) => (
+      render: (usuario) => (
         <Typography className="fz-h5 fw-regular" color="text.secondary">
           {utcToLocal(usuario.fechaCreacion)}
         </Typography>
@@ -56,14 +49,19 @@ export const UsersTable = ({
     {
       key: "nombre",
       label: "Usuario",
-      render: ({ usuario }) => (
+      render: (usuario) => (
         <Stack direction="row" spacing={1.5} alignItems="center">
           <Avatar
             src={usuario.fotoUrl ?? undefined}
             sx={{ width: 32, height: 32 }}
-          />
+          >
+            {!usuario.fotoUrl
+              ? usuario.nombre?.charAt(0).toUpperCase()
+              : undefined}
+          </Avatar>
+
           <Typography className="fz-h4 fw-semibold">
-            {usuario.nombre}
+            {usuario.nombre || "Sin nombre"}
           </Typography>
         </Stack>
       ),
@@ -71,41 +69,78 @@ export const UsersTable = ({
     {
       key: "email",
       label: "Correo",
-      render: ({ usuario }) => (
-        <Typography className="fz-h4 fw-regular">{usuario.email}</Typography>
+      render: (usuario) => (
+        <Typography className="fz-h4 fw-regular">
+          {usuario.email || "—"}
+        </Typography>
       ),
     },
     {
-      key: "plan",
-      label: "Plan",
-      render: ({ suscripcion }) => (
+      key: "emailVerificado",
+      label: "Verificación",
+      render: (usuario) => (
         <Stack direction="row" spacing={1} alignItems="center">
           <Box
-            className="admin-plan-dot"
-            style={
-              {
-                "--tipo-color": TIPO_COLOR[suscripcion.plan.tipo] ?? "#8e8e93",
-              } as React.CSSProperties
-            }
+            sx={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              bgcolor: usuario.emailVerificado
+                ? "success.main"
+                : "warning.main",
+            }}
           />
-          <Typography className="fz-h4 fw-medium">
-            {suscripcion.plan.nombre}
+
+          <Typography className="fz-h4 fw-regular">
+            {usuario.emailVerificado ? "Verificado" : "Pendiente"}
           </Typography>
         </Stack>
       ),
     },
-  ];
+    {
+      key: "activo",
+      label: "Estado",
+      render: (usuario) => (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Box
+            sx={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              bgcolor: usuario.activo ? "success.main" : "error.main",
+            }}
+          />
 
+          <Typography className="fz-h4 fw-semibold">
+            {usuario.activo ? "Activo" : "Inactivo"}
+          </Typography>
+        </Stack>
+      ),
+    },
+    {
+      key: "ultimoAcceso",
+      label: "Último acceso",
+      render: (usuario) => (
+        <Typography className="fz-h5 fw-regular" color="text.secondary">
+          {usuario.ultimoAcceso
+            ? utcToLocal(usuario.ultimoAcceso)
+            : "Sin acceso"}
+        </Typography>
+      ),
+    },
+  ];
   return (
-    <Paper elevation={0} className="table-paper p-3">      
-      <GenericTable<UsuarioConSuscripcionDto>
+    <Paper elevation={0} className="table-paper p-3">
+      <GenericTable<UsuarioDto>
         columns={columns}
         data={users}
         loading={loading}
         emptyText="No hay usuarios registrados"
+        emptyDescription="No se encontraron usuarios para mostrar."
         page={page}
         rowsPerPage={rows}
-        total={total}
+        total={Number(total ?? 0)}
+        rowsPerPageOptions={[10, 30, 100]}
         onPageChange={onPageChange}
         onRowsPerPageChange={onRowsPerPageChange}
         actions={(row) => (

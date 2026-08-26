@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import Swal from "sweetalert2";
-import type { UsuarioConSuscripcionDto } from "../types/Admin/usuarios";
+import type { UsuarioDto } from "../types/Admin/usuarios";
 import { usersService } from "../services/usersApi";
 
 interface ListarParams {
@@ -11,7 +11,7 @@ interface ListarParams {
 }
 
 export const useUsers = () => {
-  const [users, setUsers] = useState<UsuarioConSuscripcionDto[]>([]);
+  const [users, setUsers] = useState<UsuarioDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
 
@@ -27,7 +27,7 @@ export const useUsers = () => {
         });
 
         setUsers(resp.data.respuesta.items);
-        setTotal(resp.data.respuesta.totalRecords);
+        setTotal(resp.data.respuesta.totalItems);
       } catch (error) {
         console.error(error);
         Swal.fire(

@@ -40,7 +40,7 @@ const menuTitles: Record<string, string> = {
   "/admin/app/usuarios": "Usuarios",
   "/admin/app/tipos-comercios": "Tipos Comercios",
   "/admin/app/configuraciones": "Configuraciones",
-  "/admin/app/historial-suscripciones": "Historial",
+  // "/admin/app/historial-suscripciones": "Historial",
   "/admin/app/perfil": "Mi perfil",
   "/admin/app/perfil/cambiar-contrasena": "Cambiar contraseña",
 };

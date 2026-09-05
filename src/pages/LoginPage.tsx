@@ -1,11 +1,3 @@
-import {
-  Box,
-  Container,
-  Divider,
-  Link,
-  Paper,
-  Typography,
-} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
@@ -15,12 +7,10 @@ import { useUser } from "../hooks/useUser";
 import LoginForm from "../components/forms/LoginForm";
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
 
-import styles from "../styles/LoginPage.module.css";
 import { setLocalStorageJWTAdmin } from "../utils/storageAdmin";
 import { setLocalStorageJWTUsuario } from "../utils/storageUsuario";
 
-const LOGO_URL =
-  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
+const LOGO_URL = "/logo-adlocal.png";
 
 interface Props {
   type: "admin" | "user";
@@ -31,7 +21,6 @@ export default function LoginPage({ type }: Props) {
 
   const isAdmin = type === "admin";
 
-  // Siempre se ejecutan los hooks
   const admin = useAdmin();
   const user = useUser();
 
@@ -77,39 +66,36 @@ export default function LoginPage({ type }: Props) {
       });
     } catch (error) {
       console.error(error);
-      // El hook ya muestra el mensaje de error.
     }
   };
 
   return (
-    <Box component="main" className={styles.loginPage}>
-      <Box className={styles.backgroundDecoration} aria-hidden="true">
-        <Box className={styles.decorationOne} />
-        <Box className={styles.decorationTwo} />
-        <Box className={styles.decorationThree} />
-      </Box>
+    <main className="auth-page">
+      <div className="auth-bg-decoration" aria-hidden="true">
+        <div className="auth-decoration-1" />
+        <div className="auth-decoration-2" />
+        <div className="auth-decoration-3" />
+      </div>
 
-      <Container maxWidth="xs" className={styles.container}>
-        <Link
+      <div className="container auth-container" style={{ maxWidth: "440px" }}>
+        <a
           href="/"
-          underline="none"
-          className={styles.logoLink}
+          className="auth-logo-link"
           aria-label="Ir al inicio de ADLocal"
         >
-          <Box
-            component="img"
+          <img
             src={LOGO_URL}
             alt="ADLocal"
-            className={styles.logo}
+            className="auth-logo-img"
           />
-        </Link>
+        </a>
 
-        <Paper elevation={0} className={styles.loginCard}>
-          <Box className={styles.loginHeader}>
-            <Box
+        <div className="auth-card">
+          <div className="auth-header">
+            <div
               className={[
-                styles.headerIcon,
-                isAdmin ? styles.adminHeaderIcon : "",
+                "auth-header-icon",
+                isAdmin ? "auth-header-icon--admin" : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -119,44 +105,41 @@ export default function LoginPage({ type }: Props) {
                 size="large"
                 filled
               />
-            </Box>
+            </div>
 
-            <Box className={styles.headerContent}>
-              <Typography
-                component="span"
+            <div className="auth-header-content">
+              <span
                 className={[
-                  styles.loginType,
-                  isAdmin ? styles.adminLoginType : "",
+                  "auth-eyebrow",
+                  isAdmin ? "auth-eyebrow--admin" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
               >
                 {isAdmin ? "Portal administrativo" : "Cuenta ADLocal"}
-              </Typography>
+              </span>
 
-              <Typography component="h1" className={styles.title}>
+              <h1 className="auth-title">
                 {isAdmin ? "Acceso administrador" : "Iniciar sesión"}
-              </Typography>
+              </h1>
 
-              <Typography component="p" className={styles.description}>
+              <p className="auth-description">
                 {isAdmin
                   ? "Ingresa tus credenciales para administrar la plataforma."
                   : "Accede a tu cuenta para administrar tu negocio y sus servicios."}
-              </Typography>
-            </Box>
-          </Box>
+              </p>
+            </div>
+          </div>
 
           {!isAdmin && (
-            <Box className={styles.registerMessage}>
-              <Typography component="span" className={styles.registerText}>
+            <div className="auth-message-banner">
+              <span className="auth-message-text">
                 ¿Todavía no tienes una cuenta?
-              </Typography>
+              </span>
 
-              <Link
-                component="button"
+              <button
                 type="button"
-                underline="none"
-                className={styles.textButton}
+                className="auth-text-btn"
                 onClick={() =>
                   navigate(
                     type === "user"
@@ -166,19 +149,17 @@ export default function LoginPage({ type }: Props) {
                 }
               >
                 Crear cuenta
-              </Link>
-            </Box>
+              </button>
+            </div>
           )}
 
-          <Box className={styles.formContainer}>
+          <div className="auth-form-container">
             <LoginForm onSubmit={handleLogin} loading={loading} />
-          </Box>
+          </div>
 
-          <Link
-            component="button"
+          <button
             type="button"
-            underline="none"
-            className={styles.forgotPasswordButton}
+            className="auth-forgot-password-btn"
             onClick={() =>
               navigate(
                 type === "user"
@@ -189,43 +170,44 @@ export default function LoginPage({ type }: Props) {
           >
             <MaterialSymbol icon="lock_reset" size="small" />
             <span>¿Olvidaste tu contraseña?</span>
-          </Link>
+          </button>
 
           {!isAdmin && (
             <>
-              <Divider className={styles.divider}>Información legal</Divider>
+              <div className="auth-divider my-3 text-center text-muted fz-h5">
+                Información legal
+              </div>
 
-              <Typography component="p" className={styles.terms}>
+              <p className="auth-terms">
                 Al iniciar sesión o crear una cuenta, aceptas nuestros{" "}
-                <Link
+                <a
                   href="/terminos"
-                  underline="none"
-                  className={styles.termsLink}
+                  className="auth-terms-link"
                 >
                   Términos y Condiciones
-                </Link>{" "}
+                </a>{" "}
                 y la{" "}
-                <Link
+                <a
                   href="/privacidad"
-                  underline="none"
-                  className={styles.termsLink}
+                  className="auth-terms-link"
                 >
                   Política de Privacidad
-                </Link>
+                </a>
                 .
-              </Typography>
+              </p>
             </>
           )}
-        </Paper>
+        </div>
 
-        <Box className={styles.pageFooter}>
+        <div className="auth-footer">
           <MaterialSymbol icon="verified_user" size="small" />
 
-          <Typography component="span" className={styles.pageFooterText}>
+          <span className="auth-footer-text">
             Tu información está protegida por ADLocal
-          </Typography>
-        </Box>
-      </Container>
-    </Box>
+          </span>
+        </div>
+      </div>
+    </main>
   );
 }
+

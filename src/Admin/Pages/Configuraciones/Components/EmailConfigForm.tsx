@@ -1,9 +1,9 @@
 import {
   Button,
-  Divider,
   InputAdornment,
   LinearProgress,
   TextField,
+  IconButton,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useConfiguracionSistema } from "../../../../hooks/useConfiguracionSistema";
@@ -32,6 +32,8 @@ export const EmailConfigForm = () => {
     fromNombre: "",
   });
 
+  const [showKey, setShowKey] = useState(false);
+
   useEffect(() => {
     void cargar();
   }, [cargar]);
@@ -47,15 +49,10 @@ export const EmailConfigForm = () => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm({
       host: getValue("EMAIL_HOST") || "smtp-relay.brevo.com",
-
       port: getValue("EMAIL_PORT") || "587",
-
       user: getValue("EMAIL_USER") || "",
-
       key: getValue("EMAIL_KEY") || "",
-
       from: getValue("EMAIL_FROM") || "jcarlosgonzalez086@gmail.com",
-
       fromNombre: getValue("EMAIL_FROM_NOMBRE") || "",
     });
   }, [configuraciones]);
@@ -96,23 +93,47 @@ export const EmailConfigForm = () => {
   };
 
   return (
-    <div className="card-adlocal">
+    <div className="card-adlocal h-100 d-flex flex-column">
       <ConfigFormHeader
         icon={<MaterialSymbol icon="mail" size="medium" filled />}
-        title="Correo electrónico"
-        subtitle="Configura el servidor SMTP utilizado por ADLocal"
+        title="Servidor de Correo (SMTP)"
+        subtitle="Configuración para envío de notificaciones y correos del sistema"
+        badgeColor="terracotta"
+        action={
+          <span className="badge-adlocal badge-adlocal--secondary">
+            <MaterialSymbol icon="forward_to_inbox" size="small" />
+            SMTP Relay
+          </span>
+        }
       />
-
-      <Divider />
 
       {loading && <LinearProgress />}
 
-      <div className="p-3 p-lg-4">
+      <div className="card-adlocal-body flex-grow-1 d-flex flex-column justify-content-between">
         <div className="d-flex flex-column gap-3">
+          {/* INFORMACIÓN */}
+          <div className="config-info-box config-info-box--secondary">
+            <div
+              className="config-icon-badge config-icon-badge--terracotta"
+              style={{ width: 36, height: 36 }}
+            >
+              <MaterialSymbol icon="mark_email_read" size="small" />
+            </div>
+            <div>
+              <h3 className="fz-h4 fw-semibold mb-1" style={{ color: "#1C1C1E" }}>
+                Mensajería Transaccional
+              </h3>
+              <p className="fz-body text-secondary mb-0">
+                Utilizado para envío de códigos de verificación, restablecimiento de accesos y notificaciones de pedidos.
+              </p>
+            </div>
+          </div>
+
+          {/* CAMPOS EMPAREJADOS RESPONSIVOS */}
           <div className="row g-3">
-            <div className="col-12 col-md-8 col-lg-12">
+            <div className="col-12 col-sm-8">
               <TextField
-                label="Servidor SMTP"
+                label="Servidor SMTP (Host)"
                 value={form.host}
                 onChange={handleChange("host")}
                 fullWidth
@@ -131,9 +152,9 @@ export const EmailConfigForm = () => {
               />
             </div>
 
-            <div className="col-12 col-md-4 col-lg-12">
+            <div className="col-12 col-sm-4">
               <TextField
-                label="Puerto"
+                label="Puerto SMTP"
                 type="number"
                 value={form.port}
                 onChange={handleChange("port")}
@@ -156,7 +177,7 @@ export const EmailConfigForm = () => {
               />
             </div>
 
-            <div className="col-12">
+            <div className="col-12 col-sm-6">
               <TextField
                 label="Usuario SMTP"
                 value={form.user}
@@ -176,10 +197,10 @@ export const EmailConfigForm = () => {
               />
             </div>
 
-            <div className="col-12">
+            <div className="col-12 col-sm-6">
               <TextField
-                label="Clave SMTP"
-                type="password"
+                label="Clave SMTP / Token"
+                type={showKey ? "text" : "password"}
                 value={form.key}
                 onChange={handleChange("key")}
                 fullWidth
@@ -189,7 +210,22 @@ export const EmailConfigForm = () => {
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
-                        <MaterialSymbol icon="key" size="small" />
+                        <MaterialSymbol icon="lock" size="small" />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setShowKey((prev) => !prev)}
+                          edge="end"
+                          tabIndex={-1}
+                        >
+                          <MaterialSymbol
+                            icon={showKey ? "visibility_off" : "visibility"}
+                            size="small"
+                          />
+                        </IconButton>
                       </InputAdornment>
                     ),
                   },
@@ -197,16 +233,16 @@ export const EmailConfigForm = () => {
               />
             </div>
 
-            <div className="col-12">
+            <div className="col-12 col-sm-6">
               <TextField
-                label="Correo remitente"
+                label="Correo remitente (From)"
                 type="email"
                 value={form.from}
                 onChange={handleChange("from")}
                 fullWidth
                 disabled={loading}
                 variant="filled"
-                placeholder="jcarlosgonzalez086@gmail.com"
+                placeholder="notificaciones@adlocal.com"
                 slotProps={{
                   input: {
                     startAdornment: (
@@ -219,9 +255,9 @@ export const EmailConfigForm = () => {
               />
             </div>
 
-            <div className="col-12">
+            <div className="col-12 col-sm-6">
               <TextField
-                label="Nombre del remitente"
+                label="Nombre remitente"
                 value={form.fromNombre}
                 onChange={handleChange("fromNombre")}
                 fullWidth
@@ -240,26 +276,16 @@ export const EmailConfigForm = () => {
               />
             </div>
           </div>
+        </div>
 
-          <Divider />
-
-          <div className="d-flex align-items-start gap-2">
-            <MaterialSymbol icon="info" size="small" />
-
-            <span className="fz-h5 fw-regular">
-              Esta configuración será utilizada para correos de verificación,
-              recuperación de contraseña y notificaciones del sistema.
-            </span>
-          </div>
-
+        <div className="pt-3 mt-3 border-top">
           <Button
             type="button"
             onClick={onSubmit}
             disabled={isDisabled}
-            className="btn-adlocal btn-adlocal--solid config-form-submit fz-h4 fw-semibold w-100"
+            className="btn-adlocal btn-adlocal--solid w-100"
           >
             <MaterialSymbol icon="save" size="small" />
-
             <span className="ms-2">Guardar correo</span>
           </Button>
         </div>

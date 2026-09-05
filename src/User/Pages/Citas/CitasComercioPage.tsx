@@ -1,12 +1,10 @@
 import {
   Alert,
   Button,
-  Chip,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
-  TextField,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
@@ -14,6 +12,8 @@ import {
   GenericTable,
   type TableColumn,
 } from "../../../components/layouts/GenericTable";
+import { StatusBadge, type StatusVariant } from "../../../components/UI/StatusBadge";
+import { AppDatePicker } from "../../../components/UI/DateTimePickers";
 import { pedidosComercioApi } from "../../../services/pedidosComercioApi";
 import { citasComercioApi } from "../../../services/citasComercioApi";
 import {
@@ -30,6 +30,23 @@ const textos: Record<number, string> = {
   4: "Completada",
   5: "Cancelada",
   6: "No asistió",
+};
+
+const getEstadoCitaVariant = (estado: number): StatusVariant => {
+  switch (estado) {
+    case 1:
+      return "warning";
+    case 2:
+      return "info";
+    case 3:
+      return "purple";
+    case 4:
+      return "success";
+    case 5:
+      return "error";
+    default:
+      return "neutral";
+  }
 };
 export function CitasComercioPage() {
   const [comercios, setComercios] = useState<ComercioPedidoSelectorDto[]>([]),
@@ -78,7 +95,14 @@ export function CitasComercioPage() {
       {
         key: "estado",
         label: "Estado",
-        render: (c) => <Chip size="small" label={textos[c.estado]} />,
+        render: (c) => (
+          <StatusBadge
+            label={textos[c.estado] || "Desconocido"}
+            variant={getEstadoCitaVariant(c.estado)}
+            dot
+            size="small"
+          />
+        ),
       },
     ],
     [],
@@ -151,17 +175,17 @@ export function CitasComercioPage() {
               ))}
             </Select>
           </FormControl>
-          <TextField
-            size="small"
-            label="Día"
-            type="date"
-            value={fecha}
-            onChange={(e) => {
-              setFecha(e.target.value);
-              setPage(0);
-            }}
-            slotProps={{ inputLabel: { shrink: true } }}
-          />
+          <div style={{ minWidth: "175px" }}>
+            <AppDatePicker
+              label="Filtrar por día"
+              value={fecha}
+              size="small"
+              onChange={(newDate) => {
+                setFecha(newDate || "");
+                setPage(0);
+              }}
+            />
+          </div>
         </div>
       </div>
       {error && <Alert severity="error">{error}</Alert>}
@@ -180,8 +204,27 @@ export function CitasComercioPage() {
           }}
           getRowKey={(c) => c.uuid}
           actions={(c) => (
-            <Button size="small" onClick={() => setSeleccionada(c)}>
-              Ver / gestionar
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setSeleccionada(c)}
+              sx={{
+                borderRadius: "8px",
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "13px",
+                py: 0.5,
+                px: 1.5,
+                color: "#007AFF",
+                borderColor: "rgba(0, 122, 255, 0.25)",
+                backgroundColor: "rgba(0, 122, 255, 0.04)",
+                "&:hover": {
+                  borderColor: "#007AFF",
+                  backgroundColor: "rgba(0, 122, 255, 0.08)",
+                },
+              }}
+            >
+              Gestionar
             </Button>
           )}
         />

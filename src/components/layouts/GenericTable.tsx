@@ -1,4 +1,14 @@
+import React, {
+  type ReactNode,
+  type Key as ReactKey,
+  useState,
+  type MouseEvent,
+} from "react";
 import {
+  Box,
+  Card,
+  CardContent,
+  Divider,
   IconButton,
   Menu,
   Skeleton,
@@ -10,17 +20,14 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Typography,
   useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
-import { useTheme } from "@mui/material/styles";
+import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
+import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
-import {
-  type ReactNode,
-  type Key as ReactKey,
-  useState,
-  type MouseEvent,
-} from "react";
 
 export interface TableColumn<T> {
   key: keyof T | string;
@@ -29,6 +36,7 @@ export interface TableColumn<T> {
   render?: (row: T) => ReactNode;
   width?: string | number;
   minWidth?: string | number;
+  hideOnMobileCard?: boolean;
 }
 
 interface GenericTableProps<T> {
@@ -45,6 +53,7 @@ interface GenericTableProps<T> {
   onRowsPerPageChange: (rows: number) => void;
   getRowKey?: (row: T, index: number) => ReactKey;
   rowsPerPageOptions?: number[];
+  mobileLayout?: "cards" | "table";
 }
 
 const getCellValue = <T,>(row: T, key: keyof T | string): ReactNode => {
@@ -54,7 +63,7 @@ const getCellValue = <T,>(row: T, key: keyof T | string): ReactNode => {
 
   const value = (row as Record<string, unknown>)[String(key)];
 
-  if (value === null || value === undefined) {
+  if (value === null || value === undefined || value === "") {
     return "—";
   }
 
@@ -71,17 +80,11 @@ const getCellValue = <T,>(row: T, key: keyof T | string): ReactNode => {
 
 const getDefaultRowKey = <T,>(row: T, index: number): ReactKey => {
   if (typeof row === "object" && row !== null && "id" in row) {
-    const id = (
-      row as {
-        id?: unknown;
-      }
-    ).id;
-
+    const id = (row as { id?: unknown }).id;
     if (typeof id === "string" || typeof id === "number") {
       return id;
     }
   }
-
   return index;
 };
 
@@ -99,24 +102,25 @@ export function GenericTable<T>({
   onRowsPerPageChange,
   getRowKey = getDefaultRowKey,
   rowsPerPageOptions = [10, 30, 100],
+  mobileLayout = "cards",
 }: GenericTableProps<T>) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const visibleColumns = isMobile ? columns.slice(0, 2) : columns;
-  const totalColumns = visibleColumns.length + (actions ? 1 : 0);
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isCardsMode = isMobile && mobileLayout === "cards";
+
+  const totalColumns = columns.length + (actions ? 1 : 0);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedRow, setSelectedRow] = useState<T | null>(null);
   const menuOpen = Boolean(anchorEl);
 
   const handleMenuOpen = (event: MouseEvent<HTMLElement>, row: T) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
-
     setSelectedRow(row);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-
     setSelectedRow(null);
   };
 
@@ -126,29 +130,350 @@ export function GenericTable<T>({
 
   const handleRowsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value);
-
     if (!Number.isFinite(value) || value <= 0) {
       return;
     }
-
     onRowsPerPageChange(Math.floor(value));
   };
 
+  const totalPages = Math.ceil(total / rowsPerPage) || 1;
+
+  // Render Empty State
+  const renderEmptyState = () => (
+    <Box
+      sx={{
+        py: { xs: 5, sm: 7 },
+        px: 3,
+        textAlign: "center",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Box
+        sx={{
+          width: 56,
+          height: 56,
+          borderRadius: "16px",
+          backgroundColor: "rgba(0, 122, 255, 0.08)",
+          color: "#007AFF",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          mb: 1.5,
+        }}
+      >
+        <MaterialSymbol icon="folder_open" size="large" />
+      </Box>
+
+      <Typography
+        variant="h6"
+        sx={{
+          fontSize: "16px",
+          fontWeight: 700,
+          color: "#1C1C1E",
+          mb: 0.5,
+        }}
+      >
+        {emptyText}
+      </Typography>
+
+      <Typography
+        variant="body2"
+        sx={{
+          fontSize: "13.5px",
+          color: "#6E6E73",
+          maxWidth: 360,
+          lineHeight: 1.4,
+        }}
+      >
+        {emptyDescription}
+      </Typography>
+    </Box>
+  );
+
+  // ==========================================
+  // MOBILE CARDS VIEW (< 768px)
+  // ==========================================
+  if (isCardsMode) {
+    const primaryCol = columns[0];
+    const secondaryCols = columns.slice(1);
+
+    return (
+      <Box sx={{ width: "100%" }}>
+        {loading ? (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            {[1, 2, 3].map((i) => (
+              <Card
+                key={`mobile-skeleton-${i}`}
+                sx={{
+                  p: 2,
+                  borderRadius: "14px",
+                  border: "1px solid rgba(0, 0, 0, 0.06)",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
+                }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.5 }}>
+                  <Skeleton variant="rounded" width="50%" height={24} />
+                  <Skeleton variant="rounded" width="20%" height={24} />
+                </Box>
+                <Skeleton variant="rounded" width="90%" height={16} sx={{ mb: 1 }} />
+                <Skeleton variant="rounded" width="70%" height={16} />
+              </Card>
+            ))}
+          </Box>
+        ) : data.length === 0 ? (
+          <Card
+            sx={{
+              borderRadius: "14px",
+              border: "1px solid rgba(0, 0, 0, 0.06)",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
+            }}
+          >
+            {renderEmptyState()}
+          </Card>
+        ) : (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            {data.map((row, index) => {
+              const rowKey = getRowKey(row, index);
+
+              return (
+                <Card
+                  key={rowKey}
+                  sx={{
+                    borderRadius: "14px",
+                    backgroundColor: "#FFFFFF",
+                    border: "1px solid rgba(0, 0, 0, 0.06)",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.03)",
+                    overflow: "visible",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                    {/* Header: First column + Action button */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        justifyContent: "space-between",
+                        gap: 1.5,
+                        mb: 1.5,
+                      }}
+                    >
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "#8E8E93",
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                            display: "block",
+                          }}
+                        >
+                          {primaryCol?.label}
+                        </Typography>
+                        <Box sx={{ mt: 0.2 }}>
+                          {primaryCol?.render
+                            ? primaryCol.render(row)
+                            : (
+                              <Typography
+                                sx={{
+                                  fontSize: "15px",
+                                  fontWeight: 700,
+                                  color: "#1C1C1E",
+                                }}
+                              >
+                                {getCellValue(row, primaryCol?.key ?? "")}
+                              </Typography>
+                            )}
+                        </Box>
+                      </Box>
+
+                      {actions && (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuOpen(e, row)}
+                          sx={{
+                            p: 0.5,
+                            color: "#6E6E73",
+                            backgroundColor: "rgba(0, 0, 0, 0.03)",
+                            borderRadius: "8px",
+                            "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.06)" },
+                          }}
+                          aria-label="Acciones"
+                        >
+                          <MoreVertRoundedIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Box>
+
+                    <Divider sx={{ my: 1.2, borderColor: "rgba(0, 0, 0, 0.05)" }} />
+
+                    {/* Secondary columns: 2-column key-value grid */}
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(2, 1fr)",
+                        gap: 1.5,
+                      }}
+                    >
+                      {secondaryCols
+                        .filter((col) => !col.hideOnMobileCard)
+                        .map((col) => (
+                          <Box key={String(col.key)} sx={{ minWidth: 0 }}>
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: "#8E8E93",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                letterSpacing: "0.5px",
+                                display: "block",
+                                mb: 0.2,
+                              }}
+                            >
+                              {col.label}
+                            </Typography>
+                            <Box sx={{ fontSize: "13.5px", color: "#1C1C1E" }}>
+                              {col.render
+                                ? col.render(row)
+                                : getCellValue(row, col.key)}
+                            </Box>
+                          </Box>
+                        ))}
+                    </Box>
+                  </CardContent>
+                </Card>
+              );
+            })}
+
+            {/* Mobile Compact Pagination */}
+            {!loading && total > rowsPerPage && (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  p: 1.5,
+                  mt: 0.5,
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(0, 0, 0, 0.06)",
+                }}
+              >
+                <IconButton
+                  size="small"
+                  disabled={page === 0}
+                  onClick={() => onPageChange(page - 1)}
+                  sx={{
+                    borderRadius: "8px",
+                    border: "1px solid rgba(0, 0, 0, 0.1)",
+                    p: 0.8,
+                  }}
+                >
+                  <ArrowBackIosNewRoundedIcon sx={{ fontSize: 13 }} />
+                </IconButton>
+
+                <Typography sx={{ fontSize: "13px", fontWeight: 600, color: "#6E6E73" }}>
+                  Página {page + 1} de {totalPages} ({total} registros)
+                </Typography>
+
+                <IconButton
+                  size="small"
+                  disabled={page >= totalPages - 1}
+                  onClick={() => onPageChange(page + 1)}
+                  sx={{
+                    borderRadius: "8px",
+                    border: "1px solid rgba(0, 0, 0, 0.1)",
+                    p: 0.8,
+                  }}
+                >
+                  <ArrowForwardIosRoundedIcon sx={{ fontSize: 13 }} />
+                </IconButton>
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {/* Action Menu (Shared) */}
+        {actions && (
+          <Menu
+            anchorEl={anchorEl}
+            open={menuOpen}
+            onClose={handleMenuClose}
+            slotProps={{
+              paper: {
+                sx: {
+                  borderRadius: "12px",
+                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.12)",
+                  border: "1px solid rgba(0, 0, 0, 0.06)",
+                  p: 0.5,
+                  minWidth: 160,
+                },
+              },
+            }}
+          >
+            {selectedRow && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0.5,
+                }}
+                onClickCapture={handleMenuClose}
+              >
+                {actions(selectedRow)}
+              </Box>
+            )}
+          </Menu>
+        )}
+      </Box>
+    );
+  }
+
+  // ==========================================
+  // DESKTOP & TABLET VIEW (>= 768px)
+  // ==========================================
   return (
-    <div className="genericTableWrapper">
-      <TableContainer className="genericTableContainer">
-        <Table className="genericTable" aria-label="Tabla de registros">
+    <Box
+      sx={{
+        width: "100%",
+        borderRadius: "14px",
+        backgroundColor: "#FFFFFF",
+        border: "1px solid rgba(0, 0, 0, 0.06)",
+        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02)",
+        overflow: "hidden",
+      }}
+    >
+      <TableContainer
+        sx={{
+          width: "100%",
+          maxHeight: "calc(100vh - 240px)",
+          overflowX: "auto",
+        }}
+      >
+        <Table stickyHeader aria-label="Tabla de registros">
           <TableHead>
-            <TableRow className="genericTableHeadRow">
-              {visibleColumns.map((column) => (
+            <TableRow>
+              {columns.map((column) => (
                 <TableCell
                   key={String(column.key)}
                   align={column.align ?? "left"}
-                  className="genericTableHeadCell fz-h5 fw-bold"
-                  style={{
+                  sx={{
                     width: column.width,
-
-                    minWidth: column.minWidth,
+                    minWidth: column.minWidth ?? 120,
+                    backgroundColor: "#F8F9FA",
+                    color: "#6E6E73",
+                    fontWeight: 700,
+                    fontSize: "12px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    borderBottom: "1px solid #E5E5EA",
+                    py: 1.5,
                   }}
                 >
                   {column.label}
@@ -158,7 +483,18 @@ export function GenericTable<T>({
               {actions && (
                 <TableCell
                   align="right"
-                  className="genericTableHeadCell genericTableActionsHeadCell fz-h5 fw-bold"
+                  sx={{
+                    backgroundColor: "#F8F9FA",
+                    color: "#6E6E73",
+                    fontWeight: 700,
+                    fontSize: "12px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    borderBottom: "1px solid #E5E5EA",
+                    width: 110,
+                    minWidth: 110,
+                    py: 1.5,
+                  }}
                 >
                   Acciones
                 </TableCell>
@@ -168,24 +504,17 @@ export function GenericTable<T>({
 
           <TableBody>
             {loading ? (
-              Array.from({
-                length: Math.min(rowsPerPage, 5),
-              }).map((_, rowIndex) => (
-                <TableRow
-                  key={`skeleton-${rowIndex}`}
-                  className="genericTableBodyRow"
-                >
-                  {Array.from({
-                    length: totalColumns,
-                  }).map((_, columnIndex) => (
+              Array.from({ length: Math.min(rowsPerPage, 5) }).map((_, rowIndex) => (
+                <TableRow key={`skeleton-row-${rowIndex}`}>
+                  {Array.from({ length: totalColumns }).map((_, columnIndex) => (
                     <TableCell
-                      key={`skeleton-${rowIndex}-${columnIndex}`}
-                      className="genericTableSkeletonCell"
+                      key={`skeleton-cell-${rowIndex}-${columnIndex}`}
+                      sx={{ py: 2 }}
                     >
                       <Skeleton
                         variant="rounded"
                         height={20}
-                        className="genericTableSkeleton"
+                        sx={{ borderRadius: "6px" }}
                       />
                     </TableCell>
                   ))}
@@ -195,21 +524,9 @@ export function GenericTable<T>({
               <TableRow>
                 <TableCell
                   colSpan={totalColumns}
-                  className="genericTableEmptyCell"
+                  sx={{ borderBottom: "none", p: 0 }}
                 >
-                  <div className="genericTableEmpty">
-                    <div className="genericTableEmptyIcon">
-                      <MaterialSymbol icon="folder_off" size="large" />
-                    </div>
-
-                    <h3 className="genericTableEmptyTitle fz-h3 fw-bold mb-1">
-                      {emptyText}
-                    </h3>
-
-                    <p className="genericTableEmptyDescription fz-h5 fw-regular mb-0">
-                      {emptyDescription}
-                    </p>
-                  </div>
+                  {renderEmptyState()}
                 </TableCell>
               </TableRow>
             ) : (
@@ -217,12 +534,28 @@ export function GenericTable<T>({
                 const rowKey = getRowKey(row, index);
 
                 return (
-                  <TableRow key={rowKey} hover className="genericTableBodyRow">
-                    {visibleColumns.map((column) => (
+                  <TableRow
+                    key={rowKey}
+                    hover
+                    sx={{
+                      transition: "background-color 0.15s ease",
+                      "&:hover": {
+                        backgroundColor: "rgba(0, 122, 255, 0.025) !important",
+                      },
+                      "&:last-child td": {
+                        borderBottom: "none",
+                      },
+                    }}
+                  >
+                    {columns.map((column) => (
                       <TableCell
                         key={`${String(rowKey)}-${String(column.key)}`}
                         align={column.align ?? "left"}
-                        className="genericTableBodyCell fz-h4 fw-regular"
+                        sx={{
+                          fontSize: "14px",
+                          color: "#1C1C1E",
+                          py: 1.6,
+                        }}
                       >
                         {column.render
                           ? column.render(row)
@@ -231,27 +564,17 @@ export function GenericTable<T>({
                     ))}
 
                     {actions && (
-                      <TableCell
-                        align="right"
-                        className="genericTableActionsCell"
-                      >
-                        {isMobile ? (
-                          <IconButton
-                            type="button"
-                            size="small"
-                            className="genericTableMobileActionsButton"
-                            onClick={(event) => handleMenuOpen(event, row)}
-                            aria-label="Mostrar acciones"
-                            aria-haspopup="menu"
-                            aria-expanded={menuOpen ? "true" : undefined}
-                          >
-                            <MoreVertRoundedIcon className="genericTableMoreIcon" />
-                          </IconButton>
-                        ) : (
-                          <div className="d-flex align-items-center justify-content-end gap-1">
-                            {actions(row)}
-                          </div>
-                        )}
+                      <TableCell align="right" sx={{ py: 1.6 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            gap: 0.5,
+                          }}
+                        >
+                          {actions(row)}
+                        </Box>
                       </TableCell>
                     )}
                   </TableRow>
@@ -271,45 +594,27 @@ export function GenericTable<T>({
                   rowsPerPage={rowsPerPage}
                   onPageChange={handlePageChange}
                   onRowsPerPageChange={handleRowsChange}
-                  labelRowsPerPage="Filas por página"
+                  labelRowsPerPage="Filas:"
                   labelDisplayedRows={({ from, to, count }) =>
                     `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`
                   }
                   SelectProps={{
                     native: true,
-
-                    className: "fz-h5 fw-medium",
                   }}
-                  className="genericTablePagination"
+                  sx={{
+                    borderTop: "1px solid #E5E5EA",
+                    color: "#6E6E73",
+                    fontSize: "13px",
+                    "& .MuiTablePagination-select": {
+                      fontWeight: 600,
+                    },
+                  }}
                 />
               </TableRow>
             </TableFooter>
           )}
         </Table>
       </TableContainer>
-
-      {isMobile && actions && (
-        <Menu
-          anchorEl={anchorEl}
-          open={menuOpen}
-          onClose={handleMenuClose}
-          className="genericTableActionsMenu"
-          slotProps={{
-            paper: {
-              className: "genericTableMenuPaper",
-            },
-          }}
-        >
-          {selectedRow && (
-            <div
-              className="genericTableMobileActions d-flex align-items-center gap-1"
-              onClickCapture={handleMenuClose}
-            >
-              {actions(selectedRow)}
-            </div>
-          )}
-        </Menu>
-      )}
-    </div>
+    </Box>
   );
 }

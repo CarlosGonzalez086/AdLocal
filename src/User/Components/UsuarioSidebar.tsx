@@ -1,5 +1,4 @@
 import {
-  Box,
   Divider,
   Drawer,
   List,
@@ -8,14 +7,12 @@ import {
   ListItemIcon,
   ListItemText,
   Tooltip,
-  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { useMemo, type CSSProperties } from "react";
 import { Link, useLocation } from "react-router-dom";
 import MaterialSymbol from "../../components/UI/MaterialSymbol/MaterialSymbol";
-import styles from "../../styles/UserSidebar.module.css";
 import type { JwtPayload } from "../Auth/PrivateRouteUsuario";
 
 interface UserSidebarProps {
@@ -42,11 +39,9 @@ type SidebarCssVariables = CSSProperties & {
   "--sidebar-width": string;
 };
 
-const LOGO_FULL =
-  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
+const LOGO_FULL = "/logo-adlocal.png";
 
-const LOGO_ICON =
-  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
+const LOGO_ICON = "/logo-adlocal.png";
 
 const PLAN_PRESENTATION: Record<string, PlanPresentation> = {
   FREE: {
@@ -154,21 +149,6 @@ const UserSidebar = ({
       isCollaborator ||
       (rol === "Comercio" && (planTipo === "BASIC" || planTipo === "FREE"));
 
-    // if (!isCollaborator) {
-    //   items.push(
-    //     {
-    //       text: "Mi plan",
-    //       icon: "event_note",
-    //       path: "/usuario/app/plan",
-    //     },
-    //     {
-    //       text: "Tarjetas",
-    //       icon: "credit_card",
-    //       path: "/usuario/app/tarjetas",
-    //     },
-    //   );
-    // }
-
     if (hasMultipleBusinesses) {
       items.push({
         text: "Productos y servicios",
@@ -203,52 +183,49 @@ const UserSidebar = ({
     : null;
 
   const drawerContent = (
-    <Box className={styles.sidebarContent}>
-      <Box
+    <div className="user-sidebar-content">
+      <div
         className={[
-          styles.logoSection,
-          isCollapsedDesktop ? styles.logoSectionCollapsed : "",
-          isMobile ? styles.logoSectionMobile : "",
+          "user-sidebar-logo-section",
+          isCollapsedDesktop ? "user-sidebar-logo-collapsed" : "",
+          isMobile ? "user-sidebar-logo-mobile" : "",
         ]
           .filter(Boolean)
           .join(" ")}
       >
-        <Box
-          component={Link}
+        <Link
           to="/usuario/app/inicio"
-          className={styles.logoLink}
+          className="user-sidebar-logo-link"
           aria-label="Ir al inicio de ADLocal"
           onClick={isMobile ? onCloseMobile : undefined}
         >
-          <Box
-            component="img"
+          <img
             src={isCollapsedDesktop ? LOGO_ICON : LOGO_FULL}
             alt="ADLocal"
             className={[
-              styles.logo,
-              isCollapsedDesktop ? styles.logoCollapsed : "",
-              isMobile ? styles.logoMobile : "",
+              "user-sidebar-logo-img",
+              isCollapsedDesktop ? "user-sidebar-logo-img-collapsed" : "",
+              isMobile ? "user-sidebar-logo-img-mobile" : "",
             ]
               .filter(Boolean)
               .join(" ")}
           />
-        </Box>
+        </Link>
 
         {isMobile && (
-          <Typography component="span" className={styles.mobileAppName}>
+          <span className="user-sidebar-mobile-app-name">
             ADLocal
-          </Typography>
+          </span>
         )}
-      </Box>
+      </div>
 
-      <Divider className={styles.divider} />
+      <Divider className="user-sidebar-divider" />
 
-      <Box
-        component="nav"
-        className={styles.navigation}
+      <nav
+        className="user-sidebar-nav"
         aria-label="Navegación principal"
       >
-        <List className={styles.menuList}>
+        <List className="user-sidebar-menu-list">
           {menuItems.map((item) => {
             const selected = isPathSelected(location.pathname, item.path);
 
@@ -260,17 +237,17 @@ const UserSidebar = ({
                 aria-current={selected ? "page" : undefined}
                 onClick={isMobile ? onCloseMobile : undefined}
                 className={[
-                  styles.menuButton,
-                  selected ? styles.menuButtonSelected : "",
-                  isCollapsedDesktop ? styles.menuButtonCollapsed : "",
+                  "user-sidebar-menu-btn",
+                  selected ? "user-sidebar-menu-btn--selected" : "",
+                  isCollapsedDesktop ? "user-sidebar-menu-btn--collapsed" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
               >
                 <ListItemIcon
                   className={[
-                    styles.menuIcon,
-                    isCollapsedDesktop ? styles.menuIconCollapsed : "",
+                    "user-sidebar-menu-icon",
+                    isCollapsedDesktop ? "user-sidebar-menu-icon--collapsed" : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -284,8 +261,8 @@ const UserSidebar = ({
 
                 <ListItemText
                   className={[
-                    styles.menuText,
-                    isCollapsedDesktop ? styles.menuTextCollapsed : "",
+                    "user-sidebar-menu-text",
+                    isCollapsedDesktop ? "user-sidebar-menu-text--collapsed" : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -293,7 +270,7 @@ const UserSidebar = ({
                     primary: {
                       component: "span",
                       noWrap: true,
-                      className: styles.menuTextTypography,
+                      className: "user-sidebar-menu-text-typo",
                     },
                   }}
                   primary={item.text}
@@ -305,7 +282,7 @@ const UserSidebar = ({
               <ListItem
                 key={item.path}
                 disablePadding
-                className={styles.menuListItem}
+                className="user-sidebar-menu-item"
               >
                 {isCollapsedDesktop ? (
                   <Tooltip
@@ -314,10 +291,10 @@ const UserSidebar = ({
                     arrow
                     slotProps={{
                       tooltip: {
-                        className: styles.menuTooltip,
+                        className: "user-sidebar-tooltip",
                       },
                       arrow: {
-                        className: styles.menuTooltipArrow,
+                        className: "user-sidebar-tooltip-arrow",
                       },
                     }}
                   >
@@ -330,32 +307,32 @@ const UserSidebar = ({
             );
           })}
         </List>
-      </Box>
+      </nav>
 
       {!isCollapsedDesktop && planPresentation && (
-        <Box className={styles.planContainer}>
-          <Box className={styles.planCard}>
-            <Box className={styles.planIcon}>
+        <div className="user-sidebar-plan-container">
+          <div className="user-sidebar-plan-card">
+            <div className="user-sidebar-plan-icon">
               <MaterialSymbol
                 icon={planPresentation.icon}
                 size="medium"
                 filled
               />
-            </Box>
+            </div>
 
-            <Box className={styles.planInformation}>
-              <Typography component="span" className={styles.planCaption}>
+            <div className="user-sidebar-plan-info">
+              <span className="user-sidebar-plan-caption">
                 Plan actual
-              </Typography>
+              </span>
 
-              <Typography component="span" className={styles.planName}>
+              <span className="user-sidebar-plan-name">
                 {planPresentation.label}
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
+              </span>
+            </div>
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 
   return (
@@ -365,12 +342,12 @@ const UserSidebar = ({
       onClose={onCloseMobile}
       style={sidebarVariables}
       className={[
-        styles.drawer,
-        isMobile ? styles.mobileDrawer : styles.desktopDrawer,
+        "user-sidebar-drawer",
+        isMobile ? "user-sidebar-mobile-drawer" : "user-sidebar-desktop-drawer",
       ].join(" ")}
       slotProps={{
         paper: {
-          className: styles.drawerPaper,
+          className: "user-sidebar-paper",
         },
       }}
     >
@@ -380,3 +357,4 @@ const UserSidebar = ({
 };
 
 export default UserSidebar;
+

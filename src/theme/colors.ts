@@ -1,103 +1,99 @@
-export const brand = {
-  primary: "#6F4E37", // Café principal
-  primaryDark: "#5A3E2B", // Café oscuro
-  primaryLight: "#C8A97E", // Café claro
-  primaryGlow: "rgba(111, 78, 55, .35)",
-  primarySubtle: "rgba(111, 78, 55, .10)",
+/**
+ * Paleta Oficial AdLocal
+ * Extraída fielmente de la identidad gráfica oficial:
+ * - "Local" & "Tu Puente con la Comunidad": Verde Azulado / Teal (#008989)
+ * - "AD" & Fachada: Terracota Cálido Coral (#E7692C)
+ * - Acentos de Campanas y Sol: Ámbar Dorado / Mostaza (#F59E0B / #F79844)
+ * - Cúpulas y Techos: Terracota Rojizo (#D84028)
+ * - Palmeras / Naturaleza: Verde Agave (#2A9D6F)
+ * - Fondo Lienzo: Arena / Marfil Cálido Suave (#F8F6F2)
+ */
 
-  backgroundBlue: "#F8F4EE", // Fondo crema
-  lightBlue: "#F5E9CF", // Beige claro
+export const brand = {
+  primary: "#008989", // Teal / Verde Azulado de "Local"
+  primaryDark: "#007070", // Hover oscuro
+  primaryLight: "#1DA3A3", // Tono luminoso
+  primaryGlow: "rgba(0, 137, 137, 0.28)",
+  primarySubtle: "rgba(0, 137, 137, 0.08)",
+
+  backgroundTeal: "#EDF7F7",
+  lightTeal: "#D8EFEF",
+
+  // Compatibilidad
+  backgroundBlue: "#EDF7F7",
+  lightBlue: "#D8EFEF",
+};
+
+export const accent = {
+  orange: "#E7692C", // Terracota cálido de "AD"
+  orangeDark: "#C9551D",
+  orangeLight: "#F28650",
+  orangeGlow: "rgba(231, 105, 44, 0.28)",
+  orangeSubtle: "rgba(231, 105, 44, 0.10)",
+
+  gold: "#F59E0B",
+  goldLight: "#FBBF24",
+  goldSubtle: "rgba(245, 158, 11, 0.12)",
 };
 
 export const neutral = {
   white: "#FFFFFF",
-  whiteMuted: "rgba(255,255,255,.70)",
-  whiteSubtle: "rgba(255,255,255,.08)",
+  whiteMuted: "rgba(255, 255, 255, 0.80)",
+  whiteSubtle: "rgba(255, 255, 255, 0.12)",
 
-  surface: "#FAF8F5",
-  surfaceDark: "#3B2A1F",
+  surface: "#F8F6F2", // Fondo arena/marfil suave del lienzo del logo
+  surfaceSubtle: "#F3EFE8",
+  surfaceDark: "#1C1D1F",
 
-  dark: "#2F241D",
-  darkMuted: "#8A7A70",
+  dark: "#1C1D1F", // Texto principal oscuro
+  darkMuted: "#696E75", // Texto secundario
+  darkSubtle: "#8E939B", // Texto terciario / placeholders
 
-  textLight: "#D8CEC6",
+  textLight: "#A8ADB5",
   textWhite: "#FFFFFF",
 
-  border: "#E7DDD4",
-};
-
-export const accent = {
-  orange: "#E8692C", // Tu color secundario
-  orangeDark: "#C65420",
-  orangeLight: "#F49A67",
-  orangeGlow: "rgba(232,105,44,.35)",
-  orangeSubtle: "rgba(232,105,44,.10)",
+  border: "#EAE5DD", // Borde cálido sutil
+  borderLight: "rgba(0, 0, 0, 0.06)",
 };
 
 export const status = {
-  onRoute: "#6F4E37",
-  delay: "#E8692C",
-  penalty: "#C0392B",
-  incident: "#D96C3D",
-  inactive: "#A79A90",
+  success: "#2A9D6F", // Verde Agave de la palmera / naturaleza
+  successSubtle: "rgba(42, 157, 111, 0.12)",
 
-  error: "#C0392B",
-  success: "#6F4E37",
-  warning: "#E8692C",
-  info: "#8B6A4E",
-};
+  warning: "#E7692C", // Terracota / Ámbar para pendientes
+  warningSubtle: "rgba(231, 105, 44, 0.12)",
 
-export const dashboard = {
-  cooperativas: "#6F4E37",
-  propietarios: "#C8A97E",
+  error: "#D84028", // Terracota rojizo de las cúpulas
+  errorSubtle: "rgba(216, 64, 40, 0.12)",
 
-  autobuses: "#8B5E3C",
-  choferes: "#B08968",
+  info: "#008989", // Teal de "Local"
+  infoSubtle: "rgba(0, 137, 137, 0.10)",
 
-  rutas: "#5A3E2B",
-  puntosChequeo: "#F5E9CF",
-
-  incidencias: "#D96C3D",
-  penalizaciones: "#C0392B",
-
-  recorridos: "#6F4E37",
-  prorrogas: "#E8692C",
+  inactive: "#8E939B",
+  inactiveSubtle: "rgba(142, 147, 155, 0.12)",
 };
 
 export const sidebar = {
-  background: "#2F241D",
-
-  text: "#FFFFFF",
-
-  textMuted: "#C0B2A6",
-
-  hover: "rgba(255,255,255,.06)",
-
-  active: "#6F4E37",
-
-  activeBackground: "linear-gradient(135deg, #6F4E37 0%, #C8A97E 100%)",
-
-  border: "rgba(255,255,255,.08)",
+  background: "#FFFFFF",
+  backgroundHover: "rgba(0, 137, 137, 0.05)",
+  text: "#1C1D1F",
+  textMuted: "#696E75",
+  active: "#008989",
+  activeBackground: "rgba(0, 137, 137, 0.10)",
+  border: "#EAE5DD",
 };
 
 export const cards = {
   background: "#FFFFFF",
-
-  border: "#E7DDD4",
-
-  shadow: "rgba(47,36,29,.08)",
-
-  shadowHover: "rgba(47,36,29,.15)",
+  border: "#EAE5DD",
+  shadow: "0 2px 8px rgba(0, 0, 0, 0.03), 0 8px 24px rgba(0, 0, 0, 0.03)",
+  shadowHover: "0 4px 14px rgba(0, 0, 0, 0.06), 0 12px 28px rgba(0, 137, 137, 0.08)",
 };
 
 export const table = {
-  headerBackground: "#3B2A1F",
-
-  headerText: "#FFFFFF",
-
-  rowHover: "#F8F4EE",
-
-  rowBorder: "#E7DDD4",
-
-  selected: "rgba(111,78,55,.10)",
+  headerBackground: "#F5F2EC",
+  headerText: "#1C1D1F",
+  rowHover: "rgba(0, 137, 137, 0.03)",
+  rowBorder: "#EAE5DD",
+  selected: "rgba(0, 137, 137, 0.08)",
 };

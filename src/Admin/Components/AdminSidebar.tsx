@@ -6,7 +6,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Box,
   Divider,
   Tooltip,
   useTheme,
@@ -14,7 +13,6 @@ import {
 } from "@mui/material";
 
 import MaterialSymbol from "../../components/UI/MaterialSymbol/MaterialSymbol";
-import styles from "../../styles/UserSidebar.module.css";
 import type { CSSProperties } from "react";
 
 interface SidebarProps {
@@ -35,11 +33,9 @@ type SidebarCssVariables = CSSProperties & {
   "--sidebar-width": string;
 };
 
-const LOGO_FULL =
-  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
+const LOGO_FULL = "/logo-adlocal.png";
 
-const LOGO_ICON =
-  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
+const LOGO_ICON = "/logo-adlocal.png";
 
 const AdminSidebar = ({
   drawerWidth,
@@ -100,11 +96,6 @@ const AdminSidebar = ({
       icon: "account_balance",
       path: "/admin/app/cuentas-adlocal",
     },
-    // {
-    //   text: "Historial",
-    //   icon: "history",
-    //   path: "/admin/app/historial-suscripciones",
-    // },
   ];
 
   const normalizePath = (path: string) => {
@@ -129,41 +120,39 @@ const AdminSidebar = ({
   };
 
   const drawerContent = (
-    <Box className={styles.sidebarContent}>
-      <Box
+    <div className="user-sidebar-content">
+      <div
         className={[
-          styles.logoSection,
-          isCollapsedDesktop ? styles.logoSectionCollapsed : "",
-          isMobile ? styles.logoSectionMobile : "",
+          "user-sidebar-logo-section",
+          isCollapsedDesktop ? "user-sidebar-logo-collapsed" : "",
+          isMobile ? "user-sidebar-logo-mobile" : "",
         ]
           .filter(Boolean)
           .join(" ")}
       >
-        <Box
-          component={Link}
+        <Link
           to="/admin/app/inicio"
-          className={styles.logoLink}
+          className="user-sidebar-logo-link"
           onClick={isMobile ? onCloseMobile : undefined}
         >
-          <Box
-            component="img"
+          <img
             src={isCollapsedDesktop ? LOGO_ICON : LOGO_FULL}
             alt="ADLocal"
             className={[
-              styles.logo,
-              isCollapsedDesktop ? styles.logoCollapsed : "",
-              isMobile ? styles.logoMobile : "",
+              "user-sidebar-logo-img",
+              isCollapsedDesktop ? "user-sidebar-logo-img-collapsed" : "",
+              isMobile ? "user-sidebar-logo-img-mobile" : "",
             ]
               .filter(Boolean)
               .join(" ")}
           />
-        </Box>
-      </Box>
+        </Link>
+      </div>
 
-      <Divider className={styles.divider} />
+      <Divider className="user-sidebar-divider" />
 
-      <Box component="nav" className={styles.navigation}>
-        <List className={styles.menuList}>
+      <nav className="user-sidebar-nav">
+        <List className="user-sidebar-menu-list">
           {menuItems.map((item) => {
             const selected = isPathSelected(location.pathname, item.path);
 
@@ -174,17 +163,17 @@ const AdminSidebar = ({
                 selected={selected}
                 onClick={isMobile ? onCloseMobile : undefined}
                 className={[
-                  styles.menuButton,
-                  selected ? styles.menuButtonSelected : "",
-                  isCollapsedDesktop ? styles.menuButtonCollapsed : "",
+                  "user-sidebar-menu-btn",
+                  selected ? "user-sidebar-menu-btn--selected" : "",
+                  isCollapsedDesktop ? "user-sidebar-menu-btn--collapsed" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
               >
                 <ListItemIcon
                   className={[
-                    styles.menuIcon,
-                    isCollapsedDesktop ? styles.menuIconCollapsed : "",
+                    "user-sidebar-menu-icon",
+                    isCollapsedDesktop ? "user-sidebar-menu-icon--collapsed" : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -199,8 +188,8 @@ const AdminSidebar = ({
                 <ListItemText
                   primary={item.text}
                   className={[
-                    styles.menuText,
-                    isCollapsedDesktop ? styles.menuTextCollapsed : "",
+                    "user-sidebar-menu-text",
+                    isCollapsedDesktop ? "user-sidebar-menu-text--collapsed" : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -208,7 +197,7 @@ const AdminSidebar = ({
                     primary: {
                       component: "span",
                       noWrap: true,
-                      className: styles.menuTextTypography,
+                      className: "user-sidebar-menu-text-typo",
                     },
                   }}
                 />
@@ -219,7 +208,7 @@ const AdminSidebar = ({
               <ListItem
                 key={item.path}
                 disablePadding
-                className={styles.menuListItem}
+                className="user-sidebar-menu-item"
               >
                 {isCollapsedDesktop ? (
                   <Tooltip
@@ -228,10 +217,10 @@ const AdminSidebar = ({
                     arrow
                     slotProps={{
                       tooltip: {
-                        className: styles.menuTooltip,
+                        className: "user-sidebar-tooltip",
                       },
                       arrow: {
-                        className: styles.menuTooltipArrow,
+                        className: "user-sidebar-tooltip-arrow",
                       },
                     }}
                   >
@@ -244,8 +233,8 @@ const AdminSidebar = ({
             );
           })}
         </List>
-      </Box>
-    </Box>
+      </nav>
+    </div>
   );
 
   return (
@@ -255,12 +244,12 @@ const AdminSidebar = ({
       onClose={onCloseMobile}
       style={sidebarVariables}
       className={[
-        styles.drawer,
-        isMobile ? styles.mobileDrawer : styles.desktopDrawer,
+        "user-sidebar-drawer",
+        isMobile ? "user-sidebar-mobile-drawer" : "user-sidebar-desktop-drawer",
       ].join(" ")}
       slotProps={{
         paper: {
-          className: styles.drawerPaper,
+          className: "user-sidebar-paper",
         },
       }}
     >
@@ -270,3 +259,4 @@ const AdminSidebar = ({
 };
 
 export default AdminSidebar;
+

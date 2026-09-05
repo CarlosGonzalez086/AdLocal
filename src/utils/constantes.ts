@@ -113,11 +113,11 @@ export const METODOS_PAGO = [
 
 
 export const iosColors = {
-  primary: "#007AFF",
-  success: "#34C759",
-  warning: "#FF9F0A",
-  danger: "#FF3B30",
-  purple: "#AF52DE",
-  gray: "#8E8E93",
-  background: "#F9FAFB",
+  primary: "#008989", // Teal de "Local"
+  success: "#2A9D6F", // Verde Agave
+  warning: "#E7692C", // Terracota cálido de "AD"
+  danger: "#D84028", // Terracota rojizo
+  purple: "#F59E0B", // Ámbar dorado del sol
+  gray: "#8E939B",
+  background: "#F8F6F2",
 };

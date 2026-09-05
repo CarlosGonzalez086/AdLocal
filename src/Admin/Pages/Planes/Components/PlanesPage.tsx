@@ -1,10 +1,8 @@
-import { Button, Box, Stack } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { PlanCreateDto } from "../../../../types/Admin/planes";
 import { usePlanes } from "../../../../hooks/usePlanes";
-import { SearchInput } from "../../../../components/SearchInput";
-import { OrderSelect } from "../../../../components/OrderSelect";
+import { SearchToolbar } from "../../../../components/UI/SearchToolbar";
 import { PlanesTable } from "./PlanesTable";
 import { PlanModal } from "./PlanModal";
 
@@ -42,43 +40,29 @@ export const PlanesPageAdmin = () => {
   }, [page, rows, orderBy, search]);
 
   return (
-    <Box>
-      <div className="filters-paper">
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={2}
-          alignItems={{ md: "center" }}
-        >
-          <SearchInput
-            value={search}
-            placeholder="Buscar plan…"
-            onChange={(value) => {
-              setSearch(value);
-              setPage(0);
-            }}
-          />
-
-          <OrderSelect
-            value={orderBy}
-            onChange={(value) => {
-              setOrderBy(value);
-              setPage(0);
-            }}
-          />
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            className="btn-adlocal btn-adlocal--solid fz-h4 fw-semibold"
-            onClick={() => {
-              setPlan(initialForm);
-              setOpen(true);
-            }}
-          >
-            Nuevo
-          </Button>
-        </Stack>
-      </div>
-      <div className="mt-4">
+    <Box sx={{ width: "100%" }}>
+      <SearchToolbar
+        search={search}
+        searchPlaceholder="Buscar plan..."
+        onSearchChange={(value) => {
+          setSearch(value);
+          setPage(0);
+        }}
+        orderBy={orderBy}
+        onOrderChange={(value) => {
+          setOrderBy(value);
+          setPage(0);
+        }}
+        actionButton={{
+          label: "Nuevo Plan",
+          icon: "add",
+          onClick: () => {
+            setPlan(initialForm);
+            setOpen(true);
+          },
+        }}
+      />
+      <Box sx={{ mt: 2 }}>
         <PlanesTable
           planes={planes}
           total={total}
@@ -98,7 +82,7 @@ export const PlanesPageAdmin = () => {
             eliminar(Number(p.id), { page, rows, orderBy, search })
           }
         />
-      </div>
+      </Box>
 
       {open && (
         <>

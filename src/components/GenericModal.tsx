@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   CircularProgress,
   Dialog,
@@ -11,9 +10,6 @@ import {
 } from "@mui/material";
 
 import type { FormEvent, ReactNode } from "react";
-
-import styles from "../styles/GenericModal.module.css";
-
 import MaterialSymbol from "./UI/MaterialSymbol/MaterialSymbol";
 
 export interface GenericModalPrimaryAction {
@@ -27,105 +23,63 @@ export interface GenericModalPrimaryAction {
 
 interface Props {
   open: boolean;
-
   onClose: (data?: any) => void;
-
   title: string;
   subtitle?: string;
   icon?: string;
-
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
-
   fullWidth?: boolean;
-
   fullScreenMobile?: boolean;
-
   loading?: boolean;
-
   onSubmit?: (event: FormEvent<HTMLFormElement>) => Promise<void> | void;
-
   primaryAction?: GenericModalPrimaryAction;
-
   secondaryLabel?: string;
-
   onCancel?: () => Promise<any> | any;
-
   showCancel?: boolean;
-
   rejectLabel?: string;
-
   onReject?: () => Promise<any> | any;
-
   showReject?: boolean;
-
   hideActions?: boolean;
-
   showDivider?: boolean;
-
   showCloseButton?: boolean;
-
   children: ReactNode;
 }
 
 export const GenericModal = ({
   open,
-
   onClose,
-
   title,
-
   subtitle,
-
   icon,
-
   maxWidth = "md",
-
   fullWidth = true,
-
   fullScreenMobile = true,
-
   loading = false,
-
   onSubmit,
-
   primaryAction,
-
   secondaryLabel = "Cancelar",
-
   onCancel,
-
   showCancel = true,
-
   rejectLabel = "Rechazar",
-
   onReject,
-
   showReject = false,
-
   hideActions = false,
-
   showDivider = false,
-
   showCloseButton = true,
-
   children,
 }: Props) => {
   const theme = useTheme();
-
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleClose = () => {
     if (loading) return;
-
     onClose();
   };
 
   const handleCancel = async () => {
     if (loading) return;
-
     try {
       const data = onCancel ? await onCancel() : undefined;
-
       onClose(data);
     } catch (error) {
       console.error("Error al cancelar:", error);
@@ -136,10 +90,8 @@ export const GenericModal = ({
     if (loading || primaryAction?.disabled || !primaryAction?.onClick) {
       return;
     }
-
     try {
       const data = await primaryAction.onClick();
-
       if (!data?.noClose) {
         onClose(data);
       }
@@ -150,10 +102,8 @@ export const GenericModal = ({
 
   const handleReject = async () => {
     if (loading || !onReject) return;
-
     try {
       const data = await onReject();
-
       if (!data?.noClose) {
         onClose(data);
       }
@@ -166,18 +116,17 @@ export const GenericModal = ({
     <>
       <DialogTitle
         id="generic-modal-title"
-        className={`${styles.dialogTitle} d-flex justify-content-between align-items-center p-3 gap-3`}
+        className="generic-modal-title d-flex justify-content-between align-items-center p-3 gap-3"
       >
         <div className="d-flex justify-content-start align-items-center gap-3 w-100">
           {icon && (
-            <div className={styles.titleIcon}>
+            <div className="generic-modal-title-icon">
               <MaterialSymbol icon={icon} size="large" />
             </div>
           )}
 
           <div className="d-flex justify-content-start align-items-start flex-column">
             <h2 className="fz-h2 fw-bold mb-0">{title}</h2>
-
             {subtitle && <h4 className="fz-h4 fw-regular mb-0">{subtitle}</h4>}
           </div>
         </div>
@@ -187,7 +136,7 @@ export const GenericModal = ({
             type="button"
             onClick={handleClose}
             disabled={loading}
-            className={styles.closeButton}
+            className="generic-modal-close-btn"
             aria-label="Cerrar"
           >
             <MaterialSymbol icon="close" size="medium" />
@@ -195,13 +144,13 @@ export const GenericModal = ({
         )}
       </DialogTitle>
 
-      {showDivider && <div className={styles.divider} />}
+      {showDivider && <div className="border-bottom" />}
 
-      <DialogContent className={styles.dialogContent}>{children}</DialogContent>
+      <DialogContent className="generic-modal-content">{children}</DialogContent>
 
       {!hideActions && (
         <DialogActions
-          className={`${styles.dialogActions} d-flex justify-content-end align-items-center p-3 gap-3`}
+          className="generic-modal-actions d-flex justify-content-end align-items-center p-3 gap-3"
         >
           <div>
             {showReject && onReject && (
@@ -216,10 +165,11 @@ export const GenericModal = ({
             )}
           </div>
 
-          <div className="d-flex justify-content-end align-items-center gap-3">
+          <div className="d-flex justify-content-end align-items-center gap-2">
             {showCancel && !showReject && (
               <Button
                 type="button"
+                variant="outlined"
                 onClick={handleCancel}
                 disabled={loading}
                 className="btn-adlocal btn-adlocal--ghost fz-h4 fw-medium"
@@ -231,13 +181,14 @@ export const GenericModal = ({
             {primaryAction && (
               <Button
                 type={primaryAction.type ?? "button"}
+                variant="contained"
                 onClick={
                   primaryAction.type === "submit"
                     ? undefined
                     : handlePrimaryAction
                 }
                 disabled={loading || primaryAction.disabled}
-                className="btn-adlocal btn-adlocal--solid fz-h4 fw-semibold"
+                className="generic-modal-save-btn btn-adlocal btn-adlocal--solid fz-h4 fw-medium"
                 startIcon={
                   loading || !primaryAction.icon ? undefined : (
                     <MaterialSymbol icon={primaryAction.icon} size="small" />
@@ -249,9 +200,8 @@ export const GenericModal = ({
                     <CircularProgress
                       size={18}
                       thickness={4}
-                      className={styles.saveProgress}
+                      className="generic-modal-save-progress"
                     />
-
                     <span>{primaryAction.loadingLabel ?? "Guardando..."}</span>
                   </>
                 ) : (
@@ -275,30 +225,25 @@ export const GenericModal = ({
       aria-labelledby="generic-modal-title"
       slotProps={{
         paper: {
-          className: styles.dialogPaper,
+          className: "generic-modal-paper",
         },
-
         backdrop: {
-          className: styles.dialogBackdrop,
+          className: "generic-modal-backdrop",
         },
       }}
     >
       {onSubmit ? (
-        <Box
-          component="form"
+        <form
           onSubmit={onSubmit}
           noValidate
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-          }}
+          className="d-flex flex-column h-100"
         >
           {body}
-        </Box>
+        </form>
       ) : (
         body
       )}
     </Dialog>
   );
 };
+

@@ -19,5 +19,28 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'sweetalert2',
+              message: 'Usa src/utils/sweetalert para mantener el tema y comportamiento AdLocal.',
+            },
+            {
+              name: '@mui/material',
+              importNames: ['Box', 'Stack', 'Grid', 'Card', 'Paper', 'Typography'],
+              message:
+                'Prohibido por Sistema de Diseño AdLocal: Use HTML semántico, Bootstrap grid (container, row, col-*) y clases AdLocal.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/utils/sweetalert.ts'],
+    rules: { 'no-restricted-imports': 'off' },
   },
 ])

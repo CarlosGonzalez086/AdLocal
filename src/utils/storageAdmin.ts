@@ -56,9 +56,27 @@ export const removeLocalStorageAdmin = (
   }
 };
 
+export const getLocalStorageRefreshTokenAdmin = (): string => {
+  try {
+    return window.localStorage.getItem("refreshTokenAdmin") ?? "";
+  } catch (error) {
+    console.log(error);
+    return "";
+  }
+};
+
+export const setLocalStorageRefreshTokenAdmin = (token: string): void => {
+  try {
+    window.localStorage.setItem("refreshTokenAdmin", token);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const clearStorageAdmin = (): void => {
   try {
     window.localStorage.removeItem("jwtAdmin");
+    window.localStorage.removeItem("refreshTokenAdmin");
     window.localStorage.removeItem("admin");
     window.localStorage.removeItem("token");
   } catch (error) {

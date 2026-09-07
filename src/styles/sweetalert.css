@@ -1,0 +1,267 @@
+/* SweetAlert2 compartido: mismo contrato visual en web pública y panel. */
+.adlocal-alert-container.swal2-container {
+  z-index: 10000 !important;
+  padding: 16px !important;
+  font-family: var(--font-body, Inter, system-ui, sans-serif);
+}
+
+.adlocal-alert-container.swal2-container:not(.swal2-top-end) {
+  backdrop-filter: blur(4px);
+}
+
+.adlocal-alert-container.swal2-container.swal2-top-end {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  pointer-events: none;
+}
+
+.adlocal-alert.swal2-toast {
+  pointer-events: auto;
+}
+
+.adlocal-alert.swal2-popup {
+  width: min(100%, 440px) !important;
+  max-width: 440px !important;
+  padding: 24px !important;
+  border: 1px solid var(--border, #eae5dd) !important;
+  border-radius: 20px !important;
+  background: var(--surface, #fff) !important;
+  color: var(--text, #1c1d1f) !important;
+  box-shadow: 0 20px 48px rgba(28, 29, 31, 0.16) !important;
+  font-family: var(--font-body, Inter, system-ui, sans-serif) !important;
+}
+
+.adlocal-alert .swal2-title {
+  padding: 8px 0 0 !important;
+  color: var(--text, #1c1d1f) !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.adlocal-alert .swal2-html-container {
+  margin: 10px 0 0 !important;
+  padding: 0 !important;
+  color: var(--text-secondary, #696e75) !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.55 !important;
+}
+
+.adlocal-alert .swal2-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  width: 64px !important;
+  height: 64px !important;
+  margin: 4px auto 8px !important;
+  border: 0 !important;
+  border-radius: 18px !important;
+  line-height: 1 !important;
+  --swal2-icon-animations: false;
+}
+
+/* El dibujo nativo de SweetAlert2 se reemplaza por glifos vectoriales.
+   Se conservan icon, roles y textos de la librería para accesibilidad. */
+.adlocal-alert .swal2-icon > * {
+  display: none !important;
+}
+
+.adlocal-alert .swal2-icon::before {
+  content: "" !important;
+  display: block !important;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  background: currentColor;
+  -webkit-mask-image: var(--adlocal-alert-glyph);
+  mask-image: var(--adlocal-alert-glyph);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.adlocal-alert .swal2-icon::after {
+  content: none !important;
+  display: none !important;
+}
+
+.adlocal-alert .swal2-close {
+  color: var(--text-muted, #8e939b) !important;
+  border-radius: 8px !important;
+}
+
+.adlocal-alert .swal2-close:hover {
+  color: var(--text, #1c1d1f) !important;
+  background: var(--bg, #f8f6f2) !important;
+}
+
+.adlocal-alert .swal2-validation-message {
+  border-radius: 8px !important;
+  background: rgba(216, 64, 40, 0.1) !important;
+  color: var(--error, #d84028) !important;
+}
+
+.adlocal-alert .swal2-actions {
+  width: 100% !important;
+  margin: 24px 0 0 !important;
+  gap: 10px !important;
+}
+
+.adlocal-alert .swal2-actions button {
+  min-height: 44px !important;
+  margin: 0 !important;
+  padding: 10px 20px !important;
+  border-radius: 10px !important;
+  font-family: inherit !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  transition: background-color 150ms ease, box-shadow 150ms ease !important;
+}
+
+.adlocal-alert .adlocal-alert-confirm.swal2-confirm {
+  border: 1px solid var(--primary, #008989) !important;
+  background: var(--primary, #008989) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(0, 137, 137, 0.22) !important;
+}
+
+.adlocal-alert .adlocal-alert-confirm.swal2-confirm:hover {
+  background: var(--primary-dark, #007070) !important;
+}
+
+.adlocal-alert--destructive .adlocal-alert-confirm.swal2-confirm {
+  border-color: var(--error, #d84028) !important;
+  background: var(--error, #d84028) !important;
+  box-shadow: 0 4px 12px rgba(216, 64, 40, 0.2) !important;
+}
+
+.adlocal-alert--destructive .adlocal-alert-confirm.swal2-confirm:hover {
+  background: #b52f19 !important;
+}
+
+.adlocal-alert .adlocal-alert-cancel.swal2-cancel {
+  border: 1px solid var(--border, #eae5dd) !important;
+  background: var(--bg, #f8f6f2) !important;
+  color: var(--text, #1c1d1f) !important;
+  box-shadow: none !important;
+}
+
+.adlocal-alert .adlocal-alert-cancel.swal2-cancel:hover {
+  background: var(--bg-soft, #f3efe8) !important;
+}
+
+.adlocal-alert .adlocal-alert-deny.swal2-deny {
+  border: 1px solid var(--error, #d84028) !important;
+  background: var(--error, #d84028) !important;
+  color: #fff !important;
+}
+
+.adlocal-alert .swal2-actions button:focus-visible,
+.adlocal-alert .swal2-close:focus-visible,
+.adlocal-alert .swal2-input:focus-visible,
+.adlocal-alert .swal2-textarea:focus-visible,
+.adlocal-alert .swal2-select:focus-visible {
+  outline: 3px solid rgba(0, 137, 137, 0.35) !important;
+  outline-offset: 2px !important;
+}
+
+.adlocal-alert .swal2-icon.swal2-success {
+  color: var(--success, #2a9d6f) !important;
+  background: rgba(42, 157, 111, 0.11) !important;
+  --adlocal-alert-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 16.5l6.5 6.5L25.5 10'/%3E%3C/svg%3E");
+}
+
+.adlocal-alert .swal2-icon.swal2-error {
+  color: var(--error, #d84028) !important;
+  background: rgba(216, 64, 40, 0.1) !important;
+  --adlocal-alert-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round'%3E%3Cpath d='M7.5 7.5l17 17m0-17l-17 17'/%3E%3C/svg%3E");
+}
+
+.adlocal-alert .swal2-icon.swal2-warning {
+  color: var(--warning, #e7692c) !important;
+  background: rgba(231, 105, 44, 0.11) !important;
+  --adlocal-alert-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round'%3E%3Cpath d='M16 7.5v12'/%3E%3Ccircle cx='16' cy='24.5' r='1.8' fill='black' stroke='none'/%3E%3C/svg%3E");
+}
+
+.adlocal-alert .swal2-icon.swal2-info,
+.adlocal-alert .swal2-icon.swal2-question {
+  color: var(--primary, #008989) !important;
+  background: rgba(0, 137, 137, 0.1) !important;
+}
+
+.adlocal-alert .swal2-icon.swal2-info {
+  --adlocal-alert-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round'%3E%3Cpath d='M16 14v10'/%3E%3Ccircle cx='16' cy='8.5' r='1.8' fill='black' stroke='none'/%3E%3C/svg%3E");
+}
+
+.adlocal-alert .swal2-icon.swal2-question {
+  --adlocal-alert-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.5 12a5.5 5.5 0 0 1 11 0c0 3.7-5.5 4.2-5.5 8'/%3E%3Ccircle cx='16' cy='25.5' r='1.6' fill='black' stroke='none'/%3E%3C/svg%3E");
+}
+
+.adlocal-alert .swal2-input,
+.adlocal-alert .swal2-textarea,
+.adlocal-alert .swal2-select {
+  max-width: 100% !important;
+  border: 1px solid var(--border, #eae5dd) !important;
+  border-radius: 10px !important;
+  background: var(--surface, #fff) !important;
+  color: var(--text, #1c1d1f) !important;
+  font-family: inherit !important;
+}
+
+.adlocal-alert .swal2-input:focus,
+.adlocal-alert .swal2-textarea:focus,
+.adlocal-alert .swal2-select:focus {
+  border-color: var(--primary, #008989) !important;
+  box-shadow: 0 0 0 3px rgba(0, 137, 137, 0.14) !important;
+}
+
+.adlocal-alert .swal2-timer-progress-bar {
+  background: var(--primary, #008989) !important;
+}
+
+.adlocal-alert.swal2-toast {
+  width: min(100%, 360px) !important;
+  padding: 12px 16px !important;
+  border-radius: 14px !important;
+}
+
+.adlocal-alert.swal2-toast .swal2-title {
+  padding: 0 !important;
+  font-size: 0.875rem !important;
+}
+
+.adlocal-alert.swal2-toast .swal2-icon {
+  width: 36px !important;
+  height: 36px !important;
+  margin: 0 10px 0 0 !important;
+  border-radius: 10px !important;
+}
+
+.adlocal-alert.swal2-toast .swal2-icon::before {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 480px) {
+  .adlocal-alert.swal2-popup:not(.swal2-toast) {
+    padding: 20px 16px !important;
+  }
+
+  .adlocal-alert .swal2-actions button {
+    flex: 1 1 120px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adlocal-alert,
+  .adlocal-alert * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

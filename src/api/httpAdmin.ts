@@ -4,6 +4,7 @@ import {
   getLocalStorageJWTAdmin,
 } from "../utils/storageAdmin";
 import { renovarTokenAdmin } from "../services/tokenRefresh";
+import { extraerMensajeError } from "../utils/errorHandler";
 
 const getAdminBaseUrl = (): string => {
   const envUrl = import.meta.env.VITE_API_URL as string | undefined;
@@ -13,6 +14,7 @@ const getAdminBaseUrl = (): string => {
 
 export const httpAdmin = axios.create({
   baseURL: getAdminBaseUrl(),
+  withCredentials: true,
 });
 
 httpAdmin.interceptors.request.use(
@@ -113,6 +115,10 @@ httpAdmin.interceptors.response.use(
       ) {
         window.location.href = "/admin/login";
       }
+    }
+
+    if (error && typeof error === "object") {
+      (error as Record<string, unknown>).mensajeAmigable = extraerMensajeError(error);
     }
 
     return Promise.reject(error);

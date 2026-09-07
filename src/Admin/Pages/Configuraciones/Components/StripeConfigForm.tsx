@@ -32,7 +32,7 @@ export const StripeConfigForm = () => {
 
   useEffect(() => {
     cargar();
-  }, []);
+  }, [cargar]);
 
   useEffect(() => {
     if (!Array.isArray(configuraciones)) return;

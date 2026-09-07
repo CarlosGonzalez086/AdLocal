@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
 
 import {
   configuracionApi,
@@ -8,12 +8,13 @@ import {
   type ComisionMarketplaceDto,
   type EmailConfiguracionDto,
   type StripeConfiguracionDto,
+  type ConfiguracionItemDto,
 } from "../services/configuracionApi";
 
 export const useConfiguracionSistema = () => {
   const [loading, setLoading] = useState(false);
 
-  const [configuraciones, setConfiguraciones] = useState<any[]>([]);
+  const [configuraciones, setConfiguraciones] = useState<ConfiguracionItemDto[]>([]);
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -22,9 +23,7 @@ export const useConfiguracionSistema = () => {
       const { data } = await configuracionApi.obtenerTodas();
 
       setConfiguraciones(data.respuesta ?? []);
-    } catch (error) {
-      console.error(error);
-
+    } catch {
       Swal.fire(
         "Error",
         "No se pudo cargar la configuración del sistema",
@@ -48,9 +47,7 @@ export const useConfiguracionSistema = () => {
       );
 
       await cargar();
-    } catch (error) {
-      console.error(error);
-
+    } catch {
       await Swal.fire(
         "Error",
         "No se pudo guardar la configuración de Stripe",
@@ -74,9 +71,7 @@ export const useConfiguracionSistema = () => {
       );
 
       await cargar();
-    } catch (error) {
-      console.error(error);
-
+    } catch {
       await Swal.fire(
         "Error",
         "No se pudo guardar la configuración de claves",
@@ -102,9 +97,7 @@ export const useConfiguracionSistema = () => {
       await cargar();
 
       return true;
-    } catch (error) {
-      console.error(error);
-
+    } catch {
       await Swal.fire(
         "Error",
         "No se pudo guardar la configuración de comisión",
@@ -131,9 +124,7 @@ export const useConfiguracionSistema = () => {
       await cargar();
 
       return true;
-    } catch (error) {
-      console.error(error);
-
+    } catch {
       await Swal.fire(
         "Error",
         "No se pudo guardar la configuración de correo",

@@ -1,5 +1,4 @@
 import {
-  Box,
   Divider,
   InputAdornment,
   MenuItem,
@@ -38,21 +37,10 @@ type NumericPlanField =
 type TextPlanField = "nombre" | "stripePriceId" | "badgeTexto";
 
 const defaultForm: PlanCreateDto = {
-  nombre: "",
-  precio: 0,
-  duracionDias: 30,
-  tipo: "FREE",
-  maxNegocios: 1,
-  maxProductos: 0,
-  maxFotos: 1,
-  stripePriceId: "",
-  nivelVisibilidad: 0,
-  permiteCatalogo: false,
-  coloresPersonalizados: false,
-  tieneBadge: false,
-  badgeTexto: null,
-  tieneAnalytics: false,
-  isMultiUsuario: false,
+  nombre: "", precio: 0, duracionDias: 30, tipo: "FREE", maxNegocios: 1,
+  maxProductos: 0, maxFotos: 1, stripePriceId: "", nivelVisibilidad: 0,
+  permiteCatalogo: false, coloresPersonalizados: false, tieneBadge: false,
+  badgeTexto: null, tieneAnalytics: false, isMultiUsuario: false,
 };
 
 const normalizeForm = (plan?: PlanCreateDto | null): PlanCreateDto => ({
@@ -88,10 +76,7 @@ export const PlanModal = ({
   const [errors, setErrors] = useState<PlanFormErrors>({});
 
   const modalTitle = useMemo(() => {
-    if (soloVer) {
-      return "Detalle del plan";
-    }
-
+    if (soloVer) return "Detalle del plan";
     return form.id ? "Editar plan" : "Nuevo plan";
   }, [form.id, soloVer]);
 
@@ -102,10 +87,7 @@ export const PlanModal = ({
       : "Configura un nuevo plan para los usuarios de la plataforma.";
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
-
+    if (!open) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm(normalizeForm(plan));
     setErrors({});
@@ -171,41 +153,16 @@ export const PlanModal = ({
   const validar = (): boolean => {
     const nextErrors: PlanFormErrors = {};
 
-    if (!form.nombre.trim()) {
-      nextErrors.nombre = "El nombre es obligatorio";
-    }
-
-    if (!Number.isFinite(form.precio) || form.precio < 0) {
-      nextErrors.precio = "El precio no puede ser negativo";
-    }
-
-    if (!Number.isInteger(form.duracionDias) || form.duracionDias <= 0) {
-      nextErrors.duracionDias = "La duración debe ser mayor a 0";
-    }
-
-    if (!Number.isInteger(form.maxNegocios) || form.maxNegocios < 0) {
-      nextErrors.maxNegocios = "Debe ser 0 o mayor";
-    }
-
-    if (!Number.isInteger(form.maxProductos) || form.maxProductos < 0) {
-      nextErrors.maxProductos = "Debe ser 0 o mayor";
-    }
-
-    if (!Number.isInteger(form.maxFotos) || form.maxFotos < 0) {
-      nextErrors.maxFotos = "Debe ser 0 o mayor";
-    }
-
-    if (
-      !Number.isFinite(form.nivelVisibilidad) ||
-      form.nivelVisibilidad < 0 ||
-      form.nivelVisibilidad > 100
-    ) {
+    if (!form.nombre.trim()) nextErrors.nombre = "El nombre es obligatorio";
+    if (!Number.isFinite(form.precio) || form.precio < 0) nextErrors.precio = "El precio no puede ser negativo";
+    if (!Number.isInteger(form.duracionDias) || form.duracionDias <= 0) nextErrors.duracionDias = "La duración debe ser mayor a 0";
+    if (!Number.isInteger(form.maxNegocios) || form.maxNegocios < 0) nextErrors.maxNegocios = "Debe ser 0 o mayor";
+    if (!Number.isInteger(form.maxProductos) || form.maxProductos < 0) nextErrors.maxProductos = "Debe ser 0 o mayor";
+    if (!Number.isInteger(form.maxFotos) || form.maxFotos < 0) nextErrors.maxFotos = "Debe ser 0 o mayor";
+    if (!Number.isFinite(form.nivelVisibilidad) || form.nivelVisibilidad < 0 || form.nivelVisibilidad > 100) {
       nextErrors.nivelVisibilidad = "Debe estar entre 0 y 100";
     }
-
-    if (form.tieneBadge && !form.badgeTexto?.trim()) {
-      nextErrors.badgeTexto = "Escribe el texto del distintivo";
-    }
+    if (form.tieneBadge && !form.badgeTexto?.trim()) nextErrors.badgeTexto = "Escribe el texto del distintivo";
 
     setErrors(nextErrors);
 
@@ -259,7 +216,7 @@ export const PlanModal = ({
             }
       }
     >
-      <Box className="card-adlocal mt-3">
+      <div className="card-adlocal mt-3">
         <SectionHeader
           icon="description"
           title="Información general"
@@ -359,11 +316,11 @@ export const PlanModal = ({
             </TextField>
           </div>
         </div>
-      </Box>
+      </div>
 
       <Divider className="divider" />
 
-      <Box className="card-adlocal">
+      <div className="card-adlocal">
         <SectionHeader
           icon="tune"
           title="Capacidades"
@@ -413,11 +370,11 @@ export const PlanModal = ({
             />
           </div>
         </div>
-      </Box>
+      </div>
 
       <Divider className="divider" />
 
-      <Box className="card-adlocal">
+      <div className="card-adlocal">
         <SectionHeader
           icon="visibility"
           title="Visibilidad"
@@ -444,11 +401,11 @@ export const PlanModal = ({
             },
           }}
         />
-      </Box>
+      </div>
 
       <Divider className="divider" />
 
-      <Box className="card-adlocal">
+      <div className="card-adlocal">
         <SectionHeader
           icon="extension"
           title="Funciones incluidas"
@@ -534,7 +491,7 @@ export const PlanModal = ({
             </FeatureSwitch>
           </div>
         </div>
-      </Box>
+      </div>
     </GenericModal>
   );
 };

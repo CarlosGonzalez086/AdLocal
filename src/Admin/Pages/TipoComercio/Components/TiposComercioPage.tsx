@@ -1,5 +1,3 @@
-import { Box } from "@mui/material";
-
 import { useEffect, useState } from "react";
 import type { TipoComercioCreateDto } from "../../../../types/Admin/tipoComercio";
 import { useTiposComercio } from "../../../../hooks/useTiposComercio";
@@ -27,10 +25,10 @@ export const TiposComercioPageAdmin = () => {
 
   useEffect(() => {
     listar({ page, rows, orderBy, search });
-  }, [page, rows, orderBy, search]);
+  }, [page, rows, orderBy, search, listar]);
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <div className="w-100">
       <SearchToolbar
         search={search}
         searchPlaceholder="Buscar tipo de comercio..."
@@ -52,7 +50,7 @@ export const TiposComercioPageAdmin = () => {
           },
         }}
       />
-      <Box sx={{ mt: 2 }}>
+      <div className="mt-3">
         <TiposComercioTable
           tipos={tipos}
           total={total}
@@ -72,7 +70,7 @@ export const TiposComercioPageAdmin = () => {
             eliminar(Number(t.id), { page, rows, orderBy, search })
           }
         />
-      </Box>
+      </div>
       {open && (
         <TipoComercioModal
           key={`edit-${tipo?.id ?? "new"}`}
@@ -86,6 +84,6 @@ export const TiposComercioPageAdmin = () => {
           loading={loading}
         />
       )}
-    </Box>
+    </div>
   );
 };

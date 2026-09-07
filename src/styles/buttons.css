@@ -1,0 +1,127 @@
+/* ==============================================================
+   ADLOCAL DESIGN SYSTEM - BUTTONS
+   Clase base btn-adlocal y sus variantes estándar.
+   ============================================================== */
+
+.btn-adlocal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.55rem 1.25rem;
+  font-family: var(--font-body);
+  font-size: var(--fz-body);
+  font-weight: 600;
+  line-height: 1.35;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn-adlocal:disabled,
+.btn-adlocal.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* --- Variante Primaria (Teal) --- */
+.btn-adlocal-primary {
+  background-color: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.btn-adlocal-primary:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: #ffffff;
+  box-shadow: var(--shadow-teal);
+  transform: translateY(-1px);
+}
+
+.btn-adlocal-primary:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* --- Variante Secundaria (Terracota) --- */
+.btn-adlocal-secondary {
+  background-color: var(--secondary);
+  color: #ffffff;
+  border-color: var(--secondary);
+}
+
+.btn-adlocal-secondary:hover {
+  background-color: var(--secondary-dark);
+  border-color: var(--secondary-dark);
+  color: #ffffff;
+  box-shadow: var(--shadow-warm);
+  transform: translateY(-1px);
+}
+
+.btn-adlocal-secondary:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* --- Variante Contorno (Outline) --- */
+.btn-adlocal-outline {
+  background-color: transparent;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-adlocal-outline:hover {
+  background-color: var(--primary-subtle);
+  color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+/* --- Variante Fantasma / Texto (Ghost) --- */
+.btn-adlocal-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border-color: transparent;
+}
+
+.btn-adlocal-ghost:hover {
+  background-color: var(--surface-hover);
+  color: var(--text);
+}
+
+/* --- Variante Peligro / Eliminar --- */
+.btn-adlocal-danger {
+  background-color: var(--error);
+  color: #ffffff;
+  border-color: var(--error);
+}
+
+.btn-adlocal-danger:hover {
+  background-color: var(--error-dark);
+  border-color: var(--error-dark);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(216, 64, 40, 0.2);
+}
+
+/* --- Tamaños --- */
+.btn-adlocal-sm {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.825rem;
+  border-radius: var(--radius-xs);
+}
+
+.btn-adlocal-lg {
+  padding: 0.75rem 1.75rem;
+  font-size: 1.05rem;
+  border-radius: var(--radius-md);
+}
+
+.btn-adlocal-icon {
+  padding: 0.5rem;
+  border-radius: var(--radius-full);
+}

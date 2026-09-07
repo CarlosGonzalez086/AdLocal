@@ -14,6 +14,7 @@ import { useMemo, type CSSProperties } from "react";
 import { Link, useLocation } from "react-router-dom";
 import MaterialSymbol from "../../components/UI/MaterialSymbol/MaterialSymbol";
 import type { JwtPayload } from "../Auth/PrivateRouteUsuario";
+import { ADLOCAL_MARK_URL } from "../../constants/brand";
 
 interface UserSidebarProps {
   drawerWidth: number;
@@ -38,10 +39,6 @@ interface PlanPresentation {
 type SidebarCssVariables = CSSProperties & {
   "--sidebar-width": string;
 };
-
-const LOGO_FULL = "/logo-adlocal.png";
-
-const LOGO_ICON = "/logo-adlocal.png";
 
 const PLAN_PRESENTATION: Record<string, PlanPresentation> = {
   FREE: {
@@ -200,8 +197,8 @@ const UserSidebar = ({
           onClick={isMobile ? onCloseMobile : undefined}
         >
           <img
-            src={isCollapsedDesktop ? LOGO_ICON : LOGO_FULL}
-            alt="ADLocal"
+            src={ADLOCAL_MARK_URL}
+            alt=""
             className={[
               "user-sidebar-logo-img",
               isCollapsedDesktop ? "user-sidebar-logo-img-collapsed" : "",
@@ -210,13 +207,12 @@ const UserSidebar = ({
               .filter(Boolean)
               .join(" ")}
           />
+          {!isCollapsedDesktop && (
+            <span className="user-sidebar-brand-wordmark" aria-hidden="true">
+              <span>AD</span><span>Local</span>
+            </span>
+          )}
         </Link>
-
-        {isMobile && (
-          <span className="user-sidebar-mobile-app-name">
-            ADLocal
-          </span>
-        )}
       </div>
 
       <Divider className="user-sidebar-divider" />

@@ -9,12 +9,14 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: [
-        "logo-adlocal.png",
-        "apple-touch-icon.png",
-        "pwa-64x64.png",
-        "pwa-192x192.png",
-        "pwa-512x512.png",
-        "maskable-icon-512x512.png",
+        "logo-adlocal.svg",
+        "logo-adlocal-mark.svg",
+        "adlocal-32.png",
+        "adlocal-64.png",
+        "adlocal-192.png",
+        "adlocal-512.png",
+        "adlocal-maskable-512.png",
+        "adlocal-apple-touch-180.png",
       ],
       manifest: {
         name: "ADLocal - Tu Puente con la Comunidad",
@@ -30,24 +32,24 @@ export default defineConfig({
         categories: ["shopping", "business", "lifestyle"],
         icons: [
           {
-            src: "/pwa-64x64.png",
+            src: "/adlocal-64.png",
             sizes: "64x64",
             type: "image/png",
           },
           {
-            src: "/pwa-192x192.png",
+            src: "/adlocal-192.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "any",
           },
           {
-            src: "/pwa-512x512.png",
+            src: "/adlocal-512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any",
           },
           {
-            src: "/maskable-icon-512x512.png",
+            src: "/adlocal-maskable-512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",

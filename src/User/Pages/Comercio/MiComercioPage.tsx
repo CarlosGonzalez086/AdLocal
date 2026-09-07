@@ -1,11 +1,4 @@
-import {
-  Box,
-  Card,
-  CardContent,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Skeleton } from "@mui/material";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useComercio } from "../../../hooks/useComercio";
 import { ComercioForm } from "./ComercioForm";
@@ -71,49 +64,46 @@ const FormPanel = ({
       : "commerceFormHeaderIcon commerceFormHeaderIconRegister";
 
   return (
-    <Card
-      component="section"
-      elevation={0}
-      className="commerceFormCard"
+    <section
+      className="card-adlocal commerceFormCard"
       aria-labelledby={`${variant}-commerce-title`}
     >
-      <CardContent className="commerceFormContent">
-        <Box className="commerceFormHeader">
-          <Box className={iconClass}>
+      <div className="card-adlocal-body commerceFormContent">
+        <div className="commerceFormHeader">
+          <div className={iconClass}>
             <MaterialSymbol icon={icon} size="medium" />
-          </Box>
+          </div>
 
-          <Box className="commerceFormHeaderText">
-            <Typography
+          <div className="commerceFormHeaderText">
+            <h1
               id={`${variant}-commerce-title`}
-              component="h1"
-              className="commerceFormTitle"
+              className="commerceFormTitle fz-h4 fw-bold"
             >
               {title}
-            </Typography>
+            </h1>
 
-            <Typography component="p" className="commerceFormDescription">
+            <p className="commerceFormDescription fz-body-sm text-muted">
               {description}
-            </Typography>
-          </Box>
-        </Box>
+            </p>
+          </div>
+        </div>
 
         {children}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 };
 
 const PageSkeleton = () => {
   return (
-    <Box
+    <div
       className="commerceLoadingContainer"
       aria-busy="true"
       aria-live="polite"
     >
       <Skeleton variant="rounded" className="commerceHeaderSkeleton" />
 
-      <Stack className="commerceRowsSkeleton">
+      <div className="commerceRowsSkeleton d-flex flex-column gap-2">
         {[1, 2, 3].map((item) => (
           <Skeleton
             key={item}
@@ -121,12 +111,12 @@ const PageSkeleton = () => {
             className="commerceRowSkeleton"
           />
         ))}
-      </Stack>
+      </div>
 
-      <Typography component="p" className="commerceLoadingText">
+      <p className="commerceLoadingText fz-body-sm text-muted">
         Cargando información de tus comercios...
-      </Typography>
-    </Box>
+      </p>
+    </div>
   );
 };
 
@@ -237,7 +227,7 @@ export const MiComercioPage = ({ user }: MiComercioPageProps) => {
   }
 
   return (
-    <Box component="main" className="commerceManagementPage">
+    <main className="commerceManagementPage">
       <ComercioPlanGate
         user={user}
         fallback={
@@ -252,7 +242,7 @@ export const MiComercioPage = ({ user }: MiComercioPageProps) => {
       >
         <ComercioActionsHeader claims={user} total={total} />
 
-        <Box className="commerceTableContainer">
+        <div className="commerceTableContainer">
           <ComerciosTable
             data={comercios}
             loading={loading}
@@ -264,8 +254,8 @@ export const MiComercioPage = ({ user }: MiComercioPageProps) => {
             eliminarFromTable={eliminarFromTable}
             onSaveColaborador={guardarColaborador}
           />
-        </Box>
+        </div>
       </ComercioPlanGate>
-    </Box>
+    </main>
   );
 };

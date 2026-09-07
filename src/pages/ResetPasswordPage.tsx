@@ -5,7 +5,6 @@ import {
   IconButton,
   InputAdornment,
   TextField,
-  Typography,
 } from "@mui/material";
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -13,8 +12,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
 import { useAdmin } from "../hooks/useAdmin";
 import { useUser } from "../hooks/useUser";
-
-const LOGO_URL = "/logo-adlocal.png";
+import { authAdmin } from "../services/authAdmin.api";
+import { authUser } from "../services/authUser.api";
+import { extraerMensajeError } from "../utils/errorHandler";
+import { ADLOCAL_LOGO_URL } from "../constants/brand";
 
 export default function ResetPasswordPage() {
   const { token, type } = useParams<{
@@ -59,16 +60,14 @@ export default function ResetPasswordPage() {
       try {
         setValidatingToken(true);
 
-        const esValido = isAdmin
-          ? await admin.checkToken(token)
-          : await user.checkToken(token);
+        const resp = isAdmin
+          ? await authAdmin.checkToken(token)
+          : await authUser.checkToken(token);
 
         if (componentMounted) {
-          setTokenValido(Boolean(esValido));
+          setTokenValido(Boolean(resp.data));
         }
-      } catch (validationError) {
-        console.error("Error al validar el token:", validationError);
-
+      } catch {
         if (componentMounted) {
           setTokenValido(false);
         }
@@ -84,7 +83,7 @@ export default function ResetPasswordPage() {
     return () => {
       componentMounted = false;
     };
-  }, [token]);
+  }, [token, isAdmin]);
 
   useEffect(() => {
     if (!successMessage) {
@@ -123,18 +122,18 @@ export default function ResetPasswordPage() {
             passwordNueva: password,
           });
 
-      const data = response as any;
+      const data = response as { codigo?: string; mensaje?: string } | undefined;
 
-      if (data.codigo !== "200") {
-        setError(data.mensaje || "Ocurrió un error inesperado.");
+      if (data?.codigo !== "200") {
+        setError(data?.mensaje || "Ocurrió un error inesperado.");
         setSuccessMessage("");
         return;
       }
 
-      setSuccessMessage(data.mensaje);
-    } catch (error: any) {
-      console.error(error);
-      setError(error.message || "Ocurrió un error inesperado.");
+      setSuccessMessage(data.mensaje || "Contraseña actualizada exitosamente.");
+    } catch (error: unknown) {
+      const mensaje = extraerMensajeError(error, "Ocurrió un error al actualizar la contraseña.");
+      setError(mensaje);
       setSuccessMessage("");
     }
   };
@@ -163,7 +162,7 @@ export default function ResetPasswordPage() {
           aria-label="Ir al inicio de ADLocal"
         >
           <img
-            src={LOGO_URL}
+            src={ADLOCAL_LOGO_URL}
             alt="ADLocal"
             className="auth-logo-img"
           />
@@ -426,7 +425,7 @@ export default function ResetPasswordPage() {
           )}
         </form>
 
-        <Typography component="p" className="auth-footer-text mt-3">
+        <p className="auth-footer-text mt-3">
           ¿Necesitas otro enlace?{" "}
           <button
             type="button"
@@ -441,7 +440,7 @@ export default function ResetPasswordPage() {
           >
             Solicitar recuperación
           </button>
-        </Typography>
+        </p>
       </div>
     </main>
   );

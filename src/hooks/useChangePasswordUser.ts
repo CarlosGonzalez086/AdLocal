@@ -1,10 +1,8 @@
 import { useState } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
 import type { ChangeUserPasswordDto } from "../types/User/UserAuth";
 import { profileUserApi } from "../services/profileUserApi";
-
-
-
+import { extraerMensajeError } from "../utils/errorHandler";
 
 export const useChangePasswordUser = () => {
   const [loading, setLoading] = useState(false);
@@ -36,11 +34,10 @@ export const useChangePasswordUser = () => {
 
       localStorage.removeItem("token");
       window.location.href = "/login";
-    } catch (error: any) {
+    } catch (error: unknown) {
       Swal.fire(
         "Error",
-        error?.response?.data?.mensaje ??
-          "No se pudo cambiar la contraseña",
+        extraerMensajeError(error, "No se pudo cambiar la contraseña"),
         "error"
       );
     } finally {

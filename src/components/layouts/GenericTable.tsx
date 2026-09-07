@@ -3,10 +3,6 @@ import React, {
   type Key as ReactKey,
 } from "react";
 import {
-  Box,
-  Card,
-  CardContent,
-  Divider,
   IconButton,
   Skeleton,
   Table,
@@ -17,9 +13,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Typography,
   useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
@@ -100,8 +94,7 @@ export function GenericTable<T>({
   rowsPerPageOptions = [10, 30, 100],
   mobileLayout = "cards",
 }: GenericTableProps<T>) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = useMediaQuery("(max-width: 1199.98px)");
   const isCardsMode = isMobile && mobileLayout === "cards";
 
   const totalColumns = columns.length + (actions ? 1 : 0);
@@ -120,294 +113,154 @@ export function GenericTable<T>({
 
   const totalPages = Math.ceil(total / rowsPerPage) || 1;
 
-  // Render Empty State
+  // Render Empty State con clases oficiales AdLocal
   const renderEmptyState = () => (
-    <Box
-      sx={{
-        py: { xs: 5, sm: 7 },
-        px: 3,
-        textAlign: "center",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Box
-        sx={{
-          width: 56,
-          height: 56,
-          borderRadius: "16px",
-          backgroundColor: "rgba(0, 137, 137, 0.08)",
-          color: "#008989",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          mb: 1.5,
-        }}
-      >
+    <div className="empty-state-adlocal">
+      <div className="empty-state-adlocal-icon">
         <MaterialSymbol icon="folder_open" size="large" />
-      </Box>
-
-      <Typography
-        variant="h6"
-        sx={{
-          fontSize: "16px",
-          fontWeight: 700,
-          color: "#1C1C1E",
-          mb: 0.5,
-        }}
-      >
-        {emptyText}
-      </Typography>
-
-      <Typography
-        variant="body2"
-        sx={{
-          fontSize: "13.5px",
-          color: "#6E6E73",
-          maxWidth: 360,
-          lineHeight: 1.4,
-        }}
-      >
-        {emptyDescription}
-      </Typography>
-    </Box>
+      </div>
+      <h3 className="empty-state-adlocal-title">{emptyText}</h3>
+      {emptyDescription && (
+        <p className="empty-state-adlocal-desc">{emptyDescription}</p>
+      )}
+    </div>
   );
 
   // ==========================================
-  // MOBILE CARDS VIEW (< 768px)
+  // RESPONSIVE CARDS VIEW (< 1200px, Bootstrap xl)
   // ==========================================
   if (isCardsMode) {
     const primaryCol = columns[0];
     const secondaryCols = columns.slice(1);
 
     return (
-      <Box sx={{ width: "100%" }}>
+      <div className="w-100">
         {loading ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <div className="d-flex flex-column gap-3">
             {[1, 2, 3].map((i) => (
-              <Card
-                key={`mobile-skeleton-${i}`}
-                sx={{
-                  p: 2,
-                  borderRadius: "14px",
-                  border: "1px solid rgba(0, 0, 0, 0.06)",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
-                }}
-              >
-                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.5 }}>
+              <div key={`mobile-skeleton-${i}`} className="card-adlocal p-3">
+                <div className="d-flex justify-content-between mb-2">
                   <Skeleton variant="rounded" width="50%" height={24} />
                   <Skeleton variant="rounded" width="20%" height={24} />
-                </Box>
-                <Skeleton variant="rounded" width="90%" height={16} sx={{ mb: 1 }} />
+                </div>
+                <Skeleton variant="rounded" width="90%" height={16} className="mb-2" />
                 <Skeleton variant="rounded" width="70%" height={16} />
-              </Card>
+              </div>
             ))}
-          </Box>
+          </div>
         ) : data.length === 0 ? (
-          <Card
-            sx={{
-              borderRadius: "14px",
-              border: "1px solid rgba(0, 0, 0, 0.06)",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
-            }}
-          >
+          <div className="card-adlocal">
             {renderEmptyState()}
-          </Card>
+          </div>
         ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <div className="table-adlocal-card-grid d-grid gap-3">
             {data.map((row, index) => {
               const rowKey = getRowKey(row, index);
 
               return (
-                <Card
-                  key={rowKey}
-                  sx={{
-                    borderRadius: "14px",
-                    backgroundColor: "#FFFFFF",
-                    border: "1px solid rgba(0, 0, 0, 0.06)",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.03)",
-                    overflow: "visible",
-                    transition: "all 0.15s ease",
-                  }}
-                >
-                  <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                <div key={rowKey} className="card-adlocal card-adlocal-interactive table-adlocal-mobile-card">
+                  <div className="card-adlocal-body">
                     {/* Header: First column */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        justifyContent: "space-between",
-                        gap: 1.5,
-                        mb: 1.5,
-                      }}
-                    >
-                      <Box sx={{ minWidth: 0, flex: 1 }}>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: "#8E8E93",
-                            fontSize: "11px",
-                            fontWeight: 700,
-                            textTransform: "uppercase",
-                            letterSpacing: "0.5px",
-                            display: "block",
-                          }}
-                        >
+                    <div className="d-flex align-items-start justify-content-between gap-2 mb-2">
+                      <div className="min-w-0 flex-grow-1">
+                        <span className="fz-caption fw-bold text-uppercase text-muted d-block">
                           {primaryCol?.label}
-                        </Typography>
-                        <Box sx={{ mt: 0.2 }}>
-                          {primaryCol?.render
-                            ? primaryCol.render(row)
-                            : (
-                              <Typography
-                                sx={{
-                                  fontSize: "15px",
-                                  fontWeight: 700,
-                                  color: "#1C1C1E",
-                                }}
-                              >
-                                {getCellValue(row, primaryCol?.key ?? "")}
-                              </Typography>
-                            )}
-                        </Box>
-                      </Box>
-                    </Box>
+                        </span>
+                        <div className="mt-1">
+                          {primaryCol?.render ? (
+                            primaryCol.render(row)
+                          ) : (
+                            <span className="fz-h6 fw-bold text-dark">
+                              {getCellValue(row, primaryCol?.key ?? "")}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
 
-                    <Divider sx={{ my: 1.2, borderColor: "rgba(0, 0, 0, 0.05)" }} />
+                    <hr className="my-2 border-light-subtle" />
 
                     {/* Secondary columns: 2-column key-value grid */}
-                    <Box
-                      sx={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(2, 1fr)",
-                        gap: 1.5,
-                      }}
-                    >
+                    <div className="row g-2">
                       {secondaryCols
                         .filter((col) => !col.hideOnMobileCard)
                         .map((col) => (
-                          <Box key={String(col.key)} sx={{ minWidth: 0 }}>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: "#8E8E93",
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                textTransform: "uppercase",
-                                letterSpacing: "0.5px",
-                                display: "block",
-                                mb: 0.2,
-                              }}
-                            >
+                          <div key={String(col.key)} className="col-12 col-sm-6">
+                            <span className="fz-caption fw-bold text-uppercase text-muted d-block mb-1">
                               {col.label}
-                            </Typography>
-                            <Box sx={{ fontSize: "13.5px", color: "#1C1C1E" }}>
+                            </span>
+                            <div className="fz-body-sm text-dark">
                               {col.render
                                 ? col.render(row)
                                 : getCellValue(row, col.key)}
-                            </Box>
-                          </Box>
+                            </div>
+                          </div>
                         ))}
-                    </Box>
+                    </div>
 
                     {/* Acciones directas en móvil */}
                     {actions && (
                       <>
-                        <Divider sx={{ my: 1.5, borderColor: "rgba(0, 0, 0, 0.06)" }} />
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                            gap: 1,
-                            flexWrap: "wrap",
-                          }}
+                        <hr className="my-2 border-light-subtle" />
+                        <div
+                          className="table-adlocal-actions d-flex align-items-center justify-content-start gap-2 flex-wrap"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {actions(row)}
-                        </Box>
+                        </div>
                       </>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               );
             })}
 
             {/* Mobile Compact Pagination */}
             {!loading && total > rowsPerPage && (
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  p: 1.5,
-                  mt: 0.5,
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: "12px",
-                  border: "1px solid rgba(0, 0, 0, 0.06)",
-                }}
-              >
+              <div className="card-adlocal table-adlocal-mobile-pagination p-2 d-flex flex-row align-items-center justify-content-between">
                 <IconButton
+                  aria-label="Página anterior"
                   size="small"
                   disabled={page === 0}
                   onClick={() => onPageChange(page - 1)}
-                  sx={{
-                    borderRadius: "8px",
-                    border: "1px solid rgba(0, 0, 0, 0.1)",
-                    p: 0.8,
-                  }}
+                  className="btn-adlocal-ghost p-1"
                 >
                   <ArrowBackIosNewRoundedIcon sx={{ fontSize: 13 }} />
                 </IconButton>
 
-                <Typography sx={{ fontSize: "13px", fontWeight: 600, color: "#6E6E73" }}>
+                <span className="fz-body-sm fw-semibold text-muted">
                   Página {page + 1} de {totalPages} ({total} registros)
-                </Typography>
+                </span>
 
                 <IconButton
+                  aria-label="Página siguiente"
                   size="small"
                   disabled={page >= totalPages - 1}
                   onClick={() => onPageChange(page + 1)}
-                  sx={{
-                    borderRadius: "8px",
-                    border: "1px solid rgba(0, 0, 0, 0.1)",
-                    p: 0.8,
-                  }}
+                  className="btn-adlocal-ghost p-1"
                 >
                   <ArrowForwardIosRoundedIcon sx={{ fontSize: 13 }} />
                 </IconButton>
-              </Box>
+              </div>
             )}
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
     );
   }
 
   // ==========================================
-  // DESKTOP & TABLET VIEW (>= 768px)
+  // DESKTOP VIEW (>= 1200px)
   // ==========================================
   return (
-    <Box
-      sx={{
-        width: "100%",
-        borderRadius: "14px",
-        backgroundColor: "#FFFFFF",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
-        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02)",
-        overflow: "hidden",
-      }}
-    >
+    <div className="w-100">
       <TableContainer
+        className="table-adlocal-wrapper"
         sx={{
-          width: "100%",
           maxHeight: "calc(100vh - 240px)",
-          overflowX: "auto",
         }}
       >
-        <Table stickyHeader aria-label="Tabla de registros">
+        <Table stickyHeader className="table-adlocal" aria-label="Tabla de registros">
           <TableHead>
             <TableRow>
               {columns.map((column) => (
@@ -417,14 +270,6 @@ export function GenericTable<T>({
                   sx={{
                     width: column.width,
                     minWidth: column.minWidth ?? 120,
-                    backgroundColor: "#F8F9FA",
-                    color: "#6E6E73",
-                    fontWeight: 700,
-                    fontSize: "12px",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                    borderBottom: "1px solid #E5E5EA",
-                    py: 1.5,
                   }}
                 >
                   {column.label}
@@ -435,16 +280,8 @@ export function GenericTable<T>({
                 <TableCell
                   align="right"
                   sx={{
-                    backgroundColor: "#F8F9FA",
-                    color: "#6E6E73",
-                    fontWeight: 700,
-                    fontSize: "12px",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                    borderBottom: "1px solid #E5E5EA",
-                    width: 110,
-                    minWidth: 110,
-                    py: 1.5,
+                    width: 148,
+                    minWidth: 148,
                   }}
                 >
                   Acciones
@@ -485,28 +322,11 @@ export function GenericTable<T>({
                 const rowKey = getRowKey(row, index);
 
                 return (
-                  <TableRow
-                    key={rowKey}
-                    hover
-                    sx={{
-                      transition: "background-color 0.15s ease",
-                      "&:hover": {
-                        backgroundColor: "rgba(0, 137, 137, 0.03) !important",
-                      },
-                      "&:last-child td": {
-                        borderBottom: "none",
-                      },
-                    }}
-                  >
+                  <TableRow key={rowKey} hover>
                     {columns.map((column) => (
                       <TableCell
                         key={`${String(rowKey)}-${String(column.key)}`}
                         align={column.align ?? "left"}
-                        sx={{
-                          fontSize: "14px",
-                          color: "#1C1C1E",
-                          py: 1.6,
-                        }}
                       >
                         {column.render
                           ? column.render(row)
@@ -515,17 +335,10 @@ export function GenericTable<T>({
                     ))}
 
                     {actions && (
-                      <TableCell align="right" sx={{ py: 1.6 }}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                            gap: 0.5,
-                          }}
-                        >
+                      <TableCell align="right">
+                        <div className="table-adlocal-actions d-flex align-items-center justify-content-end gap-1">
                           {actions(row)}
-                        </Box>
+                        </div>
                       </TableCell>
                     )}
                   </TableRow>
@@ -538,6 +351,7 @@ export function GenericTable<T>({
             <TableFooter>
               <TableRow>
                 <TablePagination
+                  className="table-adlocal-pagination"
                   colSpan={totalColumns}
                   rowsPerPageOptions={rowsPerPageOptions}
                   count={total}
@@ -552,20 +366,12 @@ export function GenericTable<T>({
                   SelectProps={{
                     native: true,
                   }}
-                  sx={{
-                    borderTop: "1px solid #E5E5EA",
-                    color: "#6E6E73",
-                    fontSize: "13px",
-                    "& .MuiTablePagination-select": {
-                      fontWeight: 600,
-                    },
-                  }}
                 />
               </TableRow>
             </TableFooter>
           )}
         </Table>
       </TableContainer>
-    </Box>
+    </div>
   );
 }

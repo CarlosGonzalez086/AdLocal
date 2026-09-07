@@ -39,7 +39,6 @@ export default function PublicRouteUsuario({ children }: Props) {
       decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
 
     if (role === "Comercio" || role === "Colaborador") {
-      // eslint-disable-next-line react-hooks/error-boundaries
       return <Navigate to="/usuario/app" replace />;
     }
 

@@ -4,7 +4,6 @@ import {
   CircularProgress,
   InputAdornment,
   TextField,
-  Typography,
 } from "@mui/material";
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,9 +11,9 @@ import { useNavigate } from "react-router-dom";
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
 import { useAdmin } from "../hooks/useAdmin";
 import { useUser } from "../hooks/useUser";
-import Swal from "sweetalert2";
-
-const LOGO_URL = "/logo-adlocal.png";
+import Swal from "../utils/sweetalert";
+import { extraerMensajeError } from "../utils/errorHandler";
+import { ADLOCAL_LOGO_URL } from "../constants/brand";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -57,27 +56,27 @@ export default function ForgotPasswordPage({ type }: Props) {
         ? await admin.forgetPassword({ email: cleanEmail })
         : await user.forgetPassword({ email: cleanEmail });
 
-      const data = response as any;
+      const data = response as { codigo?: string; mensaje?: string } | undefined;
 
-      if (data.codigo !== "200") {
-        setError(data.mensaje || "Ocurrió un error inesperado.");
+      if (data?.codigo !== "200") {
+        setError(data?.mensaje || "Ocurrió un error inesperado.");
         setSuccessMessage("");
         return;
       }
-      setSuccessMessage(data.mensaje);
+      setSuccessMessage(data.mensaje || "Correo enviado exitosamente.");
       Swal.fire({
         icon: "success",
         title: "Correo enviado",
-        text: data.mensaje,
+        text: data.mensaje || "Correo enviado exitosamente.",
       });
-    } catch (error: any) {
-      console.error(error);
-      setError(error.message || "Ocurrió un error inesperado.");
+    } catch (error: unknown) {
+      const mensaje = extraerMensajeError(error, "Ocurrió un error al enviar el correo.");
+      setError(mensaje);
       setSuccessMessage("");
       Swal.fire({
         icon: "error",
         title: "Error al enviar correo",
-        text: error.message || "Ocurrió un error inesperado.",
+        text: mensaje,
       });
     }
   };
@@ -108,7 +107,7 @@ export default function ForgotPasswordPage({ type }: Props) {
           aria-label="Ir al inicio de ADLocal"
         >
           <img
-            src={LOGO_URL}
+            src={ADLOCAL_LOGO_URL}
             alt="ADLocal"
             className="auth-logo-img"
           />
@@ -239,7 +238,7 @@ export default function ForgotPasswordPage({ type }: Props) {
           </p>
         </form>
 
-        <Typography component="p" className="auth-footer-text mt-3">
+        <p className="auth-footer-text mt-3">
           ¿Recordaste tu contraseña?{" "}
           <button
             type="button"
@@ -248,7 +247,7 @@ export default function ForgotPasswordPage({ type }: Props) {
           >
             Iniciar sesión
           </button>
-        </Typography>
+        </p>
       </div>
     </main>
   );

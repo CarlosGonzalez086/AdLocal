@@ -1,7 +1,5 @@
 import {
   TextField,
-  Box,
-  Stack,
   InputAdornment,
   IconButton,
 } from "@mui/material";
@@ -11,9 +9,17 @@ import { useState } from "react";
 
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
 
+export interface RegisterFormData {
+  nombre?: string;
+  email?: string;
+  password?: string;
+  codigoReferenciado?: string;
+  [key: string]: unknown;
+}
+
 interface FormRegisterProps {
-  onSubmit: (data: any) => Promise<void> | void;
-  defaultValues?: any;
+  onSubmit: (data: RegisterFormData) => Promise<void> | void;
+  defaultValues?: Partial<RegisterFormData>;
   type: "admin" | "user";
   isEdit?: boolean;
   isFormCode?: boolean;
@@ -30,15 +36,15 @@ export default function FormRegister({
 }: FormRegisterProps) {
   const [showPassword, setShowPassword] = useState(false);
 
-  const { register, handleSubmit } = useForm({
+  const { register, handleSubmit } = useForm<RegisterFormData>({
     defaultValues,
   });
 
   const isAdmin = type === "admin";
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} width="100%">
-      <Stack spacing={2}>
+    <form onSubmit={handleSubmit(onSubmit)} className="w-100">
+      <div className="d-flex flex-column gap-3">
         <TextField
           placeholder="Nombre"
           fullWidth
@@ -144,7 +150,7 @@ export default function FormRegister({
             ? `Actualizar ${isAdmin ? "administrador" : "usuario"}`
             : `Crear ${isAdmin ? "administrador" : "cuenta"}`}
         </LoadingButton>
-      </Stack>
-    </Box>
+      </div>
+    </form>
   );
 }

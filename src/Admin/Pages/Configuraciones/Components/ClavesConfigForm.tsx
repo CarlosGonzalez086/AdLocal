@@ -26,7 +26,7 @@ export const ClavesConfigForm = () => {
 
   useEffect(() => {
     cargar();
-  }, []);
+  }, [cargar]);
 
   useEffect(() => {
     if (!Array.isArray(configuraciones)) return;

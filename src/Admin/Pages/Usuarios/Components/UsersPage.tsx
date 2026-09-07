@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { UsuarioDto } from "../../../../types/Admin/usuarios";
 import { useUsers } from "../../../../hooks/useUsers";
@@ -46,7 +45,7 @@ export const UsersPageAdmin = () => {
   const [rows, setRows] = useState(10);
   const [view, setView] = useState(false);
   const [user, setUser] = useState<UsuarioDto>(initialForm);
-  const [orderBy, setOrderBy] = useState<"recent" | "old" | "az" | "za">("recent",);
+  const [orderBy, setOrderBy] = useState<"recent" | "old" | "az" | "za">("recent");
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -59,7 +58,7 @@ export const UsersPageAdmin = () => {
   }, [page, rows, orderBy, search, listar]);
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <div className="w-100">
       <SearchToolbar
         search={search}
         searchPlaceholder="Buscar usuario..."
@@ -73,7 +72,7 @@ export const UsersPageAdmin = () => {
           setPage(0);
         }}
       />
-      <Box sx={{ mt: 2 }}>
+      <div className="mt-3">
         <UsersTable
           users={users}
           total={total}
@@ -90,7 +89,7 @@ export const UsersPageAdmin = () => {
             setView(true);
           }}
         />
-      </Box>
+      </div>
 
       <UserModal
         open={view}
@@ -101,6 +100,6 @@ export const UsersPageAdmin = () => {
         usuario={user}
         soloVer
       />
-    </Box>
+    </div>
   );
 };

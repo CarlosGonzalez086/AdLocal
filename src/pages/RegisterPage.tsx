@@ -1,12 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
 import { sendWelcomeEmail } from "../api/authApi";
 import { useAdmin } from "../hooks/useAdmin";
 import { useUser } from "../hooks/useUser";
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
-import FormRegister from "../components/forms/FormRegister";
-
-const LOGO_URL = "/logo-adlocal.png";
+import FormRegister, { type RegisterFormData } from "../components/forms/FormRegister";
+import { ADLOCAL_LOGO_URL } from "../constants/brand";
 
 interface Props {
   type: "admin" | "user";
@@ -22,13 +21,19 @@ export default function RegisterPage({ type }: Props) {
 
   const loading = isAdmin ? admin.loading : user.loading;
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: RegisterFormData) => {
     try {
+      const payload = {
+        nombre: data.nombre ?? "",
+        email: data.email ?? "",
+        password: data.password ?? "",
+        codigoReferenciado: data.codigoReferenciado ?? "",
+      };
       const response = isAdmin
-        ? await admin.crearAdmin(data)
-        : await user.crearUser(data);
+        ? await admin.crearAdmin(payload)
+        : await user.crearUser(payload);
 
-      const createdAccount: any = response?.respuesta;
+      const createdAccount = response?.respuesta as unknown as { nombre?: string; email?: string } | undefined;
 
       let welcomeEmailFailed = false;
 
@@ -39,12 +44,7 @@ export default function RegisterPage({ type }: Props) {
         if (accountName && accountEmail) {
           try {
             await sendWelcomeEmail(accountName, accountEmail);
-          } catch (emailError) {
-            console.error(
-              "No fue posible enviar el correo de bienvenida:",
-              emailError,
-            );
-
+          } catch {
             welcomeEmailFailed = true;
           }
         } else {
@@ -58,7 +58,6 @@ export default function RegisterPage({ type }: Props) {
           title: "Cuenta creada",
           text: "La cuenta fue creada correctamente, pero no fue posible enviar el correo de bienvenida.",
           confirmButtonText: "Continuar",
-          confirmButtonColor: "#008989",
         });
       }
 
@@ -85,7 +84,7 @@ export default function RegisterPage({ type }: Props) {
           aria-label="Ir al inicio de ADLocal"
         >
           <img
-            src={LOGO_URL}
+            src={ADLOCAL_LOGO_URL}
             alt="ADLocal"
             className="auth-logo-img"
           />

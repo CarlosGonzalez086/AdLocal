@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
 import type { SuscripcionListadoDto } from "../types/Admin/suscripciones";
 import { suscripcionesService } from "../services/suscripciones.api";
 

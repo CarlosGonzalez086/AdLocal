@@ -1,0 +1,117 @@
+/* ==============================================================
+   ADLOCAL DESIGN SYSTEM - MODALS
+   Diálogos flotantes, ventanas emergentes y superposiciones.
+   ============================================================== */
+
+.modal-adlocal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(28, 29, 31, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  animation: modal-adlocal-fade-in 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-adlocal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 560px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  z-index: 1055;
+  animation: modal-adlocal-slide-up 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-adlocal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background-color: transparent;
+}
+
+.modal-adlocal-body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: calc(85vh - 140px);
+}
+
+.modal-adlocal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background-color: var(--surface-soft);
+}
+
+.modal-adlocal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-xs);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.modal-adlocal-close:hover {
+  background-color: var(--surface-hover);
+  color: var(--text);
+}
+
+/* --- Variantes de Ancho --- */
+.modal-adlocal-sm {
+  max-width: 400px;
+}
+
+.modal-adlocal-lg {
+  max-width: 800px;
+}
+
+.modal-adlocal-xl {
+  max-width: 1050px;
+}
+
+/* --- Animaciones --- */
+@keyframes modal-adlocal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-adlocal-slide-up {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

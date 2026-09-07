@@ -3,7 +3,7 @@ import { Alert, Button, CircularProgress } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 
 import { useParams } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../../../utils/sweetalert";
 
 import { useComercio } from "../../../hooks/useComercio";
 
@@ -60,7 +60,6 @@ export function PreviewNegocio() {
 
           confirmButtonText: "Aceptar",
 
-          confirmButtonColor: "#008989",
         });
 
         return;
@@ -81,7 +80,6 @@ export function PreviewNegocio() {
 
         confirmButtonText: "Aceptar",
 
-        confirmButtonColor: "#008989",
       });
     } finally {
       setLoadingProducts(false);

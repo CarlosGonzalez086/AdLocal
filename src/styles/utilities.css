@@ -1,0 +1,108 @@
+/* ==============================================================
+   ADLOCAL DESIGN SYSTEM - UTILITIES
+   Estados vacíos (empty-state), placeholders de carga (skeleton)
+   y clases utilitarias complementarias.
+   ============================================================== */
+
+/* --- Estados Vacíos (Empty State) --- */
+.empty-state-adlocal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  background-color: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  margin: var(--space-4) 0;
+}
+
+.empty-state-adlocal-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  background-color: var(--primary-subtle);
+  color: var(--primary);
+  font-size: 2rem;
+  margin-bottom: var(--space-3);
+}
+
+.empty-state-adlocal-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: var(--space-1);
+}
+
+.empty-state-adlocal-description {
+  font-family: var(--font-body);
+  font-size: 0.925rem;
+  color: var(--text-secondary);
+  max-width: 440px;
+  margin-bottom: var(--space-4);
+  line-height: 1.5;
+}
+
+/* --- Placeholders de Carga (Skeleton) --- */
+.skeleton-adlocal {
+  display: block;
+  width: 100%;
+  height: 1rem;
+  background: linear-gradient(
+    90deg,
+    var(--bg-soft) 25%,
+    var(--surface-soft) 37%,
+    var(--bg-soft) 63%
+  );
+  background-size: 400% 100%;
+  border-radius: var(--radius-xs);
+  animation: skeleton-adlocal-shimmer 1.4s ease infinite;
+}
+
+.skeleton-adlocal-text {
+  height: 0.85rem;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-adlocal-circle {
+  border-radius: var(--radius-full);
+}
+
+.skeleton-adlocal-rect {
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-adlocal-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* --- Utilidades de Fondo y Superficie --- */
+.bg-adlocal-canvas {
+  background-color: var(--bg) !important;
+}
+
+.bg-adlocal-surface {
+  background-color: var(--surface) !important;
+}
+
+.bg-adlocal-soft {
+  background-color: var(--bg-soft) !important;
+}
+
+/* --- Separadores Visuales --- */
+.divider-adlocal {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: var(--space-4) 0;
+  opacity: 1;
+}

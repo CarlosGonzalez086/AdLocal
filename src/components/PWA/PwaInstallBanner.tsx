@@ -32,7 +32,7 @@ export const PwaInstallBanner = () => {
         {/* Logo de la aplicación */}
         <div className="pwaInstallBannerIconWrapper">
           <img
-            src="/pwa-64x64.png"
+            src="/adlocal-64.png"
             alt="Logo de ADLocal"
             className="pwaInstallBannerIcon"
             width={48}
@@ -142,4 +142,3 @@ export const PwaInstallBanner = () => {
     </div>
   );
 };
-

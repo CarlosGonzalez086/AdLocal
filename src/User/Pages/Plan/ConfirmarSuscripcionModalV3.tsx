@@ -15,7 +15,7 @@ import {
   type SetStateAction,
 } from "react";
 
-import Swal from "sweetalert2";
+import Swal from "../../../utils/sweetalert";
 
 import { GenericModal } from "../../../components/GenericModal";
 import { MetodoPagoStep } from "./MetodoPagoStep";
@@ -212,7 +212,6 @@ export const ConfirmarSuscripcionModalV3 = ({
 
             confirmButtonText: "Entendido",
 
-            confirmButtonColor: "#008989",
           });
 
           return;
@@ -292,7 +291,6 @@ export const ConfirmarSuscripcionModalV3 = ({
 
         confirmButtonText: "Entendido",
 
-        confirmButtonColor: "#D84028",
       });
     }
   };

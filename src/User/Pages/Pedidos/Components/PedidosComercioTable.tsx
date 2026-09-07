@@ -1,4 +1,3 @@
-import { Button, Box, Typography } from "@mui/material";
 import {
   GenericTable,
   type TableColumn,
@@ -69,14 +68,14 @@ const columns: TableColumn<PedidoComercioListadoDto>[] = [
     label: "Pedido",
     minWidth: 160,
     render: (pedido) => (
-      <Box>
-        <Typography sx={{ fontWeight: 700, fontSize: "14.5px", color: "#1C1C1E" }}>
+      <div>
+        <div className="fw-bold fz-body-sm text-dark">
           #{pedido.numeroPedido}
-        </Typography>
-        <Typography sx={{ fontSize: "12px", color: "#8E8E93", mt: 0.3 }}>
+        </div>
+        <div className="fz-caption text-muted mt-1">
           {pedido.totalProductos} {pedido.totalProductos === 1 ? "producto" : "productos"}
-        </Typography>
-      </Box>
+        </div>
+      </div>
     ),
   },
   {
@@ -84,9 +83,9 @@ const columns: TableColumn<PedidoComercioListadoDto>[] = [
     label: "Cliente",
     minWidth: 170,
     render: (pedido) => (
-      <Typography sx={{ fontSize: "14px", fontWeight: 550, color: "#1C1C1E" }}>
+      <span className="fz-body-sm fw-semibold text-dark">
         {pedido.clienteNombre}
-      </Typography>
+      </span>
     ),
   },
   {
@@ -94,9 +93,9 @@ const columns: TableColumn<PedidoComercioListadoDto>[] = [
     label: "Fecha",
     minWidth: 160,
     render: (pedido) => (
-      <Typography sx={{ fontSize: "13px", color: "#6E6E73" }}>
+      <span className="fz-body-sm text-muted">
         {dateFormatter.format(new Date(pedido.fechaCreacion))}
-      </Typography>
+      </span>
     ),
   },
   {
@@ -130,9 +129,9 @@ const columns: TableColumn<PedidoComercioListadoDto>[] = [
     align: "right",
     minWidth: 130,
     render: (pedido) => (
-      <Typography sx={{ fontWeight: 750, fontSize: "14.5px", color: "#1C1C1E" }}>
+      <span className="fw-bold fz-body-sm text-dark">
         {moneyFormatter.format(pedido.total)}
-      </Typography>
+      </span>
     ),
   },
 ];
@@ -160,30 +159,14 @@ export const PedidosComercioTable = ({
     onRowsPerPageChange={onRowsPerPageChange}
     getRowKey={(pedido) => pedido.uuid}
     actions={(pedido) => (
-      <Button
-        variant="outlined"
-        size="small"
+      <button
+        type="button"
+        className="btn-adlocal btn-adlocal-outline-primary btn-adlocal-sm d-inline-flex align-items-center gap-1"
         onClick={() => onDetalle(pedido.uuid)}
-        startIcon={<MaterialSymbol icon="visibility" size="small" />}
-        sx={{
-          minHeight: "36px",
-          borderRadius: "8px",
-          textTransform: "none",
-          fontWeight: 600,
-          fontSize: "13px",
-          py: 0.6,
-          px: 1.5,
-          color: "#008989",
-          borderColor: "rgba(0, 137, 137, 0.25)",
-          backgroundColor: "rgba(0, 137, 137, 0.05)",
-          "&:hover": {
-            borderColor: "#008989",
-            backgroundColor: "rgba(0, 137, 137, 0.12)",
-          },
-        }}
       >
-        Detalle
-      </Button>
+        <MaterialSymbol icon="visibility" size="small" />
+        <span>Detalle</span>
+      </button>
     )}
   />
 );

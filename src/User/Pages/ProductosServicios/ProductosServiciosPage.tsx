@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Tooltip } from "@mui/material";
+import { Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useProductosServicios } from "../../../hooks/useProductosServicios";
 import {
@@ -66,7 +66,7 @@ export const ProductosServiciosPage = () => {
       search,
       idComercio: 0,
     });
-  }, [page, rows, orderBy, search]);
+  }, [page, rows, orderBy, search, listar]);
 
   const columns: TableColumn<ProductoServicioDto>[] = [
     {
@@ -151,10 +151,10 @@ export const ProductosServiciosPage = () => {
 
       render: (p) => (
         <span
-          className={`productoServicioStatus fz-h5 fw-semibold ${
+          className={`badge-adlocal ${
             p.disponible
-              ? "productoServicioStatusActive"
-              : "productoServicioStatusInactive"
+              ? "badge-adlocal-success"
+              : "badge-adlocal-neutral"
           }`}
         >
           {p.disponible ? "Disponible" : "No disponible"}
@@ -168,10 +168,10 @@ export const ProductosServiciosPage = () => {
 
       render: (p) => (
         <span
-          className={`productoServicioStatus fz-h5 fw-semibold ${
+          className={`badge-adlocal ${
             p.activo
-              ? "productoServicioStatusActive"
-              : "productoServicioStatusInactive"
+              ? "badge-adlocal-success"
+              : "badge-adlocal-neutral"
           }`}
         >
           {p.activo ? "Activo" : "Inactivo"}
@@ -198,13 +198,9 @@ export const ProductosServiciosPage = () => {
   };
 
   return (
-    <Box>
-      <div className="filters-paper">
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={2}
-          alignItems={{ md: "center" }}
-        >
+    <div className="w-100">
+      <div className="card-adlocal p-3 mb-4">
+        <div className="d-flex flex-column flex-md-row gap-3 align-items-md-center">
           <SearchInput
             value={search}
             placeholder="Buscar plan…"
@@ -221,15 +217,15 @@ export const ProductosServiciosPage = () => {
               setPage(0);
             }}
           />
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            className="btn-adlocal btn-adlocal--solid fz-h4 fw-semibold"
+          <button
+            type="button"
+            className="btn-adlocal btn-adlocal-primary text-nowrap d-inline-flex align-items-center gap-1"
             onClick={abrirNuevoProducto}
           >
-            Nuevo
-          </Button>
-        </Stack>
+            <AddIcon style={{ fontSize: 18 }} />
+            <span>Nuevo</span>
+          </button>
+        </div>
       </div>
       <div className="mt-4">
         <GenericTable<ProductoServicioDto>
@@ -248,21 +244,21 @@ export const ProductosServiciosPage = () => {
           actions={(p) => (
             <div className="d-flex align-items-center justify-content-end gap-1">
               <Tooltip title="Editar" arrow disableTouchListener>
-                <Button
+                <button
                   type="button"
-                  className="btn-adlocal btn-adlocal--ghost btn-adlocal--sm"
+                  className="btn-adlocal btn-adlocal-ghost btn-adlocal-sm d-inline-flex align-items-center justify-content-center p-0"
                   aria-label={`Editar ${p.nombre}`}
                   onClick={() => editarProducto(p)}
-                  style={{ minWidth: 36, width: 36, height: 36, padding: 0 }}
+                  style={{ minWidth: 36, width: 36, height: 36 }}
                 >
                   <MaterialSymbol icon="edit" size="small" />
-                </Button>
+                </button>
               </Tooltip>
 
               <Tooltip title="Eliminar" arrow disableTouchListener>
-                <Button
+                <button
                   type="button"
-                  className="btn-adlocal btn-adlocal--danger btn-adlocal--sm"
+                  className="btn-adlocal btn-adlocal-danger btn-adlocal-sm d-inline-flex align-items-center justify-content-center p-0"
                   aria-label={`Eliminar ${p.nombre}`}
                   onClick={() =>
                     eliminar(Number(p.id), 0, {
@@ -273,19 +269,19 @@ export const ProductosServiciosPage = () => {
                       idComercio: 0,
                     })
                   }
-                  style={{ minWidth: 36, width: 36, height: 36, padding: 0 }}
+                  style={{ minWidth: 36, width: 36, height: 36 }}
                 >
                   <MaterialSymbol icon="delete" size="small" />
-                </Button>
+                </button>
               </Tooltip>
 
               <Tooltip title={p.activo ? "Desactivar" : "Activar"} arrow disableTouchListener>
-                <Button
+                <button
                   type="button"
-                  className={`btn-adlocal btn-adlocal--sm ${
+                  className={`btn-adlocal btn-adlocal-sm d-inline-flex align-items-center justify-content-center p-0 ${
                     p.activo
                       ? "productoServicioToggleActive"
-                      : "btn-adlocal--ghost"
+                      : "btn-adlocal-ghost"
                   }`}
                   aria-label={
                     p.activo ? `Desactivar ${p.nombre}` : `Activar ${p.nombre}`
@@ -299,14 +295,14 @@ export const ProductosServiciosPage = () => {
                       idComercio: 0,
                     })
                   }
-                  style={{ minWidth: 36, width: 36, height: 36, padding: 0 }}
+                  style={{ minWidth: 36, width: 36, height: 36 }}
                 >
                   <MaterialSymbol
                     icon={p.activo ? "toggle_on" : "toggle_off"}
                     size="medium"
                     filled={p.activo}
                   />
-                </Button>
+                </button>
               </Tooltip>
             </div>
           )}
@@ -330,6 +326,6 @@ export const ProductosServiciosPage = () => {
           loading={loading}
         />
       )}
-    </Box>
+    </div>
   );
 };

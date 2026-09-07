@@ -14,9 +14,10 @@ import {
   type SetStateAction,
 } from "react";
 
-import Swal from "sweetalert2";
+import Swal from "../../utils/sweetalert";
 
 import { beneficiosApi } from "../../services/beneficios.api";
+import { extraerMensajeError } from "../../utils/errorHandler";
 
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
 
@@ -25,16 +26,6 @@ interface Props {
   totalUsoCodigo: number;
   setAplicoBeneficio: Dispatch<SetStateAction<boolean>>;
   usoTotalReferidos: string;
-}
-
-interface ApiError {
-  response?: {
-    data?: {
-      mensaje?: string;
-    };
-  };
-
-  message?: string;
 }
 
 /* ============================================
@@ -50,12 +41,9 @@ const COPY_FEEDBACK_DURATION = 1800;
 ============================================ */
 
 const getErrorMessage = (error: unknown): string => {
-  const apiError = error as ApiError;
-
-  return (
-    apiError.response?.data?.mensaje ??
-    apiError.message ??
-    "Ocurrió un error inesperado al aplicar el beneficio."
+  return extraerMensajeError(
+    error,
+    "Ocurrió un error inesperado al aplicar el beneficio.",
   );
 };
 
@@ -176,7 +164,6 @@ const CodigoReferido = ({
 
         confirmButtonText: "Entendido",
 
-        confirmButtonColor: "#008989",
       });
     }
   };
@@ -230,7 +217,6 @@ const CodigoReferido = ({
 
         confirmButtonText: "Continuar",
 
-        confirmButtonColor: "#2A9D6F",
       });
 
       setAplicoBeneficio(true);
@@ -246,7 +232,6 @@ const CodigoReferido = ({
 
         confirmButtonText: "Entendido",
 
-        confirmButtonColor: "#D84028",
       });
 
       setAplicoBeneficio(false);

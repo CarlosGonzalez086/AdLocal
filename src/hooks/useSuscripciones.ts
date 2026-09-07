@@ -1,5 +1,6 @@
 import { useState, useContext } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
+import { showConfirmDialog } from "../utils/sweetalert";
 import {
   defaultSuscripcion,
   suscripcionApi,
@@ -81,14 +82,14 @@ export const useSuscripciones = () => {
   };
 
   const cancelar = async (): Promise<void> => {
-    const result = await Swal.fire({
+    const result = await showConfirmDialog({
       title: "¿Cancelar suscripción?",
       text: "Seguirás teniendo acceso hasta el fin del período",
       icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, cancelar",
       cancelButtonText: "No",
       reverseButtons: true,
+      isDestructive: true,
     });
 
     if (!result.isConfirmed) return;

@@ -8,6 +8,7 @@ export interface UsuarioRenovado {
 
 export interface RenovarTokenRespuesta {
   token: string;
+  refreshToken?: string;
   usuario?: UsuarioRenovado;
 }
 

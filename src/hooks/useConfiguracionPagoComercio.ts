@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
 
 import { configuracionPagoComercioApi } from "../services/configuracionPagoComercioApi";
+import { extraerMensajeError } from "../utils/errorHandler";
 
 import type { ConfiguracionPagoComercioDto } from "../types/User/pagosComercio";
 
@@ -54,11 +55,13 @@ export const useConfiguracionPagoComercio = () => {
       Swal.fire("Éxito", data.mensaje, "success");
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       Swal.fire(
         "Error",
-        error?.response?.data?.mensaje ??
+        extraerMensajeError(
+          error,
           "No se pudo guardar la configuración de pagos.",
+        ),
         "error",
       );
 

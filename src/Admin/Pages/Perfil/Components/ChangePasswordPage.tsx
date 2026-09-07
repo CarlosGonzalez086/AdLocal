@@ -1,4 +1,4 @@
-import { TextField, Button, IconButton, Box, Typography } from "@mui/material";
+import { TextField, Button, IconButton } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChangePassword } from "../../../../hooks/useChangePassword";
@@ -19,24 +19,24 @@ export const ChangePasswordPage = () => {
         <IconButton onClick={() => navigate(-1)} aria-label="Volver">
           <MaterialSymbol icon="arrow_back" size="medium" />
         </IconButton>
-        <Typography className="ms-2 fz-h4 fw-medium">
+        <span className="ms-2 fz-h4 fw-medium text-dark">
           Volver al perfil
-        </Typography>
+        </span>
       </div>
 
       <div className="d-flex justify-content-center">
         <div className="card-adlocal change-password-card">
-          <Box display="flex" alignItems="center" gap={1} mb={2}>
+          <div className="d-flex align-items-center gap-2 mb-3">
             <MaterialSymbol
               icon="lock"
               size="medium"
               filled
               className="change-password-icon"
             />
-            <Typography className="fz-h2 fw-semibold">
+            <h2 className="fz-h4 fw-semibold mb-0 text-dark">
               Cambiar contraseña
-            </Typography>
-          </Box>
+            </h2>
+          </div>
 
           <div className="row">
             <div className="col-12 mb-3">
@@ -49,6 +49,7 @@ export const ChangePasswordPage = () => {
                 onChange={(e) =>
                   setForm({ ...form, passwordActual: e.target.value })
                 }
+                className="form-control-mui-adlocal"
               />
             </div>
 
@@ -63,6 +64,7 @@ export const ChangePasswordPage = () => {
                 onChange={(e) =>
                   setForm({ ...form, passwordNueva: e.target.value })
                 }
+                className="form-control-mui-adlocal"
               />
             </div>
 
@@ -70,7 +72,7 @@ export const ChangePasswordPage = () => {
               <Button
                 disabled={loading}
                 onClick={() => cambiarPassword(form)}
-                className="btn-adlocal btn-adlocal--warning fz-h4 fw-semibold"
+                className="btn-adlocal btn-adlocal-primary fz-h4 fw-semibold"
               >
                 Cambiar contraseña
               </Button>

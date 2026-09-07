@@ -1,4 +1,5 @@
 import { httpAdmin } from "../api/httpAdmin";
+import type { ApiResponse } from "../api/apiResponse";
 
 export interface StripeConfiguracionDto {
   publishableKey: string;
@@ -25,6 +26,11 @@ export interface EmailConfiguracionDto {
   fromNombre: string;
 }
 
+export interface ConfiguracionItemDto {
+  key: string;
+  val: string | null;
+}
+
 export const configuracionApi = {
   guardarStripe: (data: StripeConfiguracionDto) =>
     httpAdmin.post("/Configuracion/stripe", data),
@@ -32,7 +38,8 @@ export const configuracionApi = {
   guardarClaves: (data: ClavesConfigDto) =>
     httpAdmin.post("/Configuracion/claves", data),
 
-  obtenerTodas: () => httpAdmin.get("/Configuracion/listar"),
+  obtenerTodas: () =>
+    httpAdmin.get<ApiResponse<ConfiguracionItemDto[]>>("/Configuracion/listar"),
 
   guardarComisionMarketplace: (data: ComisionMarketplaceDto) =>
     httpAdmin.post("/Configuracion/comision-marketplace", data),

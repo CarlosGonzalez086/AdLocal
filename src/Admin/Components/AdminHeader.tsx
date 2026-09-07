@@ -8,7 +8,6 @@ import {
   Menu,
   MenuItem,
   Toolbar,
-  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -32,10 +31,13 @@ type HeaderCssVariables = CSSProperties & {
 
 const menuTitles: Record<string, string> = {
   "/admin/app": "Inicio",
+  "/admin/app/inicio": "Inicio",
   "/admin/app/planes": "Planes",
   "/admin/app/usuarios": "Usuarios",
-  "/admin/app/tipos-comercios": "Tipos Comercios",
+  "/admin/app/tipos-comercios": "Tipos comercios",
   "/admin/app/configuraciones": "Configuraciones",
+  "/admin/app/comisiones": "Comisiones",
+  "/admin/app/cuentas-adlocal": "Cuentas ADLocal",
   "/admin/app/perfil": "Mi perfil",
   "/admin/app/perfil/cambiar-contrasena": "Cambiar contraseña",
 };
@@ -149,13 +151,12 @@ const AdminHeader = ({
           </IconButton>
 
           {pageTitle && (
-            <Typography
-              component="h1"
-              className="user-header-title"
+            <h1
+              className="user-header-title fz-h5 m-0"
               title={pageTitle}
             >
               {pageTitle}
-            </Typography>
+            </h1>
           )}
         </div>
 
@@ -203,13 +204,13 @@ const AdminHeader = ({
                 </Avatar>
 
                 <div className="user-header-menu-user-text">
-                  <Typography component="span" className="user-header-menu-user-name">
+                  <span className="user-header-menu-user-name">
                     {user.nombre || "Usuario"}
-                  </Typography>
+                  </span>
 
-                  <Typography component="span" className="user-header-menu-user-role">
+                  <span className="user-header-menu-user-role">
                     {user.rol}
-                  </Typography>
+                  </span>
                 </div>
               </div>
 
@@ -223,9 +224,9 @@ const AdminHeader = ({
                   <MaterialSymbol icon="person" size="small" />
                 </ListItemIcon>
 
-                <Typography component="span" className="user-header-menu-item-text">
+                <span className="user-header-menu-item-text">
                   Mi perfil
-                </Typography>
+                </span>
               </MenuItem>
 
               <Divider className="user-header-menu-divider" />
@@ -238,9 +239,9 @@ const AdminHeader = ({
                   <MaterialSymbol icon="logout" size="small" />
                 </ListItemIcon>
 
-                <Typography component="span" className="user-header-menu-item-text">
+                <span className="user-header-menu-item-text">
                   Cerrar sesión
-                </Typography>
+                </span>
               </MenuItem>
             </Menu>
           </div>

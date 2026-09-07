@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { PlanCreateDto } from "../../../../types/Admin/planes";
 import { usePlanes } from "../../../../hooks/usePlanes";
@@ -37,10 +36,10 @@ export const PlanesPageAdmin = () => {
 
   useEffect(() => {
     listar({ page, rows, orderBy, search });
-  }, [page, rows, orderBy, search]);
+  }, [page, rows, orderBy, search, listar]);
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <div className="w-100">
       <SearchToolbar
         search={search}
         searchPlaceholder="Buscar plan..."
@@ -62,7 +61,7 @@ export const PlanesPageAdmin = () => {
           },
         }}
       />
-      <Box sx={{ mt: 2 }}>
+      <div className="mt-3">
         <PlanesTable
           planes={planes}
           total={total}
@@ -82,7 +81,7 @@ export const PlanesPageAdmin = () => {
             eliminar(Number(p.id), { page, rows, orderBy, search })
           }
         />
-      </Box>
+      </div>
 
       {open && (
         <>
@@ -99,6 +98,6 @@ export const PlanesPageAdmin = () => {
           />
         </>
       )}
-    </Box>
+    </div>
   );
 };

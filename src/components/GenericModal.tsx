@@ -12,18 +12,23 @@ import {
 import type { FormEvent, ReactNode } from "react";
 import MaterialSymbol from "./UI/MaterialSymbol/MaterialSymbol";
 
+export interface GenericModalResult {
+  noClose?: boolean;
+  [key: string]: unknown;
+}
+
 export interface GenericModalPrimaryAction {
   label: string;
   loadingLabel?: string;
   icon?: string;
   type?: "submit" | "button";
-  onClick?: () => Promise<any> | any;
+  onClick?: () => Promise<GenericModalResult | void> | GenericModalResult | void;
   disabled?: boolean;
 }
 
 interface Props {
   open: boolean;
-  onClose: (data?: any) => void;
+  onClose: (data?: unknown) => void;
   title: string;
   subtitle?: string;
   icon?: string;
@@ -34,10 +39,10 @@ interface Props {
   onSubmit?: (event: FormEvent<HTMLFormElement>) => Promise<void> | void;
   primaryAction?: GenericModalPrimaryAction;
   secondaryLabel?: string;
-  onCancel?: () => Promise<any> | any;
+  onCancel?: () => Promise<unknown> | unknown;
   showCancel?: boolean;
   rejectLabel?: string;
-  onReject?: () => Promise<any> | any;
+  onReject?: () => Promise<GenericModalResult | void> | GenericModalResult | void;
   showReject?: boolean;
   hideActions?: boolean;
   showDivider?: boolean;
@@ -81,8 +86,8 @@ export const GenericModal = ({
     try {
       const data = onCancel ? await onCancel() : undefined;
       onClose(data);
-    } catch (error) {
-      console.error("Error al cancelar:", error);
+    } catch {
+      onClose();
     }
   };
 
@@ -95,8 +100,8 @@ export const GenericModal = ({
       if (!data?.noClose) {
         onClose(data);
       }
-    } catch (error) {
-      console.error("Error al ejecutar acción principal:", error);
+    } catch {
+      // Manejado internamente por el caller
     }
   };
 
@@ -107,8 +112,8 @@ export const GenericModal = ({
       if (!data?.noClose) {
         onClose(data);
       }
-    } catch (error) {
-      console.error("Error al rechazar:", error);
+    } catch {
+      // Manejado internamente por el caller
     }
   };
 

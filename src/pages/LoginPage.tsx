@@ -1,16 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
 
 import { useAdmin } from "../hooks/useAdmin";
 import { useUser } from "../hooks/useUser";
 
-import LoginForm from "../components/forms/LoginForm";
+import LoginForm, { type LoginFormData } from "../components/forms/LoginForm";
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
 
 import { setLocalStorageJWTAdmin } from "../utils/storageAdmin";
 import { setLocalStorageJWTUsuario } from "../utils/storageUsuario";
-
-const LOGO_URL = "/logo-adlocal.png";
+import { ADLOCAL_LOGO_URL } from "../constants/brand";
 
 interface Props {
   type: "admin" | "user";
@@ -26,13 +25,16 @@ export default function LoginPage({ type }: Props) {
 
   const loading = isAdmin ? admin.loading : user.loading;
 
-  const handleLogin = async (data: any) => {
+  const handleLogin = async (data: LoginFormData) => {
     try {
       const response = isAdmin
         ? await admin.loginAdmin(data)
         : await user.loginUser(data);
 
-      const loginResponse = response as any;
+      const loginResponse = response as unknown as {
+        respuesta?: { token?: string };
+        token?: string;
+      } | undefined;
       const token = loginResponse?.respuesta?.token ?? loginResponse?.token;
       if (!token) {
         await Swal.fire({
@@ -83,7 +85,7 @@ export default function LoginPage({ type }: Props) {
           aria-label="Ir al inicio de ADLocal"
         >
           <img
-            src={LOGO_URL}
+            src={ADLOCAL_LOGO_URL}
             alt="ADLocal"
             className="auth-logo-img"
           />

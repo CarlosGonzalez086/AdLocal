@@ -4,9 +4,11 @@ import {
   getLocalStorageJWTUsuario,
 } from "../utils/storageUsuario";
 import { renovarTokenUsuario } from "../services/tokenRefresh";
+import { extraerMensajeError } from "../utils/errorHandler";
 
 export const httpUsuario = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}api/`,
+  withCredentials: true,
 });
 
 httpUsuario.interceptors.request.use(
@@ -107,6 +109,10 @@ httpUsuario.interceptors.response.use(
       ) {
         window.location.href = "/usuario/login";
       }
+    }
+
+    if (error && typeof error === "object") {
+      (error as Record<string, unknown>).mensajeAmigable = extraerMensajeError(error);
     }
 
     return Promise.reject(error);

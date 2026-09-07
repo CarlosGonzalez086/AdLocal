@@ -1,4 +1,4 @@
-import { Chip, Paper, Stack, Typography } from "@mui/material";
+import { Chip } from "@mui/material";
 import type { SuscripcionListadoDto } from "../../../../types/Admin/suscripciones";
 import {
   GenericTable,
@@ -46,21 +46,21 @@ export const SuscripcionesTable = ({
       key: "usuario",
       label: "Usuario",
       render: (row) => (
-        <Stack>
-          <Typography className="fz-h4 fw-semibold">
+        <div className="d-flex flex-column">
+          <span className="fz-body-sm fw-semibold text-dark">
             {row.usuarioNombre}
-          </Typography>
-          <Typography className="fz-h6 fw-regular" color="text.secondary">
+          </span>
+          <span className="fz-caption text-muted">
             {row.usuarioEmail}
-          </Typography>
-        </Stack>
+          </span>
+        </div>
       ),
     },
     {
       key: "plan",
       label: "Plan",
       render: (row) => (
-        <Typography className="fz-h4 fw-medium">{row.planNombre}</Typography>
+        <span className="fz-body-sm fw-medium text-dark">{row.planNombre}</span>
       ),
     },
     {
@@ -83,11 +83,11 @@ export const SuscripcionesTable = ({
       label: "Inicio",
       render: (row) =>
         row.fechaInicio ? (
-          <Typography className="fz-h5 fw-regular" color="text.secondary">
+          <span className="fz-body-sm text-muted">
             {utcToLocal(row.fechaInicio)}
-          </Typography>
+          </span>
         ) : (
-          <Typography className="admin-cell-empty">—</Typography>
+          <span className="admin-cell-empty text-muted fz-caption">—</span>
         ),
     },
     {
@@ -95,33 +95,33 @@ export const SuscripcionesTable = ({
       label: "Fin",
       render: (row) =>
         row.fechaFin ? (
-          <Typography className="fz-h5 fw-regular" color="text.secondary">
+          <span className="fz-body-sm text-muted">
             {utcToLocal(row.fechaFin)}
-          </Typography>
+          </span>
         ) : (
-          <Typography className="admin-cell-empty">—</Typography>
+          <span className="admin-cell-empty text-muted fz-caption">—</span>
         ),
     },
     {
       key: "autoRenew",
       label: "Renovación",
       render: (row) => (
-        <Typography className="fz-h5 fw-regular" color="text.secondary">
+        <span className="fz-body-sm text-muted">
           {row.autoRenew ? "Automática" : "Manual"}
-        </Typography>
+        </span>
       ),
     },
     {
       key: "precio",
       label: "Precio",
       render: (row) => (
-        <Typography className="fz-h4 fw-semibold">${row.precio} MXN</Typography>
+        <span className="fz-body-sm fw-semibold text-dark">${row.precio} MXN</span>
       ),
     },
   ];
 
   return (
-    <Paper elevation={0} className="table-paper p-3">
+    <div className="card-adlocal p-3">
       <GenericTable<SuscripcionListadoDto>
         columns={columns}
         data={suscripciones}
@@ -133,6 +133,6 @@ export const SuscripcionesTable = ({
         onPageChange={onPageChange}
         onRowsPerPageChange={onRowsPerPageChange}
       />
-    </Paper>
+    </div>
   );
 };

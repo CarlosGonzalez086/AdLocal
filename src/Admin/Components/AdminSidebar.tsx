@@ -14,6 +14,7 @@ import {
 
 import MaterialSymbol from "../../components/UI/MaterialSymbol/MaterialSymbol";
 import type { CSSProperties } from "react";
+import { ADLOCAL_MARK_URL } from "../../constants/brand";
 
 interface SidebarProps {
   drawerWidth: number;
@@ -32,10 +33,6 @@ interface MenuItemConfig {
 type SidebarCssVariables = CSSProperties & {
   "--sidebar-width": string;
 };
-
-const LOGO_FULL = "/logo-adlocal.png";
-
-const LOGO_ICON = "/logo-adlocal.png";
 
 const AdminSidebar = ({
   drawerWidth,
@@ -133,11 +130,12 @@ const AdminSidebar = ({
         <Link
           to="/admin/app/inicio"
           className="user-sidebar-logo-link"
+          aria-label="Ir al inicio del panel de administración"
           onClick={isMobile ? onCloseMobile : undefined}
         >
           <img
-            src={isCollapsedDesktop ? LOGO_ICON : LOGO_FULL}
-            alt="ADLocal"
+            src={ADLOCAL_MARK_URL}
+            alt=""
             className={[
               "user-sidebar-logo-img",
               isCollapsedDesktop ? "user-sidebar-logo-img-collapsed" : "",
@@ -146,12 +144,20 @@ const AdminSidebar = ({
               .filter(Boolean)
               .join(" ")}
           />
+          {!isCollapsedDesktop && (
+            <span className="user-sidebar-brand-wordmark" aria-hidden="true">
+              <span>AD</span><span>Local</span>
+            </span>
+          )}
         </Link>
       </div>
 
       <Divider className="user-sidebar-divider" />
 
-      <nav className="user-sidebar-nav">
+      <nav
+        className="user-sidebar-nav"
+        aria-label="Navegación administrativa"
+      >
         <List className="user-sidebar-menu-list">
           {menuItems.map((item) => {
             const selected = isPathSelected(location.pathname, item.path);
@@ -161,6 +167,7 @@ const AdminSidebar = ({
                 component={Link}
                 to={item.path}
                 selected={selected}
+                aria-current={selected ? "page" : undefined}
                 onClick={isMobile ? onCloseMobile : undefined}
                 className={[
                   "user-sidebar-menu-btn",

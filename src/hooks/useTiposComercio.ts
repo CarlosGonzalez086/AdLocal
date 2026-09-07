@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
+import { showConfirmDialog } from "../utils/sweetalert";
 import type {
   TipoComercioCreateDto,
   TipoComercioDto,
@@ -35,8 +36,7 @@ export const useTiposComercio = () => {
         );
         setTipos(data.respuesta?.items ?? []);
         setTotal(data.respuesta?.totalItems ?? 0);
-      } catch (error) {
-        console.error(error);
+      } catch {
         Swal.fire("Error", "No se pudo cargar los tipos de comercio", "error");
       } finally {
         setLoading(false);
@@ -59,8 +59,7 @@ export const useTiposComercio = () => {
         Swal.fire("Creado", "Tipo de comercio creado", "success");
       }
       await listar(refrescarParams);
-    } catch (error) {
-      console.error(error);
+    } catch {
       Swal.fire("Error", "No se pudo guardar el tipo de comercio", "error");
     } finally {
       setLoading(false);
@@ -68,13 +67,13 @@ export const useTiposComercio = () => {
   };
 
   const eliminar = async (id: number, refrescarParams: ListarParams) => {
-    const result = await Swal.fire({
+    const result = await showConfirmDialog({
       title: "¿Eliminar tipo de comercio?",
       text: "Esta acción no se puede deshacer",
       icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
+      isDestructive: true,
     });
 
     if (!result.isConfirmed) return;
@@ -84,8 +83,7 @@ export const useTiposComercio = () => {
       await tipoComercioApi.eliminar(id);
       Swal.fire("Eliminado", "Tipo de comercio eliminado", "success");
       await listar(refrescarParams);
-    } catch (error) {
-      console.error(error);
+    } catch {
       Swal.fire("Error", "No se pudo eliminar el tipo de comercio", "error");
     } finally {
       setLoading(false);
@@ -101,13 +99,12 @@ export const useTiposComercio = () => {
     }
   };
 
-  const listarParaSelect = async () => {
+  const listarParaSelect = useCallback(async () => {
     setLoadingSelect(true);
     try {
       const { data } = await tipoComercioApi.getAllForSelect();
       setTiposSelect(data.respuesta ?? []);
-    } catch (error) {
-      console.error(error);
+    } catch {
       Swal.fire(
         "Error",
         "No se pudo cargar los tipos de comercio para select",
@@ -116,7 +113,7 @@ export const useTiposComercio = () => {
     } finally {
       setLoadingSelect(false);
     }
-  };
+  }, []);
 
   return {
     tipos,

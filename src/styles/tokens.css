@@ -1,0 +1,109 @@
+/* ==============================================================
+   ADLOCAL DESIGN SYSTEM - TOKENS
+   Fuente única de verdad para colores, tipografía, espaciado,
+   bordes, radios, sombras, breakpoints y estados.
+   ============================================================== */
+
+:root {
+  /* 1. TIPOGRAFÍA */
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* 2. PALETA MAESTRA DE MARCA */
+  --primary: #008989;           /* Teal oficial de marca */
+  --primary-dark: #007070;      /* Teal profundo */
+  --primary-light: #1da3a3;     /* Teal luminoso */
+  --primary-rgb: 0, 137, 137;
+  --primary-subtle: rgba(0, 137, 137, 0.08);
+  --primary-glow: rgba(0, 137, 137, 0.25);
+
+  --secondary: #e7692c;         /* Terracota cálido de acción */
+  --secondary-dark: #c9551d;    /* Terracota tostado */
+  --secondary-light: #f28650;   /* Terracota suave */
+  --secondary-rgb: 231, 105, 44;
+  --secondary-subtle: rgba(231, 105, 44, 0.10);
+  --secondary-glow: rgba(231, 105, 44, 0.25);
+
+  --accent-gold: #f59e0b;       /* Miel dorada para favoritos y calificaciones */
+  --accent-orange: #e7692c;
+  --accent-teal: #008989;
+
+  /* 3. ESTADOS DE SISTEMA */
+  --success: #2a9d6f;           /* Verde Agave */
+  --success-dark: #217d58;
+  --success-light: #d4f4e4;
+  --success-subtle: rgba(42, 157, 111, 0.10);
+
+  --warning: #e7692c;           /* Terracota advertencia */
+  --warning-dark: #c9551d;
+  --warning-light: #fde8dd;
+  --warning-subtle: rgba(231, 105, 44, 0.10);
+
+  --error: #d84028;             /* Rojo arcilla */
+  --error-dark: #b52f19;
+  --error-light: #fde8e5;
+  --error-subtle: rgba(216, 64, 40, 0.10);
+
+  --info: #008989;
+  --info-light: #e0f4f4;
+
+  /* 4. SUPERFICIES Y FONDOS NEUTRALES (Warm Ivory & Craft Canvas) */
+  --bg: #f8f6f2;                /* Fondo general marfil cálido */
+  --bg-soft: #f3efe8;           /* Fondo secundario suave */
+  --surface: #ffffff;           /* Superficie de tarjetas y paneles */
+  --surface-soft: #faf8f5;      /* Superficie atenuada */
+  --surface-warm: #f5efe6;      /* Superficie cálida */
+  --surface-hover: rgba(0, 137, 137, 0.05);
+
+  /* 5. TEXTO Y CONTRASTE */
+  --text: #1c1d1f;              /* Texto principal de alto contraste */
+  --text-secondary: #696e75;    /* Texto secundario / metadatos */
+  --text-muted: #8e939b;        /* Texto deshabilitado o notas */
+  --text-inverse: #ffffff;      /* Texto sobre fondos oscuros/primarios */
+
+  /* 6. BORDES Y SEPARADORES */
+  --border: #eae5dd;            /* Borde estructural */
+  --border-soft: rgba(234, 229, 221, 0.85);
+  --border-focus: #008989;
+
+  /* 7. ESPACIADOS MODULARES */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+
+  /* 8. RADIOS DE CURVATURA */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* 9. SOMBRAS ELEVADAS Y ATMOSFÉRICAS */
+  --shadow-xs: 0 1px 3px rgba(28, 29, 31, 0.05);
+  --shadow-sm: 0 2px 8px rgba(28, 29, 31, 0.06);
+  --shadow-md: 0 6px 18px rgba(28, 29, 31, 0.08);
+  --shadow-lg: 0 12px 32px rgba(28, 29, 31, 0.10);
+  --shadow-xl: 0 20px 48px rgba(28, 29, 31, 0.14);
+  --shadow-warm: 0 12px 28px rgba(231, 105, 44, 0.18);
+  --shadow-teal: 0 12px 28px rgba(0, 137, 137, 0.18);
+
+  /* 10. TRANSICIONES */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 11. BREAKPOINTS (Referencia Bootstrap Mobile-First) */
+  --breakpoint-xs: 0;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1400px;
+}

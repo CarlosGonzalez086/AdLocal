@@ -1,7 +1,3 @@
-import {
-  Box,
-  Typography,
-} from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -12,14 +8,14 @@ interface FeatureProps {
 
 export const Feature = ({ label, active }: FeatureProps) => {
   return (
-    <Box display="flex" alignItems="center" gap={1}>
+    <div className="d-flex align-items-center gap-2">
       {active ? (
-        <CheckIcon fontSize="small" sx={{ color: "#22C55E" }} />
+        <CheckIcon fontSize="small" className="text-success" />
       ) : (
-        <CloseIcon fontSize="small" sx={{ color: "#EF4444" }} />
+        <CloseIcon fontSize="small" className="text-danger" />
       )}
 
-      <Typography variant="body2">{label}</Typography>
-    </Box>
+      <span className="fz-body-sm text-dark">{label}</span>
+    </div>
   );
 };

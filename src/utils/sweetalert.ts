@@ -1,12 +1,24 @@
-import Swal, { type SweetAlertIcon } from "sweetalert2";
+import Swal, { type SweetAlertIcon, type SweetAlertOptions } from "sweetalert2";
+import { extraerMensajeError } from "./errorHandler";
+
+export { extraerMensajeError };
+
+const alertClasses = {
+  container: "adlocal-alert-container",
+  popup: "adlocal-alert",
+  confirmButton: "adlocal-alert-confirm",
+  cancelButton: "adlocal-alert-cancel",
+  denyButton: "adlocal-alert-deny",
+};
 
 /**
- * Instancia preconfigurada de SweetAlert2 para AdLocal
+ * Instancia preconfigurada de SweetAlert2 para AdLocalWeb y AdLocal
  * con paleta corporativa y tipografía estandarizada.
  */
 export const appSwal = Swal.mixin({
   buttonsStyling: true,
   reverseButtons: true,
+  customClass: alertClasses,
   confirmButtonColor: "#008989",
   cancelButtonColor: "#F8F6F2",
   denyButtonColor: "#D84028",
@@ -60,12 +72,8 @@ export const showInfoAlert = (title: string, text?: string) => {
   });
 };
 
-interface ConfirmDialogOptions {
+interface ConfirmDialogOptions extends Omit<SweetAlertOptions, "customClass" | "showCancelButton"> {
   title: string;
-  text?: string;
-  confirmButtonText?: string;
-  cancelButtonText?: string;
-  icon?: SweetAlertIcon;
   isDestructive?: boolean;
 }
 
@@ -79,22 +87,33 @@ export const showConfirmDialog = async ({
   cancelButtonText = "Cancelar",
   icon = "question",
   isDestructive = false,
+  ...options
 }: ConfirmDialogOptions) => {
   return appSwal.fire({
+    ...options,
     title,
     text,
     icon,
     showCancelButton: true,
     confirmButtonText,
     cancelButtonText,
-    confirmButtonColor: isDestructive ? "#D84028" : "#008989",
-  });
+    customClass: isDestructive
+      ? {
+          ...alertClasses,
+          popup: "adlocal-alert adlocal-alert--destructive",
+        }
+      : alertClasses,
+  } as SweetAlertOptions);
 };
 
 /**
  * Muestra una notificación tipo Toast corporativa
  */
-export const showToast = (title: string, icon: SweetAlertIcon = "success", timer = 3000) => {
+export const showToast = (
+  title: string,
+  icon: SweetAlertIcon = "success",
+  timer = 3000,
+) => {
   return appSwal.fire({
     toast: true,
     position: "top-end",
@@ -106,4 +125,28 @@ export const showToast = (title: string, icon: SweetAlertIcon = "success", timer
   });
 };
 
-export default Swal;
+/**
+ * Notifica un error de API en modal corporativo utilizando el extractor unificado.
+ */
+export const notificarErrorApi = (
+  error: unknown,
+  fallback = "Ocurrió un error inesperado al procesar la solicitud.",
+  title = "Error",
+) => {
+  const mensaje = extraerMensajeError(error, fallback);
+  return showErrorAlert(title, mensaje);
+};
+
+/**
+ * Notifica un error de API en formato Toast corporativo utilizando el extractor unificado.
+ */
+export const notificarToastErrorApi = (
+  error: unknown,
+  fallback = "Ocurrió un error inesperado.",
+  timer = 4000,
+) => {
+  const mensaje = extraerMensajeError(error, fallback);
+  return showToast(mensaje, "error", timer);
+};
+
+export default appSwal;

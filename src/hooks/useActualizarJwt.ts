@@ -4,6 +4,7 @@ import { httpAdmin } from "../api/httpAdmin";
 import { httpUsuario } from "../api/httpUsuario";
 import { setLocalStorageJWTAdmin } from "../utils/storageAdmin";
 import { setLocalStorageJWTUsuario } from "../utils/storageUsuario";
+import { extraerMensajeError } from "../utils/errorHandler";
 
 export interface ActualizarJwtParams {
   email: string;
@@ -58,11 +59,8 @@ export const useActualizarJwt = () => {
       }
 
       return data;
-    } catch (err: any) {
-      const mensaje =
-        err?.response?.data?.mensaje ||
-        err.message ||
-        "Error al actualizar el JWT";
+    } catch (err: unknown) {
+      const mensaje = extraerMensajeError(err, "Error al actualizar el JWT");
       setError(mensaje);
       throw err;
     } finally {

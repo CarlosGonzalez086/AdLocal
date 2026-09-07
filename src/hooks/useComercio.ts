@@ -1,22 +1,11 @@
-import { useState, useEffect, useContext } from "react";
-import Swal from "sweetalert2";
-
+import { useState, useEffect, useContext, useCallback } from "react";
+import Swal, { notificarErrorApi, showConfirmDialog } from "../utils/sweetalert";
 import { useActualizarJwt } from "./useActualizarJwt";
-
-import {
-  comercioCreateSchema,
-  comercioUpdateSchema,
-  type ComercioCreateDto,
-} from "../schemas/comercioCreate.schema";
+import { comercioCreateSchema, comercioUpdateSchema, type ComercioCreateDto } from "../schemas/comercioCreate.schema";
 import { normalizeComercioData } from "../utils/generalsFunctions";
 import { UserContext } from "../context/UserContext ";
 import { useNavigate } from "react-router-dom";
-import {
-  comercioDtoDefault,
-  type ColaborarDto,
-  type ComercioDto,
-  type ComercioDtoListItem,
-} from "../types/User/comercio";
+import { comercioDtoDefault, type ColaborarDto, type ComercioDto, type ComercioDtoListItem } from "../types/User/comercio";
 import { comercioApi } from "../services/comercioApi";
 import type { ProfileUser } from "../types/User/UserAuth";
 
@@ -35,15 +24,12 @@ export const useComercio = () => {
   const navigate = useNavigate();
   const { actualizarJwt } = useActualizarJwt();
   const [comercio, setComercio] = useState<ComercioDto>(comercioDtoDefault);
-  const [comercioPage, setComercioPage] =
-    useState<ComercioDto>(comercioDtoDefault);
+  const [comercioPage, setComercioPage] = useState<ComercioDto>(comercioDtoDefault);
   const [comercios, setComercios] = useState<ComercioDtoListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [totalByUser, setTotalByUser] = useState(0);
-  const [usersColaboradores, setUsersColaboradores] = useState<ProfileUser[]>(
-    [],
-  );
+  const [usersColaboradores, setUsersColaboradores] = useState<ProfileUser[]>([]);
   const [totalColaboradores, setTotalColaboradores] = useState(0);
 
   const cargar = async () => {
@@ -130,8 +116,8 @@ export const useComercio = () => {
       }
 
       await cargar();
-    } catch (error: any) {
-      Swal.fire("Error", error.response.data.mensaje, "error");
+    } catch (error: unknown) {
+      notificarErrorApi(error, "No fue posible guardar el comercio.");
     } finally {
       setLoading(false);
     }
@@ -140,13 +126,13 @@ export const useComercio = () => {
   const eliminar = async () => {
     if (!comercio?.id) return;
 
-    const r = await Swal.fire({
+    const r = await showConfirmDialog({
       title: "¿Eliminar comercio?",
       text: "Esta acción no se puede deshacer",
       icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       reverseButtons: true,
+      isDestructive: true,
     });
 
     if (!r.isConfirmed) return;
@@ -168,33 +154,35 @@ export const useComercio = () => {
     }
   };
 
-  const getAllComerciosByUser = async (page: number, rowsPerPage: number) => {
-    setLoading(true);
+  const getAllComerciosByUser = useCallback(
+    async (page: number, rowsPerPage: number) => {
+      setLoading(true);
 
-    try {
-      const { data } = await comercioApi.getAllComerciosByUser(
-        page + 1,
-        rowsPerPage,
-      );
+      try {
+        const { data } = await comercioApi.getAllComerciosByUser(
+          page + 1,
+          rowsPerPage,
+        );
 
-      if (data.codigo !== "200") {
-        Swal.fire("Error", data.mensaje, "error");
+        if (data.codigo !== "200") {
+          Swal.fire("Error", data.mensaje, "error");
+          setComercios([]);
+          setTotal(0);
+          return;
+        }
+
+        setComercios(data.respuesta.items || []);
+        setTotal(data.respuesta.totalItems || 0);
+      } catch {
+        Swal.fire("Error", "No se pudieron cargar los comercios", "error");
         setComercios([]);
         setTotal(0);
-        return;
+      } finally {
+        setLoading(false);
       }
-
-      setComercios(data.respuesta.items || []);
-      setTotal(data.respuesta.totalItems || 0);
-    } catch (error) {
-      console.error(error);
-      Swal.fire("Error", "No se pudieron cargar los comercios", "error");
-      setComercios([]);
-      setTotal(0);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [],
+  );
 
   const cargarPorId = async (id: number) => {
     setLoading(true);
@@ -286,13 +274,13 @@ export const useComercio = () => {
   ) => {
     if (!id) return;
 
-    const r = await Swal.fire({
+    const r = await showConfirmDialog({
       title: "¿Eliminar comercio?",
       text: "Esta acción no se puede deshacer",
       icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       reverseButtons: true,
+      isDestructive: true,
     });
 
     if (!r.isConfirmed) return;
@@ -360,38 +348,29 @@ export const useComercio = () => {
     }
   };
 
-  const getAllColaboradores = async (
-    idComercio: number,
-    page: number,
-    rowsPerPage: number,
-  ) => {
-    setLoading(true);
-
-    try {
-      const { data } = await comercioApi.getAllColaboradores(
-        idComercio,
-        page + 1,
-        rowsPerPage,
-      );
-
-      if (data.codigo !== "200") {
-        Swal.fire("Error", data.mensaje, "error");
+  const getAllColaboradores = useCallback(
+    async (idComercio: number, page: number, rowsPerPage: number) => {
+      setLoading(true);
+      try {
+        const { data } = await comercioApi.getAllColaboradores(idComercio, page + 1, rowsPerPage);
+        if (data.codigo !== "200") {
+          Swal.fire("Error", data.mensaje, "error");
+          setUsersColaboradores([]);
+          setTotalColaboradores(0);
+          return;
+        }
+        setUsersColaboradores(data.respuesta.items || []);
+        setTotalColaboradores(data.respuesta.totalItems || 0);
+      } catch {
+        Swal.fire("Error", "No se pudieron cargar los colaboradores", "error");
         setUsersColaboradores([]);
         setTotalColaboradores(0);
-        return;
+      } finally {
+        setLoading(false);
       }
-
-      setUsersColaboradores(data.respuesta.items || []);
-      setTotalColaboradores(data.respuesta.totalItems || 0);
-    } catch (error) {
-      console.error(error);
-      Swal.fire("Error", "No se pudieron cargar los colaboradores", "error");
-      setUsersColaboradores([]);
-      setTotalColaboradores(0);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [],
+  );
   const toggleAccesoColaborador = async (
     idColaborador: number,
     idComercio: number,
@@ -442,14 +421,14 @@ export const useComercio = () => {
   ) => {
     if (!idColaborador || !idComercio) return;
 
-    const r = await Swal.fire({
+    const r = await showConfirmDialog({
       title: "¿Eliminar colaborador?",
       text: "Esta acción eliminará al colaborador del comercio y no se puede deshacer.",
       icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
       reverseButtons: true,
+      isDestructive: true,
       didOpen: () => {
         const container = Swal.getContainer();
         if (container) {

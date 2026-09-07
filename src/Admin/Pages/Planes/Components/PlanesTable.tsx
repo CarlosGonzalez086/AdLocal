@@ -1,11 +1,7 @@
 import {
   IconButton,
   Tooltip,
-  Stack,
-  Typography,
   Chip,
-  Paper,
-  Box,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -21,6 +17,7 @@ const TIPO_COLOR: Record<string, string> = {
   PRO: "#af52de",
   BUSINESS: "#ff9f0a",
 };
+
 interface Props {
   planes: PlanCreateDto[];
   total: number;
@@ -49,25 +46,26 @@ export const PlanesTable = ({
       key: "nombre",
       label: "Plan",
       render: (p) => (
-        <Stack direction="row" spacing={1.25} alignItems="center">
-          <Box
-            sx={{
+        <div className="d-flex align-items-center gap-2">
+          <span
+            style={{
               width: 8,
               height: 8,
               borderRadius: "50%",
               flexShrink: 0,
-              bgcolor: TIPO_COLOR[p.tipo] ?? "#8e8e93",
+              backgroundColor: TIPO_COLOR[p.tipo] ?? "#8e8e93",
+              display: "inline-block",
             }}
           />
-          <Stack>
-            <Typography fontWeight={600} fontSize="0.9rem">
+          <div className="d-flex flex-column">
+            <span className="fz-body-sm fw-semibold text-dark">
               {p.nombre}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+            </span>
+            <span className="fz-caption text-muted">
               {p.tipo}
-            </Typography>
-          </Stack>
-        </Stack>
+            </span>
+          </div>
+        </div>
       ),
     },
     {
@@ -82,18 +80,18 @@ export const PlanesTable = ({
             variant="outlined"
           />
         ) : (
-          <Typography fontWeight={600} fontSize="0.875rem">
+          <span className="fz-body-sm fw-semibold text-dark">
             ${p.precio.toLocaleString()}
-          </Typography>
+          </span>
         ),
     },
     {
       key: "duracionDias",
       label: "Duración",
       render: (p) => (
-        <Typography color="text.secondary" fontSize="0.875rem">
+        <span className="fz-body-sm text-muted">
           {p.duracionDias} días
-        </Typography>
+        </span>
       ),
     },
     {
@@ -122,9 +120,9 @@ export const PlanesTable = ({
         p.tieneBadge ? (
           <Chip label={p.badgeTexto ?? "Badge"} size="small" color="primary" />
         ) : (
-          <Typography color="text.disabled" fontSize="0.8rem">
+          <span className="text-muted fz-caption">
             —
-          </Typography>
+          </span>
         ),
     },
     {
@@ -134,15 +132,15 @@ export const PlanesTable = ({
         p.isMultiUsuario ? (
           <Chip label="Sí" size="small" color="primary" variant="outlined" />
         ) : (
-          <Typography color="text.disabled" fontSize="0.8rem">
+          <span className="text-muted fz-caption">
             —
-          </Typography>
+          </span>
         ),
     },
   ];
 
   return (
-    <Paper elevation={0} className="table-paper p-3">
+    <div className="card-adlocal p-3">
       <GenericTable<PlanCreateDto>
         columns={columns}
         data={planes}
@@ -154,12 +152,12 @@ export const PlanesTable = ({
         onPageChange={onPageChange}
         onRowsPerPageChange={onRowsPerPageChange}
         actions={(p) => (
-          <Stack direction="row" spacing={0.5}>
+          <div className="d-flex align-items-center gap-1">
             <Tooltip title="Editar" disableTouchListener>
               <IconButton
                 size="small"
                 onClick={() => onEdit(p)}
-                sx={{ width: 36, height: 36 }}
+                className="btn-adlocal-ghost p-1"
               >
                 <EditIcon fontSize="small" />
               </IconButton>
@@ -169,14 +167,14 @@ export const PlanesTable = ({
                 size="small"
                 color="error"
                 onClick={() => onDelete(p)}
-                sx={{ width: 36, height: 36 }}
+                className="btn-adlocal-ghost p-1 text-danger"
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-          </Stack>
+          </div>
         )}
       />
-    </Paper>
+    </div>
   );
 };

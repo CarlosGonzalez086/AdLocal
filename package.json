@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "npx tsc -b && npx vite build",
     "lint": "eslint .",
+    "test": "vitest run",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
     "@stripe/stripe-js": "^8.6.1",
     "apexcharts": "^5.3.6",
     "axios": "^1.13.2",
+    "bootstrap": "^5.3.8",
     "dayjs": "^1.11.19",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
@@ -58,6 +60,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
-    "vite-plugin-pwa": "^1.3.0"
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^5.0.2"
   }
 }

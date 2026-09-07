@@ -7,7 +7,7 @@ import {
   Select,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import Swal from "sweetalert2";
+import Swal from "../../../utils/sweetalert";
 import {
   GenericTable,
   type TableColumn,

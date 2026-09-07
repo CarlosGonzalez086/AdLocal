@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
+import { showConfirmDialog } from "../utils/sweetalert";
 import {
   tarjetaApi,
   type CrearTarjetaDto,
@@ -69,14 +70,14 @@ export const useTarjetas = () => {
   };
 
   const eliminar = async (id: number) => {
-    const result = await Swal.fire({
+    const result = await showConfirmDialog({
       title: "¿Eliminar tarjeta?",
       text: "Esta acción no se puede deshacer",
       icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
       reverseButtons: true,
+      isDestructive: true,
     });
 
     if (!result.isConfirmed) return;

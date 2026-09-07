@@ -1,4 +1,4 @@
-import { FormControlLabel, Switch, Typography } from "@mui/material";
+import { FormControlLabel, Switch } from "@mui/material";
 import type { ReactNode } from "react";
 import MaterialSymbol from "./UI/MaterialSymbol/MaterialSymbol";
 
@@ -48,13 +48,13 @@ const FeatureSwitch = ({
             </div>
 
             <div className="feature-text">
-              <Typography component="span" className="feature-title">
+              <span className="feature-title">
                 {label}
-              </Typography>
+              </span>
 
-              <Typography component="p" className="feature-description">
+              <p className="feature-description">
                 {description}
-              </Typography>
+              </p>
             </div>
           </div>
         }
@@ -66,4 +66,3 @@ const FeatureSwitch = ({
 };
 
 export default FeatureSwitch;
-

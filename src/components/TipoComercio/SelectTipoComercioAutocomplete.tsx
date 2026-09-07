@@ -12,7 +12,7 @@ export const SelectTipoComercioAutocomplete = ({ value, onChange }: Props) => {
 
   useEffect(() => {
     listarParaSelect();
-  }, []);
+  }, [listarParaSelect]);
 
   const selected = tiposSelect.find((t) => t.id === value) ?? null;
 

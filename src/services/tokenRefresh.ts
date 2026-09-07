@@ -3,12 +3,16 @@ import { jwtDecode } from "jwt-decode";
 import type { RenovarTokenResponse } from "../types/tokenRefresh";
 import {
   getLocalStorageJWTUsuario,
+  getLocalStorageRefreshTokenUsuario,
   setLocalStorageJWTUsuario,
+  setLocalStorageRefreshTokenUsuario,
   setLocalStorageUsuario,
 } from "../utils/storageUsuario";
 import {
   getLocalStorageJWTAdmin,
+  getLocalStorageRefreshTokenAdmin,
   setLocalStorageJWTAdmin,
+  setLocalStorageRefreshTokenAdmin,
   setLocalStorageAdmin,
 } from "../utils/storageAdmin";
 
@@ -63,7 +67,8 @@ export const isTokenExpiringSoon = (
  */
 export const renovarTokenUsuario = async (): Promise<RenovarTokenResponse> => {
   const currentToken = getLocalStorageJWTUsuario();
-  if (!currentToken) {
+  const currentRefreshToken = getLocalStorageRefreshTokenUsuario();
+  if (!currentToken && !currentRefreshToken) {
     throw new Error("No hay token de usuario almacenado para renovar");
   }
 
@@ -71,13 +76,13 @@ export const renovarTokenUsuario = async (): Promise<RenovarTokenResponse> => {
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${currentToken}`,
+    Authorization: currentToken ? `Bearer ${currentToken}` : "",
   };
 
   const response = await axios.post<RenovarTokenResponse>(
     endpoint,
-    { token: currentToken },
-    { headers }
+    { token: currentToken, tokenActual: currentToken, refreshToken: currentRefreshToken },
+    { headers, withCredentials: true }
   );
 
   const data = response.data;
@@ -85,6 +90,9 @@ export const renovarTokenUsuario = async (): Promise<RenovarTokenResponse> => {
 
   if (nuevoToken) {
     setLocalStorageJWTUsuario(nuevoToken);
+    if (data?.respuesta?.refreshToken) {
+      setLocalStorageRefreshTokenUsuario(data.respuesta.refreshToken);
+    }
 
     if (data.respuesta.usuario) {
       try {
@@ -122,13 +130,14 @@ export const renovarTokenUsuario = async (): Promise<RenovarTokenResponse> => {
  */
 export const renovarTokenAdmin = async (): Promise<RenovarTokenResponse> => {
   const currentToken = getLocalStorageJWTAdmin();
-  if (!currentToken) {
+  const currentRefreshToken = getLocalStorageRefreshTokenAdmin();
+  if (!currentToken && !currentRefreshToken) {
     throw new Error("No hay token de admin almacenado para renovar");
   }
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${currentToken}`,
+    Authorization: currentToken ? `Bearer ${currentToken}` : "",
   };
 
   const endpointAdmin = `${getBaseApiUrl()}/Admin/renovar-token`;
@@ -138,16 +147,16 @@ export const renovarTokenAdmin = async (): Promise<RenovarTokenResponse> => {
   try {
     response = await axios.post<RenovarTokenResponse>(
       endpointAdmin,
-      { token: currentToken },
-      { headers }
+      { token: currentToken, tokenActual: currentToken, refreshToken: currentRefreshToken },
+      { headers, withCredentials: true }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Si el endpoint específico de Admin retorna 404, usar fallback al Endpoint Central de Auth
-    if (error?.response?.status === 404) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
       response = await axios.post<RenovarTokenResponse>(
         endpointAuth,
-        { token: currentToken },
-        { headers }
+        { token: currentToken, tokenActual: currentToken, refreshToken: currentRefreshToken },
+        { headers, withCredentials: true }
       );
     } else {
       throw error;
@@ -159,6 +168,9 @@ export const renovarTokenAdmin = async (): Promise<RenovarTokenResponse> => {
 
   if (nuevoToken) {
     setLocalStorageJWTAdmin(nuevoToken);
+    if (data?.respuesta?.refreshToken) {
+      setLocalStorageRefreshTokenAdmin(data.respuesta.refreshToken);
+    }
 
     if (data.respuesta.usuario) {
       try {

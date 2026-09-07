@@ -8,7 +8,6 @@ import {
   Menu,
   MenuItem,
   Toolbar,
-  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -33,6 +32,7 @@ type HeaderCssVariables = CSSProperties & {
 
 const menuTitles: Record<string, string> = {
   "/usuario/app": "Inicio",
+  "/usuario/app/inicio": "Inicio",
   "/usuario/app/comercio": "Mis comercios",
   "/usuario/app/comercio/nuevo": "Nuevo comercio",
   "/usuario/app/comercio/editar": "Editar comercio",
@@ -41,8 +41,9 @@ const menuTitles: Record<string, string> = {
   "/usuario/app/configuracion": "Configuración",
   "/usuario/app/perfil": "Mi perfil",
   "/usuario/app/productos-servicios": "Productos y servicios",
-  "/usuario/app/configuracion-pagos": "Configuracion de pagos",
+  "/usuario/app/configuracion-pagos": "Configuración de pagos",
   "/usuario/app/pedidos": "Pedidos",
+  "/usuario/app/citas": "Citas",
   "/usuario/app/comisiones": "Comisiones",
   "/usuario/app/productos-servicios/comercios":
     "Productos y servicios de los comercios",
@@ -160,13 +161,12 @@ const UserHeader = ({
           </IconButton>
 
           {pageTitle && (
-            <Typography
-              component="h1"
-              className="user-header-title"
+            <h1
+              className="user-header-title fz-h5 m-0"
               title={pageTitle}
             >
               {pageTitle}
-            </Typography>
+            </h1>
           )}
         </div>
 
@@ -220,13 +220,13 @@ const UserHeader = ({
                 </Avatar>
 
                 <div className="user-header-menu-user-text">
-                  <Typography component="span" className="user-header-menu-user-name">
+                  <span className="user-header-menu-user-name">
                     {user.nombre || "Usuario"}
-                  </Typography>
+                  </span>
 
-                  <Typography component="span" className="user-header-menu-user-role">
+                  <span className="user-header-menu-user-role">
                     {user.rol}
-                  </Typography>
+                  </span>
                 </div>
               </div>
 
@@ -240,9 +240,9 @@ const UserHeader = ({
                   <MaterialSymbol icon="person" size="small" />
                 </ListItemIcon>
 
-                <Typography component="span" className="user-header-menu-item-text">
+                <span className="user-header-menu-item-text">
                   Mi perfil
-                </Typography>
+                </span>
               </MenuItem>
 
               <Divider className="user-header-menu-divider" />
@@ -255,9 +255,9 @@ const UserHeader = ({
                   <MaterialSymbol icon="logout" size="small" />
                 </ListItemIcon>
 
-                <Typography component="span" className="user-header-menu-item-text">
+                <span className="user-header-menu-item-text">
                   Cerrar sesión
-                </Typography>
+                </span>
               </MenuItem>
             </Menu>
           </div>

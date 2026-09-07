@@ -10758,3 +10758,223 @@ a {
   height: 1.8em !important;
   border-width: 2px !important;
 }
+
+/* =========================================================
+   PWA INSTALL BANNER & PROMPT (ADLocal Mobile Identity)
+========================================================= */
+
+@keyframes pwaSlideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 40px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.pwaInstallBanner {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 540px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 137, 137, 0.22);
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(0, 137, 137, 0.16), 0 4px 16px rgba(28, 29, 31, 0.08);
+  padding: 14px 16px;
+  z-index: 9999;
+  animation: pwaSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pwaInstallBannerContent {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pwaInstallBannerIconWrapper {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-soft, #f3efe8);
+  border: 1px solid rgba(0, 137, 137, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pwaInstallBannerIcon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pwaInstallBannerBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.pwaInstallBannerHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.pwaInstallBannerTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text, #1c1d1f);
+  line-height: 1.25;
+}
+
+.pwaInstallBannerBadge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: rgba(42, 157, 111, 0.12);
+  color: #2a9d6f;
+  letter-spacing: 0.2px;
+}
+
+.pwaInstallBannerSubtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary, #696e75);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pwaInstallBannerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pwaInstallBtn {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 8px 14px !important;
+  border-radius: 10px !important;
+  white-space: nowrap;
+}
+
+.pwaInstallDismissBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #8e939b);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.pwaInstallDismissBtn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text, #1c1d1f);
+}
+
+.pwaInstallDismissBtn .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* iOS Safari Guide Box */
+.pwaIosGuideContainer {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--bg-soft, #f3efe8);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 137, 137, 0.12);
+  animation: pwaSlideUp 0.25s ease-out;
+}
+
+.pwaIosGuideHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text, #1c1d1f);
+  margin-bottom: 8px;
+}
+
+.pwaIosGuideInfoIcon {
+  font-size: 18px !important;
+  color: var(--primary, #008989);
+}
+
+.pwaIosGuideSteps {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 12px;
+  color: var(--text-secondary, #696e75);
+  line-height: 1.6;
+}
+
+.pwaIosGuideSteps strong {
+  color: var(--text, #1c1d1f);
+}
+
+.pwaIosInlineIcon {
+  font-size: 15px !important;
+  vertical-align: -2px;
+  color: var(--primary, #008989);
+}
+
+.pwaIosGuideFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.pwaIosCloseGuideBtn {
+  font-size: 12px !important;
+  padding: 4px 10px !important;
+  border-radius: 8px !important;
+}
+
+@media (max-width: 480px) {
+  .pwaInstallBanner {
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    width: calc(100% - 20px);
+    padding: 12px;
+  }
+
+  .pwaInstallBannerContent {
+    gap: 10px;
+  }
+
+  .pwaInstallBannerIconWrapper {
+    width: 42px;
+    height: 42px;
+  }
+
+  .pwaInstallBannerTitle {
+    font-size: 14px;
+  }
+
+  .pwaInstallBtn {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+  }
+}
+

@@ -26,7 +26,11 @@ export const OrderSelect = ({
           borderColor: "rgba(0, 0, 0, 0.12)",
         },
         "&:hover .MuiOutlinedInput-notchedOutline": {
-          borderColor: "#007AFF",
+          borderColor: "#008989",
+        },
+        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+          borderColor: "#008989",
+          borderWidth: "1.5px",
         },
       }}
     >

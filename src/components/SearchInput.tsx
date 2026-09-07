@@ -31,7 +31,11 @@ export const SearchInput = ({
             borderColor: "rgba(0, 0, 0, 0.12)",
           },
           "&:hover fieldset": {
-            borderColor: "#007AFF",
+            borderColor: "#008989",
+          },
+          "&.Mui-focused fieldset": {
+            borderColor: "#008989",
+            borderWidth: "1.5px",
           },
         },
       }}

@@ -44,34 +44,34 @@ type ModalCssVariables = CSSProperties & {
 
 const PLAN_CONFIG: Record<PlanType, PlanVisualConfig> = {
   BASIC: {
-    gradient: "linear-gradient(135deg, #007AFF, #005FCC)",
-    accent: "#007AFF",
-    soft: "rgba(0, 122, 255, 0.09)",
-    glow: "rgba(0, 122, 255, 0.23)",
-    icon: "bolt",
+    gradient: "linear-gradient(135deg, #008989, #007070)",
+    accent: "#008989",
+    soft: "rgba(0, 137, 137, 0.09)",
+    glow: "rgba(0, 137, 137, 0.23)",
+    icon: "storefront",
   },
 
   PRO: {
-    gradient: "linear-gradient(135deg, #5856D6, #3634A3)",
-    accent: "#5856D6",
-    soft: "rgba(88, 86, 214, 0.09)",
-    glow: "rgba(88, 86, 214, 0.23)",
+    gradient: "linear-gradient(135deg, #E7692C, #C9551D)",
+    accent: "#E7692C",
+    soft: "rgba(231, 105, 44, 0.09)",
+    glow: "rgba(231, 105, 44, 0.23)",
     icon: "rocket_launch",
   },
 
   BUSINESS: {
-    gradient: "linear-gradient(135deg, #FF9500, #CC7700)",
-    accent: "#FF9500",
-    soft: "rgba(255, 149, 0, 0.1)",
-    glow: "rgba(255, 149, 0, 0.23)",
+    gradient: "linear-gradient(135deg, #F59E0B, #D97706)",
+    accent: "#F59E0B",
+    soft: "rgba(245, 158, 11, 0.1)",
+    glow: "rgba(245, 158, 11, 0.23)",
     icon: "business_center",
   },
 
   FREE: {
-    gradient: "linear-gradient(135deg, #8E8E93, #636366)",
-    accent: "#8E8E93",
-    soft: "rgba(142, 142, 147, 0.1)",
-    glow: "rgba(142, 142, 147, 0.18)",
+    gradient: "linear-gradient(135deg, #696E75, #4A4D52)",
+    accent: "#696E75",
+    soft: "rgba(110, 115, 122, 0.1)",
+    glow: "rgba(110, 115, 122, 0.18)",
     icon: "verified",
   },
 };

@@ -148,7 +148,7 @@ export default function PreviewPage({ user }: PreviewPageProps) {
 
           text: data.mensaje || "Ocurrió un error al consultar los productos.",
 
-          confirmButtonColor: "#007AFF",
+          confirmButtonColor: "#008989",
         });
 
         return;
@@ -167,7 +167,7 @@ export default function PreviewPage({ user }: PreviewPageProps) {
 
         text: "No fue posible cargar los productos del comercio.",
 
-        confirmButtonColor: "#007AFF",
+        confirmButtonColor: "#008989",
       });
     } finally {
       setLoadingProducts(false);

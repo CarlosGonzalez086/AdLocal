@@ -111,9 +111,9 @@ export default function ComercioCard({
     : "Explorar comercio";
 
   const commerceVariables: CommerceCssVariables = {
-    "--commerce-primary": comercio.colorPrimario || "#007AFF",
+    "--commerce-primary": comercio.colorPrimario || "#008989",
 
-    "--commerce-secondary": comercio.colorSecundario || "#5AC8FA",
+    "--commerce-secondary": comercio.colorSecundario || "#E7692C",
   };
 
   return (

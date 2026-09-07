@@ -138,8 +138,8 @@ export function GenericTable<T>({
           width: 56,
           height: 56,
           borderRadius: "16px",
-          backgroundColor: "rgba(0, 122, 255, 0.08)",
-          color: "#007AFF",
+          backgroundColor: "rgba(0, 137, 137, 0.08)",
+          color: "#008989",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -491,7 +491,7 @@ export function GenericTable<T>({
                     sx={{
                       transition: "background-color 0.15s ease",
                       "&:hover": {
-                        backgroundColor: "rgba(0, 122, 255, 0.025) !important",
+                        backgroundColor: "rgba(0, 137, 137, 0.03) !important",
                       },
                       "&:last-child td": {
                         borderBottom: "none",

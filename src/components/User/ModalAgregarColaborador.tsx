@@ -138,8 +138,8 @@ export default function ModalAgregarColaborador({
               borderRadius: 2,
               textTransform: "none",
               fontWeight: 600,
-              background: "linear-gradient(135deg, #007AFF 0%, #005FCC 100%)",
-              boxShadow: "0 6px 16px rgba(0,122,255,0.3)",
+              background: "linear-gradient(135deg, #008989 0%, #007070 100%)",
+              boxShadow: "0 4px 14px rgba(0, 137, 137, 0.28)",
             }}
           >
             Guardar

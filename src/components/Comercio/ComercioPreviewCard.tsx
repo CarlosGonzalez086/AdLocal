@@ -51,8 +51,8 @@ type ColorChipCssVariables = CSSProperties & {
   "--color-chip": string;
 };
 
-const DEFAULT_PRIMARY_COLOR = "#007AFF";
-const DEFAULT_SECONDARY_COLOR = "#0051FF";
+const DEFAULT_PRIMARY_COLOR = "#008989";
+const DEFAULT_SECONDARY_COLOR = "#E7692C";
 
 const isPresent = (value: unknown): boolean => {
   return value !== null && value !== undefined && String(value).trim() !== "";

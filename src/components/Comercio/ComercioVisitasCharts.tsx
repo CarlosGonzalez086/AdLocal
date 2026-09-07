@@ -405,8 +405,8 @@ export default function ComercioVisitasCharts({
             icon="date_range"
             categories={weeklyCategories}
             values={weeklyValues}
-            color="#007AFF"
-            colorSecondary="#5AC8FA"
+            color="#008989"
+            colorSecondary="#1DA3A3"
           />
         </div>
 
@@ -417,8 +417,8 @@ export default function ComercioVisitasCharts({
             icon="calendar_month"
             categories={monthlyCategories}
             values={monthlyValues}
-            color="#34C759"
-            colorSecondary="#30D158"
+            color="#2A9D6F"
+            colorSecondary="#38B281"
           />
         </div>
       </div>

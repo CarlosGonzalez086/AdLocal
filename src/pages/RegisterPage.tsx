@@ -58,7 +58,7 @@ export default function RegisterPage({ type }: Props) {
           title: "Cuenta creada",
           text: "La cuenta fue creada correctamente, pero no fue posible enviar el correo de bienvenida.",
           confirmButtonText: "Continuar",
-          confirmButtonColor: "#007AFF",
+          confirmButtonColor: "#008989",
         });
       }
 

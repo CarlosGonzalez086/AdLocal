@@ -34,7 +34,6 @@ export default function LoginPage({ type }: Props) {
 
       const loginResponse = response as any;
       const token = loginResponse?.respuesta?.token ?? loginResponse?.token;
-      console.log(token);
       if (!token) {
         await Swal.fire({
           icon: "error",

@@ -9,7 +9,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={theme}>
     <CssBaseline />
     <div
-      style={{ height: "100vh", width: "100vw", backgroundColor: "#F2F2F7" }}
+      style={{ height: "100vh", width: "100vw", backgroundColor: "#F8F6F2" }}
     >
       <App />
     </div>

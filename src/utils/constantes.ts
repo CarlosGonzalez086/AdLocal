@@ -112,7 +112,7 @@ export const METODOS_PAGO = [
 ];
 
 
-export const iosColors = {
+export const adlocalColors = {
   primary: "#008989", // Teal de "Local"
   success: "#2A9D6F", // Verde Agave
   warning: "#E7692C", // Terracota cálido de "AD"
@@ -121,3 +121,5 @@ export const iosColors = {
   gray: "#8E939B",
   background: "#F8F6F2",
 };
+
+export const iosColors = adlocalColors;

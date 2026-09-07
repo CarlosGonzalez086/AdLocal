@@ -277,7 +277,6 @@ export const ProductoServicioModal = ({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Entro");
 
     if (soloVer) {
       return;

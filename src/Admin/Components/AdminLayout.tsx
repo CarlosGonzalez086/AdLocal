@@ -6,6 +6,7 @@ import AdminHeader from "./AdminHeader";
 import { jwtDecode } from "jwt-decode";
 import { getLocalStorageJWTAdmin } from "../../utils/storageAdmin";
 import type { JwtPayload } from "../Auth/PrivateRouteAdmin";
+import AdLocalErrorBoundary from "../../components/UI/AdLocalErrorBoundary";
 
 const DRAWER_WIDTH = 240;
 const COLLAPSED_WIDTH = 76;
@@ -30,12 +31,36 @@ const AdminLayout = () => {
   }, []);
 
   useEffect(() => {
-    const token = getLocalStorageJWTAdmin();
-    if (token) {
-      const decoded = jwtDecode<JwtPayload>(token);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUser(decoded);
-    }
+    const updateAdminFromStorage = () => {
+      const token = getLocalStorageJWTAdmin();
+      if (token) {
+        try {
+          const decoded = jwtDecode<JwtPayload>(token);
+          setUser(decoded);
+        } catch {
+          setUser(null);
+        }
+      }
+    };
+
+    updateAdminFromStorage();
+
+    const handleTokenRefreshed = (e: Event) => {
+      const customEvent = e as CustomEvent<{ token?: string; userType?: string }>;
+      if (customEvent.detail?.userType === "admin" && customEvent.detail?.token) {
+        try {
+          const decoded = jwtDecode<JwtPayload>(customEvent.detail.token);
+          setUser(decoded);
+        } catch {
+          // ignore
+        }
+      }
+    };
+
+    window.addEventListener("adlocal_token_refreshed", handleTokenRefreshed);
+    return () => {
+      window.removeEventListener("adlocal_token_refreshed", handleTokenRefreshed);
+    };
   }, []);
 
   return (
@@ -67,7 +92,9 @@ const AdminLayout = () => {
           className="user-layout-main-content"
         >
           <div className="user-layout-outlet-container">
-            <Outlet />
+            <AdLocalErrorBoundary sectionName="el módulo administrativo">
+              <Outlet />
+            </AdLocalErrorBoundary>
           </div>
         </main>
       </div>

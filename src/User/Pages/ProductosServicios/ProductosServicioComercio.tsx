@@ -119,8 +119,8 @@ export function ProductosServicioComercio() {
             borderRadius: 999,
             fontSize: "0.72rem",
             fontWeight: 700,
-            bgcolor: p.activo ? "rgba(52,199,89,0.10)" : "rgba(0,0,0,0.06)",
-            color: p.activo ? "#34C759" : "#8e8e93",
+            bgcolor: p.activo ? "rgba(42, 157, 111, 0.12)" : "rgba(142, 147, 155, 0.12)",
+            color: p.activo ? "#2A9D6F" : "#8E939B",
           }}
         />
       ),
@@ -224,7 +224,7 @@ export function ProductosServicioComercio() {
                 bgcolor: "rgba(0,0,0,0.06)",
                 "& .MuiLinearProgress-bar": {
                   borderRadius: 999,
-                  bgcolor: limiteAlcanzado ? "error.main" : "#007AFF",
+                  bgcolor: limiteAlcanzado ? "error.main" : "#008989",
                 },
               }}
             />
@@ -287,8 +287,8 @@ export function ProductosServicioComercio() {
                   bgcolor: "rgba(0,0,0,0.05)",
                   border: "1px solid rgba(0,0,0,0.07)",
                   "&:hover": {
-                    bgcolor: "rgba(0,122,255,0.10)",
-                    color: "#007AFF",
+                    bgcolor: "rgba(0, 137, 137, 0.10)",
+                    color: "#008989",
                   },
                   transition: "all 0.2s ease",
                 }}
@@ -313,10 +313,10 @@ export function ProductosServicioComercio() {
                   width: 36,
                   height: 36,
                   borderRadius: 999,
-                  bgcolor: "rgba(255,59,48,0.08)",
-                  border: "1px solid rgba(255,59,48,0.15)",
-                  color: "#FF3B30",
-                  "&:hover": { bgcolor: "rgba(255,59,48,0.16)" },
+                  bgcolor: "rgba(216, 64, 40, 0.08)",
+                  border: "1px solid rgba(216, 64, 40, 0.20)",
+                  color: "#D84028",
+                  "&:hover": { bgcolor: "rgba(216, 64, 40, 0.16)" },
                   transition: "all 0.2s ease",
                 }}
               >
@@ -341,13 +341,13 @@ export function ProductosServicioComercio() {
                   height: 36,
                   borderRadius: 999,
                   bgcolor: p.activo
-                    ? "rgba(52,199,89,0.10)"
+                    ? "rgba(42, 157, 111, 0.12)"
                     : "rgba(0,0,0,0.05)",
-                  border: `1px solid ${p.activo ? "rgba(52,199,89,0.20)" : "rgba(0,0,0,0.07)"}`,
-                  color: p.activo ? "#34C759" : "#8e8e93",
+                  border: `1px solid ${p.activo ? "rgba(42, 157, 111, 0.25)" : "rgba(0,0,0,0.07)"}`,
+                  color: p.activo ? "#2A9D6F" : "#8E939B",
                   "&:hover": {
                     bgcolor: p.activo
-                      ? "rgba(52,199,89,0.20)"
+                      ? "rgba(42, 157, 111, 0.22)"
                       : "rgba(0,0,0,0.09)",
                   },
                   transition: "all 0.2s ease",

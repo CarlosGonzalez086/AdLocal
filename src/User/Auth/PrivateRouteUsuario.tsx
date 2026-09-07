@@ -5,6 +5,8 @@ import {
   clearStorageUsuario,
   getLocalStorageJWTUsuario,
 } from "../../utils/storageUsuario";
+import { renovarTokenUsuario } from "../../services/tokenRefresh";
+import { useTokenRefresh } from "../../hooks/useTokenRefresh";
 
 interface Props {
   children: ReactElement;
@@ -42,43 +44,98 @@ export default function PrivateRouteUsuario({ children, roles }: Props) {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 
+  // Mantiene la sesión siempre activa renovando el token proactivamente en segundo plano
+  useTokenRefresh({
+    userType: "usuario",
+    thresholdSeconds: 300,
+    checkIntervalMs: 60_000,
+    enableUserActivityRefresh: true,
+  });
+
   useEffect(() => {
-    try {
-      const token = getLocalStorageJWTUsuario();
+    let isMounted = true;
 
-      if (!token) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setAuthenticated(false);
-        return;
-      }
+    const validarToken = async () => {
+      try {
+        const token = getLocalStorageJWTUsuario();
 
-      const decoded = jwtDecode<JwtPayload>(token);
-      const now = Math.floor(Date.now() / 1000);
+        if (!token) {
+          if (isMounted) {
+            setAuthenticated(false);
+            setLoading(false);
+          }
+          return;
+        }
 
-      if (!decoded.exp || decoded.exp <= now) {
+        let activeToken = token;
+        let decoded: JwtPayload;
+
+        try {
+          decoded = jwtDecode<JwtPayload>(activeToken);
+        } catch {
+          clearStorageUsuario();
+          if (isMounted) {
+            setAuthenticated(false);
+            setLoading(false);
+          }
+          return;
+        }
+
+        const now = Math.floor(Date.now() / 1000);
+
+        // Si ya expiró o le queda menos de 1 minuto, intentar renovar inmediatamente
+        if (!decoded.exp || decoded.exp <= now + 60) {
+          try {
+            const renovacion = await renovarTokenUsuario();
+            const nuevoToken = renovacion?.respuesta?.token;
+            if (nuevoToken) {
+              activeToken = nuevoToken;
+              decoded = jwtDecode<JwtPayload>(activeToken);
+            } else {
+              throw new Error("Respuesta de renovación sin token");
+            }
+          } catch {
+            clearStorageUsuario();
+            if (isMounted) {
+              setAuthenticated(false);
+              setLoading(false);
+            }
+            return;
+          }
+        }
+
+        const rol =
+          decoded.rol ||
+          decoded.role ||
+          decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+        if (roles && roles.length > 0 && (!rol || !roles.includes(rol))) {
+          clearStorageUsuario();
+          if (isMounted) {
+            setAuthenticated(false);
+            setLoading(false);
+          }
+          return;
+        }
+
+        if (isMounted) {
+          setAuthenticated(true);
+          setLoading(false);
+        }
+      } catch {
         clearStorageUsuario();
-        setAuthenticated(false);
-        return;
+        if (isMounted) {
+          setAuthenticated(false);
+          setLoading(false);
+        }
       }
+    };
 
-      const rol =
-        decoded.rol ||
-        decoded.role ||
-        decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+    void validarToken();
 
-      if (roles && roles.length > 0 && (!rol || !roles.includes(rol))) {
-        clearStorageUsuario();
-        setAuthenticated(false);
-        return;
-      }
-
-      setAuthenticated(true);
-    } catch {
-      clearStorageUsuario();
-      setAuthenticated(false);
-    } finally {
-      setLoading(false);
-    }
+    return () => {
+      isMounted = false;
+    };
   }, [roles]);
 
   if (loading) return null;

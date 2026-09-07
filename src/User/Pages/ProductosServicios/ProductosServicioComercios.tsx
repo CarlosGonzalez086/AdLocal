@@ -28,7 +28,7 @@ export default function ProductosServicioComercios() {
         title: "Acceso restringido",
         text: "Tu plan actual no incluye acceso a esta sección. Actualiza tu plan para desbloquear esta funcionalidad.",
         confirmButtonText: "Entendido",
-        confirmButtonColor: "#007AFF",
+        confirmButtonColor: "#008989",
         allowOutsideClick: false,
         allowEscapeKey: false,
       }).then(() => navigate("/app/productos-servicios"));

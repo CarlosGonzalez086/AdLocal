@@ -60,7 +60,7 @@ export function PreviewNegocio() {
 
           confirmButtonText: "Aceptar",
 
-          confirmButtonColor: "#007AFF",
+          confirmButtonColor: "#008989",
         });
 
         return;
@@ -81,7 +81,7 @@ export function PreviewNegocio() {
 
         confirmButtonText: "Aceptar",
 
-        confirmButtonColor: "#007AFF",
+        confirmButtonColor: "#008989",
       });
     } finally {
       setLoadingProducts(false);

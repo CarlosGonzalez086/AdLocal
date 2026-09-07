@@ -95,7 +95,6 @@ export const useComercio = () => {
           ...result.data,
           id: comercio.id,
         });
-        console.log(resp);
 
         if (resp.codigo !== "200") {
           Swal.fire("Error", resp.mensaje, "error");
@@ -207,7 +206,6 @@ export const useComercio = () => {
         setComercioPage(comercioDtoDefault);
         return;
       }
-      console.log(data.respuesta);
 
       setComercioPage(data.respuesta);
     } catch (error) {

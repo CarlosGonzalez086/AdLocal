@@ -56,8 +56,8 @@ export default function ModalColaboradores({ open, onClose, id }: Props) {
           sx={{
             borderRadius: 1.5,
             fontWeight: 500,
-            bgcolor: p.activo ? "#E9F7EF" : "#F2F2F7",
-            color: p.activo ? "#1E7F4F" : "#666",
+            bgcolor: p.activo ? "rgba(42, 157, 111, 0.12)" : "rgba(142, 147, 155, 0.12)",
+            color: p.activo ? "#2A9D6F" : "#696E75",
           }}
         />
       ),
@@ -126,8 +126,9 @@ export default function ModalColaboradores({ open, onClose, id }: Props) {
                     sx={{
                       width: 36,
                       height: 36,
-                      bgcolor: "#F2F2F7",
-                      "&:hover": { bgcolor: "#E5E5EA" },
+                      bgcolor: "#F3EFE8",
+                      color: "#1C1D1F",
+                      "&:hover": { bgcolor: "#EAE5DD" },
                     }}
                     onClick={() => {
                       toggleAccesoColaborador(p.id, id, {
@@ -151,9 +152,9 @@ export default function ModalColaboradores({ open, onClose, id }: Props) {
                     sx={{
                       width: 36,
                       height: 36,
-                      bgcolor: "#FDECEA",
-                      color: "#D93025",
-                      "&:hover": { bgcolor: "#FAD2CF" },
+                      bgcolor: "rgba(216, 64, 40, 0.10)",
+                      color: "#D84028",
+                      "&:hover": { bgcolor: "rgba(216, 64, 40, 0.18)" },
                     }}
                     onClick={() => {
                       eliminarColaborador(p.id, id, {

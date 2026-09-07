@@ -151,9 +151,9 @@ const createFormState = (initialData: ComercioDto | null): ComercioDto => ({
 
   imagenes: initialData?.imagenes ?? [],
 
-  colorPrimario: initialData?.colorPrimario || "#007AFF",
+  colorPrimario: initialData?.colorPrimario || "#008989",
 
-  colorSecundario: initialData?.colorSecundario || "#FF9500",
+  colorSecundario: initialData?.colorSecundario || "#E7692C",
 
   horarios: normalizarHorarios(initialData?.horarios),
 
@@ -393,7 +393,7 @@ console.log(user);
 
       confirmButtonText: "Entendido",
 
-      confirmButtonColor: "#007AFF",
+      confirmButtonColor: "#008989",
     });
   };
 
@@ -407,7 +407,7 @@ console.log(user);
 
       confirmButtonText: "Entendido",
 
-      confirmButtonColor: "#FF3B30",
+      confirmButtonColor: "#D84028",
     });
   };
 
@@ -475,7 +475,7 @@ console.log(user);
 
         confirmButtonText: "Entendido",
 
-        confirmButtonColor: "#007AFF",
+        confirmButtonColor: "#008989",
       });
 
       return;
@@ -881,7 +881,7 @@ console.log(user);
                   <TextField
                     type="color"
                     label="Color primario"
-                    value={form.colorPrimario || "#007AFF"}
+                    value={form.colorPrimario || "#008989"}
                     onChange={handleChange("colorPrimario")}
                     fullWidth
                     disabled={!editable}
@@ -898,7 +898,7 @@ console.log(user);
                   <TextField
                     type="color"
                     label="Color secundario"
-                    value={form.colorSecundario || "#FF9500"}
+                    value={form.colorSecundario || "#E7692C"}
                     onChange={handleChange("colorSecundario")}
                     fullWidth
                     disabled={!editable}

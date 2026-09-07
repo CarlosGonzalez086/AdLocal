@@ -216,12 +216,12 @@ export function CitasComercioPage() {
                 fontSize: "13px",
                 py: 0.5,
                 px: 1.5,
-                color: "#007AFF",
-                borderColor: "rgba(0, 122, 255, 0.25)",
-                backgroundColor: "rgba(0, 122, 255, 0.04)",
+                color: "#008989",
+                borderColor: "rgba(0, 137, 137, 0.25)",
+                backgroundColor: "rgba(0, 137, 137, 0.05)",
                 "&:hover": {
-                  borderColor: "#007AFF",
-                  backgroundColor: "rgba(0, 122, 255, 0.08)",
+                  borderColor: "#008989",
+                  backgroundColor: "rgba(0, 137, 137, 0.12)",
                 },
               }}
             >

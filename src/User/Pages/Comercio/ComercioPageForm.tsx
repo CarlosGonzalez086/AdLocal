@@ -158,9 +158,9 @@ const createInitialForm = (id = 0): ComercioDto => ({
 
   imagenes: [],
 
-  colorPrimario: "#007AFF",
+  colorPrimario: "#008989",
 
-  colorSecundario: "#FF9500",
+  colorSecundario: "#E7692C",
 
   horarios: normalizarHorarios(),
 
@@ -321,9 +321,9 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
 
     imagenes: comercio.imagenes ?? [],
 
-    colorPrimario: comercio.colorPrimario || "#007AFF",
+    colorPrimario: comercio.colorPrimario || "#008989",
 
-    colorSecundario: comercio.colorSecundario || "#FF9500",
+    colorSecundario: comercio.colorSecundario || "#E7692C",
 
     horarios: normalizarHorarios(comercio.horarios ?? []),
 
@@ -454,7 +454,7 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
 
       confirmButtonText: "Entendido",
 
-      confirmButtonColor: "#007AFF",
+      confirmButtonColor: "#008989",
     });
   };
 
@@ -468,7 +468,7 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
 
       confirmButtonText: "Entendido",
 
-      confirmButtonColor: "#FF3B30",
+      confirmButtonColor: "#D84028",
     });
   };
 
@@ -558,7 +558,7 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
 
         confirmButtonText: "Entendido",
 
-        confirmButtonColor: "#007AFF",
+        confirmButtonColor: "#008989",
       });
 
       return;
@@ -677,7 +677,7 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
 
         confirmButtonText: "Volver",
 
-        confirmButtonColor: "#007AFF",
+        confirmButtonColor: "#008989",
 
         allowOutsideClick: false,
 
@@ -714,7 +714,7 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
 
       confirmButtonText: "Volver",
 
-      confirmButtonColor: "#007AFF",
+      confirmButtonColor: "#008989",
 
       allowOutsideClick: false,
 
@@ -1001,7 +1001,7 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
                       <TextField
                         type="color"
                         label="Color primario"
-                        value={form.colorPrimario || "#007AFF"}
+                        value={form.colorPrimario || "#008989"}
                         onChange={handleChange("colorPrimario")}
                         fullWidth
                         className="commerceColorField"
@@ -1017,7 +1017,7 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
                       <TextField
                         type="color"
                         label="Color secundario"
-                        value={form.colorSecundario || "#FF9500"}
+                        value={form.colorSecundario || "#E7692C"}
                         onChange={handleChange("colorSecundario")}
                         fullWidth
                         className="commerceColorField"

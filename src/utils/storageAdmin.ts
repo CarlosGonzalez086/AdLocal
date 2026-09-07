@@ -58,13 +58,9 @@ export const removeLocalStorageAdmin = (
 
 export const clearStorageAdmin = (): void => {
   try {
-    window.localStorage.removeItem(
-      "jwtAdmin"
-    );
-
-    window.localStorage.removeItem(
-      "admin"
-    );
+    window.localStorage.removeItem("jwtAdmin");
+    window.localStorage.removeItem("admin");
+    window.localStorage.removeItem("token");
   } catch (error) {
     console.log(error);
   }

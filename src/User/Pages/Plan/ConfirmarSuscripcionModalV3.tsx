@@ -24,6 +24,7 @@ import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol
 
 import { useCheckout } from "../../../hooks/useCheckout";
 import { useTarjetas } from "../../../hooks/useTarjetas";
+import type { TarjetaDto } from "../../../services/tarjetaApi";
 
 import type { PlanCreateDto } from "../../../services/planPublicApi";
 
@@ -112,7 +113,7 @@ export const ConfirmarSuscripcionModalV3 = ({
 
   const selectedCard =
     tarjetas.find(
-      (card) => card.stripePaymentMethodId === tarjetaSeleccionada,
+      (card: TarjetaDto) => card.stripePaymentMethodId === tarjetaSeleccionada,
     ) ?? null;
 
   const canConfirm =
@@ -178,7 +179,8 @@ export const ConfirmarSuscripcionModalV3 = ({
       return;
     }
 
-    const defaultCard = tarjetas.find((card) => card.isDefault) ?? tarjetas[0];
+    const defaultCard =
+      tarjetas.find((card: TarjetaDto) => card.isDefault) ?? tarjetas[0];
 
     setTarjetaPreSeleccionada(defaultCard.id);
 
@@ -210,7 +212,7 @@ export const ConfirmarSuscripcionModalV3 = ({
 
             confirmButtonText: "Entendido",
 
-            confirmButtonColor: "#007AFF",
+            confirmButtonColor: "#008989",
           });
 
           return;
@@ -290,7 +292,7 @@ export const ConfirmarSuscripcionModalV3 = ({
 
         confirmButtonText: "Entendido",
 
-        confirmButtonColor: "#FF3B30",
+        confirmButtonColor: "#D84028",
       });
     }
   };
@@ -408,7 +410,7 @@ export const ConfirmarSuscripcionModalV3 = ({
             </div>
           ) : (
             <div className="d-flex flex-column gap-2">
-              {tarjetas.map((card) => {
+              {tarjetas.map((card: TarjetaDto) => {
                 const selected =
                   tarjetaSeleccionada === card.stripePaymentMethodId;
 

@@ -1,6 +1,6 @@
 import Chart from "react-apexcharts";
 import type { SuscripcionPorPlanDto } from "../../../services/dashboard.api";
-import { iosColors } from "../../../utils/constantes";
+import { adlocalColors } from "../../../utils/constantes";
 
 interface Props {
   data: SuscripcionPorPlanDto[];
@@ -22,10 +22,10 @@ export const SubscriptionsDonutChart = ({ data }: Props) => {
     },
     labels: data.map((p) => p.plan),
     colors: [
-      iosColors.primary,
-      iosColors.success,
-      iosColors.warning,
-      iosColors.purple,
+      adlocalColors.primary,
+      adlocalColors.success,
+      adlocalColors.warning,
+      adlocalColors.purple,
     ],
     stroke: {
       width: 2,

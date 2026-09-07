@@ -176,7 +176,7 @@ const CodigoReferido = ({
 
         confirmButtonText: "Entendido",
 
-        confirmButtonColor: "#007AFF",
+        confirmButtonColor: "#008989",
       });
     }
   };
@@ -230,7 +230,7 @@ const CodigoReferido = ({
 
         confirmButtonText: "Continuar",
 
-        confirmButtonColor: "#34C759",
+        confirmButtonColor: "#2A9D6F",
       });
 
       setAplicoBeneficio(true);
@@ -246,7 +246,7 @@ const CodigoReferido = ({
 
         confirmButtonText: "Entendido",
 
-        confirmButtonColor: "#FF3B30",
+        confirmButtonColor: "#D84028",
       });
 
       setAplicoBeneficio(false);

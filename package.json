@@ -22,6 +22,7 @@
     "@stripe/stripe-js": "^8.6.1",
     "apexcharts": "^5.3.6",
     "axios": "^1.13.2",
+    "bootstrap": "^5.3.8",
     "dayjs": "^1.11.19",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",

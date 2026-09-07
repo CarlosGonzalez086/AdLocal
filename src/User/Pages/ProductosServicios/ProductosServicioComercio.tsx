@@ -253,14 +253,14 @@ export function ProductosServicioComercio() {
         }}
         actions={(p) => (
           <Stack direction="row" spacing={0.5} sx={{ p: 0.5 }}>
-            <Tooltip title="Editar" arrow>
+            <Tooltip title="Editar" arrow disableTouchListener>
               <IconButton
                 size="small"
                 onClick={() => {
                   setProducto({
                     id: p.id,
                     uuid: p.uuid,
-                    idComercio: producto.idComercio,
+                    idComercio: p.idComercio ?? Number(id),
                     imagenBase64: p.imagenBase64,
                     precio: p.precio,
                     precioDesde: p.precioDesde,
@@ -281,8 +281,8 @@ export function ProductosServicioComercio() {
                   setOpen(true);
                 }}
                 sx={{
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   borderRadius: 999,
                   bgcolor: "rgba(0,0,0,0.05)",
                   border: "1px solid rgba(0,0,0,0.07)",
@@ -293,11 +293,11 @@ export function ProductosServicioComercio() {
                   transition: "all 0.2s ease",
                 }}
               >
-                <EditRoundedIcon sx={{ fontSize: 16 }} />
+                <EditRoundedIcon sx={{ fontSize: 18 }} />
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Eliminar" arrow>
+            <Tooltip title="Eliminar" arrow disableTouchListener>
               <IconButton
                 size="small"
                 onClick={() =>
@@ -310,8 +310,8 @@ export function ProductosServicioComercio() {
                   })
                 }
                 sx={{
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   borderRadius: 999,
                   bgcolor: "rgba(255,59,48,0.08)",
                   border: "1px solid rgba(255,59,48,0.15)",
@@ -320,11 +320,11 @@ export function ProductosServicioComercio() {
                   transition: "all 0.2s ease",
                 }}
               >
-                <DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />
+                <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
               </IconButton>
             </Tooltip>
 
-            <Tooltip title={p.activo ? "Desactivar" : "Activar"} arrow>
+            <Tooltip title={p.activo ? "Desactivar" : "Activar"} arrow disableTouchListener>
               <IconButton
                 size="small"
                 onClick={() =>
@@ -337,8 +337,8 @@ export function ProductosServicioComercio() {
                   })
                 }
                 sx={{
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   borderRadius: 999,
                   bgcolor: p.activo
                     ? "rgba(52,199,89,0.10)"
@@ -354,9 +354,9 @@ export function ProductosServicioComercio() {
                 }}
               >
                 {p.activo ? (
-                  <ToggleOnRoundedIcon sx={{ fontSize: 18 }} />
+                  <ToggleOnRoundedIcon sx={{ fontSize: 20 }} />
                 ) : (
-                  <ToggleOffRoundedIcon sx={{ fontSize: 18 }} />
+                  <ToggleOffRoundedIcon sx={{ fontSize: 20 }} />
                 )}
               </IconButton>
             </Tooltip>

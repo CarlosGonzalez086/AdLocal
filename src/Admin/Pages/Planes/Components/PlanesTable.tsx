@@ -155,16 +155,21 @@ export const PlanesTable = ({
         onRowsPerPageChange={onRowsPerPageChange}
         actions={(p) => (
           <Stack direction="row" spacing={0.5}>
-            <Tooltip title="Editar">
-              <IconButton size="small" onClick={() => onEdit(p)}>
+            <Tooltip title="Editar" disableTouchListener>
+              <IconButton
+                size="small"
+                onClick={() => onEdit(p)}
+                sx={{ width: 36, height: 36 }}
+              >
                 <EditIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Eliminar">
+            <Tooltip title="Eliminar" disableTouchListener>
               <IconButton
                 size="small"
                 color="error"
                 onClick={() => onDelete(p)}
+                sx={{ width: 36, height: 36 }}
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>

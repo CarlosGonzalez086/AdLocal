@@ -166,6 +166,7 @@ export const PedidosComercioTable = ({
         onClick={() => onDetalle(pedido.uuid)}
         startIcon={<MaterialSymbol icon="visibility" size="small" />}
         sx={{
+          minHeight: "36px",
           borderRadius: "8px",
           textTransform: "none",
           fontWeight: 600,

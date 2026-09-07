@@ -121,10 +121,11 @@ export const CuentasBancariasTable = ({
       actions={(cuenta) => (
         <div className="d-flex align-items-center justify-content-end gap-1">
           {!cuenta.principal && cuenta.activo && (
-            <Tooltip title="Establecer como principal" arrow>
+            <Tooltip title="Establecer como principal" arrow disableTouchListener>
               <Button
                 type="button"
                 className="btn-adlocal btn-adlocal--ghost btn-adlocal--sm cuentaBancariaIconAction"
+                style={{ minWidth: 36, width: 36, height: 36, padding: 0 }}
                 onClick={() => onPrincipal(cuenta)}
               >
                 <MaterialSymbol icon="star" size="small" />
@@ -132,20 +133,22 @@ export const CuentasBancariasTable = ({
             </Tooltip>
           )}
 
-          <Tooltip title="Editar" arrow>
+          <Tooltip title="Editar" arrow disableTouchListener>
             <Button
               type="button"
               className="btn-adlocal btn-adlocal--ghost btn-adlocal--sm cuentaBancariaIconAction"
+              style={{ minWidth: 36, width: 36, height: 36, padding: 0 }}
               onClick={() => onEditar(cuenta)}
             >
               <MaterialSymbol icon="edit" size="small" />
             </Button>
           </Tooltip>
 
-          <Tooltip title="Eliminar" arrow>
+          <Tooltip title="Eliminar" arrow disableTouchListener>
             <Button
               type="button"
               className="btn-adlocal btn-adlocal--danger btn-adlocal--sm cuentaBancariaIconAction"
+              style={{ minWidth: 36, width: 36, height: 36, padding: 0 }}
               onClick={() => onEliminar(cuenta)}
             >
               <MaterialSymbol icon="delete" size="small" />

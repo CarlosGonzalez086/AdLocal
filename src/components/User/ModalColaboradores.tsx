@@ -120,10 +120,12 @@ export default function ModalColaboradores({ open, onClose, id }: Props) {
             }}
             actions={(p) => (
               <Stack direction="row" spacing={0.5} className="p-1">
-                <Tooltip title={p.activo ? "Quitar acceso" : "Dar acceso"}>
+                <Tooltip title={p.activo ? "Quitar acceso" : "Dar acceso"} disableTouchListener>
                   <IconButton
                     size="small"
                     sx={{
+                      width: 36,
+                      height: 36,
                       bgcolor: "#F2F2F7",
                       "&:hover": { bgcolor: "#E5E5EA" },
                     }}
@@ -143,10 +145,12 @@ export default function ModalColaboradores({ open, onClose, id }: Props) {
                   </IconButton>
                 </Tooltip>
 
-                <Tooltip title="Eliminar">
+                <Tooltip title="Eliminar" disableTouchListener>
                   <IconButton
                     size="small"
                     sx={{
+                      width: 36,
+                      height: 36,
                       bgcolor: "#FDECEA",
                       color: "#D93025",
                       "&:hover": { bgcolor: "#FAD2CF" },

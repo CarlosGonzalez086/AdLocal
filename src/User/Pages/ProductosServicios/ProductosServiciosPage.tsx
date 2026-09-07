@@ -246,22 +246,23 @@ export const ProductosServiciosPage = () => {
             setPage(0);
           }}
           actions={(p) => (
-            <div className="productoServicioTableActions">
-              <Tooltip title="Editar" arrow>
+            <div className="d-flex align-items-center justify-content-end gap-1">
+              <Tooltip title="Editar" arrow disableTouchListener>
                 <Button
                   type="button"
-                  className="btn-adlocal btn-adlocal--ghost btn-adlocal--sm productoServicioIconAction"
+                  className="btn-adlocal btn-adlocal--ghost btn-adlocal--sm"
                   aria-label={`Editar ${p.nombre}`}
                   onClick={() => editarProducto(p)}
+                  style={{ minWidth: 36, width: 36, height: 36, padding: 0 }}
                 >
                   <MaterialSymbol icon="edit" size="small" />
                 </Button>
               </Tooltip>
 
-              <Tooltip title="Eliminar" arrow>
+              <Tooltip title="Eliminar" arrow disableTouchListener>
                 <Button
                   type="button"
-                  className="btn-adlocal btn-adlocal--danger btn-adlocal--sm productoServicioIconAction"
+                  className="btn-adlocal btn-adlocal--danger btn-adlocal--sm"
                   aria-label={`Eliminar ${p.nombre}`}
                   onClick={() =>
                     eliminar(Number(p.id), 0, {
@@ -272,15 +273,16 @@ export const ProductosServiciosPage = () => {
                       idComercio: 0,
                     })
                   }
+                  style={{ minWidth: 36, width: 36, height: 36, padding: 0 }}
                 >
                   <MaterialSymbol icon="delete" size="small" />
                 </Button>
               </Tooltip>
 
-              <Tooltip title={p.activo ? "Desactivar" : "Activar"} arrow>
+              <Tooltip title={p.activo ? "Desactivar" : "Activar"} arrow disableTouchListener>
                 <Button
                   type="button"
-                  className={`btn-adlocal btn-adlocal--sm productoServicioIconAction ${
+                  className={`btn-adlocal btn-adlocal--sm ${
                     p.activo
                       ? "productoServicioToggleActive"
                       : "btn-adlocal--ghost"
@@ -297,6 +299,7 @@ export const ProductosServiciosPage = () => {
                       idComercio: 0,
                     })
                   }
+                  style={{ minWidth: 36, width: 36, height: 36, padding: 0 }}
                 >
                   <MaterialSymbol
                     icon={p.activo ? "toggle_on" : "toggle_off"}

@@ -263,6 +263,7 @@ export const ComisionesPage = () => {
           actions={(r) => (
             <Button
               className="btn-adlocal btn-adlocal--solid btn-adlocal--sm"
+              style={{ minHeight: 36 }}
               disabled={r.pendientePago <= 0}
               onClick={() => void liquidarComercio(r)}
             >

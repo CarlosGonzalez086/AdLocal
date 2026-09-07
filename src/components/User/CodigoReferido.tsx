@@ -295,6 +295,7 @@ const CodigoReferido = ({
                 title={copied ? "Código copiado" : "Copiar código"}
                 placement="top"
                 arrow
+                disableTouchListener
               >
                 <IconButton
                   type="button"

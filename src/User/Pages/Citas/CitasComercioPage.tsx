@@ -209,6 +209,7 @@ export function CitasComercioPage() {
               variant="outlined"
               onClick={() => setSeleccionada(c)}
               sx={{
+                minHeight: "36px",
                 borderRadius: "8px",
                 textTransform: "none",
                 fontWeight: 600,

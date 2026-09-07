@@ -83,16 +83,21 @@ export const TiposComercioTable = ({
         onRowsPerPageChange={onRowsPerPageChange}
         actions={(t) => (
           <Stack direction="row" spacing={0.5}>
-            <Tooltip title="Editar">
-              <IconButton size="small" onClick={() => onEdit(t)}>
+            <Tooltip title="Editar" disableTouchListener>
+              <IconButton
+                size="small"
+                sx={{ width: 36, height: 36 }}
+                onClick={() => onEdit(t)}
+              >
                 <EditIcon fontSize="small" />
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Eliminar">
+            <Tooltip title="Eliminar" disableTouchListener>
               <IconButton
                 size="small"
                 color="error"
+                sx={{ width: 36, height: 36 }}
                 onClick={() => onDelete(t)}
               >
                 <DeleteIcon fontSize="small" />

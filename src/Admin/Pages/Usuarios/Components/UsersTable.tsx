@@ -144,11 +144,12 @@ export const UsersTable = ({
         onPageChange={onPageChange}
         onRowsPerPageChange={onRowsPerPageChange}
         actions={(row) => (
-          <Tooltip title="Ver usuario">
+          <Tooltip title="Ver usuario" disableTouchListener>
             <IconButton
               size="small"
               className="generic-table-mobile-actions-btn"
               onClick={() => onView(row)}
+              sx={{ width: 36, height: 36 }}
             >
               <VisibilityIcon fontSize="small" />
             </IconButton>

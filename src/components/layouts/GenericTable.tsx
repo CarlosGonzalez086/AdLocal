@@ -1,8 +1,6 @@
 import React, {
   type ReactNode,
   type Key as ReactKey,
-  useState,
-  type MouseEvent,
 } from "react";
 import {
   Box,
@@ -10,7 +8,6 @@ import {
   CardContent,
   Divider,
   IconButton,
-  Menu,
   Skeleton,
   Table,
   TableBody,
@@ -24,7 +21,6 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
@@ -109,20 +105,6 @@ export function GenericTable<T>({
   const isCardsMode = isMobile && mobileLayout === "cards";
 
   const totalColumns = columns.length + (actions ? 1 : 0);
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [selectedRow, setSelectedRow] = useState<T | null>(null);
-  const menuOpen = Boolean(anchorEl);
-
-  const handleMenuOpen = (event: MouseEvent<HTMLElement>, row: T) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-    setSelectedRow(row);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedRow(null);
-  };
 
   const handlePageChange = (_: unknown, newPage: number) => {
     onPageChange(newPage);
@@ -251,7 +233,7 @@ export function GenericTable<T>({
                   }}
                 >
                   <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-                    {/* Header: First column + Action button */}
+                    {/* Header: First column */}
                     <Box
                       sx={{
                         display: "flex",
@@ -291,23 +273,6 @@ export function GenericTable<T>({
                             )}
                         </Box>
                       </Box>
-
-                      {actions && (
-                        <IconButton
-                          size="small"
-                          onClick={(e) => handleMenuOpen(e, row)}
-                          sx={{
-                            p: 0.5,
-                            color: "#6E6E73",
-                            backgroundColor: "rgba(0, 0, 0, 0.03)",
-                            borderRadius: "8px",
-                            "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.06)" },
-                          }}
-                          aria-label="Acciones"
-                        >
-                          <MoreVertRoundedIcon fontSize="small" />
-                        </IconButton>
-                      )}
                     </Box>
 
                     <Divider sx={{ my: 1.2, borderColor: "rgba(0, 0, 0, 0.05)" }} />
@@ -346,6 +311,25 @@ export function GenericTable<T>({
                           </Box>
                         ))}
                     </Box>
+
+                    {/* Acciones directas en móvil */}
+                    {actions && (
+                      <>
+                        <Divider sx={{ my: 1.5, borderColor: "rgba(0, 0, 0, 0.06)" }} />
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            gap: 1,
+                            flexWrap: "wrap",
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {actions(row)}
+                        </Box>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               );
@@ -397,39 +381,6 @@ export function GenericTable<T>({
               </Box>
             )}
           </Box>
-        )}
-
-        {/* Action Menu (Shared) */}
-        {actions && (
-          <Menu
-            anchorEl={anchorEl}
-            open={menuOpen}
-            onClose={handleMenuClose}
-            slotProps={{
-              paper: {
-                sx: {
-                  borderRadius: "12px",
-                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.12)",
-                  border: "1px solid rgba(0, 0, 0, 0.06)",
-                  p: 0.5,
-                  minWidth: 160,
-                },
-              },
-            }}
-          >
-            {selectedRow && (
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 0.5,
-                }}
-                onClickCapture={handleMenuClose}
-              >
-                {actions(selectedRow)}
-              </Box>
-            )}
-          </Menu>
         )}
       </Box>
     );

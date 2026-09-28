@@ -1,7 +1,6 @@
 import {
   AppBar,
   Avatar,
-  Box,
   Chip,
   Divider,
   IconButton,
@@ -9,7 +8,6 @@ import {
   Menu,
   MenuItem,
   Toolbar,
-  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -17,9 +15,6 @@ import { useMemo, useState, type CSSProperties, type MouseEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import MaterialSymbol from "../../components/UI/MaterialSymbol/MaterialSymbol";
-
-import styles from "../../styles/UserHeader.module.css";
-
 import { clearStorageAdmin } from "../../utils/storageAdmin";
 import type { JwtPayload } from "../Auth/PrivateRouteAdmin";
 
@@ -36,11 +31,13 @@ type HeaderCssVariables = CSSProperties & {
 
 const menuTitles: Record<string, string> = {
   "/admin/app": "Inicio",
+  "/admin/app/inicio": "Inicio",
   "/admin/app/planes": "Planes",
   "/admin/app/usuarios": "Usuarios",
-  "/admin/app/tipos-comercios": "Tipos Comercios",
+  "/admin/app/tipos-comercios": "Tipos comercios",
   "/admin/app/configuraciones": "Configuraciones",
-  // "/admin/app/historial-suscripciones": "Historial",
+  "/admin/app/comisiones": "Comisiones",
+  "/admin/app/cuentas-adlocal": "Cuentas ADLocal",
   "/admin/app/perfil": "Mi perfil",
   "/admin/app/perfil/cambiar-contrasena": "Cambiar contraseña",
 };
@@ -78,13 +75,9 @@ const AdminHeader = ({
 }: AdminHeaderProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-
   const theme = useTheme();
-
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-
   const menuOpen = Boolean(anchorEl);
 
   const pageTitle = useMemo(
@@ -134,14 +127,14 @@ const AdminHeader = ({
     <AppBar
       position="fixed"
       elevation={0}
-      className={styles.appBar}
+      className="user-header-appbar"
       style={headerVariables}
     >
-      <Toolbar className={styles.toolbar}>
-        <Box className={styles.leftSection}>
+      <Toolbar className="user-header-toolbar">
+        <div className="user-header-left">
           <IconButton
             type="button"
-            className={styles.menuButton}
+            className="user-header-menu-btn"
             onClick={handleToggleSidebar}
             aria-label={
               isMobile
@@ -158,31 +151,30 @@ const AdminHeader = ({
           </IconButton>
 
           {pageTitle && (
-            <Typography
-              component="h1"
-              className={styles.pageTitle}
+            <h1
+              className="user-header-title fz-h5 m-0"
               title={pageTitle}
             >
               {pageTitle}
-            </Typography>
+            </h1>
           )}
-        </Box>
+        </div>
 
         {user && (
-          <Box className={styles.userSection}>
-            <Chip label={user.rol} size="small" className={styles.roleChip} />
+          <div className="user-header-user-section">
+            <Chip label={user.rol} size="small" className="user-header-role-chip" />
 
             <IconButton
               id="user-menu-button"
               type="button"
-              className={styles.avatarButton}
+              className="user-header-avatar-btn"
               onClick={handleOpenMenu}
               aria-label="Abrir menú de usuario"
               aria-controls={menuOpen ? "user-account-menu" : undefined}
               aria-haspopup="true"
               aria-expanded={menuOpen ? "true" : undefined}
             >
-              <Avatar alt={user.nombre ?? "Usuario"} className={styles.avatar}>
+              <Avatar alt={user.nombre ?? "Usuario"} className="user-header-avatar">
                 {userInitial}
               </Avatar>
             </IconButton>
@@ -202,59 +194,57 @@ const AdminHeader = ({
               }}
               slotProps={{
                 paper: {
-                  className: styles.menuPaper,
+                  className: "user-header-menu-paper",
                 },
               }}
             >
-              <Box className={styles.userInformation}>
-                <Avatar alt="" className={styles.menuAvatar}>
+              <div className="user-header-menu-user-info">
+                <Avatar alt="" className="user-header-menu-avatar">
                   {userInitial}
                 </Avatar>
 
-                <Box className={styles.userInformationText}>
-                  <Typography component="span" className={styles.userName}>
+                <div className="user-header-menu-user-text">
+                  <span className="user-header-menu-user-name">
                     {user.nombre || "Usuario"}
-                  </Typography>
+                  </span>
 
-                  <Typography component="span" className={styles.userRole}>
+                  <span className="user-header-menu-user-role">
                     {user.rol}
-                  </Typography>
-                </Box>
-              </Box>
+                  </span>
+                </div>
+              </div>
 
-              <Divider className={styles.menuDivider} />
+              <Divider className="user-header-menu-divider" />
 
               <MenuItem
-                className={styles.menuItem}
+                className="user-header-menu-item"
                 onClick={handleNavigateProfile}
               >
-                <ListItemIcon className={styles.menuItemIcon}>
+                <ListItemIcon className="user-header-menu-item-icon">
                   <MaterialSymbol icon="person" size="small" />
                 </ListItemIcon>
 
-                <Typography component="span" className={styles.menuItemText}>
+                <span className="user-header-menu-item-text">
                   Mi perfil
-                </Typography>
+                </span>
               </MenuItem>
 
-              <Divider className={styles.menuDivider} />
+              <Divider className="user-header-menu-divider" />
 
               <MenuItem
-                className={[styles.menuItem, styles.logoutMenuItem].join(" ")}
+                className="user-header-menu-item user-header-logout-item"
                 onClick={handleLogout}
               >
-                <ListItemIcon
-                  className={[styles.menuItemIcon, styles.logoutIcon].join(" ")}
-                >
+                <ListItemIcon className="user-header-menu-item-icon user-header-logout-icon">
                   <MaterialSymbol icon="logout" size="small" />
                 </ListItemIcon>
 
-                <Typography component="span" className={styles.menuItemText}>
+                <span className="user-header-menu-item-text">
                   Cerrar sesión
-                </Typography>
+                </span>
               </MenuItem>
             </Menu>
-          </Box>
+          </div>
         )}
       </Toolbar>
     </AppBar>
@@ -262,3 +252,4 @@ const AdminHeader = ({
 };
 
 export default AdminHeader;
+

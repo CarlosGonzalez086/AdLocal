@@ -1,7 +1,6 @@
 import {
   TextField,
   Alert,
-  Stack,
   InputAdornment,
   IconButton,
 } from "@mui/material";
@@ -12,13 +11,14 @@ import { adminLoginSchema } from "../../schemas/admin.schema";
 import { useState } from "react";
 
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
+import { extraerMensajeError } from "../../utils/errorHandler";
 
 interface LoginFormProps {
   onSubmit: (data: LoginFormData) => Promise<void>;
   loading?: boolean;
 }
 
-type LoginFormData = {
+export type LoginFormData = {
   email: string;
   password: string;
 };
@@ -43,18 +43,16 @@ export default function LoginForm({
 
     try {
       await onSubmit(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorMsg(
-        error?.response?.data?.mensaje ??
-          error?.message ??
-          "Error al iniciar sesión",
+        extraerMensajeError(error, "Error al iniciar sesión"),
       );
     }
   };
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)}>
-      <Stack spacing={2}>
+      <div className="d-flex flex-column gap-3">
         {errorMsg && (
           <Alert severity="error" className="auth-alert">
             {errorMsg}
@@ -128,7 +126,7 @@ export default function LoginForm({
         >
           Iniciar sesión
         </LoadingButton>
-      </Stack>
+      </div>
     </form>
   );
 }

@@ -1,6 +1,5 @@
 import {
   Button,
-  Divider,
   InputAdornment,
   LinearProgress,
   Switch,
@@ -134,37 +133,52 @@ export const MarketplaceCommissionConfigForm = () => {
     montoFijoNumero < 0;
 
   return (
-    <div className="card-adlocal">
+    <div className="card-adlocal h-100 d-flex flex-column">
       <ConfigFormHeader
         icon={<MaterialSymbol icon="percent" size="medium" filled />}
         title="Comisión de ADLocal"
         subtitle="Configura la comisión cobrada por cada pedido"
+        badgeColor="teal"
+        action={
+          <span
+            className={`badge-adlocal ${
+              form.activa ? "badge-adlocal--primary" : "bg-light text-muted border"
+            }`}
+          >
+            <MaterialSymbol
+              icon={form.activa ? "check_circle" : "pause_circle"}
+              size="small"
+            />
+            {form.activa ? "Activa" : "Pausada"}
+          </span>
+        }
       />
-
-      <Divider />
 
       {loading && <LinearProgress />}
 
-      <div className="p-3 p-lg-4">
+      <div className="card-adlocal-body flex-grow-1 d-flex flex-column justify-content-between">
         <div className="d-flex flex-column gap-3">
           {/* INFORMACIÓN */}
-          <div className="marketplaceCommissionInfo d-flex align-items-center gap-3 p-3">
-            <div className="marketplaceCommissionInfoIcon d-flex align-items-center justify-content-center flex-shrink-0">
-              <MaterialSymbol icon="payments" size="medium" />
+          <div className="config-info-box">
+            <div
+              className="config-icon-badge config-icon-badge--teal"
+              style={{ width: 36, height: 36 }}
+            >
+              <MaterialSymbol icon="payments" size="small" />
             </div>
-
             <div>
-              <strong className="fz-h4 fw-semibold">Comisión por venta</strong>
-
-              <p className="fz-h5 fw-regular mb-0">
-                Este porcentaje se aplicará a cada pedido confirmado en ADLocal.
+              <h3 className="fz-h4 fw-semibold mb-1" style={{ color: "#1C1C1E" }}>
+                Comisión comercial por venta
+              </h3>
+              <p className="fz-body text-secondary mb-0">
+                Este porcentaje y monto fijo se aplicarán a cada pedido confirmado dentro de la plataforma ADLocal.
               </p>
             </div>
           </div>
 
-          {/* CAMPOS */}
+          {/* CAMPOS LADO A LADO */}
           <div className="row g-3">
-            <div className="col-12 col-md-6 col-lg-12">
+            <div className="col-12 col-sm-6">
               <TextField
                 label="Comisión porcentual"
                 value={form.porcentaje}
@@ -190,9 +204,9 @@ export const MarketplaceCommissionConfigForm = () => {
               />
             </div>
 
-            <div className="col-12 col-md-6 col-lg-12">
+            <div className="col-12 col-sm-6">
               <TextField
-                label="Comisión fija"
+                label="Comisión fija (MXN)"
                 value={form.montoFijo}
                 onChange={handleMontoFijoChange}
                 type="number"
@@ -216,20 +230,19 @@ export const MarketplaceCommissionConfigForm = () => {
             </div>
           </div>
 
-          <Divider />
-
           {/* ACTIVAR COMISIÓN */}
-          <div className="marketplaceCommissionToggle d-flex align-items-center justify-content-between gap-3 p-3">
+          <div className="config-toggle-card">
             <div className="d-flex align-items-center gap-2">
               <MaterialSymbol
                 icon={form.activa ? "check_circle" : "pause_circle"}
                 size="medium"
+                style={{ color: form.activa ? "#008989" : "#8E8E93" }}
               />
-
-              <div className="d-flex flex-column">
-                <strong className="fz-h4 fw-semibold">Comisión activa</strong>
-
-                <span className="fz-h5 fw-regular">
+              <div>
+                <strong className="fz-h4 fw-semibold d-block">
+                  Estado de la comisión
+                </strong>
+                <span className="fz-body text-secondary">
                   {form.activa
                     ? "ADLocal cobrará comisión en los nuevos pedidos."
                     : "Los nuevos pedidos no generarán comisión."}
@@ -241,16 +254,20 @@ export const MarketplaceCommissionConfigForm = () => {
               checked={form.activa}
               onChange={handleActivaChange}
               disabled={loading}
+              color="primary"
             />
           </div>
 
-          {/* EJEMPLO */}
-          <div className="marketplaceCommissionPreview d-flex flex-column align-items-center justify-content-center text-center gap-1 p-3">
-            <span className="fz-h5 fw-medium">
-              Ejemplo sobre una venta de $1,000.00
-            </span>
+          {/* EJEMPLO / SIMULADOR */}
+          <div className="config-simulation-card">
+            <div className="d-flex align-items-center justify-content-center gap-1 mb-1 text-secondary">
+              <MaterialSymbol icon="calculate" size="small" />
+              <span className="fz-h5 fw-medium">
+                Simulación sobre una orden de $1,000.00 MXN
+              </span>
+            </div>
 
-            <strong className="fz-h3 fw-bold">
+            <div className="fz-h2 fw-bold" style={{ color: "#008989" }}>
               $
               {(
                 1000 * (Math.max(porcentajeNumero || 0, 0) / 100) +
@@ -258,22 +275,32 @@ export const MarketplaceCommissionConfigForm = () => {
               ).toLocaleString("es-MX", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
-              })}
-            </strong>
+              })}{" "}
+              <span className="fz-body fw-regular text-secondary">MXN</span>
+            </div>
 
-            <span className="fz-h6 fw-regular">
-              Comisión estimada de ADLocal
+            <span className="fz-body text-secondary" style={{ fontSize: "12px" }}>
+              {porcentajeNumero > 0
+                ? `${porcentajeNumero}% ($${(
+                    (1000 * porcentajeNumero) /
+                    100
+                  ).toFixed(2)})`
+                : "0%"}
+              {montoFijoNumero > 0
+                ? ` + $${montoFijoNumero.toFixed(2)} fijo`
+                : ""}
             </span>
           </div>
+        </div>
 
+        <div className="pt-3 mt-3 border-top">
           <Button
             type="button"
             onClick={onSubmit}
             disabled={isDisabled}
-            className="btn-adlocal btn-adlocal--solid config-form-submit fz-h4 fw-semibold w-100"
+            className="btn-adlocal btn-adlocal--solid w-100"
           >
             <MaterialSymbol icon="save" size="small" />
-
             <span className="ms-2">Guardar comisión</span>
           </Button>
         </div>

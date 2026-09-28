@@ -1,4 +1,4 @@
-import { Avatar, TextField, Typography } from "@mui/material";
+import { Avatar, TextField } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import type { UsuarioDto } from "../../../../types/Admin/usuarios";
 import { GenericModal } from "../../../../components/GenericModal";
@@ -74,7 +74,7 @@ export const UserModal = ({ open, onClose, usuario, soloVer }: Props) => {
                 {!form.fotoUrl && form.nombre?.charAt(0).toUpperCase()}
               </Avatar>
 
-              <Typography className="fz-h3 fw-bold">{form.nombre}</Typography>
+              <span className="fz-h4 fw-bold text-dark">{form.nombre}</span>
             </div>
           </div>
 

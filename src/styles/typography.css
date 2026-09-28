@@ -1,0 +1,104 @@
+/* ==============================================================
+   ADLOCAL DESIGN SYSTEM - TYPOGRAPHY
+   Clases obligatorias de escala tipográfica y pesos de fuente.
+   ============================================================== */
+
+/* --- Escala de Títulos (Headings) --- */
+.fz-h1 {
+  font-family: var(--font-heading);
+  font-size: 2.25rem;       /* 36px */
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.fz-h2 {
+  font-family: var(--font-heading);
+  font-size: 1.875rem;      /* 30px */
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.fz-h3 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;        /* 24px */
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+
+.fz-h4 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;       /* 20px */
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.fz-h5 {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;      /* 18px */
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+}
+
+.fz-h6 {
+  font-family: var(--font-heading);
+  font-size: 1rem;          /* 16px */
+  line-height: 1.5;
+}
+
+/* --- Escala de Cuerpo y Notas --- */
+.fz-body {
+  font-family: var(--font-body);
+  font-size: 0.95rem;       /* 15.2px */
+  line-height: 1.55;
+}
+
+.fz-body-sm {
+  font-family: var(--font-body);
+  font-size: 0.85rem;       /* 13.6px */
+  line-height: 1.5;
+}
+
+.fz-caption {
+  font-family: var(--font-body);
+  font-size: 0.75rem;       /* 12px */
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+/* --- Pesos de Fuente (Font Weights) --- */
+.fw-regular {
+  font-weight: 400 !important;
+}
+
+.fw-medium {
+  font-weight: 500 !important;
+}
+
+.fw-semibold {
+  font-weight: 600 !important;
+}
+
+.fw-bold {
+  font-weight: 700 !important;
+}
+
+/* --- Colores de Texto AdLocal --- */
+.text-adlocal-primary {
+  color: var(--primary) !important;
+}
+
+.text-adlocal-secondary {
+  color: var(--secondary) !important;
+}
+
+.text-adlocal-text {
+  color: var(--text) !important;
+}
+
+.text-adlocal-muted {
+  color: var(--text-muted) !important;
+}
+
+.text-adlocal-white {
+  color: #ffffff !important;
+}

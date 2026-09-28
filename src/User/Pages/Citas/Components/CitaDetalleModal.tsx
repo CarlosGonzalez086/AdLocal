@@ -11,7 +11,7 @@ import {
   type CitaDto,
   type EstadoCita as EstadoCitaType,
 } from "../../../../types/User/citas";
-import { GenericModal } from "../../../../components/GenericModal";
+import { GenericModal, type GenericModalResult } from "../../../../components/GenericModal";
 
 const estados = [
   [EstadoCita.Pendiente, "Pendiente"],
@@ -33,7 +33,7 @@ interface Props {
     estado: EstadoCitaType,
     nombreAtiende: string,
     motivo: string,
-  ) => Promise<any> | any;
+  ) => Promise<GenericModalResult | void | undefined> | GenericModalResult | void | undefined;
 }
 
 export function CitaDetalleModal({ cita, loading, onClose, onSave }: Props) {

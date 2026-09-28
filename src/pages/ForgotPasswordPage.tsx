@@ -1,27 +1,19 @@
 import {
   Alert,
-  Box,
   Button,
   CircularProgress,
-  Container,
-  Divider,
   InputAdornment,
-  Paper,
   TextField,
-  Typography,
 } from "@mui/material";
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
-
-import styles from "../styles/ForgotPasswordPage.module.css";
 import { useAdmin } from "../hooks/useAdmin";
 import { useUser } from "../hooks/useUser";
-import Swal from "sweetalert2";
-
-const LOGO_URL =
-  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
+import Swal from "../utils/sweetalert";
+import { extraerMensajeError } from "../utils/errorHandler";
+import { ADLOCAL_LOGO_URL } from "../constants/brand";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -64,42 +56,42 @@ export default function ForgotPasswordPage({ type }: Props) {
         ? await admin.forgetPassword({ email: cleanEmail })
         : await user.forgetPassword({ email: cleanEmail });
 
-      const data = response as any;
+      const data = response as { codigo?: string; mensaje?: string } | undefined;
 
-      if (data.codigo !== "200") {
-        setError(data.mensaje || "Ocurrió un error inesperado.");
+      if (data?.codigo !== "200") {
+        setError(data?.mensaje || "Ocurrió un error inesperado.");
         setSuccessMessage("");
         return;
       }
-      setSuccessMessage(data.mensaje);
+      setSuccessMessage(data.mensaje || "Correo enviado exitosamente.");
       Swal.fire({
         icon: "success",
         title: "Correo enviado",
-        text: data.mensaje,
+        text: data.mensaje || "Correo enviado exitosamente.",
       });
-    } catch (error: any) {
-      console.error(error);
-      setError(error.message || "Ocurrió un error inesperado.");
+    } catch (error: unknown) {
+      const mensaje = extraerMensajeError(error, "Ocurrió un error al enviar el correo.");
+      setError(mensaje);
       setSuccessMessage("");
       Swal.fire({
         icon: "error",
         title: "Error al enviar correo",
-        text: error.message || "Ocurrió un error inesperado.",
+        text: mensaje,
       });
     }
   };
 
   return (
-    <Box component="main" className={styles.page}>
-      <Box className={styles.backgroundDecoration} aria-hidden="true">
-        <Box className={styles.decorationOne} />
-        <Box className={styles.decorationTwo} />
-      </Box>
+    <main className="auth-page">
+      <div className="auth-bg-decoration" aria-hidden="true">
+        <div className="auth-decoration-1" />
+        <div className="auth-decoration-2" />
+      </div>
 
       <Button
         type="button"
         variant="outlined"
-        className={styles.backButton}
+        className="auth-back-btn"
         onClick={() =>
           navigate(type === "user" ? "/usuario/login" : "/admin/login")
         }
@@ -108,55 +100,51 @@ export default function ForgotPasswordPage({ type }: Props) {
         Regresar
       </Button>
 
-      <Container maxWidth="xs" className={styles.container}>
-        <Box
-          component="a"
+      <div className="container auth-container" style={{ maxWidth: "440px" }}>
+        <a
           href="/"
-          className={styles.logoLink}
+          className="auth-logo-link"
           aria-label="Ir al inicio de ADLocal"
         >
-          <Box
-            component="img"
-            src={LOGO_URL}
+          <img
+            src={ADLOCAL_LOGO_URL}
             alt="ADLocal"
-            className={styles.logo}
+            className="auth-logo-img"
           />
-        </Box>
+        </a>
 
-        <Paper
-          component="form"
-          elevation={0}
-          className={styles.card}
+        <form
+          className="auth-card"
           onSubmit={handleSubmit}
           noValidate
         >
-          <Box className={styles.header}>
-            <Box className={styles.headerIcon}>
+          <div className="auth-header">
+            <div className="auth-header-icon">
               <MaterialSymbol icon="lock_reset" size="large" />
-            </Box>
+            </div>
 
-            <Box className={styles.headerContent}>
-              <Typography component="span" className={styles.eyebrow}>
+            <div className="auth-header-content">
+              <span className="auth-eyebrow">
                 Seguridad de la cuenta
-              </Typography>
+              </span>
 
-              <Typography component="h1" className={styles.title}>
+              <h1 className="auth-title">
                 Recuperar contraseña
-              </Typography>
+              </h1>
 
-              <Typography component="p" className={styles.description}>
+              <p className="auth-description">
                 Ingresa el correo asociado a tu cuenta y te enviaremos un enlace
                 para crear una nueva contraseña.
-              </Typography>
-            </Box>
-          </Box>
+              </p>
+            </div>
+          </div>
 
-          <Box className={styles.messages} aria-live="polite">
+          <div className="mt-3 d-flex flex-column gap-2" aria-live="polite">
             {error && (
               <Alert
                 severity="error"
                 variant="outlined"
-                className={styles.alert}
+                className="rounded-3"
               >
                 {error}
               </Alert>
@@ -166,12 +154,12 @@ export default function ForgotPasswordPage({ type }: Props) {
               <Alert
                 severity="success"
                 variant="outlined"
-                className={styles.alert}
+                className="rounded-3"
               >
                 {successMessage}
               </Alert>
             )}
-          </Box>
+          </div>
 
           <TextField
             fullWidth
@@ -185,7 +173,7 @@ export default function ForgotPasswordPage({ type }: Props) {
             helperText={emailHelperText}
             disabled={loading}
             autoComplete="email"
-            className={styles.emailField}
+            className="mt-3"
             onBlur={() => setEmailTouched(true)}
             onChange={(event) => {
               setEmail(event.target.value);
@@ -207,7 +195,7 @@ export default function ForgotPasswordPage({ type }: Props) {
                     <MaterialSymbol
                       icon="mail"
                       size="medium"
-                      className={styles.fieldIcon}
+                      className="text-muted"
                     />
                   </InputAdornment>
                 ),
@@ -215,7 +203,9 @@ export default function ForgotPasswordPage({ type }: Props) {
             }}
           />
 
-          <Divider className={styles.divider}>Verificación por correo</Divider>
+          <div className="auth-divider my-3 text-center text-muted fz-h5">
+            Verificación por correo
+          </div>
 
           <Button
             type="submit"
@@ -223,13 +213,13 @@ export default function ForgotPasswordPage({ type }: Props) {
             fullWidth
             size="large"
             disabled={loading || emailIsEmpty || emailIsInvalid}
-            className={styles.submitButton}
+            className="auth-submit-btn w-100"
             startIcon={
               loading ? (
                 <CircularProgress
                   size={18}
                   thickness={5}
-                  className={styles.buttonProgress}
+                  className="text-white"
                 />
               ) : (
                 <MaterialSymbol icon="send" size="small" />
@@ -239,27 +229,27 @@ export default function ForgotPasswordPage({ type }: Props) {
             {loading ? "Enviando correo..." : "Enviar correo"}
           </Button>
 
-          <Typography component="p" className={styles.securityMessage}>
+          <p className="auth-security-msg">
             <MaterialSymbol icon="verified_user" size="small" />
 
             <span>
               Por seguridad, el enlace tendrá un tiempo limitado de vigencia.
             </span>
-          </Typography>
-        </Paper>
+          </p>
+        </form>
 
-        <Typography component="p" className={styles.footerText}>
+        <p className="auth-footer-text mt-3">
           ¿Recordaste tu contraseña?{" "}
-          <Button
+          <button
             type="button"
-            variant="text"
-            className={styles.loginButton}
-            onClick={() => navigate("/login")}
+            className="auth-text-btn"
+            onClick={() => navigate(type === "user" ? "/usuario/login" : "/admin/login")}
           >
             Iniciar sesión
-          </Button>
-        </Typography>
-      </Container>
-    </Box>
+          </button>
+        </p>
+      </div>
+    </main>
   );
 }
+

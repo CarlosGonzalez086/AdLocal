@@ -1,0 +1,16 @@
+/* ==============================================================
+   ADLOCAL DESIGN SYSTEM - INDEX
+   Punto de entrada unificado que ensambla los 11 módulos de diseño.
+   ============================================================== */
+
+@import "./tokens.css";
+@import "./typography.css";
+@import "./bootstrap-overrides.css";
+@import "./buttons.css";
+@import "./cards.css";
+@import "./tabs.css";
+@import "./forms.css";
+@import "./badges.css";
+@import "./tables.css";
+@import "./modals.css";
+@import "./utilities.css";

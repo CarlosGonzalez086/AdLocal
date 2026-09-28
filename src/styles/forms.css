@@ -1,0 +1,136 @@
+/* ==============================================================
+   ADLOCAL DESIGN SYSTEM - FORMS
+   Estilos base para controles de formulario, inputs y validación.
+   ============================================================== */
+
+.form-group-adlocal {
+  margin-bottom: var(--space-4);
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label-adlocal {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-1);
+}
+
+.form-label-adlocal.required::after {
+  content: " *";
+  color: var(--error);
+}
+
+.form-control-adlocal,
+.form-select-adlocal {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text);
+  background-color: var(--surface);
+  background-clip: padding-box;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-control-adlocal:focus,
+.form-select-adlocal:focus {
+  color: var(--text);
+  background-color: var(--surface);
+  border-color: var(--primary);
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.form-control-adlocal::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.form-control-adlocal:disabled,
+.form-select-adlocal:disabled {
+  background-color: var(--bg-soft);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+/* --- Estados de Validación --- */
+.form-control-adlocal.is-invalid,
+.form-select-adlocal.is-invalid {
+  border-color: var(--error);
+}
+
+.form-control-adlocal.is-invalid:focus,
+.form-select-adlocal.is-invalid:focus {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px var(--error-subtle);
+}
+
+.form-helper-adlocal {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: var(--space-1);
+}
+
+.form-error-adlocal {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--error);
+  margin-top: var(--space-1);
+  font-weight: 500;
+}
+
+/* --- Input Groups --- */
+.input-group-adlocal {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  width: 100%;
+}
+
+.input-group-adlocal-addon {
+  display: flex;
+  align-items: center;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  background-color: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* --- Adaptación de MUI Inputs a Tokens AdLocal --- */
+.form-control-mui-adlocal .MuiOutlinedInput-root {
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-control-mui-adlocal .MuiOutlinedInput-root fieldset {
+  border-color: var(--border);
+}
+
+.form-control-mui-adlocal .MuiOutlinedInput-root:hover fieldset {
+  border-color: var(--border-hover);
+}
+
+.form-control-mui-adlocal .MuiOutlinedInput-root.Mui-focused fieldset {
+  border-color: var(--primary);
+  border-width: 1.5px;
+}
+
+.form-control-mui-adlocal .MuiInputLabel-root.Mui-focused {
+  color: var(--primary);
+}
+

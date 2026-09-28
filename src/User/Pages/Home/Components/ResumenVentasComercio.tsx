@@ -35,7 +35,10 @@ export const ResumenVentasComercio = () => {
   const [pedidos, setPedidos] = useState<PedidoComercioListadoDto[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const ventasPorDia = dashboard?.ventasPorDia ?? [];
+  const ventasPorDia = useMemo(
+    () => dashboard?.ventasPorDia ?? [],
+    [dashboard?.ventasPorDia],
+  );
 
   useEffect(() => {
     void pedidosComercioApi.comercios().then(({ data }) => {
@@ -62,12 +65,11 @@ export const ResumenVentasComercio = () => {
   }, [comercioId]);
 
   const chartOptions = useMemo<ApexOptions>(
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     () => ({
       chart: { toolbar: { show: false }, fontFamily: "Inter, sans-serif" },
-      colors: ["#6F4E37"],
+      colors: ["#008989"],
       dataLabels: { enabled: false },
-      grid: { borderColor: "#E7DDD4", strokeDashArray: 4 },
+      grid: { borderColor: "#eae5dd", strokeDashArray: 4 },
       plotOptions: { bar: { borderRadius: 7, columnWidth: "48%" } },
       xaxis: {
         categories:
@@ -82,7 +84,7 @@ export const ResumenVentasComercio = () => {
                 "Sábado",
                 "Domingo",
               ],
-        labels: { style: { colors: "#8A7A70" } },
+        labels: { style: { colors: "#696e75" } },
       },
       yaxis: {
         labels: { formatter: (value) => moneyFormatter.format(value) },
@@ -91,7 +93,7 @@ export const ResumenVentasComercio = () => {
         y: { formatter: (value) => moneyFormatter.format(value) },
       },
     }),
-    [dashboard?.ventasPorDia],
+    [ventasPorDia],
   );
 
   const series = [

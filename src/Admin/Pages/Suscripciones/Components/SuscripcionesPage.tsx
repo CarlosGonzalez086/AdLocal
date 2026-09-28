@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSuscripcionesAdmin } from "../../../../hooks/useSuscripcionesAdmin";
 import { SuscripcionesTable } from "./SuscripcionesTable";
@@ -14,12 +13,12 @@ export const SuscripcionesPage = () => {
   }, [page, rows, listar]);
 
   return (
-    <Box>
+    <div>
       <div className="filters-paper">
-        <h2 className="fz-h2 fw-semibold">Suscripciones</h2>
-        <h2 className="fz-h4 fw-regular" color="text.secondary">
+        <h1 className="fz-h2 fw-semibold mb-1">Suscripciones</h1>
+        <p className="fz-h4 fw-regular text-muted mb-0">
           Listado de todas las suscripciones del sistema
-        </h2>
+        </p>
       </div>
       <div className="mt-4">
         <SuscripcionesTable
@@ -35,6 +34,6 @@ export const SuscripcionesPage = () => {
           }}
         />
       </div>
-    </Box>
+    </div>
   );
 };

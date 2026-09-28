@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
 import {
   dashboardService,
   type SuscripcionDashboardDto,

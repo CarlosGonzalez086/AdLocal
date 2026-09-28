@@ -1,11 +1,7 @@
-import { Button, Box, Paper, Stack } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-
 import { useEffect, useState } from "react";
 import type { TipoComercioCreateDto } from "../../../../types/Admin/tipoComercio";
 import { useTiposComercio } from "../../../../hooks/useTiposComercio";
-import { SearchInput } from "../../../../components/SearchInput";
-import { OrderSelect } from "../../../../components/OrderSelect";
+import { SearchToolbar } from "../../../../components/UI/SearchToolbar";
 import { TiposComercioTable } from "./TiposComercioTable";
 import { TipoComercioModal } from "./TipoComercioModal";
 
@@ -29,47 +25,32 @@ export const TiposComercioPageAdmin = () => {
 
   useEffect(() => {
     listar({ page, rows, orderBy, search });
-  }, [page, rows, orderBy, search]);
+  }, [page, rows, orderBy, search, listar]);
 
   return (
-    <Box>
-      <Paper elevation={0} className="filters-paper">
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={2}
-          alignItems={{ md: "center" }}
-        >
-          <SearchInput
-            value={search}
-            placeholder="Buscar tipo de comercio…"
-            onChange={(value) => {
-              setSearch(value);
-              setPage(1);
-            }}
-          />
-
-          <OrderSelect
-            value={orderBy}
-            onChange={(value) => {
-              setOrderBy(value);
-              setPage(1);
-            }}
-          />
-
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            className="btn-adlocal btn-adlocal--solid fz-h4 fw-semibold"
-            onClick={() => {
-              setTipo(initialForm);
-              setOpen(true);
-            }}
-          >
-            Nuevo
-          </Button>
-        </Stack>
-      </Paper>
-      <div className="mt-4">
+    <div className="w-100">
+      <SearchToolbar
+        search={search}
+        searchPlaceholder="Buscar tipo de comercio..."
+        onSearchChange={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
+        orderBy={orderBy}
+        onOrderChange={(value) => {
+          setOrderBy(value);
+          setPage(1);
+        }}
+        actionButton={{
+          label: "Nuevo Tipo",
+          icon: "add",
+          onClick: () => {
+            setTipo(initialForm);
+            setOpen(true);
+          },
+        }}
+      />
+      <div className="mt-3">
         <TiposComercioTable
           tipos={tipos}
           total={total}
@@ -103,6 +84,6 @@ export const TiposComercioPageAdmin = () => {
           loading={loading}
         />
       )}
-    </Box>
+    </div>
   );
 };

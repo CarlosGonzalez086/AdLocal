@@ -3,9 +3,7 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-  Box,
   Button,
-  Typography,
   IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -44,7 +42,7 @@ export default function ModalAgregarColaborador({
 
     setErrors(newErrors);
 
-    if (Object.keys(newErrors).length == 0) {
+    if (Object.keys(newErrors).length === 0) {
       onSubmit({ nombre, correo, idComercio: id });
       setNombre("");
       setCorreo("");
@@ -69,23 +67,23 @@ export default function ModalAgregarColaborador({
       }}
     >
       <DialogTitle sx={{ pb: 1 }}>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography fontWeight={800} fontSize="1.1rem">
+        <div className="d-flex align-items-center justify-content-between">
+          <h2 className="fz-h5 fw-bold mb-0">
             Agregar colaborador
-          </Typography>
+          </h2>
 
           <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
-        </Box>
+        </div>
       </DialogTitle>
 
       <DialogContent>
-        <Typography fontSize={13} color="text.secondary" mb={3}>
+        <p className="fz-body-sm text-muted mb-3">
           Ingresa los datos de la persona a registrar
-        </Typography>
+        </p>
 
-        <Box display="flex" flexDirection="column" gap={2.5}>
+        <div className="d-flex flex-column gap-3">
           <TextField
             label="Nombre"
             placeholder="Ej. Juan Pérez"
@@ -94,11 +92,7 @@ export default function ModalAgregarColaborador({
             helperText={errors.nombre}
             fullWidth
             onChange={(e) => setNombre(e.target.value)}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 3,
-              },
-            }}
+            className="form-control-mui-adlocal"
           />
 
           <TextField
@@ -109,22 +103,14 @@ export default function ModalAgregarColaborador({
             helperText={errors.correo}
             fullWidth
             onChange={(e) => setCorreo(e.target.value)}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 3,
-              },
-            }}
+            className="form-control-mui-adlocal"
           />
-        </Box>
+        </div>
 
-        <Box mt={4} display="flex" gap={1.5} justifyContent="flex-end">
+        <div className="d-flex justify-content-end gap-2 mt-4">
           <Button
             onClick={onClose}
-            sx={{
-              borderRadius: 999,
-              px: 3,
-              color: "text.secondary",
-            }}
+            className="btn-adlocal btn-adlocal-ghost"
           >
             Cancelar
           </Button>
@@ -132,19 +118,11 @@ export default function ModalAgregarColaborador({
           <Button
             variant="contained"
             onClick={handleSubmit}
-            sx={{
-              ml: "auto",
-              px: 3,
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-              background: "linear-gradient(135deg, #007AFF 0%, #005FCC 100%)",
-              boxShadow: "0 6px 16px rgba(0,122,255,0.3)",
-            }}
+            className="btn-adlocal btn-adlocal-primary"
           >
             Guardar
           </Button>
-        </Box>
+        </div>
       </DialogContent>
     </Dialog>
   );

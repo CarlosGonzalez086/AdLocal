@@ -17,7 +17,7 @@ export const SelectMunicipioAutocomplete = ({
 
   useEffect(() => {
     getMunicipalitiesByState(estadoId);
-  }, [estadoId]);
+  }, [estadoId, getMunicipalitiesByState]);
 
   const selected = municipalities.find((m) => m.id === value) ?? null;
   return (

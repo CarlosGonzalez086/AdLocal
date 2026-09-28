@@ -1,5 +1,4 @@
 import type { FC } from "react";
-import styles from "./MaterialSymbol.module.css";
 
 type IconSize = "small" | "medium" | "large";
 
@@ -8,6 +7,7 @@ interface Props {
   size?: IconSize;
   filled?: boolean;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const MaterialSymbol: FC<Props> = ({
@@ -15,20 +15,22 @@ const MaterialSymbol: FC<Props> = ({
   size = "medium",
   filled = false,
   className = "",
+  style,
 }) => {
   const sizeClass = {
-    small: styles.small,
-    medium: styles.medium,
-    large: styles.large,
+    small: "material-symbol-sm",
+    medium: "material-symbol-md",
+    large: "material-symbol-lg",
   }[size];
 
   return (
     <span
       aria-hidden="true"
+      style={style}
       className={[
-        styles.icon,
+        "material-symbol-icon",
         sizeClass,
-        filled ? styles.filled : "",
+        filled ? "material-symbol-filled" : "",
         className,
       ]
         .filter(Boolean)
@@ -40,3 +42,4 @@ const MaterialSymbol: FC<Props> = ({
 };
 
 export default MaterialSymbol;
+

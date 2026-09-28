@@ -70,50 +70,31 @@ type PlanCssVariables = CSSProperties & {
 
 const PLAN_CONFIG: Record<string, PlanVisualConfig> = {
   BASIC: {
-    gradient: "linear-gradient(135deg, #007AFF, #005FCC)",
-
-    badgeGradient: "linear-gradient(135deg, #007AFF, #00D2FF)",
-
-    glow: "rgba(0, 122, 255, 0.28)",
-
-    accent: "#007AFF",
-
-    icon: "bolt",
+    gradient: "linear-gradient(135deg, #008989, #007070)",
+    badgeGradient: "linear-gradient(135deg, #008989, #1DA3A3)",
+    glow: "rgba(0, 137, 137, 0.28)",
+    accent: "#008989",
+    icon: "storefront",
   },
-
   PRO: {
-    gradient: "linear-gradient(135deg, #5856D6, #3634A3)",
-
-    badgeGradient: "linear-gradient(135deg, #5856D6, #BF5AF2)",
-
-    glow: "rgba(88, 86, 214, 0.28)",
-
-    accent: "#5856D6",
-
+    gradient: "linear-gradient(135deg, #E7692C, #C9551D)",
+    badgeGradient: "linear-gradient(135deg, #E7692C, #F28650)",
+    glow: "rgba(231, 105, 44, 0.28)",
+    accent: "#E7692C",
     icon: "rocket_launch",
   },
-
   BUSINESS: {
-    gradient: "linear-gradient(135deg, #FF9500, #CC7700)",
-
-    badgeGradient: "linear-gradient(135deg, #FF9500, #FF6B00)",
-
-    glow: "rgba(255, 149, 0, 0.28)",
-
-    accent: "#FF9500",
-
+    gradient: "linear-gradient(135deg, #F59E0B, #D97706)",
+    badgeGradient: "linear-gradient(135deg, #F59E0B, #FBBF24)",
+    glow: "rgba(245, 158, 11, 0.28)",
+    accent: "#F59E0B",
     icon: "business_center",
   },
-
   FREE: {
-    gradient: "linear-gradient(135deg, #8E8E93, #636366)",
-
-    badgeGradient: "linear-gradient(135deg, #8E8E93, #AEAEB2)",
-
-    glow: "rgba(142, 142, 147, 0.2)",
-
-    accent: "#8E8E93",
-
+    gradient: "linear-gradient(135deg, #696E75, #4A4D52)",
+    badgeGradient: "linear-gradient(135deg, #8E939B, #696E75)",
+    glow: "rgba(110, 115, 122, 0.2)",
+    accent: "#696E75",
     icon: "verified",
   },
 };

@@ -75,7 +75,7 @@ const PlanesPage = ({ user }: PlanesPageProps) => {
 
   const actualizarJwtRef = useRef(actualizarJwt);
 
-  const userEmailRef = useRef(user?.sub ?? user?.sub ?? "");
+  const userEmailRef = useRef(user?.sub ?? "");
 
   useEffect(() => {
     obtenerSuscripcionRef.current = obtenerMiSuscripcion;
@@ -86,8 +86,8 @@ const PlanesPage = ({ user }: PlanesPageProps) => {
   }, [actualizarJwt]);
 
   useEffect(() => {
-    userEmailRef.current = user?.sub ?? user?.sub ?? "";
-  }, [user?.sub, user?.sub]);
+    userEmailRef.current = user?.sub ?? "";
+  }, [user?.sub]);
 
   useEffect(() => {
     void obtenerSuscripcionRef.current();

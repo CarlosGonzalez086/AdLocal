@@ -1,11 +1,7 @@
 import {
   Avatar,
-  Box,
   IconButton,
-  Paper,
-  Stack,
   Tooltip,
-  Typography,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import type { UsuarioDto } from "../../../../types/Admin/usuarios";
@@ -41,96 +37,97 @@ export const UsersTable = ({
       key: "fechaCreacion",
       label: "Registro",
       render: (usuario) => (
-        <Typography className="fz-h5 fw-regular" color="text.secondary">
+        <span className="fz-body-sm text-muted">
           {utcToLocal(usuario.fechaCreacion)}
-        </Typography>
+        </span>
       ),
     },
     {
       key: "nombre",
       label: "Usuario",
       render: (usuario) => (
-        <Stack direction="row" spacing={1.5} alignItems="center">
+        <div className="d-flex align-items-center gap-2">
           <Avatar
             src={usuario.fotoUrl ?? undefined}
-            sx={{ width: 32, height: 32 }}
+            style={{ width: 32, height: 32 }}
           >
             {!usuario.fotoUrl
               ? usuario.nombre?.charAt(0).toUpperCase()
               : undefined}
           </Avatar>
 
-          <Typography className="fz-h4 fw-semibold">
+          <span className="fz-body-sm fw-semibold text-dark">
             {usuario.nombre || "Sin nombre"}
-          </Typography>
-        </Stack>
+          </span>
+        </div>
       ),
     },
     {
       key: "email",
       label: "Correo",
       render: (usuario) => (
-        <Typography className="fz-h4 fw-regular">
+        <span className="fz-body-sm text-dark">
           {usuario.email || "—"}
-        </Typography>
+        </span>
       ),
     },
     {
       key: "emailVerificado",
       label: "Verificación",
       render: (usuario) => (
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Box
-            sx={{
+        <div className="d-flex align-items-center gap-2">
+          <span
+            style={{
               width: 8,
               height: 8,
               borderRadius: "50%",
-              bgcolor: usuario.emailVerificado
-                ? "success.main"
-                : "warning.main",
+              display: "inline-block",
+              backgroundColor: usuario.emailVerificado ? "var(--success)" : "var(--warning)",
             }}
           />
 
-          <Typography className="fz-h4 fw-regular">
+          <span className="fz-body-sm text-dark">
             {usuario.emailVerificado ? "Verificado" : "Pendiente"}
-          </Typography>
-        </Stack>
+          </span>
+        </div>
       ),
     },
     {
       key: "activo",
       label: "Estado",
       render: (usuario) => (
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Box
-            sx={{
+        <div className="d-flex align-items-center gap-2">
+          <span
+            style={{
               width: 8,
               height: 8,
               borderRadius: "50%",
-              bgcolor: usuario.activo ? "success.main" : "error.main",
+              display: "inline-block",
+              backgroundColor: usuario.activo ? "var(--success)" : "var(--error)",
             }}
           />
 
-          <Typography className="fz-h4 fw-semibold">
+          <span className="fz-body-sm fw-semibold text-dark">
             {usuario.activo ? "Activo" : "Inactivo"}
-          </Typography>
-        </Stack>
+          </span>
+        </div>
       ),
     },
     {
       key: "ultimoAcceso",
       label: "Último acceso",
       render: (usuario) => (
-        <Typography className="fz-h5 fw-regular" color="text.secondary">
+        <span className="fz-body-sm text-muted">
           {usuario.ultimoAcceso
             ? utcToLocal(usuario.ultimoAcceso)
             : "Sin acceso"}
-        </Typography>
+        </span>
       ),
     },
   ];
+
   return (
-    <Paper elevation={0} className="table-paper p-3">
+    <div className="card-adlocal p-3">
       <GenericTable<UsuarioDto>
         columns={columns}
         data={users}
@@ -144,10 +141,10 @@ export const UsersTable = ({
         onPageChange={onPageChange}
         onRowsPerPageChange={onRowsPerPageChange}
         actions={(row) => (
-          <Tooltip title="Ver usuario">
+          <Tooltip title="Ver usuario" disableTouchListener>
             <IconButton
               size="small"
-              className="generic-table-mobile-actions-btn"
+              className="btn-adlocal-ghost p-1"
               onClick={() => onView(row)}
             >
               <VisibilityIcon fontSize="small" />
@@ -155,6 +152,6 @@ export const UsersTable = ({
           </Tooltip>
         )}
       />
-    </Paper>
+    </div>
   );
 };

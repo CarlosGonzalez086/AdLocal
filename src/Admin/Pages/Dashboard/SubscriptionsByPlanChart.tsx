@@ -1,7 +1,6 @@
 import Chart from "react-apexcharts";
-import { Box, Typography } from "@mui/material";
 import type { SuscripcionPorPlanDto } from "../../../services/dashboard.api";
-import { iosColors } from "../../../utils/constantes";
+import { adlocalColors } from "../../../utils/constantes";
 
 interface Props {
   data: SuscripcionPorPlanDto[];
@@ -27,10 +26,10 @@ export const SubscriptionsByPlanChart = ({ data }: Props) => {
       },
     },
     colors: [
-      iosColors.primary,
-      iosColors.success,
-      iosColors.warning,
-      iosColors.purple,
+      adlocalColors.primary,
+      adlocalColors.success,
+      adlocalColors.warning,
+      adlocalColors.purple,
     ],
     plotOptions: {
       bar: {
@@ -87,19 +86,19 @@ export const SubscriptionsByPlanChart = ({ data }: Props) => {
   };
 
   return (
-    <Box className="dashboard-chart-card">
-      <Box className="dashboard-chart-header">
-        <Box>
-          <Typography className="dashboard-chart-title">
-            Distribución de planes {/* o "Suscripciones por plan" */}
-          </Typography>
-          <Typography className="dashboard-chart-subtitle">
-            Proporción de suscripciones activas {/* o el otro subtítulo */}
-          </Typography>
-        </Box>
-      </Box>
+    <div className="dashboard-chart-card">
+      <div className="dashboard-chart-header">
+        <div>
+          <h3 className="dashboard-chart-title">
+            Distribución de planes
+          </h3>
+          <p className="dashboard-chart-subtitle">
+            Proporción de suscripciones activas
+          </p>
+        </div>
+      </div>
 
-      <Chart options={options} series={series} type="donut" height={320} />
-    </Box>
+      <Chart options={options} series={series} type="bar" height={320} />
+    </div>
   );
 };

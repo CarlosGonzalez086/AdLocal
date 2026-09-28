@@ -1,9 +1,11 @@
 // hooks/useCheckout.ts
 import { useState, useCallback, useContext } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
+import { showConfirmDialog } from "../utils/sweetalert";
 import { checkoutApi, type CheckoutResponseDto } from "../services/checkoutApi";
 import { UserContext } from "../context/UserContext ";
 import { useActualizarJwt } from "./useActualizarJwt";
+import { extraerMensajeError } from "../utils/errorHandler";
 
 export const useCheckout = () => {
   const [loading, setLoading] = useState(false);
@@ -44,10 +46,10 @@ export const useCheckout = () => {
 
         Swal.fire("Listo", data.mensaje, "success");
         return true;
-      } catch (error: any) {
+      } catch (error: unknown) {
         Swal.fire(
           "Error",
-          error?.response?.data?.mensaje || "No se pudo completar el pago",
+          extraerMensajeError(error, "No se pudo completar el pago"),
           "error",
         );
         return false;
@@ -79,10 +81,10 @@ export const useCheckout = () => {
 
       setResponse(data.respuesta ?? null);
       return data.respuesta;
-    } catch (error: any) {
+    } catch (error: unknown) {
       Swal.fire(
         "Error",
-        error?.response?.data?.mensaje || "No se pudo iniciar el checkout",
+        extraerMensajeError(error, "No se pudo iniciar el checkout"),
         "error",
       );
       return null;
@@ -95,13 +97,13 @@ export const useCheckout = () => {
    * Cancelar suscripción
    */
   const cancelarPlan = useCallback(async () => {
-    const r = await Swal.fire({
+    const r = await showConfirmDialog({
       icon: "warning",
       title: "¿Cancelar tu plan?",
       text: "Seguirás teniendo acceso hasta que termine tu periodo actual",
-      showCancelButton: true,
       confirmButtonText: "Sí, cancelar",
       cancelButtonText: "No",
+      isDestructive: true,
     });
 
     if (!r.isConfirmed) return false;
@@ -126,10 +128,10 @@ export const useCheckout = () => {
       });
       setIsCancel(true);
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       Swal.fire(
         "Error",
-        error?.response?.data?.mensaje || "No se pudo cancelar el plan",
+        extraerMensajeError(error, "No se pudo cancelar el plan"),
         "error",
       );
       setIsCancel(false);
@@ -137,7 +139,7 @@ export const useCheckout = () => {
     } finally {
       setLoading(false);
     }
-  }, [actualizarJwt, user.sub]);
+  }, []);
 
   return {
     loading,

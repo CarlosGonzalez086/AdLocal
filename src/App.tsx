@@ -1,7 +1,12 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import AppUser from "./User/AppUser";
-import AppAdmin from "./Admin/AppAdmin";
+import PageLoader from "./components/UI/PageLoader";
+import AdLocalErrorBoundary from "./components/UI/AdLocalErrorBoundary";
+import { PwaInstallBanner } from "./components/PWA/PwaInstallBanner";
+
+const AppUser = lazy(() => import("./User/AppUser"));
+const AppAdmin = lazy(() => import("./Admin/AppAdmin"));
 
 export default function App() {
   return (
@@ -13,10 +18,18 @@ export default function App() {
         }}
       />
 
-      <Routes>
-        <Route path="/usuario/*" element={<AppUser />} />
-        <Route path="/admin/*" element={<AppAdmin />} />
-      </Routes>
+      <PwaInstallBanner />
+
+      <AdLocalErrorBoundary fullScreen sectionName="la aplicación">
+        <Suspense fallback={<PageLoader fullScreen message="Iniciando ADLocal..." />}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/usuario/login" replace />} />
+            <Route path="/usuario/*" element={<AppUser />} />
+            <Route path="/admin/*" element={<AppAdmin />} />
+            <Route path="*" element={<Navigate to="/usuario/login" replace />} />
+          </Routes>
+        </Suspense>
+      </AdLocalErrorBoundary>
     </BrowserRouter>
   );
 }

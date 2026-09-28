@@ -1,6 +1,7 @@
 import type { ApiResponse } from "../api/apiResponse";
 import { httpUsuario } from "../api/httpUsuario";
 import { httpUsuarioPublico } from "../api/httpUsuarioPublico";
+import { renovarTokenUsuario } from "./tokenRefresh";
 import type { NewPasswordDto } from "../types/auth";
 import type {
   EmailUserDto,
@@ -33,5 +34,9 @@ export const authUser = {
 
   actualizarUser(data: Partial<UserDto>) {
     return httpUsuario.put<ApiResponse<null>>("/Usuario", data);
+  },
+
+  renovarToken() {
+    return renovarTokenUsuario();
   },
 };

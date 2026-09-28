@@ -1,16 +1,20 @@
-import { Button, Chip } from "@mui/material";
 import {
   GenericTable,
   type TableColumn,
 } from "../../../../components/layouts/GenericTable";
 import type { PedidoComercioListadoDto } from "../../../../types/User/pedidosComercio";
 import {
-  colorEstadoPago,
+  EstadoPagoPedido,
+  EstadoPedido,
+} from "../../../../types/User/pedidosComercio";
+import {
   dateFormatter,
   estadoPagoTexto,
   estadoPedidoTexto,
   moneyFormatter,
 } from "../pedidoComercioPresentation";
+import { StatusBadge, type StatusVariant } from "../../../../components/UI/StatusBadge";
+import MaterialSymbol from "../../../../components/UI/MaterialSymbol/MaterialSymbol";
 
 interface Props {
   pedidos: PedidoComercioListadoDto[];
@@ -23,46 +27,99 @@ interface Props {
   onDetalle: (pedidoUuid: string) => void;
 }
 
+const getEstadoPedidoVariant = (estado: number): StatusVariant => {
+  switch (estado) {
+    case EstadoPedido.PendienteAprobacion:
+      return "warning";
+    case EstadoPedido.Aprobado:
+    case EstadoPedido.ListoParaRecoger:
+    case EstadoPedido.ListoParaEnviar:
+      return "info";
+    case EstadoPedido.Preparando:
+    case EstadoPedido.Enviado:
+      return "purple";
+    case EstadoPedido.Entregado:
+    case EstadoPedido.Completado:
+      return "success";
+    case EstadoPedido.Rechazado:
+    case EstadoPedido.Cancelado:
+      return "error";
+    default:
+      return "neutral";
+  }
+};
+
+const getEstadoPagoVariant = (estadoPago: number): StatusVariant => {
+  switch (estadoPago) {
+    case EstadoPagoPedido.Pagado:
+      return "success";
+    case EstadoPagoPedido.PendienteVerificacion:
+      return "warning";
+    case EstadoPagoPedido.Rechazado:
+      return "error";
+    default:
+      return "neutral";
+  }
+};
+
 const columns: TableColumn<PedidoComercioListadoDto>[] = [
   {
     key: "numeroPedido",
     label: "Pedido",
-    minWidth: 150,
+    minWidth: 160,
     render: (pedido) => (
       <div>
-        <strong className="fz-h4 fw-semibold d-block">
-          {pedido.numeroPedido}
-        </strong>
-        <small className="text-muted fz-h6 fw-regular d-block mt-1">
-          {pedido.totalProductos} productos
-        </small>
+        <div className="fw-bold fz-body-sm text-dark">
+          #{pedido.numeroPedido}
+        </div>
+        <div className="fz-caption text-muted mt-1">
+          {pedido.totalProductos} {pedido.totalProductos === 1 ? "producto" : "productos"}
+        </div>
       </div>
     ),
   },
-  { key: "clienteNombre", label: "Cliente", minWidth: 170 },
+  {
+    key: "clienteNombre",
+    label: "Cliente",
+    minWidth: 170,
+    render: (pedido) => (
+      <span className="fz-body-sm fw-semibold text-dark">
+        {pedido.clienteNombre}
+      </span>
+    ),
+  },
   {
     key: "fechaCreacion",
     label: "Fecha",
-    minWidth: 180,
-    render: (pedido) => dateFormatter.format(new Date(pedido.fechaCreacion)),
+    minWidth: 160,
+    render: (pedido) => (
+      <span className="fz-body-sm text-muted">
+        {dateFormatter.format(new Date(pedido.fechaCreacion))}
+      </span>
+    ),
   },
   {
     key: "estado",
     label: "Estado",
     minWidth: 170,
     render: (pedido) => (
-      <Chip size="small" label={estadoPedidoTexto[pedido.estado]} />
+      <StatusBadge
+        label={estadoPedidoTexto[pedido.estado] || "Desconocido"}
+        variant={getEstadoPedidoVariant(pedido.estado)}
+        dot
+        size="small"
+      />
     ),
   },
   {
     key: "estadoPago",
     label: "Pago",
-    minWidth: 170,
+    minWidth: 160,
     render: (pedido) => (
-      <Chip
+      <StatusBadge
+        label={estadoPagoTexto[pedido.estadoPago] || "Pendiente"}
+        variant={getEstadoPagoVariant(pedido.estadoPago)}
         size="small"
-        color={colorEstadoPago(pedido.estadoPago)}
-        label={estadoPagoTexto[pedido.estadoPago]}
       />
     ),
   },
@@ -70,11 +127,11 @@ const columns: TableColumn<PedidoComercioListadoDto>[] = [
     key: "total",
     label: "Total",
     align: "right",
-    minWidth: 120,
+    minWidth: 130,
     render: (pedido) => (
-      <strong className="fz-h4 fw-semibold">
+      <span className="fw-bold fz-body-sm text-dark">
         {moneyFormatter.format(pedido.total)}
-      </strong>
+      </span>
     ),
   },
 ];
@@ -102,13 +159,14 @@ export const PedidosComercioTable = ({
     onRowsPerPageChange={onRowsPerPageChange}
     getRowKey={(pedido) => pedido.uuid}
     actions={(pedido) => (
-      <Button
+      <button
         type="button"
-        className="btn-adlocal btn-adlocal--ghost btn-adlocal--sm fz-h5 fw-semibold"
+        className="btn-adlocal btn-adlocal-outline-primary btn-adlocal-sm d-inline-flex align-items-center gap-1"
         onClick={() => onDetalle(pedido.uuid)}
       >
-        Ver detalle
-      </Button>
+        <MaterialSymbol icon="visibility" size="small" />
+        <span>Detalle</span>
+      </button>
     )}
   />
 );

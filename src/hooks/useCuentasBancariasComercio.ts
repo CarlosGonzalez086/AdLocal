@@ -1,7 +1,9 @@
 import { useCallback, useState } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
+import { showConfirmDialog } from "../utils/sweetalert";
 
 import { cuentasBancariasComercioApi } from "../services/cuentasBancariasComercioApi";
+import { extraerMensajeError } from "../utils/errorHandler";
 
 import type {
   CuentaBancariaComercioCreateDto,
@@ -67,11 +69,13 @@ export const useCuentasBancariasComercio = () => {
       return {
         success: true,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       Swal.fire(
         "Error",
-        error?.response?.data?.mensaje ??
+        extraerMensajeError(
+          error,
           "No se pudo registrar la cuenta bancaria.",
+        ),
         "error",
       );
 
@@ -107,11 +111,13 @@ export const useCuentasBancariasComercio = () => {
       return {
         success: true,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       Swal.fire(
         "Error",
-        error?.response?.data?.mensaje ??
+        extraerMensajeError(
+          error,
           "No se pudo actualizar la cuenta bancaria.",
+        ),
         "error",
       );
 
@@ -124,14 +130,14 @@ export const useCuentasBancariasComercio = () => {
   };
 
   const eliminar = async (cuenta: CuentaBancariaComercioDto) => {
-    const result = await Swal.fire({
+    const result = await showConfirmDialog({
       title: "Eliminar cuenta bancaria",
       text: `¿Deseas eliminar la cuenta de ${cuenta.banco}?`,
       icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
       reverseButtons: true,
+      isDestructive: true,
     });
 
     if (!result.isConfirmed) {
@@ -151,11 +157,13 @@ export const useCuentasBancariasComercio = () => {
       Swal.fire("Éxito", data.mensaje, "success");
 
       await listar();
-    } catch (error: any) {
+    } catch (error: unknown) {
       Swal.fire(
         "Error",
-        error?.response?.data?.mensaje ??
+        extraerMensajeError(
+          error,
           "No se pudo eliminar la cuenta bancaria.",
+        ),
         "error",
       );
     } finally {
@@ -197,11 +205,13 @@ export const useCuentasBancariasComercio = () => {
       Swal.fire("Éxito", data.mensaje, "success");
 
       await listar();
-    } catch (error: any) {
+    } catch (error: unknown) {
       Swal.fire(
         "Error",
-        error?.response?.data?.mensaje ??
+        extraerMensajeError(
+          error,
           "No se pudo establecer la cuenta principal.",
+        ),
         "error",
       );
     } finally {

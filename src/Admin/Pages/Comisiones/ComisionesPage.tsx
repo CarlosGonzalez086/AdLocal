@@ -8,7 +8,7 @@ import {
   Select,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import Swal from "sweetalert2";
+import Swal from "../../../utils/sweetalert";
 import {
   GenericTable,
   type TableColumn,
@@ -22,6 +22,7 @@ import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol
 import { httpAdmin } from "../../../api/httpAdmin";
 import type { ApiResponse } from "../../../api/apiResponse";
 import type { PagoComision } from "../../../types/User/pagoComisiones";
+import { extraerMensajeError } from "../../../utils/errorHandler";
 
 const moneda = (valor: number) =>
   valor.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
@@ -66,10 +67,10 @@ export const ComisionesPage = () => {
         "Las comisiones fueron marcadas como pagadas.",
         "success",
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       Swal.fire(
         "No fue posible liquidar",
-        err?.response?.data?.mensaje || "Intenta nuevamente.",
+        extraerMensajeError(err, "Intenta nuevamente."),
         "error",
       );
     }
@@ -263,6 +264,7 @@ export const ComisionesPage = () => {
           actions={(r) => (
             <Button
               className="btn-adlocal btn-adlocal--solid btn-adlocal--sm"
+              style={{ minHeight: 36 }}
               disabled={r.pendientePago <= 0}
               onClick={() => void liquidarComercio(r)}
             >

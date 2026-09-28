@@ -1,27 +1,21 @@
 import {
   Alert,
-  Box,
   Button,
   CircularProgress,
-  Container,
-  Divider,
   IconButton,
   InputAdornment,
-  Paper,
   TextField,
-  Typography,
 } from "@mui/material";
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import styles from "../styles/ResetPasswordPage.module.css";
-
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
 import { useAdmin } from "../hooks/useAdmin";
 import { useUser } from "../hooks/useUser";
-
-const LOGO_URL =
-  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
+import { authAdmin } from "../services/authAdmin.api";
+import { authUser } from "../services/authUser.api";
+import { extraerMensajeError } from "../utils/errorHandler";
+import { ADLOCAL_LOGO_URL } from "../constants/brand";
 
 export default function ResetPasswordPage() {
   const { token, type } = useParams<{
@@ -34,9 +28,6 @@ export default function ResetPasswordPage() {
   const admin = useAdmin();
   const user = useUser();
   const loading = isAdmin ? admin.loading : user.loading;
-
-  // const { checkToken, newPassword, loading, error, successMessage } =
-  //   useForgetPassword();
 
   const [codigo, setCodigo] = useState("");
   const [password, setPassword] = useState("");
@@ -69,16 +60,14 @@ export default function ResetPasswordPage() {
       try {
         setValidatingToken(true);
 
-        const esValido = isAdmin
-          ? await admin.checkToken(token)
-          : await user.checkToken(token);
+        const resp = isAdmin
+          ? await authAdmin.checkToken(token)
+          : await authUser.checkToken(token);
 
         if (componentMounted) {
-          setTokenValido(Boolean(esValido));
+          setTokenValido(Boolean(resp.data));
         }
-      } catch (validationError) {
-        console.error("Error al validar el token:", validationError);
-
+      } catch {
         if (componentMounted) {
           setTokenValido(false);
         }
@@ -94,19 +83,15 @@ export default function ResetPasswordPage() {
     return () => {
       componentMounted = false;
     };
-  }, [token]);
+  }, [token, isAdmin]);
 
-  /*
-   * Redirigir únicamente cuando el hook confirma
-   * que la contraseña se actualizó correctamente.
-   */
   useEffect(() => {
     if (!successMessage) {
       return;
     }
 
     const redirectTimeout = window.setTimeout(() => {
-      navigate("usuario/login", {
+      navigate(isAdmin ? "/admin/login" : "/usuario/login", {
         replace: true,
       });
     }, 2000);
@@ -114,7 +99,7 @@ export default function ResetPasswordPage() {
     return () => {
       window.clearTimeout(redirectTimeout);
     };
-  }, [successMessage, navigate]);
+  }, [successMessage, navigate, isAdmin]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -137,82 +122,77 @@ export default function ResetPasswordPage() {
             passwordNueva: password,
           });
 
-      const data = response as any;
+      const data = response as { codigo?: string; mensaje?: string } | undefined;
 
-      if (data.codigo !== "200") {
-        setError(data.mensaje || "Ocurrió un error inesperado.");
+      if (data?.codigo !== "200") {
+        setError(data?.mensaje || "Ocurrió un error inesperado.");
         setSuccessMessage("");
         return;
       }
 
-      setSuccessMessage(data.mensaje);
-    } catch (error: any) {
-      console.error(error);
-      setError(error.message || "Ocurrió un error inesperado.");
+      setSuccessMessage(data.mensaje || "Contraseña actualizada exitosamente.");
+    } catch (error: unknown) {
+      const mensaje = extraerMensajeError(error, "Ocurrió un error al actualizar la contraseña.");
+      setError(mensaje);
       setSuccessMessage("");
     }
   };
 
   return (
-    <Box component="main" className={styles.page}>
-      <Box className={styles.backgroundDecoration} aria-hidden="true">
-        <Box className={styles.decorationOne} />
-
-        <Box className={styles.decorationTwo} />
-      </Box>
+    <main className="auth-page">
+      <div className="auth-bg-decoration" aria-hidden="true">
+        <div className="auth-decoration-1" />
+        <div className="auth-decoration-2" />
+      </div>
 
       <Button
         type="button"
         variant="outlined"
-        className={styles.backButton}
-        onClick={() => navigate("/login")}
+        className="auth-back-btn"
+        onClick={() => navigate(isAdmin ? "/admin/login" : "/usuario/login")}
         startIcon={<MaterialSymbol icon="arrow_back_ios_new" size="small" />}
       >
         Regresar
       </Button>
 
-      <Container maxWidth="xs" className={styles.container}>
-        <Box
-          component="a"
+      <div className="container auth-container" style={{ maxWidth: "440px" }}>
+        <a
           href="/"
-          className={styles.logoLink}
+          className="auth-logo-link"
           aria-label="Ir al inicio de ADLocal"
         >
-          <Box
-            component="img"
-            src={LOGO_URL}
+          <img
+            src={ADLOCAL_LOGO_URL}
             alt="ADLocal"
-            className={styles.logo}
+            className="auth-logo-img"
           />
-        </Box>
+        </a>
 
-        <Paper
-          component="form"
-          elevation={0}
-          className={styles.card}
+        <form
+          className="auth-card"
           onSubmit={handleSubmit}
           noValidate
         >
-          <Box className={styles.header}>
-            <Box className={styles.headerIcon}>
+          <div className="auth-header">
+            <div className="auth-header-icon">
               <MaterialSymbol icon="password" size="large" />
-            </Box>
+            </div>
 
-            <Box className={styles.headerContent}>
-              <Typography component="span" className={styles.eyebrow}>
+            <div className="auth-header-content">
+              <span className="auth-eyebrow">
                 Seguridad de la cuenta
-              </Typography>
+              </span>
 
-              <Typography component="h1" className={styles.title}>
+              <h1 className="auth-title">
                 Cambiar contraseña
-              </Typography>
+              </h1>
 
-              <Typography component="p" className={styles.description}>
+              <p className="auth-description">
                 Ingresa el código recibido en tu correo y establece una nueva
                 contraseña para tu cuenta.
-              </Typography>
-            </Box>
-          </Box>
+              </p>
+            </div>
+          </div>
 
           {validatingToken && (
             <Alert
@@ -222,63 +202,65 @@ export default function ResetPasswordPage() {
                 <CircularProgress
                   size={18}
                   thickness={5}
-                  className={styles.validationProgress}
+                  className="text-primary"
                 />
               }
-              className={styles.alert}
+              className="mt-3 rounded-3"
             >
               Validando el enlace de recuperación...
             </Alert>
           )}
 
           {!validatingToken && tokenValido === false && (
-            <Box className={styles.invalidTokenState}>
-              <Box className={styles.invalidTokenIcon}>
+            <div className="auth-invalid-token-state">
+              <div className="auth-invalid-token-icon">
                 <MaterialSymbol icon="link_off" size="large" />
-              </Box>
+              </div>
 
-              <Typography component="h2" className={styles.invalidTokenTitle}>
+              <h2 className="auth-invalid-token-title">
                 Enlace no válido
-              </Typography>
+              </h2>
 
-              <Typography
-                component="p"
-                className={styles.invalidTokenDescription}
-              >
+              <p className="auth-invalid-token-desc">
                 El enlace de recuperación no existe, ya expiró o fue utilizado
                 anteriormente.
-              </Typography>
+              </p>
 
               <Button
                 type="button"
                 variant="contained"
                 fullWidth
-                className={styles.requestLinkButton}
-                onClick={() => navigate("/recuperar-contrasena")}
+                className="auth-submit-btn mt-3"
+                onClick={() =>
+                  navigate(
+                    isAdmin
+                      ? "/admin/recuperar-contrasena"
+                      : "/usuario/recuperar-contrasena",
+                  )
+                }
                 startIcon={<MaterialSymbol icon="mail" size="small" />}
               >
                 Solicitar un nuevo enlace
               </Button>
 
-              <Button
+              <button
                 type="button"
-                variant="text"
-                className={styles.loginLinkButton}
-                onClick={() => navigate("/login")}
+                className="auth-text-btn mt-2"
+                onClick={() => navigate(isAdmin ? "/admin/login" : "/usuario/login")}
               >
                 Regresar al inicio de sesión
-              </Button>
-            </Box>
+              </button>
+            </div>
           )}
 
           {!validatingToken && tokenValido === true && (
             <>
-              <Box className={styles.messages} aria-live="polite">
+              <div className="mt-3 d-flex flex-column gap-2" aria-live="polite">
                 {error && (
                   <Alert
                     severity="error"
                     variant="outlined"
-                    className={styles.alert}
+                    className="rounded-3"
                   >
                     {error}
                   </Alert>
@@ -288,28 +270,22 @@ export default function ResetPasswordPage() {
                   <Alert
                     severity="success"
                     variant="outlined"
-                    className={styles.alert}
+                    className="rounded-3"
                   >
-                    <Box className={styles.successContent}>
-                      <Typography
-                        component="span"
-                        className={styles.successMessage}
-                      >
+                    <div className="d-flex flex-column">
+                      <span className="fw-semibold">
                         {successMessage}
-                      </Typography>
+                      </span>
 
-                      <Typography
-                        component="span"
-                        className={styles.redirectMessage}
-                      >
+                      <span className="fz-h5 text-muted">
                         Redirigiendo al inicio de sesión...
-                      </Typography>
-                    </Box>
+                      </span>
+                    </div>
                   </Alert>
                 )}
-              </Box>
+              </div>
 
-              <Box className={styles.fields}>
+              <div className="mt-3 d-flex flex-column gap-3">
                 <TextField
                   fullWidth
                   required
@@ -324,7 +300,6 @@ export default function ResetPasswordPage() {
                       ? "El código de verificación es obligatorio."
                       : "Revisa el código enviado a tu correo electrónico."
                   }
-                  className={styles.textField}
                   onBlur={() => setCodigoTouched(true)}
                   onChange={(event) => setCodigo(event.target.value)}
                   slotProps={{
@@ -338,7 +313,7 @@ export default function ResetPasswordPage() {
                           <MaterialSymbol
                             icon="key"
                             size="medium"
-                            className={styles.fieldIcon}
+                            className="text-muted"
                           />
                         </InputAdornment>
                       ),
@@ -361,7 +336,6 @@ export default function ResetPasswordPage() {
                       ? "La nueva contraseña es obligatoria."
                       : "Utiliza una contraseña segura que no hayas usado anteriormente."
                   }
-                  className={styles.textField}
                   onBlur={() => setPasswordTouched(true)}
                   onChange={(event) => setPassword(event.target.value)}
                   slotProps={{
@@ -375,7 +349,7 @@ export default function ResetPasswordPage() {
                           <MaterialSymbol
                             icon="lock"
                             size="medium"
-                            className={styles.fieldIcon}
+                            className="text-muted"
                           />
                         </InputAdornment>
                       ),
@@ -386,7 +360,6 @@ export default function ResetPasswordPage() {
                             edge="end"
                             size="small"
                             disabled={loading || Boolean(successMessage)}
-                            className={styles.visibilityButton}
                             aria-label={
                               showPassword
                                 ? "Ocultar contraseña"
@@ -411,9 +384,11 @@ export default function ResetPasswordPage() {
                     },
                   }}
                 />
-              </Box>
+              </div>
 
-              <Divider className={styles.divider}>Actualización segura</Divider>
+              <div className="auth-divider my-3 text-center text-muted fz-h5">
+                Actualización segura
+              </div>
 
               <Button
                 type="submit"
@@ -421,13 +396,13 @@ export default function ResetPasswordPage() {
                 fullWidth
                 size="large"
                 disabled={loading || formIsInvalid || Boolean(successMessage)}
-                className={styles.submitButton}
+                className="auth-submit-btn w-100"
                 startIcon={
                   loading ? (
                     <CircularProgress
                       size={18}
                       thickness={5}
-                      className={styles.buttonProgress}
+                      className="text-white"
                     />
                   ) : (
                     <MaterialSymbol icon="lock_reset" size="small" />
@@ -441,27 +416,33 @@ export default function ResetPasswordPage() {
                     : "Cambiar contraseña"}
               </Button>
 
-              <Typography component="p" className={styles.securityMessage}>
+              <p className="auth-security-msg">
                 <MaterialSymbol icon="verified_user" size="small" />
 
                 <span>Tu nueva contraseña se almacenará de forma segura.</span>
-              </Typography>
+              </p>
             </>
           )}
-        </Paper>
+        </form>
 
-        <Typography component="p" className={styles.footerText}>
+        <p className="auth-footer-text mt-3">
           ¿Necesitas otro enlace?{" "}
-          <Button
+          <button
             type="button"
-            variant="text"
-            className={styles.footerButton}
-            onClick={() => navigate("/recuperar-contrasena")}
+            className="auth-text-btn"
+            onClick={() =>
+              navigate(
+                isAdmin
+                  ? "/admin/recuperar-contrasena"
+                  : "/usuario/recuperar-contrasena",
+              )
+            }
           >
             Solicitar recuperación
-          </Button>
-        </Typography>
-      </Container>
-    </Box>
+          </button>
+        </p>
+      </div>
+    </main>
   );
 }
+

@@ -9,7 +9,7 @@ export const ComisionesSemanaChart = ({
 }) => {
   const options: ApexOptions = {
     chart: { toolbar: { show: false }, fontFamily: "Inter, sans-serif" },
-    colors: ["#0f766e"],
+    colors: ["#008989"],
     dataLabels: { enabled: false },
     stroke: { curve: "smooth", width: 3 },
     xaxis: { categories: data.semana.map((x) => x.dia) },

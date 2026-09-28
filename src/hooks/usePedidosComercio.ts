@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
 import { pedidosComercioApi } from "../services/pedidosComercioApi";
+import { extraerMensajeError } from "../utils/errorHandler";
 import type {
   ComercioPedidoSelectorDto,
   EstadoPagoPedido,
@@ -54,9 +55,9 @@ export const usePedidosComercio = () => {
       ]);
       setDashboard(resumen.data.respuesta);
       setPedidos(lista.data.respuesta);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setError(
-        error?.response?.data?.mensaje || "No fue posible cargar los pedidos.",
+        extraerMensajeError(error, "No fue posible cargar los pedidos."),
       );
     } finally {
       setLoading(false);
@@ -97,10 +98,10 @@ export const usePedidosComercio = () => {
         setDetalle(data.respuesta);
         await cargar();
         return true;
-      } catch (error: any) {
+      } catch (error: unknown) {
         await Swal.fire(
           "No se pudo actualizar",
-          error?.response?.data?.mensaje || "Revisa el estado del pedido.",
+          extraerMensajeError(error, "Revisa el estado del pedido."),
           "error",
         );
         return false;
@@ -125,10 +126,10 @@ export const usePedidosComercio = () => {
         setDetalle(data.respuesta);
         await cargar();
         return true;
-      } catch (error: any) {
+      } catch (error: unknown) {
         await Swal.fire(
           "No se pudo revisar",
-          error?.response?.data?.mensaje || "Intenta nuevamente.",
+          extraerMensajeError(error, "Intenta nuevamente."),
           "error",
         );
         return false;

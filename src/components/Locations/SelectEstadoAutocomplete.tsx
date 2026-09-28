@@ -15,7 +15,7 @@ export const SelectEstadoAutocomplete = ({
 
   useEffect(() => {
     getAllStates();
-  }, []);
+  }, [getAllStates]);
 
   const selected = states.find((s) => s.id === value) ?? null;
 

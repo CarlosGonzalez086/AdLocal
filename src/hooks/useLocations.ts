@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
 import { locationsApi, type MunicipalityDto, type StateDto } from "../services/locations.api";
 
 

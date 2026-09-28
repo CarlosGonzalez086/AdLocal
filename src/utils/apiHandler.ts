@@ -1,18 +1,17 @@
-import Swal from "sweetalert2";
+import { showErrorAlert, showSuccessAlert } from "./sweetalert";
 import type { ApiResponse } from "../api/apiResponse";
-
 
 export function handleApiResponse<T>(
   response: ApiResponse<T>,
   successMessage?: string
 ): T {
   if (response.codigo !== "200") {
-    Swal.fire("Error", response.mensaje, "error");
+    showErrorAlert("Error", response.mensaje);
     throw new Error(response.mensaje);
   }
 
   if (successMessage) {
-    Swal.fire("Éxito", successMessage || response.mensaje, "success");
+    showSuccessAlert("Éxito", successMessage || response.mensaje);
   }
 
   return response.respuesta;

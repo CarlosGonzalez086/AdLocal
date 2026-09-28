@@ -6,13 +6,9 @@ import {
   type TableColumn,
 } from "../../../components/layouts/GenericTable";
 import {
-  Box,
-  Button,
   Chip,
   IconButton,
-  Stack,
   Tooltip,
-  Typography,
   LinearProgress,
 } from "@mui/material";
 import { SearchInput } from "../../../components/SearchInput";
@@ -27,14 +23,6 @@ import ButtonBack from "../../../components/ButtonBack";
 import { ModalidadProductoServicio, TipoProductoServicio, type ProductoServicioDto } from "../../../types/User/productosServicios";
 import type { JwtClaims } from "../../../types/claims";
 import { jwtDecode } from "jwt-decode";
-
-const cardSx = {
-  borderRadius: 4,
-  bgcolor: "rgba(255,255,255,0.92)",
-  backdropFilter: "blur(14px)",
-  border: "1px solid rgba(0,0,0,0.06)",
-  boxShadow: "0 4px 16px rgba(0,0,0,0.07)",
-};
 
 export function ProductosServicioComercio() {
   const { id } = useParams();
@@ -88,7 +76,7 @@ export function ProductosServicioComercio() {
 
   useEffect(() => {
     listar({ page, rows, orderBy, search, idComercio: Number(id) });
-  }, [page, rows, orderBy, search, id]);
+  }, [page, rows, orderBy, search, id, listar]);
 
   const max = Number(claims?.maxProductos);
   const restantes = max - total;
@@ -102,9 +90,9 @@ export function ProductosServicioComercio() {
       key: "precio",
       label: "Precio",
       render: (p) => (
-        <Typography fontWeight={600} fontSize="0.875rem">
+        <span className="fw-semibold fz-body-sm">
           ${p.precio}
-        </Typography>
+        </span>
       ),
     },
     {
@@ -119,8 +107,8 @@ export function ProductosServicioComercio() {
             borderRadius: 999,
             fontSize: "0.72rem",
             fontWeight: 700,
-            bgcolor: p.activo ? "rgba(52,199,89,0.10)" : "rgba(0,0,0,0.06)",
-            color: p.activo ? "#34C759" : "#8e8e93",
+            bgcolor: p.activo ? "rgba(42, 157, 111, 0.12)" : "rgba(142, 147, 155, 0.12)",
+            color: p.activo ? "#2A9D6F" : "#8E939B",
           }}
         />
       ),
@@ -128,17 +116,13 @@ export function ProductosServicioComercio() {
   ];
 
   return (
-    <Box>
-      <Box mb={2}>
+    <div className="w-100">
+      <div className="mb-3">
         <ButtonBack route="/app/productos-servicios/comercios" />
-      </Box>
+      </div>
 
-      <Box sx={{ ...cardSx, p: { xs: 2.5, sm: 3 }, mb: 2.5 }}>
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={2}
-          alignItems={{ md: "center" }}
-        >
+      <div className="card-adlocal p-3 mb-4">
+        <div className="d-flex flex-column flex-md-row gap-3 align-items-md-center">
           <SearchInput
             value={search}
             placeholder="Buscar producto o servicio…"
@@ -154,89 +138,48 @@ export function ProductosServicioComercio() {
               setPage(0);
             }}
           />
-          <Button
-            variant="contained"
+          <button
+            type="button"
+            className="btn-adlocal btn-adlocal-primary text-nowrap d-inline-flex align-items-center gap-1"
             disabled={limiteAlcanzado}
-            startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
             onClick={() => {
               setProducto(initialForm);
               setOpen(true);
             }}
-            sx={{
-              borderRadius: 999,
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.875rem",
-              px: 3,
-              py: 1.2,
-              background: "linear-gradient(135deg, #1c1c1e, #3a3a3c)",
-              boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
-              whiteSpace: "nowrap",
-              transition: "all 0.25s ease",
-              "&:hover": {
-                boxShadow: "0 10px 24px rgba(0,0,0,0.24)",
-                transform: "translateY(-1px)",
-              },
-              "&:active": { transform: "scale(0.98)" },
-            }}
           >
-            Nuevo
-          </Button>
-        </Stack>
+            <AddRoundedIcon style={{ fontSize: 18 }} />
+            <span>Nuevo</span>
+          </button>
+        </div>
 
         {claims?.maxProductos && (
-          <Box mt={2.5}>
-            <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-              <Typography
-                fontSize="0.78rem"
-                fontWeight={600}
-                color="text.secondary"
-              >
+          <div className="mt-3">
+            <div className="d-flex align-items-center gap-2 mb-2">
+              <span className="fz-caption fw-semibold text-muted">
                 Productos registrados
-              </Typography>
-              <Box
-                sx={{
-                  px: 1.2,
-                  py: 0.2,
-                  borderRadius: 999,
-                  bgcolor: limiteAlcanzado
-                    ? "rgba(255,59,48,0.10)"
-                    : "rgba(52,199,89,0.10)",
-                  border: `1px solid ${limiteAlcanzado ? "rgba(255,59,48,0.20)" : "rgba(52,199,89,0.20)"}`,
-                }}
+              </span>
+              <span
+                className={`badge-adlocal ${limiteAlcanzado ? "badge-adlocal-danger" : "badge-adlocal-success"} fz-caption fw-bold`}
               >
-                <Typography
-                  fontSize="0.7rem"
-                  fontWeight={700}
-                  color={limiteAlcanzado ? "error.main" : "success.main"}
-                >
-                  {total} / {max}
-                </Typography>
-              </Box>
-            </Stack>
+                {total} / {max}
+              </span>
+            </div>
 
             <LinearProgress
               variant="determinate"
               value={porcentaje}
-              sx={{
-                height: 6,
-                borderRadius: 999,
-                bgcolor: "rgba(0,0,0,0.06)",
-                "& .MuiLinearProgress-bar": {
-                  borderRadius: 999,
-                  bgcolor: limiteAlcanzado ? "error.main" : "#007AFF",
-                },
-              }}
+              color={limiteAlcanzado ? "error" : "primary"}
+              style={{ height: 6, borderRadius: 999 }}
             />
 
-            <Typography fontSize="0.72rem" color="text.disabled" mt={0.8}>
+            <p className="fz-caption text-muted mt-2 mb-0">
               {limiteAlcanzado
                 ? "Llegaste al límite de productos de tu plan"
                 : `Puedes registrar ${restantes} producto${restantes !== 1 ? "s" : ""} más`}
-            </Typography>
-          </Box>
+            </p>
+          </div>
         )}
-      </Box>
+      </div>
 
       <GenericTable<ProductoServicioDto>
         columns={columns}
@@ -252,15 +195,15 @@ export function ProductosServicioComercio() {
           setPage(0);
         }}
         actions={(p) => (
-          <Stack direction="row" spacing={0.5} sx={{ p: 0.5 }}>
-            <Tooltip title="Editar" arrow>
+          <div className="d-flex flex-row gap-1 p-1">
+            <Tooltip title="Editar" arrow disableTouchListener>
               <IconButton
                 size="small"
                 onClick={() => {
                   setProducto({
                     id: p.id,
                     uuid: p.uuid,
-                    idComercio: producto.idComercio,
+                    idComercio: p.idComercio ?? Number(id),
                     imagenBase64: p.imagenBase64,
                     precio: p.precio,
                     precioDesde: p.precioDesde,
@@ -281,23 +224,23 @@ export function ProductosServicioComercio() {
                   setOpen(true);
                 }}
                 sx={{
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   borderRadius: 999,
                   bgcolor: "rgba(0,0,0,0.05)",
                   border: "1px solid rgba(0,0,0,0.07)",
                   "&:hover": {
-                    bgcolor: "rgba(0,122,255,0.10)",
-                    color: "#007AFF",
+                    bgcolor: "rgba(0, 137, 137, 0.10)",
+                    color: "#008989",
                   },
                   transition: "all 0.2s ease",
                 }}
               >
-                <EditRoundedIcon sx={{ fontSize: 16 }} />
+                <EditRoundedIcon sx={{ fontSize: 18 }} />
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Eliminar" arrow>
+            <Tooltip title="Eliminar" arrow disableTouchListener>
               <IconButton
                 size="small"
                 onClick={() =>
@@ -310,21 +253,21 @@ export function ProductosServicioComercio() {
                   })
                 }
                 sx={{
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   borderRadius: 999,
-                  bgcolor: "rgba(255,59,48,0.08)",
-                  border: "1px solid rgba(255,59,48,0.15)",
-                  color: "#FF3B30",
-                  "&:hover": { bgcolor: "rgba(255,59,48,0.16)" },
+                  bgcolor: "rgba(216, 64, 40, 0.08)",
+                  border: "1px solid rgba(216, 64, 40, 0.20)",
+                  color: "#D84028",
+                  "&:hover": { bgcolor: "rgba(216, 64, 40, 0.16)" },
                   transition: "all 0.2s ease",
                 }}
               >
-                <DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />
+                <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
               </IconButton>
             </Tooltip>
 
-            <Tooltip title={p.activo ? "Desactivar" : "Activar"} arrow>
+            <Tooltip title={p.activo ? "Desactivar" : "Activar"} arrow disableTouchListener>
               <IconButton
                 size="small"
                 onClick={() =>
@@ -337,30 +280,30 @@ export function ProductosServicioComercio() {
                   })
                 }
                 sx={{
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   borderRadius: 999,
                   bgcolor: p.activo
-                    ? "rgba(52,199,89,0.10)"
+                    ? "rgba(42, 157, 111, 0.12)"
                     : "rgba(0,0,0,0.05)",
-                  border: `1px solid ${p.activo ? "rgba(52,199,89,0.20)" : "rgba(0,0,0,0.07)"}`,
-                  color: p.activo ? "#34C759" : "#8e8e93",
+                  border: `1px solid ${p.activo ? "rgba(42, 157, 111, 0.25)" : "rgba(0,0,0,0.07)"}`,
+                  color: p.activo ? "#2A9D6F" : "#8E939B",
                   "&:hover": {
                     bgcolor: p.activo
-                      ? "rgba(52,199,89,0.20)"
+                      ? "rgba(42, 157, 111, 0.22)"
                       : "rgba(0,0,0,0.09)",
                   },
                   transition: "all 0.2s ease",
                 }}
               >
                 {p.activo ? (
-                  <ToggleOnRoundedIcon sx={{ fontSize: 18 }} />
+                  <ToggleOnRoundedIcon sx={{ fontSize: 20 }} />
                 ) : (
-                  <ToggleOffRoundedIcon sx={{ fontSize: 18 }} />
+                  <ToggleOffRoundedIcon sx={{ fontSize: 20 }} />
                 )}
               </IconButton>
             </Tooltip>
-          </Stack>
+          </div>
         )}
       />
 
@@ -377,6 +320,6 @@ export function ProductosServicioComercio() {
         producto={producto}
         loading={loading}
       />
-    </Box>
+    </div>
   );
 }

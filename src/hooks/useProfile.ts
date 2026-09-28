@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
 import type { Profile, ProfileUpdateDto } from "../types/Admin/profile.types";
 import { profileApi } from "../services/profile.api";
 

@@ -11,7 +11,7 @@ import {
   TipoProductoServicio,
   type ProductoServicioDto,
 } from "../../types/User/productosServicios";
-import { GenericModal } from "../GenericModal";
+import { GenericModal, type GenericModalResult } from "../GenericModal";
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
 
 interface Props {
@@ -19,7 +19,9 @@ interface Props {
 
   onClose: () => void;
 
-  onSave: (data: ProductoServicioDto) => Promise<any> | any;
+  onSave: (
+    data: ProductoServicioDto,
+  ) => Promise<GenericModalResult | void | undefined> | GenericModalResult | void | undefined;
 
   producto: ProductoServicioDto;
 
@@ -277,7 +279,6 @@ export const ProductoServicioModal = ({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Entro");
 
     if (soloVer) {
       return;

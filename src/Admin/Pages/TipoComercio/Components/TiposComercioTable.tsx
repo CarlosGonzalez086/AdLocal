@@ -1,10 +1,7 @@
 import {
   IconButton,
   Tooltip,
-  Stack,
-  Typography,
   Chip,
-  Paper,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -42,7 +39,7 @@ export const TiposComercioTable = ({
       key: "nombre",
       label: "Nombre",
       render: (t) => (
-        <Typography className="fz-h4 fw-semibold">{t.nombre}</Typography>
+        <span className="fz-body-sm fw-semibold text-dark">{t.nombre}</span>
       ),
     },
     {
@@ -50,11 +47,11 @@ export const TiposComercioTable = ({
       label: "Descripción",
       render: (t) =>
         t.descripcion ? (
-          <Typography className="fz-h4 fw-regular" color="text.secondary">
+          <span className="fz-body-sm text-muted">
             {t.descripcion}
-          </Typography>
+          </span>
         ) : (
-          <Typography className="admin-cell-empty">—</Typography>
+          <span className="admin-cell-empty text-muted fz-caption">—</span>
         ),
     },
     {
@@ -70,7 +67,7 @@ export const TiposComercioTable = ({
   ];
 
   return (
-    <Paper elevation={0} className="table-paper p-3">
+    <div className="card-adlocal p-3">
       <GenericTable<TipoComercioCreateDto>
         columns={columns}
         data={tipos}
@@ -82,25 +79,30 @@ export const TiposComercioTable = ({
         onPageChange={onPageChange}
         onRowsPerPageChange={onRowsPerPageChange}
         actions={(t) => (
-          <Stack direction="row" spacing={0.5}>
-            <Tooltip title="Editar">
-              <IconButton size="small" onClick={() => onEdit(t)}>
+          <div className="d-flex align-items-center gap-1">
+            <Tooltip title="Editar" disableTouchListener>
+              <IconButton
+                size="small"
+                onClick={() => onEdit(t)}
+                className="btn-adlocal-ghost p-1"
+              >
                 <EditIcon fontSize="small" />
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Eliminar">
+            <Tooltip title="Eliminar" disableTouchListener>
               <IconButton
                 size="small"
                 color="error"
                 onClick={() => onDelete(t)}
+                className="btn-adlocal-ghost p-1 text-danger"
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-          </Stack>
+          </div>
         )}
       />
-    </Paper>
+    </div>
   );
 };

@@ -1,9 +1,7 @@
-import { Box, Paper, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { UsuarioDto } from "../../../../types/Admin/usuarios";
 import { useUsers } from "../../../../hooks/useUsers";
-import { SearchInput } from "../../../../components/SearchInput";
-import { OrderSelect } from "../../../../components/OrderSelect";
+import { SearchToolbar } from "../../../../components/UI/SearchToolbar";
 import { UsersTable } from "./UsersTable";
 import { UserModal } from "./UserModal";
 
@@ -47,7 +45,7 @@ export const UsersPageAdmin = () => {
   const [rows, setRows] = useState(10);
   const [view, setView] = useState(false);
   const [user, setUser] = useState<UsuarioDto>(initialForm);
-  const [orderBy, setOrderBy] = useState<"recent" | "old" | "az" | "za">("recent",);
+  const [orderBy, setOrderBy] = useState<"recent" | "old" | "az" | "za">("recent");
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -60,32 +58,21 @@ export const UsersPageAdmin = () => {
   }, [page, rows, orderBy, search, listar]);
 
   return (
-    <Box>
-      <Paper elevation={0} className="filters-paper">
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={2}
-          alignItems={{ md: "center" }}
-        >
-          <SearchInput
-            value={search}
-            placeholder="Buscar usuario…"
-            onChange={(value) => {
-              setSearch(value);
-              setPage(0);
-            }}
-          />
-
-          <OrderSelect
-            value={orderBy}
-            onChange={(value) => {
-              setOrderBy(value as "recent" | "old" | "az" | "za");
-              setPage(0);
-            }}
-          />
-        </Stack>
-      </Paper>
-      <div className="mt-4">
+    <div className="w-100">
+      <SearchToolbar
+        search={search}
+        searchPlaceholder="Buscar usuario..."
+        onSearchChange={(value) => {
+          setSearch(value);
+          setPage(0);
+        }}
+        orderBy={orderBy}
+        onOrderChange={(value) => {
+          setOrderBy(value as "recent" | "old" | "az" | "za");
+          setPage(0);
+        }}
+      />
+      <div className="mt-3">
         <UsersTable
           users={users}
           total={total}
@@ -113,6 +100,6 @@ export const UsersPageAdmin = () => {
         usuario={user}
         soloVer
       />
-    </Box>
+    </div>
   );
 };

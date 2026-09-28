@@ -2,13 +2,8 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  Box,
-  Typography,
   IconButton,
-  Paper,
-  Stack,
   Tooltip,
-  Chip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { GenericTable, type TableColumn } from "../layouts/GenericTable";
@@ -18,7 +13,6 @@ import { useComercio } from "../../hooks/useComercio";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockIcon from "@mui/icons-material/Lock";
 import type { ProfileUser } from "../../types/User/UserAuth";
-
 
 interface Props {
   open: boolean;
@@ -37,6 +31,7 @@ export default function ModalColaboradores({ open, onClose, id }: Props) {
     eliminarColaborador,
     toggleAccesoColaborador,
   } = useComercio();
+
   const columns: TableColumn<ProfileUser>[] = [
     {
       key: "nombre",
@@ -50,24 +45,23 @@ export default function ModalColaboradores({ open, onClose, id }: Props) {
       key: "activo",
       label: "Estado",
       render: (p) => (
-        <Chip
-          label={p.activo ? "Con acceso" : "Sin acceso"}
-          size="small"
-          sx={{
-            borderRadius: 1.5,
-            fontWeight: 500,
-            bgcolor: p.activo ? "#E9F7EF" : "#F2F2F7",
-            color: p.activo ? "#1E7F4F" : "#666",
-          }}
-        />
+        <span
+          className={`badge-adlocal ${
+            p.activo ? "badge-adlocal-success" : "badge-adlocal-neutral"
+          }`}
+        >
+          {p.activo ? "Con acceso" : "Sin acceso"}
+        </span>
       ),
     },
   ];
+
   useEffect(() => {
     if (id) {
       getAllColaboradores(id, page, rows);
     }
-  }, [id]);
+  }, [id, page, rows, getAllColaboradores]);
+
   return (
     <Dialog
       open={open}
@@ -85,26 +79,19 @@ export default function ModalColaboradores({ open, onClose, id }: Props) {
       }}
     >
       <DialogTitle sx={{ pb: 1 }}>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography fontWeight={800} fontSize="1.1rem">
+        <div className="d-flex align-items-center justify-content-between">
+          <h2 className="fz-h5 fw-bold mb-0">
             Colaboradores
-          </Typography>
+          </h2>
 
           <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
-        </Box>
+        </div>
       </DialogTitle>
 
       <DialogContent>
-        <Paper
-          elevation={0}
-          sx={{
-            borderRadius: 3,
-            border: "1px solid rgba(0,0,0,0.08)",
-            overflow: "hidden",
-          }}
-        >
+        <div className="card-adlocal overflow-hidden">
           <GenericTable<ProfileUser>
             columns={columns}
             data={usersColaboradores}
@@ -119,13 +106,16 @@ export default function ModalColaboradores({ open, onClose, id }: Props) {
               setPage(0);
             }}
             actions={(p) => (
-              <Stack direction="row" spacing={0.5} className="p-1">
-                <Tooltip title={p.activo ? "Quitar acceso" : "Dar acceso"}>
+              <div className="d-flex flex-row gap-1 p-1">
+                <Tooltip title={p.activo ? "Quitar acceso" : "Dar acceso"} disableTouchListener>
                   <IconButton
                     size="small"
                     sx={{
-                      bgcolor: "#F2F2F7",
-                      "&:hover": { bgcolor: "#E5E5EA" },
+                      width: 36,
+                      height: 36,
+                      bgcolor: "var(--bg-soft)",
+                      color: "var(--text)",
+                      "&:hover": { bgcolor: "var(--border)" },
                     }}
                     onClick={() => {
                       toggleAccesoColaborador(p.id, id, {
@@ -143,13 +133,15 @@ export default function ModalColaboradores({ open, onClose, id }: Props) {
                   </IconButton>
                 </Tooltip>
 
-                <Tooltip title="Eliminar">
+                <Tooltip title="Eliminar" disableTouchListener>
                   <IconButton
                     size="small"
                     sx={{
-                      bgcolor: "#FDECEA",
-                      color: "#D93025",
-                      "&:hover": { bgcolor: "#FAD2CF" },
+                      width: 36,
+                      height: 36,
+                      bgcolor: "var(--error-subtle)",
+                      color: "var(--error)",
+                      "&:hover": { bgcolor: "rgba(216, 64, 40, 0.18)" },
                     }}
                     onClick={() => {
                       eliminarColaborador(p.id, id, {
@@ -162,10 +154,10 @@ export default function ModalColaboradores({ open, onClose, id }: Props) {
                     <DeleteIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
-              </Stack>
+              </div>
             )}
           />
-        </Paper>
+        </div>
       </DialogContent>
     </Dialog>
   );

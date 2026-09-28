@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">ADLocal</title>
+  <desc id="desc">Dos comercios conectados bajo un marcador de ubicación.</desc>
+
+  <path fill="#EA6A32" fill-rule="evenodd" d="M128 15c-21 0-37 16-37 37 0 25 37 69 37 69s37-44 37-69c0-21-16-37-37-37Zm0 26a12 12 0 1 0 0 24 12 12 0 0 0 0-24Z"/>
+  <path fill="#F5B72E" d="M123 1h10v11h-10zM81 15l8-6 9 11-8 6zM167 20l9-11 8 6-9 11z"/>
+
+  <path fill="#EA6A32" d="M27 99h30l-12 35c-3 10-11 16-21 16-14 0-21-10-14-22l17-29Zm35 0h30l8 34c2 10-5 17-20 17s-22-7-20-17l2-34Zm36 0h21l23 30c9 12 1 21-13 21-10 0-18-6-21-16L98 99Z"/>
+  <path fill="#008E91" d="M137 99h21l-10 35c-3 10-11 16-21 16-14 0-22-9-13-21l23-30Zm27 0h30l2 34c2 10-5 17-20 17s-22-7-20-17l8-34Zm35 0h30l17 29c7 12 0 22-14 22-10 0-18-6-21-16l-12-35Z"/>
+
+  <path d="M25 154v65h93v-65" fill="none" stroke="#EA6A32" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M138 154v65h93v-65" fill="none" stroke="#008E91" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="72" cy="177" r="13" fill="#EA6A32"/>
+  <circle cx="184" cy="177" r="13" fill="#008E91"/>
+  <path d="M50 212c2-16 10-24 22-24 18 0 21 18 40 15l16-8" fill="none" stroke="#EA6A32" stroke-width="12" stroke-linecap="round"/>
+  <path d="M206 212c-2-16-10-24-22-24-18 0-21 18-40 15l-16-8" fill="none" stroke="#008E91" stroke-width="12" stroke-linecap="round"/>
+</svg>

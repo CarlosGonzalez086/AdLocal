@@ -1,7 +1,4 @@
-import { Box, Typography, Stack } from "@mui/material";
 import type { ProductoServicioDto } from "../../types/User/productosServicios";
-
-
 
 interface Props {
   producto: ProductoServicioDto;
@@ -9,101 +6,33 @@ interface Props {
 
 export default function ProductoCard({ producto }: Props) {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: { xs: "column", sm: "row" },
-        alignItems: { xs: "flex-start", sm: "center" },
-        width: "100%",
-
-        borderRadius: { xs: 3, sm: 4 },
-        overflow: "hidden",
-
-        background: "rgba(255,255,255,0.88)",
-        backdropFilter: "blur(14px) saturate(180%)",
-        WebkitBackdropFilter: "blur(14px) saturate(180%)",
-
-        boxShadow: {
-          xs: "0 6px 18px rgba(0,0,0,0.08)",
-          sm: "0 8px 26px rgba(0,0,0,0.1)",
-        },
-
-        border: "1px solid rgba(255,255,255,0.6)",
-        cursor: "pointer",
-
-        transition: "all .35s cubic-bezier(.4,0,.2,1)",
-
-        "&:hover": {
-          transform: "translateY(-2px)",
-          boxShadow: "0 14px 36px rgba(0,0,0,0.16)",
-        },
-      }}
-    >
+    <div className="card-adlocal card-adlocal-interactive w-100 d-flex flex-column flex-sm-row align-items-start align-items-sm-center overflow-hidden">
       {producto.imagenBase64 && (
-        <Box
-          component="img"
+        <img
           src={producto.imagenBase64}
           alt={producto.nombre}
-          sx={{
-            width: { xs: "100%", sm: 120 },
-            height: { xs: 160, sm: 120 },
-            objectFit: "cover",
-            flexShrink: 0,
-          }}
+          className="object-fit-cover flex-shrink-0"
+          style={{ width: "120px", height: "120px" }}
         />
       )}
 
-      <Stack
-        spacing={0.8}
-        sx={{
-          p: { xs: 1.8, sm: 2.2 },
-          flex: 1,
-        }}
-      >
-        <Typography
-          sx={{
-            fontWeight: 700,
-            fontSize: { xs: "0.95rem", sm: "1rem" },
-            lineHeight: 1.25,
-            letterSpacing: "0.2px",
-          }}
-        >
+      <div className="card-adlocal-body flex-grow-1 p-3">
+        <h4 className="fz-h5 fw-bold mb-1 text-dark">
           {producto.nombre}
-        </Typography>
+        </h4>
 
         {producto.descripcion && (
-          <Typography
-            sx={{
-              fontSize: { xs: "0.8rem", sm: "0.85rem" },
-              color: "text.secondary",
-              lineHeight: 1.45,
-
-              overflow: "hidden",
-              display: "-webkit-box",
-              WebkitBoxOrient: "vertical",
-              WebkitLineClamp: { xs: 3, sm: 2 },
-
-              wordBreak: "break-word",
-              hyphens: "auto",
-            }}
-          >
+          <p className="fz-body-sm text-muted mb-2 text-truncate-2">
             {producto.descripcion}
-          </Typography>
+          </p>
         )}
 
         {producto.precio != null && (
-          <Typography
-            sx={{
-              mt: 0.4,
-              fontWeight: 700,
-              fontSize: { xs: "0.9rem", sm: "0.95rem" },
-              color: "primary.main",
-            }}
-          >
+          <span className="fz-h6 fw-bold text-primary d-block">
             ${producto.precio.toFixed(2)}
-          </Typography>
+          </span>
         )}
-      </Stack>
-    </Box>
+      </div>
+    </div>
   );
 }

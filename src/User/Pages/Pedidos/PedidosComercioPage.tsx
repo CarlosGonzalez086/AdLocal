@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../../../utils/sweetalert";
 import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol";
 import { usePedidosComercio } from "../../../hooks/usePedidosComercio";
 import {
@@ -26,6 +26,7 @@ import {
 
 export const PedidosComercioPage = () => {
   const pedidosHook = usePedidosComercio();
+  const { comercioId, seleccionar } = pedidosHook;
   const [searchParams, setSearchParams] = useSearchParams();
   const [comprobanteUrl, setComprobanteUrl] = useState<string | null>(null);
   const [cargandoComprobante, setCargandoComprobante] = useState(false);
@@ -33,15 +34,15 @@ export const PedidosComercioPage = () => {
   useEffect(() => {
     const pedidoUuid = searchParams.get("pedido");
 
-    if (!pedidoUuid || !pedidosHook.comercioId) return;
+    if (!pedidoUuid || !comercioId) return;
 
-    void pedidosHook.seleccionar(pedidoUuid);
+    void seleccionar(pedidoUuid);
     setSearchParams({}, { replace: true });
   }, [
     searchParams,
     setSearchParams,
-    pedidosHook.comercioId,
-    pedidosHook.seleccionar,
+    comercioId,
+    seleccionar,
   ]);
 
   useEffect(

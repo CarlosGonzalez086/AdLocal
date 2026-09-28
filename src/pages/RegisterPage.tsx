@@ -1,22 +1,11 @@
-import {
-  Box,
-  Container,
-  Divider,
-  Link,
-  Paper,
-  Typography,
-} from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../utils/sweetalert";
 import { sendWelcomeEmail } from "../api/authApi";
 import { useAdmin } from "../hooks/useAdmin";
 import { useUser } from "../hooks/useUser";
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
-import styles from "../styles/RegisterPage.module.css";
-import FormRegister from "../components/forms/FormRegister";
-
-const LOGO_URL =
-  "https://pub-d5a2e881682f4782a4be2517d547d3c7.r2.dev/logo-comercio-imagen/WhatsApp%20Image%202025-12-23%20at%2021.19.26%20(1).jpeg";
+import FormRegister, { type RegisterFormData } from "../components/forms/FormRegister";
+import { ADLOCAL_LOGO_URL } from "../constants/brand";
 
 interface Props {
   type: "admin" | "user";
@@ -32,13 +21,19 @@ export default function RegisterPage({ type }: Props) {
 
   const loading = isAdmin ? admin.loading : user.loading;
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: RegisterFormData) => {
     try {
+      const payload = {
+        nombre: data.nombre ?? "",
+        email: data.email ?? "",
+        password: data.password ?? "",
+        codigoReferenciado: data.codigoReferenciado ?? "",
+      };
       const response = isAdmin
-        ? await admin.crearAdmin(data)
-        : await user.crearUser(data);
+        ? await admin.crearAdmin(payload)
+        : await user.crearUser(payload);
 
-      const createdAccount: any = response?.respuesta;
+      const createdAccount = response?.respuesta as unknown as { nombre?: string; email?: string } | undefined;
 
       let welcomeEmailFailed = false;
 
@@ -49,12 +44,7 @@ export default function RegisterPage({ type }: Props) {
         if (accountName && accountEmail) {
           try {
             await sendWelcomeEmail(accountName, accountEmail);
-          } catch (emailError) {
-            console.error(
-              "No fue posible enviar el correo de bienvenida:",
-              emailError,
-            );
-
+          } catch {
             welcomeEmailFailed = true;
           }
         } else {
@@ -68,7 +58,6 @@ export default function RegisterPage({ type }: Props) {
           title: "Cuenta creada",
           text: "La cuenta fue creada correctamente, pero no fue posible enviar el correo de bienvenida.",
           confirmButtonText: "Continuar",
-          confirmButtonColor: "#007AFF",
         });
       }
 
@@ -77,39 +66,36 @@ export default function RegisterPage({ type }: Props) {
       });
     } catch (error) {
       console.error(error);
-      // Los hooks ya muestran el mensaje de error correspondiente.
     }
   };
 
   return (
-    <Box component="main" className={styles.page}>
-      <Box className={styles.backgroundDecoration} aria-hidden="true">
-        <Box className={styles.decorationOne} />
-        <Box className={styles.decorationTwo} />
-        <Box className={styles.decorationThree} />
-      </Box>
+    <main className="auth-page">
+      <div className="auth-bg-decoration" aria-hidden="true">
+        <div className="auth-decoration-1" />
+        <div className="auth-decoration-2" />
+        <div className="auth-decoration-3" />
+      </div>
 
-      <Container maxWidth="xs" className={styles.container}>
-        <Link
+      <div className="container auth-container" style={{ maxWidth: "440px" }}>
+        <a
           href={type === "admin" ? "/admin/login" : "/usuario/login"}
-          underline="none"
-          className={styles.logoLink}
+          className="auth-logo-link"
           aria-label="Ir al inicio de ADLocal"
         >
-          <Box
-            component="img"
-            src={LOGO_URL}
+          <img
+            src={ADLOCAL_LOGO_URL}
             alt="ADLocal"
-            className={styles.logo}
+            className="auth-logo-img"
           />
-        </Link>
+        </a>
 
-        <Paper elevation={0} className={styles.card}>
-          <Box className={styles.header}>
-            <Box
+        <div className="auth-card">
+          <div className="auth-header">
+            <div
               className={[
-                styles.headerIcon,
-                isAdmin ? styles.adminHeaderIcon : "",
+                "auth-header-icon",
+                isAdmin ? "auth-header-icon--admin" : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -119,105 +105,106 @@ export default function RegisterPage({ type }: Props) {
                 size="large"
                 filled
               />
-            </Box>
+            </div>
 
-            <Box className={styles.headerContent}>
-              <Typography
-                component="span"
-                className={[styles.eyebrow, isAdmin ? styles.adminEyebrow : ""]
+            <div className="auth-header-content">
+              <span
+                className={[
+                  "auth-eyebrow",
+                  isAdmin ? "auth-eyebrow--admin" : "",
+                ]
                   .filter(Boolean)
                   .join(" ")}
               >
                 {isAdmin ? "Administración del sistema" : "Registro ADLocal"}
-              </Typography>
+              </span>
 
-              <Typography component="h1" className={styles.title}>
+              <h1 className="auth-title">
                 {isAdmin ? "Crear administrador" : "Crear cuenta"}
-              </Typography>
+              </h1>
 
-              <Typography component="p" className={styles.description}>
+              <p className="auth-description">
                 {isAdmin
                   ? "Registra una cuenta con permisos para administrar la plataforma."
                   : "Completa tus datos para comenzar a publicar y administrar tu negocio."}
-              </Typography>
-            </Box>
-          </Box>
+              </p>
+            </div>
+          </div>
 
           {!isAdmin && (
-            <Box className={styles.loginMessage}>
-              <Typography component="span" className={styles.loginMessageText}>
+            <div className="auth-message-banner">
+              <span className="auth-message-text">
                 ¿Ya tienes una cuenta?
-              </Typography>
+              </span>
 
-              <Link
-                component="button"
+              <button
                 type="button"
-                underline="none"
-                className={styles.loginLink}
+                className="auth-text-btn"
                 onClick={() =>
                   navigate(type === "user" ? "/usuario/login" : "/admin/login")
                 }
               >
                 Inicia sesión
-              </Link>
-            </Box>
+              </button>
+            </div>
           )}
 
-          <Box className={styles.formContainer}>
+          <div className="auth-form-container">
             <FormRegister
               onSubmit={handleCreate}
               type={type}
               isFormCode={type === "user"}
               loading={loading}
             />
-          </Box>
+          </div>
 
           {isAdmin ? (
-            <Box className={styles.adminNotice}>
-              <Box className={styles.adminNoticeIcon}>
+            <div className="auth-admin-notice">
+              <div className="auth-admin-notice-icon">
                 <MaterialSymbol icon="shield_person" size="medium" />
-              </Box>
+              </div>
 
-              <Typography component="p" className={styles.adminNoticeText}>
+              <p className="auth-admin-notice-text">
                 Esta cuenta tendrá acceso a funciones administrativas. Verifica
                 cuidadosamente la información antes de continuar.
-              </Typography>
-            </Box>
+              </p>
+            </div>
           ) : (
             <>
-              <Divider className={styles.divider}>Información legal</Divider>
+              <div className="auth-divider my-3 text-center text-muted fz-h5">
+                Información legal
+              </div>
 
-              <Typography component="p" className={styles.terms}>
+              <p className="auth-terms">
                 Al crear una cuenta, aceptas nuestros{" "}
-                <Link
+                <a
                   href="/terminos"
-                  underline="none"
-                  className={styles.termsLink}
+                  className="auth-terms-link"
                 >
                   Términos de servicio
-                </Link>{" "}
+                </a>{" "}
                 y la{" "}
-                <Link
+                <a
                   href="/privacidad"
-                  underline="none"
-                  className={styles.termsLink}
+                  className="auth-terms-link"
                 >
                   Política de privacidad
-                </Link>
+                </a>
                 .
-              </Typography>
+              </p>
             </>
           )}
-        </Paper>
+        </div>
 
-        <Box className={styles.footer}>
+        <div className="auth-footer">
           <MaterialSymbol icon="verified_user" size="small" />
 
-          <Typography component="span" className={styles.footerText}>
+          <span className="auth-footer-text">
             Registro protegido por ADLocal
-          </Typography>
-        </Box>
-      </Container>
-    </Box>
+          </span>
+        </div>
+      </div>
+    </main>
   );
 }
+

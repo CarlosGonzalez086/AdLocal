@@ -114,6 +114,7 @@ export function ComerciosTable(props: Props) {
             <Tooltip
               title="Editar negocio"
               arrow
+              disableTouchListener
               enterDelay={300}
               placement="top"
               slotProps={{
@@ -138,6 +139,7 @@ export function ComerciosTable(props: Props) {
             <Tooltip
               title="Eliminar negocio"
               arrow
+              disableTouchListener
               enterDelay={300}
               placement="top"
               slotProps={{
@@ -164,6 +166,7 @@ export function ComerciosTable(props: Props) {
               <Tooltip
                 title="Agregar colaborador"
                 arrow
+                disableTouchListener
                 enterDelay={300}
                 placement="top"
                 slotProps={{
@@ -189,6 +192,7 @@ export function ComerciosTable(props: Props) {
             <Tooltip
               title="Ver colaboradores"
               arrow
+              disableTouchListener
               enterDelay={300}
               placement="top"
               slotProps={{

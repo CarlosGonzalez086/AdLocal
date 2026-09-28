@@ -15,6 +15,7 @@ import type {
   EstadoComisionesComercio,
 } from "../../../types/User/pagoComisiones";
 import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol";
+import { extraerMensajeError } from "../../../utils/errorHandler";
 
 const moneda = (v: number) =>
   v.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
@@ -49,9 +50,9 @@ export const ComisionesComercioPage = () => {
           setComercioId(lista[0].id);
           await cargarEstado(lista[0].id);
         }
-      } catch (e: any) {
+      } catch (e: unknown) {
         setError(
-          e?.response?.data?.mensaje || "No fue posible cargar las comisiones.",
+          extraerMensajeError(e, "No fue posible cargar las comisiones."),
         );
       } finally {
         setLoading(false);
@@ -95,8 +96,8 @@ export const ComisionesComercioPage = () => {
       setArchivo(null);
       if (input.current) input.current.value = "";
       await cargarEstado(comercioId);
-    } catch (e: any) {
-      setError(e?.response?.data?.mensaje || "No fue posible enviar el pago.");
+    } catch (e: unknown) {
+      setError(extraerMensajeError(e, "No fue posible enviar el pago."));
     } finally {
       setEnviando(false);
     }

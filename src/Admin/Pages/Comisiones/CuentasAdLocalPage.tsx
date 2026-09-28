@@ -10,6 +10,7 @@ import { httpAdmin } from "../../../api/httpAdmin";
 import type { ApiResponse } from "../../../api/apiResponse";
 import type { CuentaAdLocal } from "../../../types/User/pagoComisiones";
 import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol";
+import { extraerMensajeError } from "../../../utils/errorHandler";
 
 const inicial = {
   banco: "",
@@ -43,9 +44,9 @@ export const CuentasAdLocalPage = () => {
       setForm(inicial);
       setUuid(null);
       await cargar();
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(
-        e?.response?.data?.mensaje || "No fue posible guardar la cuenta.",
+        extraerMensajeError(e, "No fue posible guardar la cuenta."),
       );
     }
   };

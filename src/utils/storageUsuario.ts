@@ -1,7 +1,9 @@
 export const getLocalStorageJWTUsuario = (): string => {
   try {
     return (
-      window.localStorage.getItem("jwtUsuario") ?? ""
+      window.localStorage.getItem("jwtUsuario") ||
+      window.localStorage.getItem("token") ||
+      ""
     );
   } catch (error) {
     console.log(error);
@@ -13,10 +15,8 @@ export const setLocalStorageJWTUsuario = (
   token: string
 ): void => {
   try {
-    window.localStorage.setItem(
-      "jwtUsuario",
-      token
-    );
+    window.localStorage.setItem("jwtUsuario", token);
+    window.localStorage.setItem("token", token);
   } catch (error) {
     console.log(error);
   }
@@ -56,15 +56,29 @@ export const removeLocalStorageUsuario = (
   }
 };
 
+export const getLocalStorageRefreshTokenUsuario = (): string => {
+  try {
+    return window.localStorage.getItem("refreshTokenUsuario") ?? "";
+  } catch (error) {
+    console.log(error);
+    return "";
+  }
+};
+
+export const setLocalStorageRefreshTokenUsuario = (token: string): void => {
+  try {
+    window.localStorage.setItem("refreshTokenUsuario", token);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const clearStorageUsuario = (): void => {
   try {
-    window.localStorage.removeItem(
-      "jwtUsuario"
-    );
-
-    window.localStorage.removeItem(
-      "usuario"
-    );
+    window.localStorage.removeItem("jwtUsuario");
+    window.localStorage.removeItem("refreshTokenUsuario");
+    window.localStorage.removeItem("usuario");
+    window.localStorage.removeItem("token");
   } catch (error) {
     console.log(error);
   }

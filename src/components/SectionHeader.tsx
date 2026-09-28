@@ -1,6 +1,4 @@
-import { Box, Typography } from "@mui/material";
 import MaterialSymbol from "./UI/MaterialSymbol/MaterialSymbol";
-import styles from "../styles/PlanModal.module.css";
 
 interface SectionHeaderProps {
   icon: string;
@@ -10,28 +8,23 @@ interface SectionHeaderProps {
 
 const SectionHeader = ({ icon, title, description }: SectionHeaderProps) => {
   return (
-    <Box className={styles.sectionHeader}>
-      <Box className={styles.sectionIcon}>
+    <div className="section-header-box">
+      <div className="section-header-icon-box">
         <MaterialSymbol icon={icon} size="medium" />
-      </Box>
+      </div>
 
-      <Box className={styles.sectionHeaderText}>
-        <Typography
-          component="h3"
-          className={`${styles.sectionTitle} fz-h3 fw-semibold`}
-        >
+      <div className="section-header-text-box">
+        <h3 className="section-header-title-text fz-h3 fw-semibold">
           {title}
-        </Typography>
+        </h3>
 
-        <Typography
-          component="p"
-          className={`${styles.sectionDescription} fz-h5 fw-regular`}
-        >
+        <p className="section-header-desc-text fz-h5 fw-regular">
           {description}
-        </Typography>
-      </Box>
-    </Box>
+        </p>
+      </div>
+    </div>
   );
 };
 
 export default SectionHeader;
+

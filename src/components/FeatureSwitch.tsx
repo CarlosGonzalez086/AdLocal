@@ -1,7 +1,6 @@
-import { Box, FormControlLabel, Switch, Typography } from "@mui/material";
+import { FormControlLabel, Switch } from "@mui/material";
 import type { ReactNode } from "react";
 import MaterialSymbol from "./UI/MaterialSymbol/MaterialSymbol";
-import styles from "../styles/PlanModal.module.css";
 
 interface FeatureSwitchProps {
   checked: boolean;
@@ -23,46 +22,46 @@ const FeatureSwitch = ({
   children,
 }: FeatureSwitchProps) => {
   return (
-    <Box
+    <div
       className={[
-        styles.featureCard,
-        checked ? styles.featureCardActive : "",
-        disabled ? styles.featureCardDisabled : "",
+        "feature-card",
+        checked ? "feature-card--active" : "",
+        disabled ? "feature-card--disabled" : "",
       ]
         .filter(Boolean)
         .join(" ")}
     >
       <FormControlLabel
-        className={styles.featureControl}
+        className="feature-control"
         control={
           <Switch
             checked={checked}
             disabled={disabled}
-            className={styles.featureSwitch}
+            className="feature-switch"
             onChange={(event) => onChange(event.target.checked)}
           />
         }
         label={
-          <Box className={styles.featureLabel}>
-            <Box className={styles.featureIcon}>
+          <div className="feature-label">
+            <div className="feature-icon">
               <MaterialSymbol icon={icon} size="medium" />
-            </Box>
+            </div>
 
-            <Box className={styles.featureText}>
-              <Typography component="span" className={styles.featureTitle}>
+            <div className="feature-text">
+              <span className="feature-title">
                 {label}
-              </Typography>
+              </span>
 
-              <Typography component="p" className={styles.featureDescription}>
+              <p className="feature-description">
                 {description}
-              </Typography>
-            </Box>
-          </Box>
+              </p>
+            </div>
+          </div>
         }
       />
 
-      {children && <Box className={styles.featureContent}>{children}</Box>}
-    </Box>
+      {children && <div className="feature-content">{children}</div>}
+    </div>
   );
 };
 

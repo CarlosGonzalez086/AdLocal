@@ -1,4 +1,4 @@
-import { Switch, FormControlLabel, TextField, Box } from "@mui/material";
+import { Switch, FormControlLabel, TextField } from "@mui/material";
 import { useState, useEffect } from "react";
 import type { TipoComercioCreateDto } from "../../../../types/Admin/tipoComercio";
 import { GenericModal } from "../../../../components/GenericModal";
@@ -63,7 +63,7 @@ export const TipoComercioModal = ({
             }
       }
     >
-      <Box className="card-adlocal mt-3">
+      <div className="card-adlocal mt-3">
         <div className="row p-3">
           <div className="col-12 mb-3">
             <TextField
@@ -72,6 +72,7 @@ export const TipoComercioModal = ({
               disabled={soloVer}
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
               fullWidth
+              className="form-control-mui-adlocal"
             />
           </div>
           <div className="col-12 mb-3">
@@ -83,6 +84,7 @@ export const TipoComercioModal = ({
                 setForm({ ...form, descripcion: e.target.value })
               }
               fullWidth
+              className="form-control-mui-adlocal"
             />
           </div>
           <div className="col-12">
@@ -100,7 +102,7 @@ export const TipoComercioModal = ({
             />
           </div>
         </div>
-      </Box>
+      </div>
     </GenericModal>
   );
 };

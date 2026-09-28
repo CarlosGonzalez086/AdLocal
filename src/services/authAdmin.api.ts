@@ -1,6 +1,7 @@
 import type { ApiResponse } from "../api/apiResponse";
 import { httpAdmin } from "../api/httpAdmin";
 import { httpAdminPublico } from "../api/httpAdminPublico";
+import { renovarTokenAdmin } from "./tokenRefresh";
 import type {
   AdminCreateDto,
   EmailAdminDto,
@@ -29,5 +30,9 @@ export const authAdmin = {
 
   actualizarAdmin(data: Partial<AdminCreateDto>) {
     return httpAdmin.put<ApiResponse<null>>("/Admin", data);
+  },
+
+  renovarToken() {
+    return renovarTokenAdmin();
   },
 };

@@ -1,0 +1,104 @@
+/* ==============================================================
+   ADLOCAL DESIGN SYSTEM - BADGES & ALERTS
+   Indicadores de estado, etiquetas y contenedores de notificación.
+   ============================================================== */
+
+/* --- Badges / Chips --- */
+.badge-adlocal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: 0.3rem 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.785rem;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  user-select: none;
+}
+
+.badge-adlocal-primary {
+  background-color: var(--primary-subtle);
+  color: var(--primary-dark);
+  border-color: rgba(0, 137, 137, 0.2);
+}
+
+.badge-adlocal-secondary {
+  background-color: var(--secondary-subtle);
+  color: var(--secondary-dark);
+  border-color: rgba(231, 105, 44, 0.2);
+}
+
+.badge-adlocal-success {
+  background-color: var(--success-light);
+  color: var(--success-dark);
+  border-color: rgba(42, 157, 111, 0.2);
+}
+
+.badge-adlocal-warning {
+  background-color: var(--warning-light);
+  color: var(--warning-dark);
+  border-color: rgba(231, 105, 44, 0.2);
+}
+
+.badge-adlocal-error {
+  background-color: var(--error-light);
+  color: var(--error-dark);
+  border-color: rgba(216, 64, 40, 0.2);
+}
+
+.badge-adlocal-info {
+  background-color: var(--info-light);
+  color: var(--primary-dark);
+  border-color: rgba(0, 137, 137, 0.2);
+}
+
+.badge-adlocal-neutral {
+  background-color: var(--bg-soft);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+
+/* --- Alerts / Notificaciones Inline --- */
+.alert-adlocal {
+  position: relative;
+  padding: 1rem 1.25rem;
+  margin-bottom: var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 0.925rem;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.alert-adlocal-success {
+  background-color: var(--success-light);
+  color: var(--success-dark);
+  border-color: rgba(42, 157, 111, 0.25);
+}
+
+.alert-adlocal-warning {
+  background-color: var(--warning-light);
+  color: var(--warning-dark);
+  border-color: rgba(231, 105, 44, 0.25);
+}
+
+.alert-adlocal-error {
+  background-color: var(--error-light);
+  color: var(--error-dark);
+  border-color: rgba(216, 64, 40, 0.25);
+}
+
+.alert-adlocal-info {
+  background-color: var(--info-light);
+  color: var(--primary-dark);
+  border-color: rgba(0, 137, 137, 0.25);
+}

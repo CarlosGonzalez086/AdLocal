@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { comisionesAdminApi } from "../services/comisionesAdminApi";
+import { extraerMensajeError } from "../utils/errorHandler";
 import type {
   ComisionComercioResumen,
   ComisionMovimiento,
@@ -39,11 +40,8 @@ export const useComisionesAdmin = () => {
         setResumen(r.data.respuesta ?? []);
         setMovimientos(m.data.respuesta?.items ?? []);
         setTotal(m.data.respuesta?.totalItems ?? 0);
-      } catch (err: any) {
-        setError(
-          err?.response?.data?.mensaje ||
-            "No fue posible cargar las comisiones.",
-        );
+      } catch (err: unknown) {
+        setError(extraerMensajeError(err, "No fue posible cargar las comisiones."));
       } finally {
         setLoading(false);
       }

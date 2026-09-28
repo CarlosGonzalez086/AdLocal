@@ -37,7 +37,7 @@ export const estaAbiertoAhora = (
   const diaHoy = ahora.getDay();
   const horaActual = ahora.toTimeString().slice(0, 5); // HH:mm
 
-  const horarioHoy = horarios.find((h) => h.dia === diaHoy);
+  const horarioHoy = horarios.find((h: HorarioComercioDto) => h.dia === diaHoy);
 
   if (!horarioHoy || !horarioHoy.abierto) return false;
 
@@ -53,7 +53,25 @@ export function removeNulls<T extends object>(obj: T): Partial<T> {
   ) as Partial<T>;
 }
 
-export const normalizeComercioData = (data: any) => ({
+export interface NormalizeComercioInput {
+  id?: number;
+  nombre?: string;
+  direccion?: string;
+  telefono?: string;
+  email?: string;
+  descripcion?: string;
+  logoBase64?: string;
+  imagenes?: string[];
+  horarios?: HorarioComercioDto[];
+  estadoId?: number;
+  municipioId?: number;
+  tipoComercioId?: number | null;
+  [key: string]: unknown;
+}
+
+export const normalizeComercioData = (
+  data: NormalizeComercioInput,
+) => ({
   ...data,
   id: data.id ?? 0,
   nombre: data.nombre ?? "",
@@ -71,11 +89,11 @@ export const normalizeComercioData = (data: any) => ({
   horarios: data.horarios?.map((h: HorarioComercioDto) => ({
     dia: h.dia,
     abierto: h.abierto,
-    horaApertura: h.abierto ? h.horaApertura : undefined,
-    horaCierre: h.abierto ? h.horaCierre : undefined,
+    horaApertura: h.abierto ? (h.horaApertura ?? undefined) : undefined,
+    horaCierre: h.abierto ? (h.horaCierre ?? undefined) : undefined,
   })),
 
-  estadoId: data.estadoId > 0 ? data.estadoId : undefined,
-  municipioId: data.municipioId > 0 ? data.municipioId : undefined,
-  tipoComercioId: data.tipoComercioId > 0 ? data.tipoComercioId : undefined,
+  estadoId: typeof data.estadoId === "number" && data.estadoId > 0 ? data.estadoId : undefined,
+  municipioId: typeof data.municipioId === "number" && data.municipioId > 0 ? data.municipioId : undefined,
+  tipoComercioId: typeof data.tipoComercioId === "number" && data.tipoComercioId > 0 ? data.tipoComercioId : undefined,
 });

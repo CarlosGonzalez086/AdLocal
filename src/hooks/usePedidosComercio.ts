@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import Swal from "../utils/sweetalert";
 import { pedidosComercioApi } from "../services/pedidosComercioApi";
 import { extraerMensajeError } from "../utils/errorHandler";
@@ -10,6 +10,7 @@ import type {
   PedidoComercioDetalleDto,
   PedidoComercioListadoDto,
   PedidosComercioDashboardDto,
+  RegistrarReembolsoPedidoDto,
 } from "../types/User/pedidosComercio";
 
 const vacio: PagedResponse<PedidoComercioListadoDto> = {
@@ -21,6 +22,7 @@ const vacio: PagedResponse<PedidoComercioListadoDto> = {
 };
 
 export const usePedidosComercio = () => {
+  const operacionEnCurso = useRef(false);
   const [comercios, setComercios] = useState<ComercioPedidoSelectorDto[]>([]);
   const [comercioId, setComercioId] = useState(0);
   const [dashboard, setDashboard] =
@@ -85,15 +87,22 @@ export const usePedidosComercio = () => {
   );
 
   const cambiarEstado = useCallback(
-    async (estado: EstadoPedido, comentario?: string) => {
-      if (!detalle || !comercioId) return false;
+    async (
+      estado: EstadoPedido,
+      comentario?: string,
+      productosRestituibles?: { detalleUuid: string; cantidad: number }[],
+    ) => {
+      if (!detalle || !comercioId || operacionEnCurso.current) return false;
+      operacionEnCurso.current = true;
       setProcesando(true);
       try {
         const { data } = await pedidosComercioApi.cambiarEstado(
           comercioId,
           detalle.uuid,
           estado,
+          detalle.version,
           comentario,
+          productosRestituibles,
         );
         setDetalle(data.respuesta);
         await cargar();
@@ -104,23 +113,27 @@ export const usePedidosComercio = () => {
           extraerMensajeError(error, "Revisa el estado del pedido."),
           "error",
         );
+        await seleccionar(detalle.uuid);
         return false;
       } finally {
+        operacionEnCurso.current = false;
         setProcesando(false);
       }
     },
-    [detalle, comercioId, cargar],
+    [detalle, comercioId, cargar, seleccionar],
   );
 
   const revisarPago = useCallback(
     async (estadoPago: EstadoPagoPedido, comentario?: string) => {
-      if (!detalle || !comercioId) return false;
+      if (!detalle || !comercioId || operacionEnCurso.current) return false;
+      operacionEnCurso.current = true;
       setProcesando(true);
       try {
         const { data } = await pedidosComercioApi.revisarPago(
           comercioId,
           detalle.uuid,
           estadoPago,
+          detalle.version,
           comentario,
         );
         setDetalle(data.respuesta);
@@ -132,13 +145,74 @@ export const usePedidosComercio = () => {
           extraerMensajeError(error, "Intenta nuevamente."),
           "error",
         );
+        await seleccionar(detalle.uuid);
         return false;
       } finally {
+        operacionEnCurso.current = false;
         setProcesando(false);
       }
     },
-    [detalle, comercioId, cargar],
+    [detalle, comercioId, cargar, seleccionar],
   );
+
+  const registrarReembolso = async (dto: RegistrarReembolsoPedidoDto) => {
+    if (!detalle || !comercioId || operacionEnCurso.current)
+      throw new Error("Hay otra operación en curso.");
+    operacionEnCurso.current = true;
+    setProcesando(true);
+    try {
+      const { data } = await pedidosComercioApi.reembolsar(
+        comercioId,
+        detalle.uuid,
+        dto,
+      );
+      if (data.codigo !== "200" || !data.respuesta?.reembolso)
+        throw new Error(data.mensaje || "No se confirmó el reembolso.");
+      setDetalle(data.respuesta);
+      void cargar();
+      return data.respuesta;
+    } finally {
+      operacionEnCurso.current = false;
+      setProcesando(false);
+    }
+  };
+
+  const conciliarInventario = async (
+    referencia: string,
+    stockDescontado: { detalleUuid: string; cantidad: number }[],
+    restituirReserva?: boolean,
+  ) => {
+    if (!detalle || !comercioId || operacionEnCurso.current) return false;
+    operacionEnCurso.current = true;
+    setProcesando(true);
+    try {
+      const { data } = await pedidosComercioApi.conciliar(
+        comercioId,
+        detalle.uuid,
+        detalle.version,
+        referencia,
+        stockDescontado,
+        restituirReserva,
+      );
+      setDetalle(data.respuesta);
+      void cargar();
+      return true;
+    } catch (error) {
+      await Swal.fire(
+        "No se pudo conciliar",
+        extraerMensajeError(
+          error,
+          "Actualiza el pedido y revisa el inventario.",
+        ),
+        "error",
+      );
+      await seleccionar(detalle.uuid);
+      return false;
+    } finally {
+      operacionEnCurso.current = false;
+      setProcesando(false);
+    }
+  };
 
   const abrirComprobante = useCallback(async () => {
     if (!detalle || !comercioId) return null;
@@ -187,5 +261,7 @@ export const usePedidosComercio = () => {
     cambiarEstado,
     revisarPago,
     abrirComprobante,
+    registrarReembolso,
+    conciliarInventario,
   };
 };

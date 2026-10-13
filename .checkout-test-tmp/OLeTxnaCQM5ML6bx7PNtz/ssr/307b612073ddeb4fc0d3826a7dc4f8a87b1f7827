@@ -1,0 +1,14 @@
+__vite_ssr_exportName__("diaAgenda", () => { try { return diaAgenda } catch {} });
+__vite_ssr_exportName__("horaCita", () => { try { return horaCita } catch {} });
+function diaAgenda(ahora = /* @__PURE__ */ new Date()) {
+  const partes = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(ahora);
+  const parte = (tipo) => partes.find((p) => p.type === tipo)?.value;
+  return `${parte("year")}-${parte("month")}-${parte("day")}`;
+};
+function horaCita(fecha) {
+  return fecha.slice(11, 16);
+}
+//# sourceMappingSource=vite-generated
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJtYXBwaW5ncyI6IkFBQUEsQ0FBQTs7QUFBTyxTQUFTLFVBQVUsUUFBUSxvQkFBSSxLQUFLLEdBQVc7QUFDcEQsUUFBTSxTQUFTLElBQUksS0FBSyxlQUFlLFNBQVMsRUFBRSxVQUFVLHVCQUF1QixNQUFNLFdBQVcsT0FBTyxXQUFXLEtBQUssVUFBVSxDQUFDLEVBQUUsY0FBYyxLQUFLO0FBQzNKLFFBQU0sUUFBUSxDQUFDLFNBQWlCLE9BQU8sS0FBSyxPQUFLLEVBQUUsU0FBUyxJQUFJLEdBQUc7QUFDbkUsU0FBTyxHQUFHLE1BQU0sTUFBTSxDQUFDLElBQUksTUFBTSxPQUFPLENBQUMsSUFBSSxNQUFNLEtBQUssQ0FBQztBQUMzRDtBQUNPLFNBQVMsU0FBUyxPQUF1QjtBQUM5QyxTQUFPLE1BQU0sTUFBTSxJQUFHLEVBQUU7QUFDMUIiLCJuYW1lcyI6W10sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbImNpdGFGZWNoYS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgZnVuY3Rpb24gZGlhQWdlbmRhKGFob3JhID0gbmV3IERhdGUoKSk6IHN0cmluZyB7XG4gIGNvbnN0IHBhcnRlcyA9IG5ldyBJbnRsLkRhdGVUaW1lRm9ybWF0KFwiZW4tQ0FcIiwgeyB0aW1lWm9uZTogXCJBbWVyaWNhL01leGljb19DaXR5XCIsIHllYXI6IFwibnVtZXJpY1wiLCBtb250aDogXCIyLWRpZ2l0XCIsIGRheTogXCIyLWRpZ2l0XCIgfSkuZm9ybWF0VG9QYXJ0cyhhaG9yYSk7XG4gIGNvbnN0IHBhcnRlID0gKHRpcG86IHN0cmluZykgPT4gcGFydGVzLmZpbmQocCA9PiBwLnR5cGUgPT09IHRpcG8pPy52YWx1ZTtcbiAgcmV0dXJuIGAke3BhcnRlKFwieWVhclwiKX0tJHtwYXJ0ZShcIm1vbnRoXCIpfS0ke3BhcnRlKFwiZGF5XCIpfWA7XG59XG5leHBvcnQgZnVuY3Rpb24gaG9yYUNpdGEoZmVjaGE6IHN0cmluZyk6IHN0cmluZyB7XG4gIHJldHVybiBmZWNoYS5zbGljZSgxMSwxNik7XG59XG4iXSwiZmlsZSI6Ii9zcmMvdXRpbHMvY2l0YUZlY2hhLnRzIn0=
+
+//# vitestCache=W3siZmlsZSI6IjEiLCJpZCI6IjEiLCJ1cmwiOiIyIiwiaW1wb3J0ZWRVcmxzIjoiMyIsIm1hcHBpbmdzIjpmYWxzZSwiZGVwcyI6IjQiLCJkeW5hbWljRGVwcyI6IjUiLCJzdGF0aWNNb2NrcyI6bnVsbH0sIkM6L1VzZXJzL1VTRVIvc291cmNlL3JlcG9zL0FkTG9jYWwvc3JjL3V0aWxzL2NpdGFGZWNoYS50cyIsIi9zcmMvdXRpbHMvY2l0YUZlY2hhLnRzIixbXSxbXSxbXV0=

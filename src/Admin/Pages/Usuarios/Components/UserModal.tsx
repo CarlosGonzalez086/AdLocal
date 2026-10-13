@@ -25,13 +25,9 @@ export const UserModal = ({ open, onClose, usuario, soloVer }: Props) => {
       activo: usuario.activo ?? true,
       emailVerificado: usuario.emailVerificado ?? false,
 
-      codigo: usuario.codigo ?? null,
       codigoReferido: usuario.codigoReferido ?? null,
 
       comercioId: usuario.comercioId ?? null,
-
-      stripeCustomerId: usuario.stripeCustomerId ?? null,
-      token: usuario.token ?? null,
 
       redeemMonthFree: usuario.redeemMonthFree ?? false,
       redeemRewards: usuario.redeemRewards ?? false,
@@ -39,10 +35,6 @@ export const UserModal = ({ open, onClose, usuario, soloVer }: Props) => {
       fechaCreacion: usuario.fechaCreacion ?? "",
       fechaActualizacion: usuario.fechaActualizacion ?? null,
       ultimoAcceso: usuario.ultimoAcceso ?? null,
-
-      comercios: usuario.comercios ?? [],
-      direcciones: usuario.direcciones ?? [],
-      suscripciones: usuario.suscripciones ?? [],
     }),
     [usuario],
   );

@@ -8,6 +8,7 @@ import type {
   PedidoComercioDetalleDto,
   PedidoComercioListadoDto,
   PedidosComercioDashboardDto,
+  RegistrarReembolsoPedidoDto,
 } from "../types/User/pedidosComercio";
 
 export const pedidosComercioApi = {
@@ -43,22 +44,25 @@ export const pedidosComercioApi = {
     comercioId: number,
     pedidoUuid: string,
     estado: EstadoPedido,
+    versionPedido: number,
     comentario?: string,
+    productosRestituibles?: { detalleUuid: string; cantidad: number }[],
   ) =>
     httpUsuario.put<ApiResponse<PedidoComercioDetalleDto>>(
       `/PedidosComercio/${pedidoUuid}/estado`,
-      { estado, comentario },
+      { estado, comentario, versionPedido, productosRestituibles },
       { params: { comercioId } },
     ),
   revisarPago: (
     comercioId: number,
     pedidoUuid: string,
     estadoPago: EstadoPagoPedido,
+    versionPedido: number,
     comentario?: string,
   ) =>
     httpUsuario.put<ApiResponse<PedidoComercioDetalleDto>>(
       `/PedidosComercio/${pedidoUuid}/pago`,
-      { estadoPago, comentario },
+      { estadoPago, comentario, versionPedido },
       { params: { comercioId } },
     ),
   comprobante: (comercioId: number, pedidoUuid: string) =>
@@ -66,4 +70,10 @@ export const pedidosComercioApi = {
       params: { comercioId },
       responseType: "blob",
     }),
+  reembolsar: (comercioId: number, pedidoUuid: string, dto: RegistrarReembolsoPedidoDto) =>
+    httpUsuario.post<ApiResponse<PedidoComercioDetalleDto>>(`/PedidosComercio/${pedidoUuid}/reembolso`, dto, { params: { comercioId } }),
+  conciliar: (comercioId: number, pedidoUuid: string, versionPedido: number, referencia: string,
+    stockDescontado: { detalleUuid: string; cantidad: number }[], restituirReserva?: boolean) =>
+    httpUsuario.put<ApiResponse<PedidoComercioDetalleDto>>(`/PedidosComercio/${pedidoUuid}/inventario/conciliacion`,
+      { versionPedido, referencia, stockDescontado, restituirReserva }, { params: { comercioId } }),
 };

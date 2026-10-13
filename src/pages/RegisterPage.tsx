@@ -61,7 +61,7 @@ export default function RegisterPage({ type }: Props) {
         });
       }
 
-      navigate(isAdmin ? "/admin/login" : "/usuario/login", {
+      navigate(isAdmin ? "/admin/app/usuarios" : "/usuario/login", {
         replace: true,
       });
     } catch (error) {
@@ -79,7 +79,7 @@ export default function RegisterPage({ type }: Props) {
 
       <div className="container auth-container" style={{ maxWidth: "440px" }}>
         <a
-          href={type === "admin" ? "/admin/login" : "/usuario/login"}
+          href={type === "admin" ? "/admin/app/usuarios" : "/usuario/login"}
           className="auth-logo-link"
           aria-label="Ir al inicio de ADLocal"
         >

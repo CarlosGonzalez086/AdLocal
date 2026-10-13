@@ -1,4 +1,5 @@
 import {
+  Alert,
   FormControl,
   InputLabel,
   MenuItem,
@@ -11,7 +12,10 @@ import {
   type CitaDto,
   type EstadoCita as EstadoCitaType,
 } from "../../../../types/User/citas";
-import { GenericModal, type GenericModalResult } from "../../../../components/GenericModal";
+import {
+  GenericModal,
+  type GenericModalResult,
+} from "../../../../components/GenericModal";
 
 const estados = [
   [EstadoCita.Pendiente, "Pendiente"],
@@ -26,6 +30,7 @@ interface Props {
   cita: CitaDto | null;
 
   loading: boolean;
+  error?: string;
 
   onClose: () => void;
 
@@ -33,10 +38,28 @@ interface Props {
     estado: EstadoCitaType,
     nombreAtiende: string,
     motivo: string,
-  ) => Promise<GenericModalResult | void | undefined> | GenericModalResult | void | undefined;
+  ) =>
+    | Promise<GenericModalResult | void | undefined>
+    | GenericModalResult
+    | void
+    | undefined;
 }
 
-export function CitaDetalleModal({ cita, loading, onClose, onSave }: Props) {
+export function CitaDetalleModal({
+  cita,
+  loading,
+  error,
+  onClose,
+  onSave,
+}: Props) {
+  const cerrada = Boolean(
+    cita &&
+    [
+      EstadoCita.Completada,
+      EstadoCita.Cancelada,
+      EstadoCita.NoAsistio,
+    ].includes(cita.estado as 4 | 5 | 6),
+  );
   const [estado, setEstado] = useState<EstadoCitaType>(EstadoCita.Pendiente);
 
   const [atiende, setAtiende] = useState("");
@@ -83,11 +106,29 @@ export function CitaDetalleModal({ cita, loading, onClose, onSave }: Props) {
         loadingLabel: "Guardando...",
         icon: "save",
         type: "button",
-        disabled: estado === EstadoCita.Cancelada && !motivo.trim(),
+        disabled:
+          !cita ||
+          cerrada ||
+          (estado === EstadoCita.Cancelada && !motivo.trim()),
         onClick: handleSave,
       }}
     >
       <div className="d-flex flex-column gap-3 pt-2">
+        {error && <Alert severity="error">{error}</Alert>}
+        {cerrada && (
+          <Alert severity="info">
+            Esta cita está cerrada y no puede reabrirse.
+          </Alert>
+        )}
+        <p className="mb-0">
+          {cita?.fechaInicio.slice(0, 10)} · {cita?.fechaInicio.slice(11, 16)} a{" "}
+          {cita?.fechaFin.slice(11, 16)} · {cita?.zonaHoraria}
+        </p>
+        {cita?.motivoCancelacion && (
+          <Alert severity="info">
+            Motivo registrado: {cita.motivoCancelacion}
+          </Alert>
+        )}
         <div className="appointment-detail-card p-3 gap-2">
           <h3 className="fz-h3 fw-semibold mb-2">{cita?.servicio}</h3>
 
@@ -114,27 +155,36 @@ export function CitaDetalleModal({ cita, loading, onClose, onSave }: Props) {
           value={atiende}
           onChange={(event) => setAtiende(event.target.value)}
           fullWidth
+          disabled={loading || cerrada}
+          slotProps={{ htmlInput: { maxLength: 100 } }}
         />
 
         <FormControl fullWidth>
           <InputLabel>Estado</InputLabel>
 
           <Select
+            disabled={loading || cerrada}
             label="Estado"
             value={estado}
             onChange={(event) =>
               setEstado(Number(event.target.value) as EstadoCitaType)
             }
           >
-            {estados.map(([value, label]) => (
-              <MenuItem key={value} value={value}>
-                {label}
-              </MenuItem>
-            ))}
+            {estados
+              .filter(
+                ([value]) =>
+                  value === cita?.estado ||
+                  cita?.accionesDisponibles.includes(value),
+              )
+              .map(([value, label]) => (
+                <MenuItem key={value} value={value}>
+                  {label}
+                </MenuItem>
+              ))}
           </Select>
         </FormControl>
 
-        {estado === EstadoCita.Cancelada && (
+        {estado === EstadoCita.Cancelada && !cerrada && (
           <TextField
             label="Motivo de cancelación"
             value={motivo}
@@ -143,6 +193,7 @@ export function CitaDetalleModal({ cita, loading, onClose, onSave }: Props) {
             minRows={2}
             required
             fullWidth
+            slotProps={{ htmlInput: { maxLength: 500 } }}
           />
         )}
       </div>

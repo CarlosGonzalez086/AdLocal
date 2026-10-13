@@ -11,7 +11,7 @@ import type { NewPasswordDto } from "../types/auth";
 
 export const authAdmin = {
   crearAdmin(data: AdminCreateDto) {
-    return httpAdminPublico.post<ApiResponse<null>>("/Admin/crear", data);
+    return httpAdmin.post<ApiResponse<null>>("/Admin/crear", data);
   },
   loginAdmin(data: LoginAdminDto) {
     return httpAdminPublico.post<ApiResponse<null>>("/Admin/login", data);

@@ -9,7 +9,7 @@ export const citasComercioApi = {
   actualizar: (
     comercioId: number,
     uuid: string,
-    data: { estado: EstadoCita; nombreAtiende?: string; motivo?: string },
+    data: { versionCita: number; estado: EstadoCita; nombreAtiende?: string; motivo?: string },
   ) =>
     httpUsuario.put<ApiResponse<CitaDto>>(`/Citas/${uuid}`, data, {
       params: { comercioId },

@@ -10,6 +10,8 @@ import type {
 import type { ProfileUser } from "../types/User/UserAuth";
 
 export const comercioApi = {
+  zonaHoraria: (id: number, zonaHoraria: string, zonaHorariaAnterior: string) =>
+    httpUsuario.put<ApiResponse<string>>(`/comercios/${id}/zona-horaria`, { zonaHoraria, zonaHorariaAnterior }),
   getMine: () => httpUsuario.get<ApiResponse<ComercioDto>>("/comercios/mine"),
   getTotalComerciosByIdUsuario: () =>
     httpUsuario.get<ApiResponse<object>>(

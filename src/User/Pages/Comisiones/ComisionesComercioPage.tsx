@@ -161,7 +161,7 @@ export const ComisionesComercioPage = () => {
       <div className="row g-4 mt-1">
         <div className="col-12 col-lg-5">
           <div className="commission-payment-card h-100 p-4">
-            <h2 className="fz-h3 fw-semibold">Saldo a pagar</h2>
+            <h2 className="fz-h3 fw-semibold">{pendiente < 0 ? "Saldo a favor" : "Saldo a pagar"}</h2>
             <div className="d-flex gap-2 mt-3">
               <Button
                 className={
@@ -185,11 +185,10 @@ export const ComisionesComercioPage = () => {
               </Button>
             </div>
             <strong className="commission-payment-total d-block mt-4">
-              {moneda(pendiente)}
+              {moneda(Math.abs(pendiente))}
             </strong>
             <span className="fz-h5 d-block mt-2">
-              Incluye únicamente comisiones pendientes que todavía no están en
-              revisión.
+              Incluye comisiones pendientes y créditos por reembolsos; los créditos se conservan hasta aplicarse, incluso fuera del periodo.
             </span>
           </div>
         </div>

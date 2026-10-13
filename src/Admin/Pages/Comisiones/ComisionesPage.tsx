@@ -109,6 +109,12 @@ export const ComisionesPage = () => {
   const columnasMovimientos = useMemo<TableColumn<ComisionMovimiento>[]>(
     () => [
       { key: "numeroPedido", label: "Pedido" },
+      {
+        key: "tipoOperacion",
+        label: "Operación",
+        render: (r) =>
+          r.tipoOperacion === 2 ? "Crédito por reembolso" : "Venta",
+      },
       { key: "comercio", label: "Comercio" },
       { key: "metodoPago", label: "Método" },
       {
@@ -121,7 +127,10 @@ export const ComisionesPage = () => {
         key: "porcentaje",
         label: "%",
         align: "right",
-        render: (r) => `${r.porcentaje}% + ${moneda(r.comisionFija)}`,
+        render: (r) =>
+          r.tipoOperacion === 2
+            ? "Crédito"
+            : `${r.porcentaje}% + ${moneda(r.comisionFija)}`,
       },
       {
         key: "montoComision",
@@ -135,8 +144,24 @@ export const ComisionesPage = () => {
         render: (r) => (
           <Chip
             size="small"
-            color={r.estatus === 2 ? "success" : "warning"}
-            label={r.estatus === 2 ? "Pagada" : "Pendiente"}
+            color={
+              r.estatus === 2
+                ? "success"
+                : r.estatus === 3
+                  ? "default"
+                  : r.estatus === 4
+                    ? "info"
+                    : "warning"
+            }
+            label={
+              r.estatus === 2
+                ? "Pagada / aplicada"
+                : r.estatus === 3
+                  ? "Cancelada"
+                  : r.estatus === 4
+                    ? "Crédito en revisión"
+                    : "Pendiente"
+            }
           />
         ),
       },

@@ -6,13 +6,16 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Swal from "../../../utils/sweetalert";
 import {
   GenericTable,
   type TableColumn,
 } from "../../../components/layouts/GenericTable";
-import { StatusBadge, type StatusVariant } from "../../../components/UI/StatusBadge";
+import {
+  StatusBadge,
+  type StatusVariant,
+} from "../../../components/UI/StatusBadge";
 import { AppDatePicker } from "../../../components/UI/DateTimePickers";
 import { pedidosComercioApi } from "../../../services/pedidosComercioApi";
 import { citasComercioApi } from "../../../services/citasComercioApi";
@@ -22,6 +25,8 @@ import {
 } from "../../../types/User/citas";
 import type { ComercioPedidoSelectorDto } from "../../../types/User/pedidosComercio";
 import { CitaDetalleModal } from "./Components/CitaDetalleModal";
+import { diaAgenda, horaCita } from "../../../utils/citaFecha";
+import { extraerMensajeError } from "../../../utils/errorHandler";
 
 const textos: Record<number, string> = {
   1: "Pendiente",
@@ -51,13 +56,14 @@ const getEstadoCitaVariant = (estado: number): StatusVariant => {
 export function CitasComercioPage() {
   const [comercios, setComercios] = useState<ComercioPedidoSelectorDto[]>([]),
     [comercioId, setComercioId] = useState(0),
-    [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10)),
+    [fecha, setFecha] = useState(diaAgenda()),
     [citas, setCitas] = useState<CitaDto[]>([]),
     [loading, setLoading] = useState(true),
     [seleccionada, setSeleccionada] = useState<CitaDto | null>(null),
     [error, setError] = useState("");
   const [page, setPage] = useState(0),
     [rows, setRows] = useState(10);
+  const operando = useRef(false);
   useEffect(() => {
     pedidosComercioApi
       .comercios()
@@ -65,28 +71,45 @@ export function CitasComercioPage() {
         const cs = r.data.respuesta ?? [];
         setComercios(cs);
         setComercioId(cs[0]?.id ?? 0);
+        setFecha(diaAgenda(new Date(), cs[0]?.zonaHoraria));
       })
       .catch(() => setError("No fue posible cargar los comercios."));
   }, []);
   useEffect(() => {
-    if (!comercioId) return;
+    let vigente = true;
+    if (!comercioId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
+    setError("");
+    setCitas([]);
+    setSeleccionada(null);
+    setPage(0);
     citasComercioApi
       .agenda(comercioId, fecha)
-      .then((r) => setCitas(r.data.respuesta ?? []))
-      .catch(() => setError("No fue posible cargar la agenda."))
-      .finally(() => setLoading(false));
+      .then((r) => {
+        if (vigente) {
+          if (r.data.codigo !== "200") throw new Error(r.data.mensaje);
+          setCitas(r.data.respuesta ?? []);
+        }
+      })
+      .catch(() => {
+        if (vigente) setError("No fue posible cargar la agenda.");
+      })
+      .finally(() => {
+        if (vigente) setLoading(false);
+      });
+    return () => {
+      vigente = false;
+    };
   }, [comercioId, fecha]);
   const columns = useMemo<TableColumn<CitaDto>[]>(
     () => [
       {
         key: "fechaInicio",
         label: "Hora",
-        render: (c) =>
-          new Date(c.fechaInicio).toLocaleTimeString("es-MX", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
+        render: (c) => horaCita(c.fechaInicio),
       },
       { key: "nombrePersona", label: "Persona a atender" },
       { key: "servicio", label: "Servicio" },
@@ -112,24 +135,29 @@ export function CitasComercioPage() {
     nombreAtiende: string,
     motivo: string,
   ) => {
-    if (!seleccionada) {
+    if (!seleccionada || operando.current) {
       return {
         noClose: true,
       };
     }
 
+    operando.current = true;
     setLoading(true);
+    setError("");
 
     try {
       const r = await citasComercioApi.actualizar(
         comercioId,
         seleccionada.uuid,
         {
+          versionCita: seleccionada.version,
           estado,
           nombreAtiende,
           motivo,
         },
       );
+      if (r.data.codigo !== "200" || !r.data.respuesta?.uuid)
+        throw new Error(r.data.mensaje || "Respuesta incompleta.");
 
       setCitas((v) =>
         v.map((c) => (c.uuid === seleccionada.uuid ? r.data.respuesta : c)),
@@ -140,13 +168,25 @@ export function CitasComercioPage() {
       return {
         success: true,
       };
-    } catch {
-      setError("No fue posible actualizar la cita.");
+    } catch (e) {
+      setError(
+        extraerMensajeError(
+          e,
+          "No se confirmó el cambio. Cierra el detalle y comprueba la agenda antes de reintentar.",
+        ),
+      );
+      try {
+        const actual = await citasComercioApi.agenda(comercioId, fecha);
+        if (actual.data.codigo === "200") setCitas(actual.data.respuesta ?? []);
+      } catch {
+        /* Preserve the visible error and current form. */
+      }
 
       return {
         noClose: true,
       };
     } finally {
+      operando.current = false;
       setLoading(false);
     }
   };
@@ -157,16 +197,29 @@ export function CitasComercioPage() {
         <div>
           <h1 className="fz-h1 fw-bold mb-1">Agenda de citas</h1>
           <p className="fz-h4 mb-0">
-            Consulta en orden quién sigue y asigna a la persona que atenderá.
+            Consulta quién sigue y asigna la atención. Zona:{" "}
+            {comercios.find((c) => c.id === comercioId)?.zonaHoraria ||
+              "Sin cargar"}
+            .
           </p>
         </div>
         <div className="d-flex flex-wrap gap-2">
           <FormControl size="small">
             <InputLabel>Comercio</InputLabel>
             <Select
+              disabled={loading}
               label="Comercio"
               value={comercioId || ""}
-              onChange={(e) => setComercioId(Number(e.target.value))}
+              onChange={(e) => {
+                const id = Number(e.target.value);
+                setComercioId(id);
+                setFecha(
+                  diaAgenda(
+                    new Date(),
+                    comercios.find((c) => c.id === id)?.zonaHoraria,
+                  ),
+                );
+              }}
             >
               {comercios.map((c) => (
                 <MenuItem key={c.id} value={c.id}>
@@ -180,6 +233,7 @@ export function CitasComercioPage() {
               label="Filtrar por día"
               value={fecha}
               size="small"
+              disabled={loading}
               onChange={(newDate) => {
                 setFecha(newDate || "");
                 setPage(0);
@@ -233,6 +287,7 @@ export function CitasComercioPage() {
       <CitaDetalleModal
         cita={seleccionada}
         loading={loading}
+        error={error}
         onClose={() => setSeleccionada(null)}
         onSave={(estado, atiende, motivo) => guardar(estado, atiende, motivo)}
       />

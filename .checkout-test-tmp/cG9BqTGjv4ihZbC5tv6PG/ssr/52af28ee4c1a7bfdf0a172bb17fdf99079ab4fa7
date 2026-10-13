@@ -1,0 +1,44 @@
+const __vite_ssr_import_0__ = await __vite_ssr_import__("/node_modules/vitest/dist/index.js", {"importedNames":["describe","expect","it","vi"]});
+const http = __vite_ssr_import_0__.vi.hoisted(() => ({ get: __vite_ssr_import_0__.vi.fn(), put: __vite_ssr_import_0__.vi.fn() }));
+__vite_ssr_import_0__.vi.mock("../api/httpUsuario", () => ({ httpUsuario: http }));
+const __vi_import_0__ = await __vite_ssr_dynamic_import__("/src/services/citasComercioApi.ts");
+const __vi_import_1__ = await __vite_ssr_dynamic_import__("/src/utils/citaFecha.ts");
+const __vi_import_2__ = await __vite_ssr_dynamic_import__("/src/services/comercioApi.ts");
+const __vi_import_3__ = await __vite_ssr_dynamic_import__("/src/schemas/comercioCreate.schema.ts");
+
+
+
+
+
+(0,__vite_ssr_import_0__.describe)("Agenda: contrato con versión y hora local", () => {
+  (0,__vite_ssr_import_0__.it)("protege una actualización con la versión vista por el operador", () => {
+    const dto = { versionCita: 9, estado: 2, nombreAtiende: "Operador" };
+    __vi_import_0__.citasComercioApi.actualizar(1, "cita", dto);
+    (0,__vite_ssr_import_0__.expect)(http.put).toHaveBeenCalledWith("/Citas/cita", dto, { params: { comercioId: 1 } });
+  });
+  (0,__vite_ssr_import_0__.it)("el filtro conserva el día local de Ciudad de México", () => {
+    (0,__vite_ssr_import_0__.expect)(__vi_import_1__.diaAgenda(/* @__PURE__ */ new Date("2026-10-13T02:00:00Z"))).toBe("2026-10-12");
+    __vi_import_0__.citasComercioApi.agenda(1, "2026-10-12");
+    (0,__vite_ssr_import_0__.expect)(http.get).toHaveBeenCalledWith("/Citas/agenda", { params: { comercioId: 1, fecha: "2026-10-12" } });
+  });
+  (0,__vite_ssr_import_0__.it)("muestra la hora guardada sin convertirla a otra zona", () => {
+    (0,__vite_ssr_import_0__.expect)(__vi_import_1__.horaCita("2030-05-21T09:30:00")).toBe("09:30");
+  });
+  (0,__vite_ssr_import_0__.it)("envía zona actual y nueva por el comando independiente", () => {
+    __vi_import_2__.comercioApi.zonaHoraria(1, "America/Tijuana", "America/Mexico_City");
+    (0,__vite_ssr_import_0__.expect)(http.put).toHaveBeenCalledWith("/comercios/1/zona-horaria", { zonaHoraria: "America/Tijuana", zonaHorariaAnterior: "America/Mexico_City" });
+  });
+  (0,__vite_ssr_import_0__.it)("el schema de creación conserva la zona elegida", () => {
+    const data = __vi_import_3__.comercioCreateSchema.parse({ nombre: "Comercio", lat: 20, lng: -100, estadoId: 1, municipioId: 1, zonaHoraria: "America/Cancun" });
+    (0,__vite_ssr_import_0__.expect)(data.zonaHoraria).toBe("America/Cancun");
+  });
+  (0,__vite_ssr_import_0__.it)("calcula el día para cada comercio al cambiar de agenda", () => {
+    const ahora = /* @__PURE__ */ new Date("2026-10-13T06:30:00Z");
+    (0,__vite_ssr_import_0__.expect)(__vi_import_1__.diaAgenda(ahora, "America/Tijuana")).toBe("2026-10-12");
+    (0,__vite_ssr_import_0__.expect)(__vi_import_1__.diaAgenda(ahora, "America/Cancun")).toBe("2026-10-13");
+  });
+});
+//# sourceMappingSource=vite-generated
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJtYXBwaW5ncyI6IkFBQUE7QUFLQSxNQUFNLE9BQUsseUJBQUcsUUFBUSxPQUFLLEVBQUMsS0FBSSx5QkFBRyxHQUFHLEdBQUUsS0FBSSx5QkFBRyxHQUFHLEVBQUMsRUFBRTtBQUNyRCx5QkFBRyxLQUFLLHNCQUFxQixPQUFLLEVBQUMsYUFBWSxLQUFJLEVBQUU7QUFMckQ7QUFDQTtBQUNBO0FBQ0E7Ozs7OztHQUdBLGdDQUFTLDZDQUE0QyxNQUFJO0FBQ3ZELCtCQUFHLGtFQUFpRSxNQUFJO0FBQ3RFLFVBQU0sTUFBSSxFQUFDLGFBQVksR0FBRSxRQUFPLEdBQVcsZUFBYyxXQUFVO0FBQUcscUNBQWlCLFdBQVcsR0FBRSxRQUFPLEdBQUc7QUFDOUcscUNBQU8sS0FBSyxHQUFHLEVBQUUscUJBQXFCLGVBQWMsS0FBSSxFQUFDLFFBQU8sRUFBQyxZQUFXLEVBQUMsRUFBQyxDQUFDO0FBQUEsRUFDakYsQ0FBQztBQUNELCtCQUFHLHVEQUFzRCxNQUFJO0FBQzNELHFDQUFPLDBCQUFVLG9CQUFJLEtBQUssc0JBQXNCLENBQUMsQ0FBQyxFQUFFLEtBQUssWUFBWTtBQUNyRSxxQ0FBaUIsT0FBTyxHQUFFLFlBQVk7QUFBRyxxQ0FBTyxLQUFLLEdBQUcsRUFBRSxxQkFBcUIsaUJBQWdCLEVBQUMsUUFBTyxFQUFDLFlBQVcsR0FBRSxPQUFNLGFBQVksRUFBQyxDQUFDO0FBQUEsRUFDM0ksQ0FBQztBQUNELCtCQUFHLHdEQUF1RCxNQUFJO0FBQUUscUNBQU8seUJBQVMscUJBQXFCLENBQUMsRUFBRSxLQUFLLE9BQU87QUFBQSxFQUFHLENBQUM7QUFDeEgsK0JBQUcsMERBQXlELE1BQUk7QUFDOUQsZ0NBQVksWUFBWSxHQUFFLG1CQUFrQixxQkFBcUI7QUFDakUscUNBQU8sS0FBSyxHQUFHLEVBQUUscUJBQXFCLDZCQUE0QixFQUFDLGFBQVksbUJBQWtCLHFCQUFvQixzQkFBcUIsQ0FBQztBQUFBLEVBQzdJLENBQUM7QUFDRCwrQkFBRyxrREFBaUQsTUFBSTtBQUN0RCxVQUFNLE9BQUsscUNBQXFCLE1BQU0sRUFBQyxRQUFPLFlBQVcsS0FBSSxJQUFHLEtBQUksTUFBSyxVQUFTLEdBQUUsYUFBWSxHQUFFLGFBQVksaUJBQWdCLENBQUM7QUFDL0gscUNBQU8sS0FBSyxXQUFXLEVBQUUsS0FBSyxnQkFBZ0I7QUFBQSxFQUNoRCxDQUFDO0FBQ0QsK0JBQUcsMERBQXlELE1BQUk7QUFDOUQsVUFBTSxRQUFNLG9CQUFJLEtBQUssc0JBQXNCO0FBQUcscUNBQU8sMEJBQVUsT0FBTSxpQkFBaUIsQ0FBQyxFQUFFLEtBQUssWUFBWTtBQUFHLHFDQUFPLDBCQUFVLE9BQU0sZ0JBQWdCLENBQUMsRUFBRSxLQUFLLFlBQVk7QUFBQSxFQUMxSyxDQUFDO0FBQ0gsQ0FBQyIsIm5hbWVzIjpbXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiY2l0YXNJbnRlZ3JpZGFkLnRlc3QudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgZGVzY3JpYmUsIGV4cGVjdCwgaXQsIHZpIH0gZnJvbSBcInZpdGVzdFwiO1xuaW1wb3J0IHsgY2l0YXNDb21lcmNpb0FwaSB9IGZyb20gXCIuLi9zZXJ2aWNlcy9jaXRhc0NvbWVyY2lvQXBpXCI7XG5pbXBvcnQgeyBkaWFBZ2VuZGEsIGhvcmFDaXRhIH0gZnJvbSBcIi4uL3V0aWxzL2NpdGFGZWNoYVwiO1xuaW1wb3J0IHsgY29tZXJjaW9BcGkgfSBmcm9tIFwiLi4vc2VydmljZXMvY29tZXJjaW9BcGlcIjtcbmltcG9ydCB7IGNvbWVyY2lvQ3JlYXRlU2NoZW1hIH0gZnJvbSBcIi4uL3NjaGVtYXMvY29tZXJjaW9DcmVhdGUuc2NoZW1hXCI7XG5jb25zdCBodHRwPXZpLmhvaXN0ZWQoKCk9Pih7Z2V0OnZpLmZuKCkscHV0OnZpLmZuKCl9KSk7XG52aS5tb2NrKFwiLi4vYXBpL2h0dHBVc3VhcmlvXCIsKCk9Pih7aHR0cFVzdWFyaW86aHR0cH0pKTtcbmRlc2NyaWJlKFwiQWdlbmRhOiBjb250cmF0byBjb24gdmVyc2nDs24geSBob3JhIGxvY2FsXCIsKCk9PntcbiAgaXQoXCJwcm90ZWdlIHVuYSBhY3R1YWxpemFjacOzbiBjb24gbGEgdmVyc2nDs24gdmlzdGEgcG9yIGVsIG9wZXJhZG9yXCIsKCk9PntcbiAgICBjb25zdCBkdG89e3ZlcnNpb25DaXRhOjksZXN0YWRvOjIgYXMgY29uc3Qsbm9tYnJlQXRpZW5kZTpcIk9wZXJhZG9yXCJ9OyBjaXRhc0NvbWVyY2lvQXBpLmFjdHVhbGl6YXIoMSxcImNpdGFcIixkdG8pO1xuICAgIGV4cGVjdChodHRwLnB1dCkudG9IYXZlQmVlbkNhbGxlZFdpdGgoXCIvQ2l0YXMvY2l0YVwiLGR0byx7cGFyYW1zOntjb21lcmNpb0lkOjF9fSk7XG4gIH0pO1xuICBpdChcImVsIGZpbHRybyBjb25zZXJ2YSBlbCBkw61hIGxvY2FsIGRlIENpdWRhZCBkZSBNw6l4aWNvXCIsKCk9PntcbiAgICBleHBlY3QoZGlhQWdlbmRhKG5ldyBEYXRlKFwiMjAyNi0xMC0xM1QwMjowMDowMFpcIikpKS50b0JlKFwiMjAyNi0xMC0xMlwiKTtcbiAgICBjaXRhc0NvbWVyY2lvQXBpLmFnZW5kYSgxLFwiMjAyNi0xMC0xMlwiKTsgZXhwZWN0KGh0dHAuZ2V0KS50b0hhdmVCZWVuQ2FsbGVkV2l0aChcIi9DaXRhcy9hZ2VuZGFcIix7cGFyYW1zOntjb21lcmNpb0lkOjEsZmVjaGE6XCIyMDI2LTEwLTEyXCJ9fSk7XG4gIH0pO1xuICBpdChcIm11ZXN0cmEgbGEgaG9yYSBndWFyZGFkYSBzaW4gY29udmVydGlybGEgYSBvdHJhIHpvbmFcIiwoKT0+eyBleHBlY3QoaG9yYUNpdGEoXCIyMDMwLTA1LTIxVDA5OjMwOjAwXCIpKS50b0JlKFwiMDk6MzBcIik7IH0pO1xuICBpdChcImVudsOtYSB6b25hIGFjdHVhbCB5IG51ZXZhIHBvciBlbCBjb21hbmRvIGluZGVwZW5kaWVudGVcIiwoKT0+e1xuICAgIGNvbWVyY2lvQXBpLnpvbmFIb3JhcmlhKDEsXCJBbWVyaWNhL1RpanVhbmFcIixcIkFtZXJpY2EvTWV4aWNvX0NpdHlcIik7XG4gICAgZXhwZWN0KGh0dHAucHV0KS50b0hhdmVCZWVuQ2FsbGVkV2l0aChcIi9jb21lcmNpb3MvMS96b25hLWhvcmFyaWFcIix7em9uYUhvcmFyaWE6XCJBbWVyaWNhL1RpanVhbmFcIix6b25hSG9yYXJpYUFudGVyaW9yOlwiQW1lcmljYS9NZXhpY29fQ2l0eVwifSk7XG4gIH0pO1xuICBpdChcImVsIHNjaGVtYSBkZSBjcmVhY2nDs24gY29uc2VydmEgbGEgem9uYSBlbGVnaWRhXCIsKCk9PntcbiAgICBjb25zdCBkYXRhPWNvbWVyY2lvQ3JlYXRlU2NoZW1hLnBhcnNlKHtub21icmU6XCJDb21lcmNpb1wiLGxhdDoyMCxsbmc6LTEwMCxlc3RhZG9JZDoxLG11bmljaXBpb0lkOjEsem9uYUhvcmFyaWE6XCJBbWVyaWNhL0NhbmN1blwifSk7XG4gICAgZXhwZWN0KGRhdGEuem9uYUhvcmFyaWEpLnRvQmUoXCJBbWVyaWNhL0NhbmN1blwiKTtcbiAgfSk7XG4gIGl0KFwiY2FsY3VsYSBlbCBkw61hIHBhcmEgY2FkYSBjb21lcmNpbyBhbCBjYW1iaWFyIGRlIGFnZW5kYVwiLCgpPT57XG4gICAgY29uc3QgYWhvcmE9bmV3IERhdGUoXCIyMDI2LTEwLTEzVDA2OjMwOjAwWlwiKTsgZXhwZWN0KGRpYUFnZW5kYShhaG9yYSxcIkFtZXJpY2EvVGlqdWFuYVwiKSkudG9CZShcIjIwMjYtMTAtMTJcIik7IGV4cGVjdChkaWFBZ2VuZGEoYWhvcmEsXCJBbWVyaWNhL0NhbmN1blwiKSkudG9CZShcIjIwMjYtMTAtMTNcIik7XG4gIH0pO1xufSk7XG4iXSwiZmlsZSI6Ii9zcmMvdGVzdHMvY2l0YXNJbnRlZ3JpZGFkLnRlc3QudHMifQ==
+
+//# vitestCache=W3siZmlsZSI6IjEiLCJpZCI6IjEiLCJ1cmwiOiIyIiwiaW1wb3J0ZWRVcmxzIjoiMyIsIm1hcHBpbmdzIjpmYWxzZSwiZGVwcyI6IjQiLCJkeW5hbWljRGVwcyI6IjUiLCJzdGF0aWNNb2NrcyI6IjYifSwiQzovVXNlcnMvVVNFUi9zb3VyY2UvcmVwb3MvQWRMb2NhbC9zcmMvdGVzdHMvY2l0YXNJbnRlZ3JpZGFkLnRlc3QudHMiLCIvc3JjL3Rlc3RzL2NpdGFzSW50ZWdyaWRhZC50ZXN0LnRzIixbXSxbIjciXSxbIjgiLCI5IiwiMTAiLCIxMSJdLFsiMTIiXSwiL25vZGVfbW9kdWxlcy92aXRlc3QvZGlzdC9pbmRleC5qcyIsIi9zcmMvc2VydmljZXMvY2l0YXNDb21lcmNpb0FwaS50cyIsIi9zcmMvdXRpbHMvY2l0YUZlY2hhLnRzIiwiL3NyYy9zZXJ2aWNlcy9jb21lcmNpb0FwaS50cyIsIi9zcmMvc2NoZW1hcy9jb21lcmNpb0NyZWF0ZS5zY2hlbWEudHMiLHsibWV0aG9kIjoiMTMiLCJzcGVjaWZpZXIiOiIxNCIsImhhc0ZhY3RvcnkiOnRydWUsImZhY3RvcnlMb2Fkc09yaWdpbmFsIjpmYWxzZX0sIm1vY2siLCIuLi9hcGkvaHR0cFVzdWFyaW8iXQ==

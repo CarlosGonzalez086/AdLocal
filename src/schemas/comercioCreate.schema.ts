@@ -19,6 +19,7 @@ const horarioSchema = z
 
 export const comercioCreateSchema = z
   .object({
+    zonaHoraria: z.string().min(1).max(100).optional(),
     nombre: z.string().min(3, "El nombre es obligatorio"),
 
     direccion: z.string().optional(),

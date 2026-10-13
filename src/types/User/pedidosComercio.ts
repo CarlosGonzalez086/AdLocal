@@ -30,6 +30,7 @@ export type TipoEntregaPedido =
   (typeof TipoEntregaPedido)[keyof typeof TipoEntregaPedido];
 
 export interface ComercioPedidoSelectorDto {
+  zonaHoraria?: string;
   id: number;
   uuid: string;
   nombre: string;
@@ -63,6 +64,9 @@ export interface PedidoComercioListadoDto {
   accionesDisponibles: EstadoPedido[];
 }
 export interface PedidoComercioProductoDto {
+  stockDescontado: number | null;
+  stockPorRestituir: number;
+  stockRestituido: number;
   uuid: string;
   nombre: string;
   logoUrl?: string | null;
@@ -72,11 +76,20 @@ export interface PedidoComercioProductoDto {
   observaciones?: string | null;
 }
 export interface PedidoComercioHistorialDto {
+  evento: string;
+  estadoPago?: EstadoPagoPedido | null;
+  idUsuarioCambio?: number | null;
   estado: EstadoPedido;
   comentario?: string | null;
   fecha: string;
 }
 export interface PedidoComercioDetalleDto extends PedidoComercioListadoDto {
+  version: number;
+  inventarioPendiente: boolean;
+  restituirReserva: boolean | null;
+  puedeRegistrarPago: boolean;
+  puedeReembolsar: boolean;
+  reembolso?: PedidoReembolsoDto | null;
   clienteEmail?: string | null;
   telefonoEntrega?: string | null;
   direccion?: string | null;
@@ -91,4 +104,22 @@ export interface PagedResponse<T> {
   totalPages: number;
   totalItems: number;
   items: T[];
+}
+
+export interface PedidoReembolsoDto {
+  uuid: string;
+  monto: number;
+  metodo: MetodoPagoPedido;
+  referencia: string;
+  motivo: string;
+  fechaCreacion: string;
+}
+export interface RegistrarReembolsoPedidoDto {
+  versionPedido: number;
+  idempotencyKey: string;
+  monto: number;
+  metodo: MetodoPagoPedido;
+  referencia: string;
+  motivo: string;
+  productosDevueltos: { detalleUuid: string; cantidad: number }[];
 }

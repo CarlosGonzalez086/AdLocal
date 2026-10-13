@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import type { UsuarioDto } from "../../../../types/Admin/usuarios";
 import { useUsers } from "../../../../hooks/useUsers";
 import { SearchToolbar } from "../../../../components/UI/SearchToolbar";
@@ -19,13 +20,9 @@ export const UsersPageAdmin = () => {
     activo: true,
     emailVerificado: false,
 
-    codigo: null,
     codigoReferido: null,
 
     comercioId: null,
-
-    stripeCustomerId: null,
-    token: null,
 
     redeemMonthFree: false,
     redeemRewards: false,
@@ -33,10 +30,6 @@ export const UsersPageAdmin = () => {
     fechaCreacion: "",
     fechaActualizacion: null,
     ultimoAcceso: null,
-
-    comercios: [],
-    direcciones: [],
-    suscripciones: [],
   };
 
   const { total, loading, listar, users } = useUsers();
@@ -45,7 +38,9 @@ export const UsersPageAdmin = () => {
   const [rows, setRows] = useState(10);
   const [view, setView] = useState(false);
   const [user, setUser] = useState<UsuarioDto>(initialForm);
-  const [orderBy, setOrderBy] = useState<"recent" | "old" | "az" | "za">("recent");
+  const [orderBy, setOrderBy] = useState<"recent" | "old" | "az" | "za">(
+    "recent",
+  );
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -59,6 +54,11 @@ export const UsersPageAdmin = () => {
 
   return (
     <div className="w-100">
+      <div className="d-flex justify-content-end mb-3">
+        <Link className="btn btn-adlocal" to="/admin/app/crear-administrador">
+          Crear administrador
+        </Link>
+      </div>
       <SearchToolbar
         search={search}
         searchPlaceholder="Buscar usuario..."

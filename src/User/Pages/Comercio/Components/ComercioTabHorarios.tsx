@@ -5,14 +5,21 @@ import MaterialSymbol from "../../../../components/UI/MaterialSymbol/MaterialSym
 import type { HorarioComercioDto } from "../../../../types/User/comercio";
 import { DIAS_SEMANA } from "../../../../utils/constantes";
 import { SectionHeader } from "../../Home/Components/SectionHeader";
+import { ComercioZonaHoraria } from "./ComercioZonaHoraria";
 
 interface ComercioTabHorariosProps {
+  comercioId: number;
+  zonaHoraria: string;
+  onZonaHoraria: (zona: string) => void;
   horarios: HorarioComercioDto[];
   editable: boolean;
   updateHorario: (dia: number, changes: Partial<HorarioComercioDto>) => void;
 }
 
 export const ComercioTabHorarios: FC<ComercioTabHorariosProps> = ({
+  comercioId,
+  zonaHoraria,
+  onZonaHoraria,
   horarios,
   editable,
   updateHorario,
@@ -26,6 +33,13 @@ export const ComercioTabHorarios: FC<ComercioTabHorariosProps> = ({
           description="Indica los días y las horas de operación del comercio."
         />
       </div>
+
+      <ComercioZonaHoraria
+        comercioId={comercioId}
+        actual={zonaHoraria}
+        editable={editable}
+        onConfirmada={onZonaHoraria}
+      />
 
       <div className="row g-3">
         {DIAS_SEMANA.map((day) => {
@@ -49,9 +63,7 @@ export const ComercioTabHorarios: FC<ComercioTabHorariosProps> = ({
                     <div className="commerceScheduleDayIcon">
                       <MaterialSymbol
                         icon={
-                          schedule.abierto
-                            ? "event_available"
-                            : "event_busy"
+                          schedule.abierto ? "event_available" : "event_busy"
                         }
                         size="small"
                       />

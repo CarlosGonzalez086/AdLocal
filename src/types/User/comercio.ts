@@ -8,6 +8,7 @@ export interface HorarioComercioDto {
 }
 
 export interface ComercioCreateDto {
+  zonaHoraria?: string;
   nombre: string;
   direccion?: string;
   telefono?: string;
@@ -45,6 +46,7 @@ export interface ComercioUpdateDto {
 }
 
 export interface ComercioDto {
+  zonaHoraria?: string;
   id: number;
   nombre: string;
   direccion: string;

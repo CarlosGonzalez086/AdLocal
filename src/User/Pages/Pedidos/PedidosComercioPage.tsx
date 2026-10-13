@@ -5,7 +5,7 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useSearchParams } from "react-router-dom";
 import Swal from "../../../utils/sweetalert";
 import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol";
@@ -15,6 +15,10 @@ import {
   EstadoPedido,
   type EstadoPedido as EstadoPedidoType,
 } from "../../../types/User/pedidosComercio";
+import { UserContext } from "../../../context/UserContext ";
+import { ReembolsoPedidoModal } from "./Components/ReembolsoPedidoModal";
+import { CancelacionPedidoModal } from "./Components/CancelacionPedidoModal";
+import { InventarioPedidoModal } from "./Components/InventarioPedidoModal";
 import { ComprobantePedidoModal } from "./Components/ComprobantePedidoModal";
 import { PedidoDetalleModal } from "./Components/PedidoDetalleModal";
 import { PedidosComercioTable } from "./Components/PedidosComercioTable";
@@ -25,6 +29,10 @@ import {
 } from "./pedidoComercioPresentation";
 
 export const PedidosComercioPage = () => {
+  const usuario = useContext(UserContext);
+  const [modalOperacion, setModalOperacion] = useState<
+    "reembolso" | "inventario" | "cancelacion" | null
+  >(null);
   const pedidosHook = usePedidosComercio();
   const { comercioId, seleccionar } = pedidosHook;
   const [searchParams, setSearchParams] = useSearchParams();
@@ -38,12 +46,7 @@ export const PedidosComercioPage = () => {
 
     void seleccionar(pedidoUuid);
     setSearchParams({}, { replace: true });
-  }, [
-    searchParams,
-    setSearchParams,
-    comercioId,
-    seleccionar,
-  ]);
+  }, [searchParams, setSearchParams, comercioId, seleccionar]);
 
   useEffect(
     () => () => {
@@ -58,6 +61,14 @@ export const PedidosComercioPage = () => {
   };
 
   const ejecutarEstado = async (estado: EstadoPedidoType) => {
+    if (
+      estado === EstadoPedido.Cancelado &&
+      pedidosHook.detalle &&
+      [4, 5, 6, 7].includes(pedidosHook.detalle.estado)
+    ) {
+      setModalOperacion("cancelacion");
+      return;
+    }
     const requiereMotivo =
       estado === EstadoPedido.Rechazado || estado === EstadoPedido.Cancelado;
 
@@ -123,12 +134,12 @@ export const PedidosComercioPage = () => {
   const stats = [
     {
       icon: "payments",
-      label: "Ventas de hoy",
+      label: "Ventas de hoy sin reembolsos",
       value: moneyFormatter.format(pedidosHook.dashboard?.ventasHoy ?? 0),
     },
     {
       icon: "date_range",
-      label: "Ventas de la semana",
+      label: "Ventas de la semana sin reembolsos",
       value: moneyFormatter.format(pedidosHook.dashboard?.ventasSemana ?? 0),
     },
     {
@@ -253,9 +264,43 @@ export const PedidosComercioPage = () => {
         onClose={() => pedidosHook.setDetalle(null)}
         onCambiarEstado={ejecutarEstado}
         onRevisarComprobante={abrirComprobante}
-        onCambiarPago={(estado) => void pedidosHook.revisarPago(estado)}
+        onCambiarPago={() => void revisarPago(true)}
+        esDueno={usuario.rol === "Comercio"}
+        onReembolso={() => setModalOperacion("reembolso")}
+        onConciliar={() => setModalOperacion("inventario")}
       />
 
+      {modalOperacion === "cancelacion" && pedidosHook.detalle && (
+        <CancelacionPedidoModal
+          key={pedidosHook.detalle.uuid}
+          pedido={pedidosHook.detalle}
+          onClose={() => setModalOperacion(null)}
+          onSave={(motivo, productos) =>
+            pedidosHook.cambiarEstado(EstadoPedido.Cancelado, motivo, productos)
+          }
+        />
+      )}
+      {modalOperacion === "reembolso" && pedidosHook.detalle && (
+        <ReembolsoPedidoModal
+          key={pedidosHook.detalle.uuid}
+          pedido={pedidosHook.detalle}
+          cuenta={usuario.id}
+          comercioId={comercioId}
+          onClose={() => {
+            setModalOperacion(null);
+            void seleccionar(pedidosHook.detalle!.uuid);
+          }}
+          onSave={pedidosHook.registrarReembolso}
+        />
+      )}
+      {modalOperacion === "inventario" && pedidosHook.detalle && (
+        <InventarioPedidoModal
+          key={pedidosHook.detalle.uuid}
+          pedido={pedidosHook.detalle}
+          onClose={() => setModalOperacion(null)}
+          onSave={pedidosHook.conciliarInventario}
+        />
+      )}
       <ComprobantePedidoModal
         open={Boolean(comprobanteUrl) || cargandoComprobante}
         loading={cargandoComprobante}

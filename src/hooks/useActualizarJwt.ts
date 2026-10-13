@@ -41,9 +41,7 @@ export const useActualizarJwt = () => {
       if (!user) throw new Error("No hay usuario en contexto");
 
       const url =
-        user.rol === "Admin"
-          ? `${import.meta.env.VITE_API_URL}/Admin/actualizar-jwt`
-          : `${import.meta.env.VITE_API_URL}/auth/actualizar-jwt`;
+        user.rol === "Admin" ? "Admin/actualizar-jwt" : "auth/actualizar-jwt";
 
       const api = user.rol === "Admin" ? httpAdmin : httpUsuario;
 

@@ -21,7 +21,11 @@ interface Props {
 
   onSave: (
     data: ProductoServicioDto,
-  ) => Promise<GenericModalResult | void | undefined> | GenericModalResult | void | undefined;
+  ) =>
+    | Promise<GenericModalResult | void | undefined>
+    | GenericModalResult
+    | void
+    | undefined;
 
   producto: ProductoServicioDto;
 
@@ -94,6 +98,7 @@ export const ProductoServicioModal = ({
       id: producto.id,
 
       uuid: producto.uuid,
+      version: producto.version,
 
       nombre: producto.nombre ?? "",
 

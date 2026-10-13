@@ -26,6 +26,9 @@ interface Props {
   onCambiarEstado: (estado: EstadoPedidoType) => void;
   onRevisarComprobante: () => void;
   onCambiarPago: (estado: EstadoPagoPedidoType) => void;
+  esDueno: boolean;
+  onReembolso: () => void;
+  onConciliar: () => void;
 }
 
 export const PedidoDetalleModal = ({
@@ -35,9 +38,13 @@ export const PedidoDetalleModal = ({
   onCambiarEstado,
   onRevisarComprobante,
   onCambiarPago,
+  esDueno,
+  onReembolso,
+  onConciliar,
 }: Props) => (
   <GenericModal
     open={Boolean(pedido)}
+    loading={loading}
     onClose={onClose}
     title={pedido?.numeroPedido ?? "Pedido"}
     subtitle={pedido?.clienteNombre}
@@ -115,6 +122,25 @@ export const PedidoDetalleModal = ({
             </Alert>
           )}
 
+        {pedido.reembolso && (
+          <Alert severity="info" className="my-3">
+            Reembolso registrado por{" "}
+            {moneyFormatter.format(pedido.reembolso.monto)} ·{" "}
+            {pedido.reembolso.metodo === 1 ? "Efectivo" : "Transferencia"}
+            <br />
+            Referencia: {pedido.reembolso.referencia}
+            <br />
+            Motivo: {pedido.reembolso.motivo}
+            <br />
+            {dateFormatter.format(new Date(pedido.reembolso.fechaCreacion))}
+          </Alert>
+        )}
+        {pedido.inventarioPendiente && (
+          <Alert severity="warning" className="my-3">
+            Hay inventario pendiente de conciliación o reposición. Revisa el
+            stock histórico y el catálogo.
+          </Alert>
+        )}
         <h3 className="fz-h3 fw-semibold mb-3">Productos</h3>
 
         <div className="d-flex flex-column gap-2 mb-4">
@@ -142,6 +168,14 @@ export const PedidoDetalleModal = ({
                   {producto.cantidad} ×{" "}
                   {moneyFormatter.format(producto.precioUnitario)}
                 </small>
+                <small>
+                  Stock descontado:{" "}
+                  {producto.stockDescontado ?? "Sin registro histórico"} ·
+                  Repuesto: {producto.stockRestituido}
+                  {producto.stockPorRestituir > producto.stockRestituido
+                    ? ` · Pendiente: ${producto.stockPorRestituir - producto.stockRestituido}`
+                    : ""}
+                </small>
               </span>
               <strong className="col-auto fz-h5 fw-semibold">
                 {moneyFormatter.format(producto.subtotal)}
@@ -158,6 +192,7 @@ export const PedidoDetalleModal = ({
 
         <div className="pedidosActions d-flex justify-content-end align-items-center gap-2 flex-wrap py-3 my-4">
           {pedido.metodoPago === MetodoPagoPedido.Efectivo &&
+            pedido.puedeRegistrarPago &&
             pedido.estadoPago === EstadoPagoPedido.Pendiente && (
               <Button
                 type="button"
@@ -170,6 +205,18 @@ export const PedidoDetalleModal = ({
               </Button>
             )}
 
+          {esDueno && pedido.puedeReembolsar && (
+            <Button color="warning" variant="outlined" onClick={onReembolso}>
+              Registrar reembolso
+            </Button>
+          )}
+          {esDueno &&
+            (pedido.inventarioPendiente ||
+              pedido.productos.some((p) => p.stockDescontado == null)) && (
+              <Button variant="outlined" onClick={onConciliar}>
+                Conciliar inventario
+              </Button>
+            )}
           {pedido.accionesDisponibles.map((estado) => (
             <Button
               type="button"
@@ -198,14 +245,21 @@ export const PedidoDetalleModal = ({
               className="pedidosTimelineItem d-flex flex-column ps-3 pb-3"
             >
               <strong className="fz-h5 fw-semibold">
-                {estadoPedidoTexto[historial.estado]}
+                {historial.evento === "Pago" ||
+                historial.evento === "Comprobante" ||
+                historial.evento === "Reembolso"
+                  ? `${historial.evento}: ${historial.estadoPago ? estadoPagoTexto[historial.estadoPago] : ""}`
+                  : historial.evento === "Inventario"
+                    ? "Inventario conciliado"
+                    : estadoPedidoTexto[historial.estado]}
               </strong>
               <small className="fz-h6 fw-regular">
+                Responsable: {historial.idUsuarioCambio ?? "Sistema"} ·{" "}
                 {dateFormatter.format(new Date(historial.fecha))}
               </small>
-              {/* {historial.comentario && (
+              {historial.comentario && (
                 <span className="fz-h6 fw-regular">{historial.comentario}</span>
-              )} */}
+              )}
             </div>
           ))}
         </div>

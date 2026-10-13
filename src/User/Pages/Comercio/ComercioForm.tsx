@@ -50,7 +50,7 @@ const normalizarHorarios = (
   horarios: HorarioComercioDto[] = [],
 ): HorarioComercioDto[] =>
   Array.from({ length: 7 }, (_, index) => {
-    const dia = index + 1;
+    const dia = index;
     const horarioExistente = horarios.find((item) => item.dia === dia);
 
     return (
@@ -65,6 +65,7 @@ const normalizarHorarios = (
   });
 
 const createFormState = (initialData: ComercioDto | null): ComercioDto => ({
+  zonaHoraria: initialData?.zonaHoraria ?? "America/Mexico_City",
   id: initialData?.id ?? 0,
   nombre: initialData?.nombre ?? "",
   direccion: initialData?.direccion ?? "",
@@ -275,7 +276,10 @@ export const ComercioForm = ({
 
     if (!file || !editable) return;
     if (!isImageFile(file)) {
-      await showImageErrorAlert("Archivo no válido", "Selecciona una imagen válida.");
+      await showImageErrorAlert(
+        "Archivo no válido",
+        "Selecciona una imagen válida.",
+      );
       return;
     }
 
@@ -408,6 +412,11 @@ export const ComercioForm = ({
             labelledBy="commerce-form-tab-schedules"
           >
             <ComercioTabHorarios
+              comercioId={form.id}
+              zonaHoraria={form.zonaHoraria ?? "America/Mexico_City"}
+              onZonaHoraria={(zonaHoraria) =>
+                setForm((v) => ({ ...v, zonaHoraria }))
+              }
               horarios={form.horarios}
               editable={editable}
               updateHorario={updateHorario}

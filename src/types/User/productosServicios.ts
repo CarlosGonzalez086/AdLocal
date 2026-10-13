@@ -3,7 +3,8 @@ export const TipoProductoServicio = {
   Servicio: 2,
 } as const;
 
-export type TipoProductoServicio = typeof TipoProductoServicio[keyof typeof TipoProductoServicio];
+export type TipoProductoServicio =
+  (typeof TipoProductoServicio)[keyof typeof TipoProductoServicio];
 
 export const ModalidadProductoServicio = {
   Compra: 1,
@@ -11,9 +12,11 @@ export const ModalidadProductoServicio = {
   Cotizacion: 3,
 } as const;
 
-export type ModalidadProductoServicio = typeof ModalidadProductoServicio[keyof typeof ModalidadProductoServicio];
+export type ModalidadProductoServicio =
+  (typeof ModalidadProductoServicio)[keyof typeof ModalidadProductoServicio];
 
 export interface ProductoServicioDto {
+  version?: number;
   id?: number;
 
   uuid?: string;

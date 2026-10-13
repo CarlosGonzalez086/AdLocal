@@ -12,7 +12,9 @@ const ForgotPasswordPage = lazy(() => import("../pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("../pages/ResetPasswordPage"));
 
 const DashboardHome = lazy(() =>
-  import("./Pages/Dashboard/DashboardHome").then((m) => ({ default: m.DashboardHome })),
+  import("./Pages/Dashboard/DashboardHome").then((m) => ({
+    default: m.DashboardHome,
+  })),
 );
 const PlanesPageAdmin = lazy(() =>
   import("./Pages/Planes/Components/PlanesPage").then((m) => ({
@@ -30,9 +32,11 @@ const TiposComercioPageAdmin = lazy(() =>
   })),
 );
 const ConfiguracionSistemaPage = lazy(() =>
-  import("./Pages/Configuraciones/Components/ConfiguracionSistemaPage").then((m) => ({
-    default: m.ConfiguracionSistemaPage,
-  })),
+  import("./Pages/Configuraciones/Components/ConfiguracionSistemaPage").then(
+    (m) => ({
+      default: m.ConfiguracionSistemaPage,
+    }),
+  ),
 );
 const SuscripcionesPage = lazy(() =>
   import("./Pages/Suscripciones/Components/SuscripcionesPage").then((m) => ({
@@ -58,7 +62,9 @@ const CuentasAdLocalPage = lazy(() =>
 
 export default function AppAdmin() {
   return (
-    <Suspense fallback={<PageLoader message="Cargando panel de administración..." />}>
+    <Suspense
+      fallback={<PageLoader message="Cargando panel de administración..." />}
+    >
       <Routes>
         <Route index element={<Navigate to="/admin/login" replace />} />
         {/* Públicas */}
@@ -72,11 +78,7 @@ export default function AppAdmin() {
         />
         <Route
           path="/crear-cuenta"
-          element={
-            <PublicRouteAdmin>
-              <RegisterPage type="admin" />
-            </PublicRouteAdmin>
-          }
+          element={<Navigate to="/admin/app/crear-administrador" replace />}
         />
 
         <Route
@@ -109,9 +111,19 @@ export default function AppAdmin() {
           <Route path="inicio" element={<DashboardHome />} />
           <Route path="planes" element={<PlanesPageAdmin />} />
           <Route path="usuarios" element={<UsersPageAdmin />} />
+          <Route
+            path="crear-administrador"
+            element={<RegisterPage type="admin" />}
+          />
           <Route path="tipos-comercios" element={<TiposComercioPageAdmin />} />
-          <Route path="configuraciones" element={<ConfiguracionSistemaPage />} />
-          <Route path="historial-suscripciones" element={<SuscripcionesPage />} />
+          <Route
+            path="configuraciones"
+            element={<ConfiguracionSistemaPage />}
+          />
+          <Route
+            path="historial-suscripciones"
+            element={<SuscripcionesPage />}
+          />
           <Route path="comisiones" element={<ComisionesPage />} />
           <Route path="cuentas-adlocal" element={<CuentasAdLocalPage />} />
           <Route path="perfil" element={<ProfilePage />} />

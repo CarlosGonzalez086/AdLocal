@@ -78,10 +78,19 @@ export const PedidosComercioPage = () => {
         ? "Explica el motivo para informar al cliente."
         : "El cliente verá este cambio en el seguimiento.",
       input: requiereMotivo ? "textarea" : undefined,
+      icon: requiereMotivo ? "warning" : "question",
       inputPlaceholder: "Motivo o comentario",
       showCancelButton: true,
       confirmButtonText: "Confirmar",
       cancelButtonText: "Cancelar",
+      didOpen: () => {
+        if (requiereMotivo) {
+          setTimeout(() => {
+            const input = Swal.getInput();
+            if (input) input.focus();
+          }, 50);
+        }
+      },
       preConfirm: (value) =>
         requiereMotivo && !String(value || "").trim()
           ? Swal.showValidationMessage("Escribe un motivo.")
@@ -111,10 +120,20 @@ export const PedidosComercioPage = () => {
       text: aprobar
         ? "Confirma que el monto y los datos sean correctos."
         : "Indica por qué debe enviarse otro comprobante.",
+      icon: aprobar ? "question" : "warning",
       input: aprobar ? undefined : "textarea",
+      inputPlaceholder: "Motivo del rechazo",
       showCancelButton: true,
       confirmButtonText: aprobar ? "Marcar pagado" : "Rechazar",
       cancelButtonText: "Cancelar",
+      didOpen: () => {
+        if (!aprobar) {
+          setTimeout(() => {
+            const input = Swal.getInput();
+            if (input) input.focus();
+          }, 50);
+        }
+      },
       preConfirm: (value) =>
         !aprobar && !String(value || "").trim()
           ? Swal.showValidationMessage("Escribe el motivo del rechazo.")

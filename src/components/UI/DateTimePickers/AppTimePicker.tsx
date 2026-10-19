@@ -74,7 +74,7 @@ export const AppTimePicker: React.FC<AppTimePickerProps> = ({
             sx: {
               "& .MuiOutlinedInput-root": {
                 borderRadius: "10px",
-                height: size === "small" ? "42px" : "46px",
+                minHeight: size === "small" ? "44px" : "48px",
                 fontSize: "14px",
                 backgroundColor: "#FFFFFF",
                 "&:hover .MuiOutlinedInput-notchedOutline": {
@@ -84,6 +84,15 @@ export const AppTimePicker: React.FC<AppTimePickerProps> = ({
                   borderColor: "#008989",
                   borderWidth: "1.5px",
                 },
+              },
+              "& .MuiOutlinedInput-notchedOutline legend": {
+                float: "none !important",
+                marginBottom: "0 !important",
+              },
+              "& .MuiInputBase-input": {
+                padding: "10px 14px !important",
+                fontSize: "14px",
+                fontWeight: 500,
               },
               "& .MuiInputLabel-root": {
                 fontSize: "14px",

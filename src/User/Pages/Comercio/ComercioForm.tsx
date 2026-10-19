@@ -330,9 +330,9 @@ export const ComercioForm = ({
 
   return (
     <div className="commerceFormContainer">
-      <div className="commerceFormCard">
+      <div className="commerceFormInner">
         <form onSubmit={handleSubmit} noValidate>
-          <div className="commerceTabsContainer">
+          <div className="commerceTabsContainer border-bottom mb-4">
             <Tabs
               value={tab}
               onChange={(_, nextTab) => setTab(nextTab)}
@@ -440,7 +440,7 @@ export const ComercioForm = ({
           </TabPanel>
 
           {editable && (
-            <div className="commerceFormActions d-flex justify-content-end gap-3 mt-4">
+            <div className="commerceFormActions d-flex justify-content-end gap-3 mt-4 pt-3 border-top">
               {setEditando && (
                 <Button
                   type="button"

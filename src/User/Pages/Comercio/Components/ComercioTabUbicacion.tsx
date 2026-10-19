@@ -36,15 +36,15 @@ export const ComercioTabUbicacion: FC<ComercioTabUbicacionProps> = ({
       />
 
       {editable && (
-        <div className="commerceMapInstructions d-flex align-items-center gap-2">
+        <div className="commerceMapInstructions d-flex align-items-center gap-2 p-3 bg-light rounded-3 mb-3 border">
           <MaterialSymbol icon="touch_app" size="small" />
-          <p className="commerceMapInstructionsText fz-h4 fw-regular mb-0">
-            Presiona sobre el mapa para colocar o mover el marcador.
+          <p className="commerceMapInstructionsText fz-body-sm fw-medium text-secondary mb-0">
+            Haz clic o toca sobre el mapa para colocar o mover el marcador corporativo de tu negocio.
           </p>
         </div>
       )}
 
-      <div className="commerceMapContainer">
+      <div className="commerceMapContainer rounded-3 overflow-hidden border mb-3">
         <MapContainer
           center={[mapLatitude, mapLongitude]}
           zoom={15}
@@ -75,11 +75,18 @@ export const ComercioTabUbicacion: FC<ComercioTabUbicacionProps> = ({
         </MapContainer>
       </div>
 
-      {hasSelectedLocation && (
-        <div className="commerceCoordinates d-flex align-items-center gap-2">
+      {hasSelectedLocation ? (
+        <div className="commerceCoordinates d-inline-flex align-items-center gap-2 py-2 px-3 bg-light rounded-pill border">
           <MaterialSymbol icon="my_location" size="small" />
-          <span className="commerceCoordinatesText fz-h5 fw-medium">
-            {lat.toFixed(6)}, {lng.toFixed(6)}
+          <span className="commerceCoordinatesText fz-caption fw-semibold text-dark">
+            Coordenadas seleccionadas: {lat.toFixed(6)}, {lng.toFixed(6)}
+          </span>
+        </div>
+      ) : (
+        <div className="d-inline-flex align-items-center gap-2 py-2 px-3 bg-light text-muted rounded-pill border">
+          <MaterialSymbol icon="info" size="small" />
+          <span className="fz-caption fw-medium">
+            Aún no has seleccionado una coordenada en el mapa.
           </span>
         </div>
       )}

@@ -37,7 +37,7 @@ export const ComercioTabGeneral: FC<ComercioTabGeneralProps> = ({
 }) => {
   return (
     <>
-      <section className="commerceSectionCard">
+      <section className="commerceSectionCard mb-4">
         <SectionHeader
           icon="storefront"
           title="Información general"
@@ -45,8 +45,8 @@ export const ComercioTabGeneral: FC<ComercioTabGeneralProps> = ({
         />
 
         {/* LOGO */}
-        <div className="d-flex flex-column flex-sm-row align-items-center gap-3 mb-4">
-          <div className="commerceLogoPreview">
+        <div className="d-flex flex-column flex-sm-row align-items-center gap-3 mb-4 pb-3 border-bottom">
+          <div className="commerceLogoPreview shadow-sm">
             {preview ? (
               <img
                 src={preview}
@@ -58,30 +58,35 @@ export const ComercioTabGeneral: FC<ComercioTabGeneralProps> = ({
             )}
           </div>
 
-          {editable && (
-            <Button
-              component="label"
-              variant="outlined"
-              size="small"
-              className="commerceUploadLogoButton fz-h4 fw-semibold"
-              startIcon={<MaterialSymbol icon="upload" size="small" />}
-            >
-              {preview ? "Cambiar logo" : "Subir logo"}
-              <input
-                hidden
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-              />
-            </Button>
-          )}
+          <div className="d-flex flex-column align-items-center align-items-sm-start gap-1">
+            {editable && (
+              <Button
+                component="label"
+                variant="outlined"
+                size="small"
+                className="commerceUploadLogoButton fz-body-sm fw-semibold"
+                startIcon={<MaterialSymbol icon="upload" size="small" />}
+              >
+                {preview ? "Cambiar logo" : "Subir logo"}
+                <input
+                  hidden
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </Button>
+            )}
+            <span className="fz-caption text-muted">
+              Recomendado: formato cuadrado PNG o JPG, mínimo 400x400 px.
+            </span>
+          </div>
         </div>
 
-        {/* CAMPOS */}
-        <div className="row g-3">
+        {/* CAMPOS DE CONTACTO E IDENTIFICACIÓN */}
+        <div className="row g-3 g-md-4">
           <div className="col-12 col-md-6">
             <TextField
-              label="Nombre"
+              label="Nombre del comercio"
               value={form.nombre ?? ""}
               onChange={handleChange("nombre")}
               fullWidth
@@ -92,17 +97,7 @@ export const ComercioTabGeneral: FC<ComercioTabGeneralProps> = ({
 
           <div className="col-12 col-md-6">
             <TextField
-              label="Dirección"
-              value={form.direccion ?? ""}
-              onChange={handleChange("direccion")}
-              fullWidth
-              disabled={!editable}
-            />
-          </div>
-
-          <div className="col-12 col-md-6">
-            <TextField
-              label="Teléfono"
+              label="Teléfono de contacto"
               value={form.telefono ?? ""}
               onChange={handleChange("telefono")}
               fullWidth
@@ -127,33 +122,44 @@ export const ComercioTabGeneral: FC<ComercioTabGeneralProps> = ({
             />
           </div>
 
+          <div className="col-12 col-md-6">
+            <TextField
+              label="Dirección física"
+              value={form.direccion ?? ""}
+              onChange={handleChange("direccion")}
+              fullWidth
+              disabled={!editable}
+            />
+          </div>
+
           <div className="col-12">
             <TextField
-              label="Descripción"
+              label="Descripción del comercio"
               value={form.descripcion ?? ""}
               onChange={handleChange("descripcion")}
               fullWidth
               multiline
-              rows={4}
+              rows={3}
               disabled={!editable}
+              helperText="Escribe un resumen atractivo sobre los productos o servicios que ofrece tu negocio."
             />
           </div>
         </div>
       </section>
 
       {/* CLASIFICACIÓN */}
-      <section className="commerceSectionCard mt-4">
+      <section className="commerceSectionCard mb-4">
         <SectionHeader
           icon="location_city"
           title="Clasificación y región"
-          description="Selecciona el estado, municipio y tipo de comercio."
+          description="Selecciona el estado, municipio y giro de tu comercio."
         />
 
         <div
           className={!editable ? "commerceReadOnlySection" : undefined}
           aria-disabled={!editable}
         >
-          <div className="row g-3">
+          <div className="row g-3 g-md-4">
             <div className="col-12 col-md-6 col-lg-4">
               <SelectEstadoAutocomplete
                 value={form.estadoId}
@@ -199,14 +205,14 @@ export const ComercioTabGeneral: FC<ComercioTabGeneralProps> = ({
       </section>
 
       {/* COLORES */}
-      <section className="commerceSectionCard mt-4">
+      <section className="commerceSectionCard mb-4">
         <SectionHeader
           icon="palette"
           title="Colores de marca"
-          description="Personaliza la apariencia pública del comercio."
+          description="Personaliza la identidad visual de tu vitrina digital en AdLocal."
         />
 
-        <div className="row g-3">
+        <div className="row g-3 g-md-4">
           <div className="col-12 col-md-6">
             <TextField
               type="color"
@@ -221,6 +227,7 @@ export const ComercioTabGeneral: FC<ComercioTabGeneralProps> = ({
                   shrink: true,
                 },
               }}
+              helperText="Color principal utilizado en botones, badges y encabezados."
             />
           </div>
 
@@ -238,6 +245,7 @@ export const ComercioTabGeneral: FC<ComercioTabGeneralProps> = ({
                   shrink: true,
                 },
               }}
+              helperText="Color de acento para promociones, llamadas a la acción y avisos."
             />
           </div>
         </div>

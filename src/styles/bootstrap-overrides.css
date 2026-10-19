@@ -64,7 +64,7 @@ a:hover {
    ============================================================== */
 .MuiOutlinedInput-notchedOutline legend {
   float: none !important;
-  width: auto !important;
+  margin-bottom: 0 !important;
   line-height: inherit !important;
   padding: 0 !important;
 }
@@ -79,4 +79,10 @@ a:hover {
   border: 1px solid var(--border) !important;
   background-color: var(--surface) !important;
   box-shadow: var(--shadow-sm) !important;
+}
+
+
+.leaflet-div-icon.adlocal-svg-marker-container {
+  background: transparent !important;
+  border: none !important;
 }

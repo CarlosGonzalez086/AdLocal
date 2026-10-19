@@ -224,6 +224,7 @@ export const GenericModal = ({
     <Dialog
       open={open}
       onClose={handleClose}
+      disableEnforceFocus
       maxWidth={maxWidth}
       fullWidth={fullWidth}
       fullScreen={fullScreenMobile && isMobile}

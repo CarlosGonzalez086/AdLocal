@@ -49,17 +49,22 @@
 }
 
 .adlocal-alert .swal2-icon {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
-  width: 64px !important;
-  height: 64px !important;
-  margin: 4px auto 8px !important;
-  border: 0 !important;
-  border-radius: 18px !important;
-  line-height: 1 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 64px;
+  height: 64px;
+  margin: 4px auto 8px;
+  border: 0;
+  border-radius: 18px;
+  line-height: 1;
   --swal2-icon-animations: false;
+}
+
+.adlocal-alert .swal2-icon[style*="display: none"],
+.adlocal-alert .swal2-icon:not(.swal2-icon-show) {
+  display: none !important;
 }
 
 /* El dibujo nativo de SweetAlert2 se reemplaza por glifos vectoriales.
@@ -69,8 +74,8 @@
 }
 
 .adlocal-alert .swal2-icon::before {
-  content: "" !important;
-  display: block !important;
+  content: "";
+  display: none;
   width: 32px;
   height: 32px;
   flex: none;
@@ -83,6 +88,14 @@
   mask-repeat: no-repeat;
   -webkit-mask-size: contain;
   mask-size: contain;
+}
+
+.adlocal-alert .swal2-icon.swal2-success::before,
+.adlocal-alert .swal2-icon.swal2-error::before,
+.adlocal-alert .swal2-icon.swal2-warning::before,
+.adlocal-alert .swal2-icon.swal2-info::before,
+.adlocal-alert .swal2-icon.swal2-question::before {
+  display: block !important;
 }
 
 .adlocal-alert .swal2-icon::after {
@@ -212,6 +225,17 @@
   background: var(--surface, #fff) !important;
   color: var(--text, #1c1d1f) !important;
   font-family: inherit !important;
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  cursor: text !important;
+}
+
+.adlocal-alert .swal2-textarea {
+  min-height: 90px !important;
+  padding: 12px !important;
+  line-height: 1.5 !important;
+  resize: vertical !important;
 }
 
 .adlocal-alert .swal2-input:focus,

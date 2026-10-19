@@ -41,7 +41,7 @@ export const ComercioTabHorarios: FC<ComercioTabHorariosProps> = ({
         onConfirmada={onZonaHoraria}
       />
 
-      <div className="row g-3">
+      <div className="row g-3 g-lg-4">
         {DIAS_SEMANA.map((day) => {
           const schedule = horarios.find((item) => item.dia === day.dia);
 
@@ -50,15 +50,15 @@ export const ComercioTabHorarios: FC<ComercioTabHorariosProps> = ({
           }
 
           return (
-            <div key={day.dia} className="col-12 col-xl-6">
+            <div key={day.dia} className="col-12 col-md-6">
               <div
-                className={`commerceScheduleCard ${
+                className={`commerceScheduleCard p-3 p-md-4 rounded-3 border ${
                   schedule.abierto
                     ? "commerceScheduleCardOpen"
                     : "commerceScheduleCardClosed"
                 }`}
               >
-                <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                <div className="d-flex align-items-center justify-content-between gap-3 pb-2 border-bottom mb-2">
                   <div className="d-flex align-items-center gap-2">
                     <div className="commerceScheduleDayIcon">
                       <MaterialSymbol
@@ -69,12 +69,12 @@ export const ComercioTabHorarios: FC<ComercioTabHorariosProps> = ({
                       />
                     </div>
 
-                    <h3 className="commerceScheduleDayTitle fz-h4 fw-semibold mb-0">
+                    <h3 className="commerceScheduleDayTitle fz-h5 fw-bold mb-0">
                       {day.label}
                     </h3>
                   </div>
 
-                  <label className="commerceScheduleControl d-flex align-items-center gap-2">
+                  <label className="commerceScheduleControl d-flex align-items-center gap-2 mb-0">
                     <Switch
                       checked={schedule.abierto}
                       disabled={!editable}
@@ -93,7 +93,7 @@ export const ComercioTabHorarios: FC<ComercioTabHorariosProps> = ({
                     />
 
                     <span
-                      className={`commerceScheduleStatus fz-h5 fw-semibold ${
+                      className={`commerceScheduleStatus fz-caption fw-semibold ${
                         schedule.abierto
                           ? "commerceOpenStatus"
                           : "commerceClosedStatus"
@@ -104,7 +104,7 @@ export const ComercioTabHorarios: FC<ComercioTabHorariosProps> = ({
                   </label>
                 </div>
 
-                {schedule.abierto && (
+                {schedule.abierto ? (
                   <HorarioTimePickers
                     horaApertura={schedule.horaApertura}
                     horaCierre={schedule.horaCierre}
@@ -115,6 +115,11 @@ export const ComercioTabHorarios: FC<ComercioTabHorariosProps> = ({
                       }
                     }}
                   />
+                ) : (
+                  <div className="py-2 text-center text-muted fz-caption fw-medium d-flex align-items-center justify-content-center gap-1">
+                    <MaterialSymbol icon="bedtime" size="small" />
+                    <span>Cerrado durante este día</span>
+                  </div>
                 )}
               </div>
             </div>

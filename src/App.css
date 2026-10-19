@@ -905,6 +905,10 @@ a {
   color: #ff9f0a;
 }
 /* ===== Auth form ===== */
+.auth-field {
+  margin-bottom: 1.25rem !important;
+}
+
 .auth-field .MuiOutlinedInput-root {
   border-radius: 12px !important;
   background-color: #fff;
@@ -912,6 +916,13 @@ a {
 
 .auth-field .MuiOutlinedInput-notchedOutline {
   border-color: #e0e0e0 !important;
+}
+
+.auth-field .MuiOutlinedInput-notchedOutline legend {
+  float: none !important;
+  width: auto !important;
+  line-height: inherit !important;
+  padding: 0 !important;
 }
 
 .auth-field:hover .MuiOutlinedInput-notchedOutline {

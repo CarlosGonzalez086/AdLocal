@@ -122,3 +122,25 @@ a:hover {
   .col-md-3 { flex: 0 0 auto; width: 25%; }
   .col-md-8 { flex: 0 0 auto; width: 66.666667%; }
 }
+
+/* ==============================================================
+   MUI / BOOTSTRAP COLLISION FIXES
+   ============================================================== */
+.MuiOutlinedInput-notchedOutline legend {
+  float: none !important;
+  width: auto !important;
+  line-height: inherit !important;
+  padding: 0 !important;
+}
+
+.MuiInputBase-root {
+  box-sizing: border-box !important;
+}
+
+/* Formas de Card con Design Tokens */
+.card, .adlocal-card {
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--border) !important;
+  background-color: var(--surface) !important;
+  box-shadow: var(--shadow-sm) !important;
+}

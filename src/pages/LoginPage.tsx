@@ -7,8 +7,14 @@ import { useUser } from "../hooks/useUser";
 import LoginForm, { type LoginFormData } from "../components/forms/LoginForm";
 import MaterialSymbol from "../components/UI/MaterialSymbol/MaterialSymbol";
 
-import { setLocalStorageJWTAdmin } from "../utils/storageAdmin";
-import { setLocalStorageJWTUsuario } from "../utils/storageUsuario";
+import {
+  setLocalStorageJWTAdmin,
+  setLocalStorageRefreshTokenAdmin,
+} from "../utils/storageAdmin";
+import {
+  setLocalStorageJWTUsuario,
+  setLocalStorageRefreshTokenUsuario,
+} from "../utils/storageUsuario";
 import { ADLOCAL_LOGO_URL } from "../constants/brand";
 
 interface Props {
@@ -32,10 +38,24 @@ export default function LoginPage({ type }: Props) {
         : await user.loginUser(data);
 
       const loginResponse = response as unknown as {
-        respuesta?: { token?: string };
+        respuesta?: {
+          token?: string;
+          Token?: string;
+          refreshToken?: string;
+          RefreshToken?: string;
+        };
         token?: string;
+        refreshToken?: string;
       } | undefined;
-      const token = loginResponse?.respuesta?.token ?? loginResponse?.token;
+      const token =
+        loginResponse?.respuesta?.token ??
+        loginResponse?.respuesta?.Token ??
+        loginResponse?.token;
+      const refreshToken =
+        loginResponse?.respuesta?.refreshToken ??
+        loginResponse?.respuesta?.RefreshToken ??
+        loginResponse?.refreshToken;
+
       if (!token) {
         await Swal.fire({
           icon: "error",
@@ -47,8 +67,14 @@ export default function LoginPage({ type }: Props) {
 
       if (isAdmin) {
         setLocalStorageJWTAdmin(token);
+        if (refreshToken) {
+          setLocalStorageRefreshTokenAdmin(refreshToken);
+        }
       } else {
         setLocalStorageJWTUsuario(token);
+        if (refreshToken) {
+          setLocalStorageRefreshTokenUsuario(refreshToken);
+        }
       }
 
       await Swal.fire({

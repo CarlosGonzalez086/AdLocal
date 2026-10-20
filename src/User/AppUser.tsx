@@ -8,6 +8,7 @@ import UserLayout from "./Components/UsuarioLayout";
 import { getLocalStorageJWTUsuario } from "../utils/storageUsuario";
 import { jwtDecode } from "jwt-decode";
 import PageLoader from "../components/UI/PageLoader";
+import { UserContext, type User } from "../context/UserContext ";
 
 // Lazy-loaded pages (Code-Splitting)
 const LoginPage = lazy(() => import("../pages/LoginPage"));
@@ -117,8 +118,20 @@ export default function AppUser() {
     };
   }, []);
 
+  const userContextValue: User = {
+    sub: user?.sub || "",
+    id: user?.id || "",
+    nombre: user?.nombre || "",
+    rol: user?.rol || "",
+    exp: user?.exp || 0,
+    iss: user?.iss || "",
+    FotoUrl:
+      ((user as unknown as Record<string, unknown>)?.fotoUrl as string) || "",
+  };
+
   return (
-    <Suspense fallback={<PageLoader message="Cargando..." />}>
+    <UserContext.Provider value={userContextValue}>
+      <Suspense fallback={<PageLoader message="Cargando..." />}>
       <Routes>
         <Route index element={<Navigate to="/usuario/login" replace />} />
 
@@ -235,5 +248,6 @@ export default function AppUser() {
         </Route>
       </Routes>
     </Suspense>
+    </UserContext.Provider>
   );
 }

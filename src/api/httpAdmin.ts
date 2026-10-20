@@ -106,8 +106,8 @@ httpAdmin.interceptors.response.use(
       });
     }
 
-    // 403 Forbidden o 401 no recuperable
-    if (status === 403 || (status === 401 && isAuthRequest)) {
+    // 401 no recuperable en peticiones de autenticación
+    if (status === 401 && isAuthRequest) {
       clearStorageAdmin();
       if (
         typeof window !== "undefined" &&

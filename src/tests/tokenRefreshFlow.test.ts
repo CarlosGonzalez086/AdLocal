@@ -1,8 +1,22 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   getTokenRemainingSeconds,
   isTokenExpiringSoon,
 } from '../services/tokenRefresh';
+import {
+  getLocalStorageJWTUsuario,
+  getLocalStorageRefreshTokenUsuario,
+  setLocalStorageJWTUsuario,
+  setLocalStorageRefreshTokenUsuario,
+  clearStorageUsuario,
+} from '../utils/storageUsuario';
+import {
+  getLocalStorageJWTAdmin,
+  getLocalStorageRefreshTokenAdmin,
+  setLocalStorageJWTAdmin,
+  setLocalStorageRefreshTokenAdmin,
+  clearStorageAdmin,
+} from '../utils/storageAdmin';
 
 describe('Flujo de Expiración y Refresco de Tokens (AdLocal)', () => {
   // Helper para generar tokens JWT de prueba con claims específicos
@@ -97,6 +111,59 @@ describe('Flujo de Expiración y Refresco de Tokens (AdLocal)', () => {
       expect(isTokenExpiringSoon(token, 30)).toBe(false);
       // Con umbral de 120 segundos, sí está "expirando pronto"
       expect(isTokenExpiringSoon(token, 120)).toBe(true);
+    });
+  });
+
+  describe('3. Persistencia de Sesión y Refresh Tokens', () => {
+    let mockStore: Record<string, string> = {};
+    const mockStorage = {
+      getItem: (key: string) => mockStore[key] ?? null,
+      setItem: (key: string, val: string) => { mockStore[key] = val; },
+      removeItem: (key: string) => { delete mockStore[key]; },
+      clear: () => { mockStore = {}; },
+      length: 0,
+      key: () => null,
+    };
+
+    beforeEach(() => {
+      mockStore = {};
+      (globalThis as unknown as { localStorage: unknown }).localStorage = mockStorage;
+      clearStorageUsuario();
+      clearStorageAdmin();
+    });
+
+    it('debe persistir y recuperar correctamente el refresh token de usuario', () => {
+      expect(getLocalStorageRefreshTokenUsuario()).toBe('');
+      setLocalStorageRefreshTokenUsuario('sample-usuario-refresh-token-xyz');
+      expect(getLocalStorageRefreshTokenUsuario()).toBe('sample-usuario-refresh-token-xyz');
+    });
+
+    it('debe persistir y recuperar correctamente el refresh token de admin', () => {
+      expect(getLocalStorageRefreshTokenAdmin()).toBe('');
+      setLocalStorageRefreshTokenAdmin('sample-admin-refresh-token-123');
+      expect(getLocalStorageRefreshTokenAdmin()).toBe('sample-admin-refresh-token-123');
+    });
+
+    it('clearStorageUsuario debe limpiar tanto el token como el refresh token', () => {
+      setLocalStorageJWTUsuario('jwt-abc');
+      setLocalStorageRefreshTokenUsuario('ref-abc');
+      expect(getLocalStorageJWTUsuario()).toBe('jwt-abc');
+      expect(getLocalStorageRefreshTokenUsuario()).toBe('ref-abc');
+
+      clearStorageUsuario();
+      expect(getLocalStorageJWTUsuario()).toBe('');
+      expect(getLocalStorageRefreshTokenUsuario()).toBe('');
+    });
+
+    it('clearStorageAdmin debe limpiar tanto el token como el refresh token', () => {
+      setLocalStorageJWTAdmin('jwt-admin-abc');
+      setLocalStorageRefreshTokenAdmin('ref-admin-abc');
+      expect(getLocalStorageJWTAdmin()).toBe('jwt-admin-abc');
+      expect(getLocalStorageRefreshTokenAdmin()).toBe('ref-admin-abc');
+
+      clearStorageAdmin();
+      expect(getLocalStorageJWTAdmin()).toBe('');
+      expect(getLocalStorageRefreshTokenAdmin()).toBe('');
     });
   });
 });

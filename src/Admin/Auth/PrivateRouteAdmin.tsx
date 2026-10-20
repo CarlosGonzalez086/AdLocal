@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import {
   clearStorageAdmin,
   getLocalStorageJWTAdmin,
+  getLocalStorageRefreshTokenAdmin,
 } from "../../utils/storageAdmin";
 import { renovarTokenAdmin } from "../../services/tokenRefresh";
 import { useTokenRefresh } from "../../hooks/useTokenRefresh";
@@ -41,8 +42,9 @@ export default function PrivateRouteAdmin({ children, roles }: Props) {
     const validarToken = async () => {
       try {
         const token = getLocalStorageJWTAdmin();
+        const refreshToken = getLocalStorageRefreshTokenAdmin();
 
-        if (!token) {
+        if (!token && !refreshToken) {
           if (isMounted) {
             setAuthenticated(false);
             setLoading(false);
@@ -51,23 +53,20 @@ export default function PrivateRouteAdmin({ children, roles }: Props) {
         }
 
         let activeToken = token;
-        let decoded: JwtPayload;
+        let decoded: JwtPayload | null = null;
 
-        try {
-          decoded = jwtDecode<JwtPayload>(activeToken);
-        } catch {
-          clearStorageAdmin();
-          if (isMounted) {
-            setAuthenticated(false);
-            setLoading(false);
+        if (activeToken) {
+          try {
+            decoded = jwtDecode<JwtPayload>(activeToken);
+          } catch {
+            decoded = null;
           }
-          return;
         }
 
         const now = Math.floor(Date.now() / 1000);
 
-        // Si ya expiró o le queda menos de 1 minuto, intentar renovar inmediatamente
-        if (!decoded.exp || decoded.exp <= now + 60) {
+        // Si no hay token, no es válido, expiró o le queda poco tiempo (menos de 60s), renovar mediante refreshToken
+        if (!decoded || !decoded.exp || decoded.exp <= now + 60) {
           try {
             const renovacion = await renovarTokenAdmin();
             const nuevoToken = renovacion?.respuesta?.token;

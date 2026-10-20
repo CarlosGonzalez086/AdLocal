@@ -2,7 +2,6 @@ import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import type { ReactElement } from "react";
 import {
-  clearStorageAdmin,
   getLocalStorageJWTAdmin,
 } from "../../utils/storageAdmin";
 
@@ -29,7 +28,6 @@ export default function PublicRouteAdmin({ children }: Props) {
     const now = Math.floor(Date.now() / 1000);
 
     if (!decoded.exp || decoded.exp <= now) {
-      clearStorageAdmin();
       return children;
     }
 
@@ -42,10 +40,8 @@ export default function PublicRouteAdmin({ children }: Props) {
       return <Navigate to="/admin/app" replace />;
     }
 
-    clearStorageAdmin();
     return children;
   } catch {
-    clearStorageAdmin();
     return children;
   }
 }

@@ -1,8 +1,21 @@
+const getStorage = (): Storage | null => {
+  if (typeof window !== "undefined" && window.localStorage) {
+    return window.localStorage;
+  }
+  if (
+    typeof globalThis !== "undefined" &&
+    (globalThis as unknown as { localStorage?: Storage }).localStorage
+  ) {
+    return (globalThis as unknown as { localStorage: Storage }).localStorage;
+  }
+  return null;
+};
+
 export const getLocalStorageJWTAdmin = (): string => {
   try {
-    return (
-      window.localStorage.getItem("jwtAdmin") ?? ""
-    );
+    const storage = getStorage();
+    if (!storage) return "";
+    return storage.getItem("jwtAdmin") ?? "";
   } catch (error) {
     console.log(error);
     return "";
@@ -13,10 +26,9 @@ export const setLocalStorageJWTAdmin = (
   token: string
 ): void => {
   try {
-    window.localStorage.setItem(
-      "jwtAdmin",
-      token
-    );
+    const storage = getStorage();
+    if (!storage) return;
+    storage.setItem("jwtAdmin", token);
   } catch (error) {
     console.log(error);
   }
@@ -27,7 +39,9 @@ export const setLocalStorageAdmin = (
   value: string
 ): void => {
   try {
-    window.localStorage.setItem(key, value);
+    const storage = getStorage();
+    if (!storage) return;
+    storage.setItem(key, value);
   } catch (error) {
     console.log(error);
   }
@@ -37,9 +51,9 @@ export const getLocalStorageAdmin = (
   key: string
 ): string => {
   try {
-    return (
-      window.localStorage.getItem(key) ?? ""
-    );
+    const storage = getStorage();
+    if (!storage) return "";
+    return storage.getItem(key) ?? "";
   } catch (error) {
     console.log(error);
     return "";
@@ -50,7 +64,9 @@ export const removeLocalStorageAdmin = (
   key: string
 ): void => {
   try {
-    window.localStorage.removeItem(key);
+    const storage = getStorage();
+    if (!storage) return;
+    storage.removeItem(key);
   } catch (error) {
     console.log(error);
   }
@@ -58,7 +74,9 @@ export const removeLocalStorageAdmin = (
 
 export const getLocalStorageRefreshTokenAdmin = (): string => {
   try {
-    return window.localStorage.getItem("refreshTokenAdmin") ?? "";
+    const storage = getStorage();
+    if (!storage) return "";
+    return storage.getItem("refreshTokenAdmin") ?? "";
   } catch (error) {
     console.log(error);
     return "";
@@ -67,7 +85,9 @@ export const getLocalStorageRefreshTokenAdmin = (): string => {
 
 export const setLocalStorageRefreshTokenAdmin = (token: string): void => {
   try {
-    window.localStorage.setItem("refreshTokenAdmin", token);
+    const storage = getStorage();
+    if (!storage) return;
+    storage.setItem("refreshTokenAdmin", token);
   } catch (error) {
     console.log(error);
   }
@@ -75,10 +95,12 @@ export const setLocalStorageRefreshTokenAdmin = (token: string): void => {
 
 export const clearStorageAdmin = (): void => {
   try {
-    window.localStorage.removeItem("jwtAdmin");
-    window.localStorage.removeItem("refreshTokenAdmin");
-    window.localStorage.removeItem("admin");
-    window.localStorage.removeItem("token");
+    const storage = getStorage();
+    if (!storage) return;
+    storage.removeItem("jwtAdmin");
+    storage.removeItem("refreshTokenAdmin");
+    storage.removeItem("admin");
+    storage.removeItem("token");
   } catch (error) {
     console.log(error);
   }

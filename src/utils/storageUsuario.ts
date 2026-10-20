@@ -1,8 +1,23 @@
+const getStorage = (): Storage | null => {
+  if (typeof window !== "undefined" && window.localStorage) {
+    return window.localStorage;
+  }
+  if (
+    typeof globalThis !== "undefined" &&
+    (globalThis as unknown as { localStorage?: Storage }).localStorage
+  ) {
+    return (globalThis as unknown as { localStorage: Storage }).localStorage;
+  }
+  return null;
+};
+
 export const getLocalStorageJWTUsuario = (): string => {
   try {
+    const storage = getStorage();
+    if (!storage) return "";
     return (
-      window.localStorage.getItem("jwtUsuario") ||
-      window.localStorage.getItem("token") ||
+      storage.getItem("jwtUsuario") ||
+      storage.getItem("token") ||
       ""
     );
   } catch (error) {
@@ -15,8 +30,10 @@ export const setLocalStorageJWTUsuario = (
   token: string
 ): void => {
   try {
-    window.localStorage.setItem("jwtUsuario", token);
-    window.localStorage.setItem("token", token);
+    const storage = getStorage();
+    if (!storage) return;
+    storage.setItem("jwtUsuario", token);
+    storage.setItem("token", token);
   } catch (error) {
     console.log(error);
   }
@@ -27,7 +44,9 @@ export const setLocalStorageUsuario = (
   value: string
 ): void => {
   try {
-    window.localStorage.setItem(key, value);
+    const storage = getStorage();
+    if (!storage) return;
+    storage.setItem(key, value);
   } catch (error) {
     console.log(error);
   }
@@ -37,9 +56,9 @@ export const getLocalStorageUsuario = (
   key: string
 ): string => {
   try {
-    return (
-      window.localStorage.getItem(key) ?? ""
-    );
+    const storage = getStorage();
+    if (!storage) return "";
+    return storage.getItem(key) ?? "";
   } catch (error) {
     console.log(error);
     return "";
@@ -50,7 +69,9 @@ export const removeLocalStorageUsuario = (
   key: string
 ): void => {
   try {
-    window.localStorage.removeItem(key);
+    const storage = getStorage();
+    if (!storage) return;
+    storage.removeItem(key);
   } catch (error) {
     console.log(error);
   }
@@ -58,7 +79,9 @@ export const removeLocalStorageUsuario = (
 
 export const getLocalStorageRefreshTokenUsuario = (): string => {
   try {
-    return window.localStorage.getItem("refreshTokenUsuario") ?? "";
+    const storage = getStorage();
+    if (!storage) return "";
+    return storage.getItem("refreshTokenUsuario") ?? "";
   } catch (error) {
     console.log(error);
     return "";
@@ -67,7 +90,9 @@ export const getLocalStorageRefreshTokenUsuario = (): string => {
 
 export const setLocalStorageRefreshTokenUsuario = (token: string): void => {
   try {
-    window.localStorage.setItem("refreshTokenUsuario", token);
+    const storage = getStorage();
+    if (!storage) return;
+    storage.setItem("refreshTokenUsuario", token);
   } catch (error) {
     console.log(error);
   }
@@ -75,10 +100,12 @@ export const setLocalStorageRefreshTokenUsuario = (token: string): void => {
 
 export const clearStorageUsuario = (): void => {
   try {
-    window.localStorage.removeItem("jwtUsuario");
-    window.localStorage.removeItem("refreshTokenUsuario");
-    window.localStorage.removeItem("usuario");
-    window.localStorage.removeItem("token");
+    const storage = getStorage();
+    if (!storage) return;
+    storage.removeItem("jwtUsuario");
+    storage.removeItem("refreshTokenUsuario");
+    storage.removeItem("usuario");
+    storage.removeItem("token");
   } catch (error) {
     console.log(error);
   }

@@ -2,7 +2,6 @@ import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import type { ReactElement } from "react";
 import {
-  clearStorageUsuario,
   getLocalStorageJWTUsuario,
 } from "../../utils/storageUsuario";
 
@@ -29,7 +28,6 @@ export default function PublicRouteUsuario({ children }: Props) {
     const now = Math.floor(Date.now() / 1000);
 
     if (!decoded.exp || decoded.exp <= now) {
-      clearStorageUsuario();
       return children;
     }
 
@@ -42,10 +40,8 @@ export default function PublicRouteUsuario({ children }: Props) {
       return <Navigate to="/usuario/app" replace />;
     }
 
-    clearStorageUsuario();
     return children;
   } catch {
-    clearStorageUsuario();
     return children;
   }
 }

@@ -11,6 +11,8 @@ import {
   type ConfiguracionItemDto,
 } from "../services/configuracionApi";
 
+let configFetchInFlight: Promise<ConfiguracionItemDto[]> | null = null;
+
 export const useConfiguracionSistema = () => {
   const [loading, setLoading] = useState(false);
 
@@ -20,9 +22,16 @@ export const useConfiguracionSistema = () => {
     setLoading(true);
 
     try {
-      const { data } = await configuracionApi.obtenerTodas();
-
-      setConfiguraciones(data.respuesta ?? []);
+      if (!configFetchInFlight) {
+        configFetchInFlight = configuracionApi
+          .obtenerTodas()
+          .then(({ data }) => data.respuesta ?? [])
+          .finally(() => {
+            configFetchInFlight = null;
+          });
+      }
+      const items = await configFetchInFlight;
+      setConfiguraciones(items);
     } catch {
       Swal.fire(
         "Error",

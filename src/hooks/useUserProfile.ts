@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import Swal from "../utils/sweetalert";
-import { UserContext } from "../context/UserContext ";
+import { UserContext } from "../context/UserContext";
 import { useActualizarJwt } from "./useActualizarJwt";
 import type { ProfileUser, ProfileUserUpdateDto } from "../types/User/UserAuth";
 import { profileUserApi } from "../services/profileUserApi";

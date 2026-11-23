@@ -6,8 +6,14 @@ import {
 import { renovarTokenUsuario } from "../services/tokenRefresh";
 import { extraerMensajeError } from "../utils/errorHandler";
 
+const getUsuarioBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL as string | undefined;
+  const baseUrl = envUrl ? envUrl.replace(/\/+$/, "") : "https://adlocalapi.onrender.com";
+  return `${baseUrl}/api/`;
+};
+
 export const httpUsuario = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}api/`,
+  baseURL: getUsuarioBaseUrl(),
   withCredentials: true,
 });
 

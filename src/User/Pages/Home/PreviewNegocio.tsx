@@ -249,7 +249,7 @@ export function PreviewNegocio() {
         {/* BACK */}
 
         <div className="commercePreviewBackContainer">
-          <ButtonBack route="/app" />
+          <ButtonBack route="/usuario/app/inicio" />
         </div>
 
         {/* HEADER */}

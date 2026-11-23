@@ -8,7 +8,7 @@ import UserLayout from "./Components/UsuarioLayout";
 import { getLocalStorageJWTUsuario } from "../utils/storageUsuario";
 import { jwtDecode } from "jwt-decode";
 import PageLoader from "../components/UI/PageLoader";
-import { UserContext, type User } from "../context/UserContext ";
+import { UserContext, type User } from "../context/UserContext";
 
 // Lazy-loaded pages (Code-Splitting)
 const LoginPage = lazy(() => import("../pages/LoginPage"));
@@ -240,6 +240,7 @@ export default function AppUser() {
           <Route path="pedidos" element={<PedidosComercioPage />} />
           <Route path="comisiones" element={<ComisionesComercioPage />} />
           <Route path="citas" element={<CitasComercioPage />} />
+          <Route path="vistaprevia/:id" element={<PreviewNegocio />} />
           {user?.rol !== "Colaborador" && (
             <Route path="plan" element={<PlanesPage user={user} />} />
           )}

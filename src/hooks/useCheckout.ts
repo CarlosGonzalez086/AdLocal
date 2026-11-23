@@ -1,9 +1,8 @@
 // hooks/useCheckout.ts
 import { useState, useCallback, useContext } from "react";
-import Swal from "../utils/sweetalert";
-import { showConfirmDialog } from "../utils/sweetalert";
+import Swal, { showConfirmDialog } from "../utils/sweetalert";
 import { checkoutApi, type CheckoutResponseDto } from "../services/checkoutApi";
-import { UserContext } from "../context/UserContext ";
+import { UserContext } from "../context/UserContext";
 import { useActualizarJwt } from "./useActualizarJwt";
 import { extraerMensajeError } from "../utils/errorHandler";
 
@@ -63,35 +62,43 @@ export const useCheckout = () => {
   /**
    * Pagar con tarjeta nueva (Stripe Checkout)
    */
-  const pagarConNuevaTarjeta = useCallback(async (planId: number) => {
-    setLoading(true);
-    setResponse(null);
+  const pagarConNuevaTarjeta = useCallback(
+    async (planId: number): Promise<string | null> => {
+      setLoading(true);
+      setResponse(null);
 
-    try {
-      const { data } = await checkoutApi.crearCheckoutStripe(planId);
+      try {
+        const { data } = await checkoutApi.crearCheckoutStripe(planId);
 
-      if (data.codigo !== "200") {
-        Swal.fire("Error", data.mensaje, "error");
+        if (data.codigo !== "200") {
+          Swal.fire("Error", data.mensaje, "error");
+          return null;
+        }
+
+        const checkoutUrl =
+          typeof data.respuesta === "string"
+            ? data.respuesta
+            : data.respuesta?.url ?? null;
+
+        if (!checkoutUrl) {
+          return null;
+        }
+
+        setResponse({ url: checkoutUrl });
+        return checkoutUrl;
+      } catch (error: unknown) {
+        Swal.fire(
+          "Error",
+          extraerMensajeError(error, "No se pudo iniciar el checkout"),
+          "error",
+        );
         return null;
+      } finally {
+        setLoading(false);
       }
-
-      if (data.respuesta?.url) {
-        window.location.href = data.respuesta.url;
-      }
-
-      setResponse(data.respuesta ?? null);
-      return data.respuesta;
-    } catch (error: unknown) {
-      Swal.fire(
-        "Error",
-        extraerMensajeError(error, "No se pudo iniciar el checkout"),
-        "error",
-      );
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   /**
    * Cancelar suscripción

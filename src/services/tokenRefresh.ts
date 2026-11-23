@@ -59,6 +59,9 @@ export const isTokenExpiringSoon = (
   return remaining <= thresholdSeconds;
 };
 
+let usuarioRefreshInFlight: Promise<RenovarTokenResponse> | null = null;
+let adminRefreshInFlight: Promise<RenovarTokenResponse> | null = null;
+
 /**
  * Endpoint 1: Endpoint Principal / Central (Recomendado para todos los roles)
  * Ruta: POST /api/Auth/renovar-token
@@ -66,70 +69,80 @@ export const isTokenExpiringSoon = (
  * Para: Comercio, Cliente, Admin y Colaborador.
  */
 export const renovarTokenUsuario = async (): Promise<RenovarTokenResponse> => {
-  const currentToken = getLocalStorageJWTUsuario();
-  const currentRefreshToken = getLocalStorageRefreshTokenUsuario();
-
-  if (!currentToken && !currentRefreshToken) {
-    throw new Error("No hay credenciales almacenadas para renovar");
+  if (usuarioRefreshInFlight) {
+    return usuarioRefreshInFlight;
   }
 
-  const endpoint = `${getBaseApiUrl()}/Auth/renovar-token`;
+  usuarioRefreshInFlight = (async () => {
+    const currentToken = getLocalStorageJWTUsuario();
+    const currentRefreshToken = getLocalStorageRefreshTokenUsuario();
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  if (currentToken) {
-    headers["Authorization"] = `Bearer ${currentToken}`;
-  }
-  if (currentRefreshToken) {
-    headers["X-Refresh-Token"] = currentRefreshToken;
-  }
-
-  const response = await axios.post<RenovarTokenResponse>(
-    endpoint,
-    {
-      token: currentToken,
-      tokenActual: currentToken,
-      refreshToken: currentRefreshToken,
-    },
-    { headers, withCredentials: true }
-  );
-
-  const data = response.data;
-  const nuevoToken = data?.respuesta?.token;
-
-  if (nuevoToken) {
-    setLocalStorageJWTUsuario(nuevoToken);
-    if (data?.respuesta?.refreshToken) {
-      setLocalStorageRefreshTokenUsuario(data.respuesta.refreshToken);
+    if (!currentToken && !currentRefreshToken) {
+      throw new Error("No hay credenciales almacenadas para renovar");
     }
 
-    if (data.respuesta.usuario) {
-      try {
-        setLocalStorageUsuario(
-          "usuario",
-          JSON.stringify(data.respuesta.usuario)
+    const endpoint = `${getBaseApiUrl()}/Auth/renovar-token`;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (currentToken) {
+      headers["Authorization"] = `Bearer ${currentToken}`;
+    }
+    if (currentRefreshToken) {
+      headers["X-Refresh-Token"] = currentRefreshToken;
+    }
+
+    const response = await axios.post<RenovarTokenResponse>(
+      endpoint,
+      {
+        token: currentToken,
+        tokenActual: currentToken,
+        refreshToken: currentRefreshToken,
+      },
+      { headers, withCredentials: true }
+    );
+
+    const data = response.data;
+    const nuevoToken = data?.respuesta?.token;
+
+    if (nuevoToken) {
+      setLocalStorageJWTUsuario(nuevoToken);
+      if (data?.respuesta?.refreshToken) {
+        setLocalStorageRefreshTokenUsuario(data.respuesta.refreshToken);
+      }
+
+      if (data.respuesta.usuario) {
+        try {
+          setLocalStorageUsuario(
+            "usuario",
+            JSON.stringify(data.respuesta.usuario)
+          );
+        } catch (err) {
+          console.warn("No se pudo guardar usuario en localStorage:", err);
+        }
+      }
+
+      // Notificar a componentes en tiempo real
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("adlocal_token_refreshed", {
+            detail: {
+              token: nuevoToken,
+              userType: "usuario",
+              usuario: data.respuesta.usuario,
+            },
+          })
         );
-      } catch (err) {
-        console.warn("No se pudo guardar usuario en localStorage:", err);
       }
     }
 
-    // Notificar a componentes en tiempo real
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("adlocal_token_refreshed", {
-          detail: {
-            token: nuevoToken,
-            userType: "usuario",
-            usuario: data.respuesta.usuario,
-          },
-        })
-      );
-    }
-  }
+    return data;
+  })().finally(() => {
+    usuarioRefreshInFlight = null;
+  });
 
-  return data;
+  return usuarioRefreshInFlight;
 };
 
 /**
@@ -139,84 +152,94 @@ export const renovarTokenUsuario = async (): Promise<RenovarTokenResponse> => {
  * Para: Administradores del panel de control de la plataforma.
  */
 export const renovarTokenAdmin = async (): Promise<RenovarTokenResponse> => {
-  const currentToken = getLocalStorageJWTAdmin();
-  const currentRefreshToken = getLocalStorageRefreshTokenAdmin();
-
-  if (!currentToken && !currentRefreshToken) {
-    throw new Error("No hay credenciales de admin almacenadas para renovar");
+  if (adminRefreshInFlight) {
+    return adminRefreshInFlight;
   }
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  if (currentToken) {
-    headers["Authorization"] = `Bearer ${currentToken}`;
-  }
-  if (currentRefreshToken) {
-    headers["X-Refresh-Token"] = currentRefreshToken;
-  }
+  adminRefreshInFlight = (async () => {
+    const currentToken = getLocalStorageJWTAdmin();
+    const currentRefreshToken = getLocalStorageRefreshTokenAdmin();
 
-  const payload = {
-    token: currentToken,
-    tokenActual: currentToken,
-    refreshToken: currentRefreshToken,
-  };
+    if (!currentToken && !currentRefreshToken) {
+      throw new Error("No hay credenciales de admin almacenadas para renovar");
+    }
 
-  const endpointAdmin = `${getBaseApiUrl()}/Admin/renovar-token`;
-  const endpointAuth = `${getBaseApiUrl()}/Auth/renovar-token`;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (currentToken) {
+      headers["Authorization"] = `Bearer ${currentToken}`;
+    }
+    if (currentRefreshToken) {
+      headers["X-Refresh-Token"] = currentRefreshToken;
+    }
 
-  let response;
-  try {
-    response = await axios.post<RenovarTokenResponse>(
-      endpointAdmin,
-      payload,
-      { headers, withCredentials: true }
-    );
-  } catch (error: unknown) {
-    // Si el endpoint específico de Admin retorna 404, usar fallback al Endpoint Central de Auth
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
+    const payload = {
+      token: currentToken,
+      tokenActual: currentToken,
+      refreshToken: currentRefreshToken,
+    };
+
+    const endpointAdmin = `${getBaseApiUrl()}/Admin/renovar-token`;
+    const endpointAuth = `${getBaseApiUrl()}/Auth/renovar-token`;
+
+    let response;
+    try {
       response = await axios.post<RenovarTokenResponse>(
-        endpointAuth,
+        endpointAdmin,
         payload,
         { headers, withCredentials: true }
       );
-    } else {
-      throw error;
-    }
-  }
-
-  const data = response.data;
-  const nuevoToken = data?.respuesta?.token;
-
-  if (nuevoToken) {
-    setLocalStorageJWTAdmin(nuevoToken);
-    if (data?.respuesta?.refreshToken) {
-      setLocalStorageRefreshTokenAdmin(data.respuesta.refreshToken);
-    }
-
-    if (data.respuesta.usuario) {
-      try {
-        setLocalStorageAdmin(
-          "admin",
-          JSON.stringify(data.respuesta.usuario)
+    } catch (error: unknown) {
+      // Si el endpoint específico de Admin retorna 404, usar fallback al Endpoint Central de Auth
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        response = await axios.post<RenovarTokenResponse>(
+          endpointAuth,
+          payload,
+          { headers, withCredentials: true }
         );
-      } catch (err) {
-        console.warn("No se pudo guardar admin en localStorage:", err);
+      } else {
+        throw error;
       }
     }
 
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("adlocal_token_refreshed", {
-          detail: {
-            token: nuevoToken,
-            userType: "admin",
-            usuario: data.respuesta.usuario,
-          },
-        })
-      );
-    }
-  }
+    const data = response.data;
+    const nuevoToken = data?.respuesta?.token;
 
-  return data;
+    if (nuevoToken) {
+      setLocalStorageJWTAdmin(nuevoToken);
+      if (data?.respuesta?.refreshToken) {
+        setLocalStorageRefreshTokenAdmin(data.respuesta.refreshToken);
+      }
+
+      if (data.respuesta.usuario) {
+        try {
+          setLocalStorageAdmin(
+            "admin",
+            JSON.stringify(data.respuesta.usuario)
+          );
+        } catch (err) {
+          console.warn("No se pudo guardar admin en localStorage:", err);
+        }
+      }
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("adlocal_token_refreshed", {
+            detail: {
+              token: nuevoToken,
+              userType: "admin",
+              usuario: data.respuesta.usuario,
+            },
+          })
+        );
+      }
+    }
+
+    return data;
+  })().finally(() => {
+    adminRefreshInFlight = null;
+  });
+
+  return adminRefreshInFlight;
 };

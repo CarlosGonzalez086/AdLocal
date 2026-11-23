@@ -3,7 +3,7 @@ import Swal, { notificarErrorApi, showConfirmDialog } from "../utils/sweetalert"
 import { useActualizarJwt } from "./useActualizarJwt";
 import { comercioCreateSchema, comercioUpdateSchema, type ComercioCreateDto } from "../schemas/comercioCreate.schema";
 import { normalizeComercioData } from "../utils/generalsFunctions";
-import { UserContext } from "../context/UserContext ";
+import { UserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { comercioDtoDefault, type ColaborarDto, type ComercioDto, type ComercioDtoListItem } from "../types/User/comercio";
 import { comercioApi } from "../services/comercioApi";
@@ -238,7 +238,7 @@ export const useComercio = () => {
         }
 
         Swal.fire("Actualizado", resp.mensaje, "success");
-        navigate("/app/comercio");
+        navigate("/usuario/app/comercio");
       } else {
         const result = comercioCreateSchema.safeParse(normalizedData);
 
@@ -259,7 +259,7 @@ export const useComercio = () => {
         }
 
         Swal.fire("Creado", resp.mensaje, "success");
-        navigate("/app/comercio");
+        navigate("/usuario/app/comercio");
       }
 
       await cargar();

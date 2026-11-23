@@ -33,7 +33,13 @@ export const setLocalStorageJWTUsuario = (
     const storage = getStorage();
     if (!storage) return;
     storage.setItem("jwtUsuario", token);
-    storage.setItem("token", token);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("adlocal_token_refreshed", {
+          detail: { token, userType: "usuario" },
+        })
+      );
+    }
   } catch (error) {
     console.log(error);
   }

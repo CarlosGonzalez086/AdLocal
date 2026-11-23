@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react";
-import Swal from "../utils/sweetalert";
-import { showConfirmDialog } from "../utils/sweetalert";
+import Swal, { showConfirmDialog } from "../utils/sweetalert";
 
 import { cuentasBancariasComercioApi } from "../services/cuentasBancariasComercioApi";
 import { extraerMensajeError } from "../utils/errorHandler";
@@ -16,7 +15,7 @@ export interface ModalActionResult {
   success?: boolean;
 }
 
-export const useCuentasBancariasComercio = () => {
+export const useCuentasBancariasComercio = (comercioId?: number) => {
   const [cuentas, setCuentas] = useState<CuentaBancariaComercioDto[]>([]);
 
   const [loading, setLoading] = useState(false);
@@ -25,7 +24,7 @@ export const useCuentasBancariasComercio = () => {
     setLoading(true);
 
     try {
-      const { data } = await cuentasBancariasComercioApi.obtenerTodas();
+      const { data } = await cuentasBancariasComercioApi.obtenerTodas(comercioId);
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");
@@ -44,7 +43,7 @@ export const useCuentasBancariasComercio = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [comercioId]);
 
   const crear = async (
     dto: CuentaBancariaComercioCreateDto,
@@ -52,7 +51,7 @@ export const useCuentasBancariasComercio = () => {
     setLoading(true);
 
     try {
-      const { data } = await cuentasBancariasComercioApi.crear(dto);
+      const { data } = await cuentasBancariasComercioApi.crear(dto, comercioId);
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");
@@ -94,7 +93,11 @@ export const useCuentasBancariasComercio = () => {
     setLoading(true);
 
     try {
-      const { data } = await cuentasBancariasComercioApi.actualizar(uuid, dto);
+      const { data } = await cuentasBancariasComercioApi.actualizar(
+        uuid,
+        dto,
+        comercioId,
+      );
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");
@@ -147,7 +150,10 @@ export const useCuentasBancariasComercio = () => {
     setLoading(true);
 
     try {
-      const { data } = await cuentasBancariasComercioApi.eliminar(cuenta.uuid);
+      const { data } = await cuentasBancariasComercioApi.eliminar(
+        cuenta.uuid,
+        comercioId,
+      );
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");
@@ -195,6 +201,7 @@ export const useCuentasBancariasComercio = () => {
     try {
       const { data } = await cuentasBancariasComercioApi.establecerPrincipal(
         cuenta.uuid,
+        comercioId,
       );
 
       if (data.codigo !== "200") {

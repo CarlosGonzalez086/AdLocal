@@ -19,9 +19,12 @@ export const checkoutApi = {
     }),
 
   crearCheckoutStripe: (planId: number) =>
-    httpUsuario.post<ApiResponse<CheckoutResponseDto>>("/checkout/checkout", {
-      planId,
-    }),
+    httpUsuario.post<ApiResponse<string | CheckoutResponseDto>>(
+      "/checkout/checkout",
+      {
+        planId,
+      },
+    ),
 
   cancelarPlan: () =>
     httpUsuario.post<ApiResponse<SimpleResponse>>("/checkout/cancelar"),

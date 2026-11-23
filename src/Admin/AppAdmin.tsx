@@ -91,7 +91,7 @@ export default function AppAdmin() {
         />
 
         <Route
-          path="/restablecer-contrasena"
+          path="/restablecer-contrasena/:token/:type"
           element={
             <PublicRouteAdmin>
               <ResetPasswordPage />

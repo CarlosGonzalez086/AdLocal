@@ -22,11 +22,12 @@ import ToggleOffRoundedIcon from "@mui/icons-material/ToggleOffRounded";
 import ButtonBack from "../../../components/ButtonBack";
 import { ModalidadProductoServicio, TipoProductoServicio, type ProductoServicioDto } from "../../../types/User/productosServicios";
 import type { JwtClaims } from "../../../types/claims";
+import { getLocalStorageJWTUsuario } from "../../../utils/storageUsuario";
 import { jwtDecode } from "jwt-decode";
 
 export function ProductosServicioComercio() {
   const { id } = useParams();
-  const dataJwt = localStorage.getItem("token");
+  const dataJwt = getLocalStorageJWTUsuario();
   const claims: JwtClaims | null = dataJwt
     ? jwtDecode<JwtClaims>(dataJwt)
     : null;
@@ -118,7 +119,7 @@ export function ProductosServicioComercio() {
   return (
     <div className="w-100">
       <div className="mb-3">
-        <ButtonBack route="/app/productos-servicios/comercios" />
+        <ButtonBack route="/usuario/app/productos-servicios/comercios" />
       </div>
 
       <div className="card-adlocal p-3 mb-4">

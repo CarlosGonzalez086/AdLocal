@@ -7,6 +7,7 @@ import { PwaInstallBanner } from "./components/PWA/PwaInstallBanner";
 
 const AppUser = lazy(() => import("./User/AppUser"));
 const AppAdmin = lazy(() => import("./Admin/AppAdmin"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
 
 export default function App() {
   return (
@@ -26,6 +27,8 @@ export default function App() {
             <Route path="/" element={<Navigate to="/usuario/login" replace />} />
             <Route path="/usuario/*" element={<AppUser />} />
             <Route path="/admin/*" element={<AppAdmin />} />
+            <Route path="/terminos" element={<LegalPage tipo="terminos" />} />
+            <Route path="/privacidad" element={<LegalPage tipo="privacidad" />} />
             <Route path="*" element={<Navigate to="/usuario/login" replace />} />
           </Routes>
         </Suspense>

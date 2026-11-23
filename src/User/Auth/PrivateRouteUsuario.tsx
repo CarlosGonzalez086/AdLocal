@@ -38,6 +38,7 @@ export interface JwtPayload {
   role?: string;
   usuario_id?: string;
   correo?: string;
+  fotoUrl?: string;
   "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: string;
 }
 

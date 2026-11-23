@@ -1,9 +1,15 @@
 import { useContext, useState } from "react";
-import { UserContext } from "../context/UserContext ";
+import { UserContext } from "../context/UserContext";
 import { httpAdmin } from "../api/httpAdmin";
 import { httpUsuario } from "../api/httpUsuario";
-import { setLocalStorageJWTAdmin } from "../utils/storageAdmin";
-import { setLocalStorageJWTUsuario } from "../utils/storageUsuario";
+import {
+  getLocalStorageJWTAdmin,
+  setLocalStorageJWTAdmin,
+} from "../utils/storageAdmin";
+import {
+  getLocalStorageJWTUsuario,
+  setLocalStorageJWTUsuario,
+} from "../utils/storageUsuario";
 import { extraerMensajeError } from "../utils/errorHandler";
 
 export interface ActualizarJwtParams {
@@ -38,21 +44,32 @@ export const useActualizarJwt = () => {
     setError(null);
 
     try {
-      if (!user) throw new Error("No hay usuario en contexto");
+      const hasUserContext = Boolean(user && user.rol);
+      const isAdmin = hasUserContext
+        ? user?.rol === "Admin"
+        : Boolean(getLocalStorageJWTAdmin()) && !getLocalStorageJWTUsuario();
 
-      const url =
-        user.rol === "Admin" ? "Admin/actualizar-jwt" : "auth/actualizar-jwt";
+      if (!hasUserContext && !getLocalStorageJWTAdmin() && !getLocalStorageJWTUsuario()) {
+        throw new Error("No hay sesión activa para actualizar el JWT");
+      }
 
-      const api = user.rol === "Admin" ? httpAdmin : httpUsuario;
+      const url = isAdmin ? "Admin/actualizar-jwt" : "auth/actualizar-jwt";
+      const api = isAdmin ? httpAdmin : httpUsuario;
 
       const { data } = await api.post<ActualizarJwtResponse>(url, params);
 
       if (data.respuesta?.token) {
-        const isAdmin = user.rol === "Admin";
         if (isAdmin) {
-          setLocalStorageJWTAdmin(data.respuesta?.token);
+          setLocalStorageJWTAdmin(data.respuesta.token);
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(
+              new CustomEvent("adlocal_token_refreshed", {
+                detail: { token: data.respuesta.token, userType: "admin" },
+              })
+            );
+          }
         } else {
-          setLocalStorageJWTUsuario(data.respuesta?.token);
+          setLocalStorageJWTUsuario(data.respuesta.token);
         }
       }
 

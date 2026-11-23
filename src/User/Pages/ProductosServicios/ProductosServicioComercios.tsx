@@ -8,13 +8,14 @@ import ComercioCard from "../../../components/Comercio/ComercioCard";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
 import type { JwtClaims } from "../../../types/claims";
+import { getLocalStorageJWTUsuario } from "../../../utils/storageUsuario";
 
 export default function ProductosServicioComercios() {
   const { loading, comercios, getAllComerciosByUser } = useComercio();
   const navigate = useNavigate();
 
   const { isAllowed, maxNegocios } = useMemo(() => {
-    const dataJwt = localStorage.getItem("token");
+    const dataJwt = getLocalStorageJWTUsuario();
     const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
     const allowed =
       claims?.rol === "Comercio" &&
@@ -36,7 +37,7 @@ export default function ProductosServicioComercios() {
         confirmButtonText: "Entendido",
         allowOutsideClick: false,
         allowEscapeKey: false,
-      }).then(() => navigate("/app/productos-servicios"));
+      }).then(() => navigate("/usuario/app/productos-servicios"));
     }
   }, [isAllowed, maxNegocios, getAllComerciosByUser, navigate]);
 
@@ -74,7 +75,7 @@ export default function ProductosServicioComercios() {
         <button
           type="button"
           className="btn-adlocal btn-adlocal-primary d-inline-flex align-items-center gap-1 mt-3"
-          onClick={() => navigate("/app/comercio")}
+          onClick={() => navigate("/usuario/app/comercio")}
         >
           <AddRoundedIcon style={{ fontSize: 18 }} />
           <span>Registrar comercio</span>

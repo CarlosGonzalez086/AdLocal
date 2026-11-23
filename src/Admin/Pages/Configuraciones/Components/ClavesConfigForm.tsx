@@ -4,7 +4,6 @@ import {
   Button,
   InputAdornment,
   LinearProgress,
-  IconButton,
 } from "@mui/material";
 import { useConfiguracionSistema } from "../../../../hooks/useConfiguracionSistema";
 import { ConfigFormHeader } from "./ConfigFormHeader";
@@ -21,8 +20,6 @@ export const ClavesConfigForm = () => {
   const [form, setForm] = useState<ClavesConfigFormState>({
     ip2locationKey: "",
   });
-
-  const [showKey, setShowKey] = useState(false);
 
   useEffect(() => {
     cargar();
@@ -100,33 +97,19 @@ export const ClavesConfigForm = () => {
             <TextField
               label="Token de API IP2Location"
               name="ip2locationKey"
-              type={showKey ? "text" : "password"}
+              type="password"
               value={form.ip2locationKey}
               onChange={onChange}
               fullWidth
               disabled={loading}
               variant="filled"
               placeholder="Ej: ABC123XYZ..."
+              helperText="Enmascarado por seguridad (••••). Déjalo igual para conservar el token actual."
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
                       <MaterialSymbol icon="pin_drop" size="small" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        onClick={() => setShowKey((prev) => !prev)}
-                        edge="end"
-                        tabIndex={-1}
-                      >
-                        <MaterialSymbol
-                          icon={showKey ? "visibility_off" : "visibility"}
-                          size="small"
-                        />
-                      </IconButton>
                     </InputAdornment>
                   ),
                 },

@@ -252,32 +252,15 @@ export const ConfirmarSuscripcionModalV3 = ({
       }
 
       if (metodo === "nueva") {
-        const checkoutWindow = window.open("", "_blank", "noopener,noreferrer");
+        const checkoutUrl = await pagarConNuevaTarjeta(Number(plan.id));
 
-        try {
-          const checkoutUrl = (await pagarConNuevaTarjeta(Number(plan.id))) as
-            | string
-            | undefined;
-
-          if (typeof checkoutUrl !== "string" || !checkoutUrl.trim()) {
-            checkoutWindow?.close();
-
-            throw new Error("No se recibió una URL válida de checkout.");
-          }
-
-          if (checkoutWindow) {
-            checkoutWindow.location.href = checkoutUrl;
-          } else {
-            window.location.assign(checkoutUrl);
-          }
-
-          resetModal();
-          onClose();
-        } catch (error) {
-          checkoutWindow?.close();
-
-          throw error;
+        if (typeof checkoutUrl !== "string" || !checkoutUrl.trim()) {
+          throw new Error("No se recibió una URL válida de checkout.");
         }
+
+        resetModal();
+        onClose();
+        window.location.assign(checkoutUrl);
       }
     } catch (error) {
       console.error("Error al procesar el pago:", error);
@@ -585,8 +568,8 @@ export const ConfirmarSuscripcionModalV3 = ({
             <MaterialSymbol icon="info" size="small" />
 
             <p className="subscriptionTransferNoticeText fz-h5 fw-regular mb-0">
-              La confirmación automática por transferencia todavía requiere el
-              servicio correspondiente en `useCheckout`.
+              El pago de suscripción por transferencia bancaria estará disponible
+              próximamente. Por ahora puedes pagar con tarjeta.
             </p>
           </div>
         </div>

@@ -100,7 +100,6 @@ export const clearStorageAdmin = (): void => {
     storage.removeItem("jwtAdmin");
     storage.removeItem("refreshTokenAdmin");
     storage.removeItem("admin");
-    storage.removeItem("token");
   } catch (error) {
     console.log(error);
   }

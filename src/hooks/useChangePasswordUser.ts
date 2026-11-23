@@ -3,6 +3,7 @@ import Swal from "../utils/sweetalert";
 import type { ChangeUserPasswordDto } from "../types/User/UserAuth";
 import { profileUserApi } from "../services/profileUserApi";
 import { extraerMensajeError } from "../utils/errorHandler";
+import { clearStorageUsuario } from "../utils/storageUsuario";
 
 export const useChangePasswordUser = () => {
   const [loading, setLoading] = useState(false);
@@ -32,8 +33,8 @@ export const useChangePasswordUser = () => {
         "success"
       );
 
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+      clearStorageUsuario();
+      window.location.href = "/usuario/login";
     } catch (error: unknown) {
       Swal.fire(
         "Error",

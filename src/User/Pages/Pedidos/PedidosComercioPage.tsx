@@ -15,7 +15,7 @@ import {
   EstadoPedido,
   type EstadoPedido as EstadoPedidoType,
 } from "../../../types/User/pedidosComercio";
-import { UserContext } from "../../../context/UserContext ";
+import { UserContext } from "../../../context/UserContext";
 import { ReembolsoPedidoModal } from "./Components/ReembolsoPedidoModal";
 import { CancelacionPedidoModal } from "./Components/CancelacionPedidoModal";
 import { InventarioPedidoModal } from "./Components/InventarioPedidoModal";

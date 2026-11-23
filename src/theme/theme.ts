@@ -85,17 +85,6 @@ const theme = createTheme({
       },
     },
 
-    MuiDialog: {
-      defaultProps: {
-        disableEnforceFocus: true,
-      },
-    },
-    MuiModal: {
-      defaultProps: {
-        disableEnforceFocus: true,
-      },
-    },
-
     MuiTextField: {
       defaultProps: {
         variant: "outlined",

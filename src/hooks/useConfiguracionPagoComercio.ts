@@ -6,7 +6,7 @@ import { extraerMensajeError } from "../utils/errorHandler";
 
 import type { ConfiguracionPagoComercioDto } from "../types/User/pagosComercio";
 
-export const useConfiguracionPagoComercio = () => {
+export const useConfiguracionPagoComercio = (comercioId?: number) => {
   const [configuracion, setConfiguracion] =
     useState<ConfiguracionPagoComercioDto | null>(null);
 
@@ -16,7 +16,7 @@ export const useConfiguracionPagoComercio = () => {
     setLoading(true);
 
     try {
-      const { data } = await configuracionPagoComercioApi.obtener();
+      const { data } = await configuracionPagoComercioApi.obtener(comercioId);
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");
@@ -35,7 +35,7 @@ export const useConfiguracionPagoComercio = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [comercioId]);
 
   const guardar = async (
     dto: ConfiguracionPagoComercioDto,
@@ -43,7 +43,10 @@ export const useConfiguracionPagoComercio = () => {
     setLoading(true);
 
     try {
-      const { data } = await configuracionPagoComercioApi.guardar(dto);
+      const { data } = await configuracionPagoComercioApi.guardar(
+        dto,
+        comercioId,
+      );
 
       if (data.codigo !== "200") {
         Swal.fire("Error", data.mensaje, "error");

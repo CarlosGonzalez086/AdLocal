@@ -220,6 +220,16 @@ export const usePedidosComercio = () => {
       comercioId,
       detalle.uuid,
     );
+    const tiposPermitidos = new Set([
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ]);
+    if (data.type && !tiposPermitidos.has(data.type.toLowerCase())) {
+      throw new Error("Tipo de archivo de comprobante no permitido.");
+    }
     return URL.createObjectURL(data);
   }, [detalle, comercioId]);
 

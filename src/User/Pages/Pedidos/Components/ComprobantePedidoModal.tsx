@@ -40,7 +40,12 @@ export const ComprobantePedidoModal = ({
       comprobanteUrl && (
         <div className="mt-4">
           <div className="ratio ratio-16x9 pedidosReceiptFrame">
-            <iframe src={comprobanteUrl} title="Comprobante de transferencia" />
+            <iframe
+              src={comprobanteUrl}
+              title="Comprobante de transferencia"
+              sandbox=""
+              referrerPolicy="no-referrer"
+            />
           </div>
 
           {estadoPago === EstadoPagoPedido.PendienteVerificacion && (

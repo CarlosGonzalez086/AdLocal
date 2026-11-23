@@ -7,7 +7,7 @@ import {
   type SuscripcionCreateDto,
   type SuscripcionDto,
 } from "../services/suscripcionApi";
-import { UserContext } from "../context/UserContext ";
+import { UserContext } from "../context/UserContext";
 import { useActualizarJwt } from "./useActualizarJwt";
 
 export const useSuscripciones = () => {

@@ -1,8 +1,14 @@
 import axios from "axios";
 import { extraerMensajeError } from "../utils/errorHandler";
 
+const getUsuarioPublicBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL as string | undefined;
+  const baseUrl = envUrl ? envUrl.replace(/\/+$/, "") : "https://adlocalapi.onrender.com";
+  return `${baseUrl}/api/`;
+};
+
 export const httpUsuarioPublico = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}api/`,
+  baseURL: getUsuarioPublicBaseUrl(),
   headers: {
     "Content-Type": "application/json",
   },

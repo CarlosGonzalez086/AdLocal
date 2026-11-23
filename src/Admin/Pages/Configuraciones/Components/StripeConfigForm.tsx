@@ -4,7 +4,6 @@ import {
   Button,
   InputAdornment,
   LinearProgress,
-  IconButton,
 } from "@mui/material";
 import { useConfiguracionSistema } from "../../../../hooks/useConfiguracionSistema";
 import { ConfigFormHeader } from "./ConfigFormHeader";
@@ -27,8 +26,6 @@ export const StripeConfigForm = () => {
     commissionPercentage: "",
     commissionFixed: "",
   });
-
-  const [showSecretKey, setShowSecretKey] = useState(false);
 
   useEffect(() => {
     cargar();
@@ -129,32 +126,18 @@ export const StripeConfigForm = () => {
               <TextField
                 label="Secret Key (sk_...)"
                 name="secretKey"
-                type={showSecretKey ? "text" : "password"}
+                type="password"
                 value={form.secretKey}
                 onChange={onChange}
                 fullWidth
                 disabled={loading}
                 variant="filled"
+                helperText="Por seguridad, la clave guardada se muestra enmascarada (••••). Déjala igual para conservarla o escribe una nueva para reemplazarla."
                 slotProps={{
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
                         <MaterialSymbol icon="lock" size="small" />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          size="small"
-                          onClick={() => setShowSecretKey((prev) => !prev)}
-                          edge="end"
-                          tabIndex={-1}
-                        >
-                          <MaterialSymbol
-                            icon={showSecretKey ? "visibility_off" : "visibility"}
-                            size="small"
-                          />
-                        </IconButton>
                       </InputAdornment>
                     ),
                   },

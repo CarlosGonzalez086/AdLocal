@@ -3,7 +3,6 @@ import {
   InputAdornment,
   LinearProgress,
   TextField,
-  IconButton,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useConfiguracionSistema } from "../../../../hooks/useConfiguracionSistema";
@@ -28,11 +27,9 @@ export const EmailConfigForm = () => {
     port: "587",
     user: "",
     key: "",
-    from: "jcarlosgonzalez086@gmail.com",
+    from: "",
     fromNombre: "",
   });
-
-  const [showKey, setShowKey] = useState(false);
 
   useEffect(() => {
     void cargar();
@@ -52,7 +49,7 @@ export const EmailConfigForm = () => {
       port: getValue("EMAIL_PORT") || "587",
       user: getValue("EMAIL_USER") || "",
       key: getValue("EMAIL_KEY") || "",
-      from: getValue("EMAIL_FROM") || "jcarlosgonzalez086@gmail.com",
+      from: getValue("EMAIL_FROM") || "",
       fromNombre: getValue("EMAIL_FROM_NOMBRE") || "",
     });
   }, [configuraciones]);
@@ -200,32 +197,18 @@ export const EmailConfigForm = () => {
             <div className="col-12 col-sm-6">
               <TextField
                 label="Clave SMTP / Token"
-                type={showKey ? "text" : "password"}
+                type="password"
                 value={form.key}
                 onChange={handleChange("key")}
                 fullWidth
                 disabled={loading}
                 variant="filled"
+                helperText="Enmascarada por seguridad (••••). Déjala igual para conservar la clave actual."
                 slotProps={{
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
                         <MaterialSymbol icon="lock" size="small" />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          size="small"
-                          onClick={() => setShowKey((prev) => !prev)}
-                          edge="end"
-                          tabIndex={-1}
-                        >
-                          <MaterialSymbol
-                            icon={showKey ? "visibility_off" : "visibility"}
-                            size="small"
-                          />
-                        </IconButton>
                       </InputAdornment>
                     ),
                   },

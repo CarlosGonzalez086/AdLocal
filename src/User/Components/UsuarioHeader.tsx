@@ -187,7 +187,7 @@ const UserHeader = ({
               aria-expanded={menuOpen ? "true" : undefined}
             >
               <Avatar
-                src={user.nombre}
+                src={user.fotoUrl || undefined}
                 alt={user.nombre ?? "Usuario"}
                 className="user-header-avatar"
               >

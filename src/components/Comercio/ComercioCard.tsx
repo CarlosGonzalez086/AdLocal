@@ -103,8 +103,8 @@ export default function ComercioCard({
     comercio.nombre?.trim().charAt(0).toUpperCase() || "C";
 
   const linkTo = isProductOrServiceCreation
-    ? `comercio/${comercio.id}`
-    : `vistaprevia/${comercio.id}`;
+    ? `/usuario/app/productos-servicios/comercio/${comercio.id}`
+    : `/usuario/app/vistaprevia/${comercio.id}`;
 
   const buttonLabel = isProductOrServiceCreation
     ? "Añadir productos o servicios"

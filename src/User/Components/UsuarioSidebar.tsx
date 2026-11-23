@@ -161,7 +161,7 @@ const UserSidebar = ({
         path: "/usuario/app/productos-servicios",
       });
     }
-    if (hasSingleBusiness) {
+    if (rol === "Comercio") {
       items.push({
         text: "Configuracion de pagos",
         icon: "payments",

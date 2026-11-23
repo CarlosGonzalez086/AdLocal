@@ -13,7 +13,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={theme}>
     <CssBaseline />
     <div
-      style={{ height: "100vh", width: "100vw", backgroundColor: "#F8F6F2" }}
+      style={{ minHeight: "100vh", width: "100%", backgroundColor: "#F8F6F2" }}
     >
       <App />
     </div>

@@ -15,6 +15,7 @@ import { useMemo, useState, type CSSProperties, type MouseEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MaterialSymbol from "../../components/UI/MaterialSymbol/MaterialSymbol";
 import { clearStorageUsuario } from "../../utils/storageUsuario";
+import { authUser } from "../../services/authUser.api";
 import type { JwtPayload } from "../Auth/PrivateRouteUsuario";
 import NotificacionesMenu from "./NotificacionesMenu";
 
@@ -123,9 +124,10 @@ const UserHeader = ({
     navigate("/usuario/app/perfil");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     handleCloseMenu();
 
+    await authUser.logoutUser().catch(() => {});
     clearStorageUsuario();
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("adlocal_usuario_logout"));

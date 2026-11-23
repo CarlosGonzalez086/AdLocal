@@ -45,9 +45,11 @@ export const useActualizarJwt = () => {
 
     try {
       const hasUserContext = Boolean(user && user.rol);
+      const isAdminRoute =
+        typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
       const isAdmin = hasUserContext
         ? user?.rol === "Admin"
-        : Boolean(getLocalStorageJWTAdmin()) && !getLocalStorageJWTUsuario();
+        : Boolean(getLocalStorageJWTAdmin()) && (isAdminRoute || !getLocalStorageJWTUsuario());
 
       if (!hasUserContext && !getLocalStorageJWTAdmin() && !getLocalStorageJWTUsuario()) {
         throw new Error("No hay sesión activa para actualizar el JWT");

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import { useState, useEffect, useContext, useCallback, useRef } from "react";
 import Swal, { notificarErrorApi, showConfirmDialog } from "../utils/sweetalert";
 import { useActualizarJwt } from "./useActualizarJwt";
 import { comercioCreateSchema, comercioUpdateSchema, type ComercioCreateDto } from "../schemas/comercioCreate.schema";
@@ -18,7 +18,8 @@ export interface ListarParamsColaboradores {
   rowsPerPage: number;
 }
 
-export const useComercio = () => {
+export const useComercio = ({ autoLoad = true }: { autoLoad?: boolean } = {}) => {
+  const autoLoadRef = useRef(autoLoad);
   const user = useContext(UserContext);
   const { actualizarJwt } = useActualizarJwt();
   const [comercio, setComercio] = useState<ComercioDto>(comercioDtoDefault);
@@ -147,6 +148,8 @@ export const useComercio = () => {
       Swal.fire("Eliminado", data.mensaje, "success");
       setComercio(comercioDtoDefault);
       window.location.reload();
+    } catch (error: unknown) {
+      notificarErrorApi(error, "No se pudo eliminar el comercio.");
     } finally {
       setLoading(false);
     }
@@ -182,7 +185,7 @@ export const useComercio = () => {
     [],
   );
 
-  const cargarPorId = async (id: number) => {
+  const cargarPorId = useCallback(async (id: number) => {
     setLoading(true);
     try {
       const { data } = await comercioApi.getById(id);
@@ -202,7 +205,7 @@ export const useComercio = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const guardarPage = async (data: ComercioCreateDto): Promise<boolean> => {
     setLoading(true);
@@ -303,6 +306,8 @@ export const useComercio = () => {
           refrescarParams.rowsPerPage,
         );
       }
+    } catch (error: unknown) {
+      notificarErrorApi(error, "No se pudo eliminar el comercio.");
     } finally {
       setLoading(false);
     }
@@ -346,6 +351,8 @@ export const useComercio = () => {
       Swal.fire("Creado", resp.mensaje, "success");
 
       await cargar();
+    } catch (error: unknown) {
+      notificarErrorApi(error, "No se pudo agregar el colaborador.");
     } finally {
       setLoading(false);
     }
@@ -413,6 +420,8 @@ export const useComercio = () => {
           refrescarParams.rowsPerPage,
         );
       }
+    } catch (error: unknown) {
+      notificarErrorApi(error, "No se pudo actualizar el acceso del colaborador.");
     } finally {
       setLoading(false);
     }
@@ -462,12 +471,15 @@ export const useComercio = () => {
           refrescarParams.rowsPerPage,
         );
       }
+    } catch (error: unknown) {
+      notificarErrorApi(error, "No se pudo eliminar al colaborador.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!autoLoadRef.current) return;
     cargar();
     getTotalComerciosByIdUsuario();
   }, []);

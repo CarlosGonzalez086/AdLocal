@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { normalizeComercioData } from "../utils/generalsFunctions";
-import { comercioCreateSchema } from "../schemas/comercioCreate.schema";
+import { comercioCreateSchema, comercioUpdateSchema } from "../schemas/comercioCreate.schema";
 
 describe("P2 Closure Security & Flows (AdLocal)", () => {
   it("normalizeComercioData convierte teléfono y correo vacíos en undefined compatibles con Zod", () => {
@@ -21,6 +21,56 @@ describe("P2 Closure Security & Flows (AdLocal)", () => {
 
     const parsed = comercioCreateSchema.safeParse(normalized);
     expect(parsed.success).toBe(true);
+  });
+
+  it("normalizeComercioData conserva logo https:// al editar y schemas rechazan data:image/svg+xml", () => {
+    const edited = normalizeComercioData({
+      id: 12,
+      nombre: "Café Sierra",
+      logoBase64: "https://cdn.adlocal.store/logos/12.webp",
+      lat: 19.4,
+      lng: -99.1,
+    });
+    expect(edited.logoBase64).toBe("https://cdn.adlocal.store/logos/12.webp");
+    expect(comercioUpdateSchema.safeParse(edited).success).toBe(true);
+
+    const svgCreate = comercioCreateSchema.safeParse({
+      nombre: "SVG Test",
+      logoBase64: "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=",
+      lat: 19.4,
+      lng: -99.1,
+      estadoId: 1,
+      municipioId: 2,
+    });
+    expect(svgCreate.success).toBe(false);
+  });
+
+  it("useComercio memoriza cargarPorId con useCallback y ComercioPageForm remonta ComercioForm al editar", () => {
+    const useComercio = fs.readFileSync(path.resolve(process.cwd(), "src/hooks/useComercio.ts"), "utf8");
+    const pageForm = fs.readFileSync(path.resolve(process.cwd(), "src/User/Pages/Comercio/ComercioPageForm.tsx"), "utf8");
+    const preview = fs.readFileSync(path.resolve(process.cwd(), "src/User/Pages/Home/PreviewNegocio.tsx"), "utf8");
+
+    expect(useComercio).toContain("const cargarPorId = useCallback(async");
+    expect(useComercio).toContain("autoLoadRef");
+    expect(pageForm).toContain("useComercio({ autoLoad: !isEditMode })");
+    expect(pageForm).toContain("comercio-edit-${comercioPage?.id ?? 0}");
+    expect(preview).toContain("useComercio({ autoLoad: false })");
+  });
+
+  it("UsuarioHeader/AdminHeader invocan logout backend, useActualizarJwt soporta sesión dual y planTipo no distingue mayúsculas", () => {
+    const userHdr = fs.readFileSync(path.resolve(process.cwd(), "src/User/Components/UsuarioHeader.tsx"), "utf8");
+    const adminHdr = fs.readFileSync(path.resolve(process.cwd(), "src/Admin/Components/AdminHeader.tsx"), "utf8");
+    const actJwt = fs.readFileSync(path.resolve(process.cwd(), "src/hooks/useActualizarJwt.ts"), "utf8");
+    const sidebar = fs.readFileSync(path.resolve(process.cwd(), "src/User/Components/UsuarioSidebar.tsx"), "utf8");
+    const gate = fs.readFileSync(path.resolve(process.cwd(), "src/components/Comercio/ComercioPlanGate.tsx"), "utf8");
+    const modal = fs.readFileSync(path.resolve(process.cwd(), "src/components/ProductosServicios/ProductoServicioModal.tsx"), "utf8");
+
+    expect(userHdr).toContain("authUser.logoutUser()");
+    expect(adminHdr).toContain("authAdmin.logoutAdmin()");
+    expect(actJwt).toContain('startsWith("/admin")');
+    expect(sidebar).toContain("user?.planTipo?.trim().toUpperCase()");
+    expect(gate).toContain("toUpperCase()");
+    expect(modal).toContain("allowedTypes.includes(file.type.toLowerCase())");
   });
 
   it("AppUser y PreviewNegocio soportan landing de Colaborador con comercioId y restringen pagos/comisiones", () => {

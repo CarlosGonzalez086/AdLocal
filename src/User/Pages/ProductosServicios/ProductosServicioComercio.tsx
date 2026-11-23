@@ -62,7 +62,7 @@ export function ProductosServicioComercio() {
 
     imagenBase64: "",
 
-    idComercio: 0,
+    idComercio: Number(id) || 0,
   };
 
   const { productos, total, loading, listar, guardar, eliminar, desactivar } =
@@ -164,21 +164,25 @@ export function ProductosServicioComercio() {
               <span
                 className={`badge-adlocal ${limiteAlcanzado ? "badge-adlocal-danger" : "badge-adlocal-success"} fz-caption fw-bold`}
               >
-                {total} / {max}
+                {isUnlimited ? `${total} / Ilimitado` : `${total} / ${max}`}
               </span>
             </div>
 
-            <LinearProgress
-              variant="determinate"
-              value={porcentaje}
-              color={limiteAlcanzado ? "error" : "primary"}
-              style={{ height: 6, borderRadius: 999 }}
-            />
+            {!isUnlimited && (
+              <LinearProgress
+                variant="determinate"
+                value={porcentaje}
+                color={limiteAlcanzado ? "error" : "primary"}
+                style={{ height: 6, borderRadius: 999 }}
+              />
+            )}
 
             <p className="fz-caption text-muted mt-2 mb-0">
-              {limiteAlcanzado
-                ? "Llegaste al límite de productos de tu plan"
-                : `Puedes registrar ${restantes} producto${restantes !== 1 ? "s" : ""} más`}
+              {isUnlimited
+                ? "Tu plan incluye catálogo ilimitado de productos y servicios"
+                : limiteAlcanzado
+                  ? "Llegaste al límite de productos de tu plan"
+                  : `Puedes registrar ${restantes} producto${restantes !== 1 ? "s" : ""} más`}
             </p>
           </div>
         )}

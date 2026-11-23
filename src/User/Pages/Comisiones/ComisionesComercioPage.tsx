@@ -33,8 +33,14 @@ export const ComisionesComercioPage = () => {
   const [mensaje, setMensaje] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const cargarEstado = async (id: number) => {
-    const { data } = await pagoComisionesApi.estado(id);
-    setEstado(data.respuesta ?? null);
+    try {
+      setError(null);
+      const { data } = await pagoComisionesApi.estado(id);
+      setEstado(data.respuesta ?? null);
+    } catch {
+      setEstado(null);
+      setError("No se pudo cargar el estado de comisiones del comercio seleccionado.");
+    }
   };
   useEffect(() => {
     void (async () => {

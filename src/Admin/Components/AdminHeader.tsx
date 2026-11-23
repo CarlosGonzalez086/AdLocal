@@ -16,6 +16,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import MaterialSymbol from "../../components/UI/MaterialSymbol/MaterialSymbol";
 import { clearStorageAdmin } from "../../utils/storageAdmin";
+import { authAdmin } from "../../services/authAdmin.api";
 import type { JwtPayload } from "../Auth/PrivateRouteAdmin";
 
 interface AdminHeaderProps {
@@ -113,9 +114,10 @@ const AdminHeader = ({
     navigate("/admin/app/perfil");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     handleCloseMenu();
 
+    await authAdmin.logoutAdmin().catch(() => {});
     clearStorageAdmin();
 
     navigate("/admin/login", {

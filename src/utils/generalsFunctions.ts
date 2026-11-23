@@ -80,9 +80,12 @@ export const normalizeComercioData = (
   email: data.email?.trim() || undefined,
   descripcion: data.descripcion ?? "",
 
-  logoBase64: data.logoBase64?.startsWith("data:image/")
-    ? data.logoBase64
-    : undefined,
+  logoBase64:
+    data.logoBase64?.startsWith("data:image/") ||
+    data.logoBase64?.startsWith("https://") ||
+    data.logoBase64?.startsWith("http://")
+      ? data.logoBase64
+      : undefined,
 
   imagenes: data.imagenes,
 

@@ -13,6 +13,7 @@ import {
 } from "../../types/User/productosServicios";
 import { GenericModal, type GenericModalResult } from "../GenericModal";
 import MaterialSymbol from "../UI/MaterialSymbol/MaterialSymbol";
+import Swal from "../../utils/sweetalert";
 
 interface Props {
   open: boolean;
@@ -309,6 +310,13 @@ export const ProductoServicioModal = ({
     const file = event.target.files?.[0];
 
     if (!file) {
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type.toLowerCase()) || file.size > 5 * 1024 * 1024) {
+      event.target.value = "";
+      void Swal.fire("Archivo no válido", "Selecciona una imagen JPG, PNG o WEBP de máximo 5 MB.", "warning");
       return;
     }
 

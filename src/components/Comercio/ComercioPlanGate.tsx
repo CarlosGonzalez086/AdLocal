@@ -9,7 +9,7 @@ interface Props {
 export function ComercioPlanGate({ user, children, fallback }: Props) {
   const permitido =
     user?.rol !== "Colaborador" &&
-    (user?.planTipo === "PRO" || user?.planTipo === "BUSINESS");
+    ["PRO", "BUSINESS"].includes(user?.planTipo?.trim().toUpperCase() ?? "");
 
   return <>{permitido ? children : fallback}</>;
 }

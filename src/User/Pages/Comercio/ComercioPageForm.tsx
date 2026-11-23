@@ -24,9 +24,6 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { comercioPage, guardarPage, cargarPorId, loading, totalByUser } =
-    useComercio();
-
   const parsedId = Number(id);
   const comercioId = !id
     ? 0
@@ -35,6 +32,8 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
       : null;
 
   const isEditMode = comercioId !== null && comercioId > 0;
+  const { comercioPage, guardarPage, cargarPorId, loading, totalByUser } =
+    useComercio({ autoLoad: !isEditMode });
   const maxNegocios = getPositiveInteger(user?.maxNegocios, 0);
   const limitAlertShownRef = useRef(false);
 
@@ -91,6 +90,11 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
       </div>
 
       <ComercioForm
+        key={
+          isEditMode
+            ? `comercio-edit-${comercioPage?.id ?? 0}`
+            : "comercio-new"
+        }
         initialData={isEditMode ? comercioPage : null}
         loading={loading}
         onSave={handleSave}

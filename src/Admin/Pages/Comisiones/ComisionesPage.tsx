@@ -36,11 +36,15 @@ export const ComisionesPage = () => {
   const [estatus, setEstatus] = useState<number | undefined>();
   const [pagosRevision, setPagosRevision] = useState<PagoComision[]>([]);
   const cargarPagos = async () => {
-    const { data } = await httpAdmin.get<ApiResponse<PagoComision[]>>(
-      "/PagosComisiones/admin",
-      { params: { estatus: 1 } },
-    );
-    setPagosRevision(data.respuesta ?? []);
+    try {
+      const { data } = await httpAdmin.get<ApiResponse<PagoComision[]>>(
+        "/PagosComisiones/admin",
+        { params: { estatus: 1 } },
+      );
+      setPagosRevision(data.respuesta ?? []);
+    } catch {
+      setPagosRevision([]);
+    }
   };
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -177,12 +181,16 @@ export const ComisionesPage = () => {
       confirmButtonText: aprobar ? "Aprobar" : "Rechazar",
     });
     if (!resultado.isConfirmed) return;
-    await httpAdmin.put(`/PagosComisiones/${pago.uuid}/revisar`, {
-      aprobar,
-      comentario: resultado.value,
-    });
-    await cargarPagos();
-    await cargar(periodo, page, rows, comercioId, estatus);
+    try {
+      await httpAdmin.put(`/PagosComisiones/${pago.uuid}/revisar`, {
+        aprobar,
+        comentario: resultado.value,
+      });
+      await cargarPagos();
+      await cargar(periodo, page, rows, comercioId, estatus);
+    } catch {
+      await Swal.fire("Error", "No se pudo registrar la revisión del pago.", "error");
+    }
   };
   const abrirComprobante = async (uuid: string) => {
     try {
@@ -190,9 +198,9 @@ export const ComisionesPage = () => {
         `/PagosComisiones/${uuid}/comprobante`,
         { responseType: "blob" },
       );
-      const mime = response.data.type.toLowerCase();
+      const mime = response.data.type.split(";")[0].trim().toLowerCase();
       const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf"];
-      if (!allowed.includes(mime)) {
+      if (mime && !allowed.includes(mime)) {
         await Swal.fire("Archivo no compatible", "Formato de comprobante no permitido.", "warning");
         return;
       }

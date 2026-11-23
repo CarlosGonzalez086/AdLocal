@@ -2,7 +2,10 @@ import { z } from "zod";
 
 const base64Image = z
   .string()
-  .startsWith("data:image/", "Formato de imagen inválido");
+  .regex(
+    /^data:image\/(jpeg|jpg|png|webp);base64,/i,
+    "Formato de imagen inválido (solo JPG, PNG o WEBP)",
+  );
 
 const imageUrl = z.string().url("URL de imagen inválida");
 

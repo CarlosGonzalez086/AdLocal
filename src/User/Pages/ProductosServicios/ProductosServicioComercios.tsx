@@ -16,10 +16,18 @@ export default function ProductosServicioComercios() {
 
   const { isAllowed, maxNegocios } = useMemo(() => {
     const dataJwt = getLocalStorageJWTUsuario();
-    const claims: JwtClaims | null = dataJwt ? jwtDecode<JwtClaims>(dataJwt) : null;
+    let claims: JwtClaims | null = null;
+    if (dataJwt) {
+      try {
+        claims = jwtDecode<JwtClaims>(dataJwt);
+      } catch {
+        claims = null;
+      }
+    }
+    const normalizedPlan = claims?.planTipo?.trim().toUpperCase();
     const allowed =
       claims?.rol === "Comercio" &&
-      (claims?.planTipo === "PRO" || claims?.planTipo === "BUSINESS");
+      (normalizedPlan === "PRO" || normalizedPlan === "BUSINESS");
     return {
       isAllowed: allowed,
       maxNegocios: Number(claims?.maxNegocios ?? 0),

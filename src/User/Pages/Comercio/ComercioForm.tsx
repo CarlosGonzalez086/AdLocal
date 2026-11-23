@@ -97,7 +97,17 @@ const getPositiveInteger = (value: unknown): number => {
   return Math.floor(parsedValue);
 };
 
-const isImageFile = (file: File): boolean => file.type.startsWith("image/");
+const ALLOWED_IMAGE_MIME = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+]);
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+const isImageFile = (file: File): boolean =>
+  ALLOWED_IMAGE_MIME.has(file.type.toLowerCase()) &&
+  file.size <= MAX_IMAGE_BYTES;
 
 const fileToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -204,7 +214,7 @@ export const ComercioForm = ({
       await Swal.fire({
         icon: "warning",
         title: "Archivo no válido",
-        text: "Selecciona un archivo de imagen.",
+        text: "Selecciona una imagen JPG, PNG o WEBP de máximo 5 MB.",
         confirmButtonText: "Entendido",
       });
       return;
@@ -249,7 +259,7 @@ export const ComercioForm = ({
       await Swal.fire({
         icon: "warning",
         title: "Archivos no válidos",
-        text: "Selecciona uno o más archivos de imagen.",
+        text: "Selecciona imágenes JPG, PNG o WEBP de máximo 5 MB.",
         confirmButtonText: "Entendido",
       });
       return;

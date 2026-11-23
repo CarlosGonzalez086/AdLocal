@@ -16,6 +16,9 @@ export const authAdmin = {
   loginAdmin(data: LoginAdminDto) {
     return httpAdminPublico.post<ApiResponse<null>>("/Admin/login", data);
   },
+  logoutAdmin() {
+    return httpAdmin.post<ApiResponse<null>>("/Admin/logout", null, { withCredentials: true });
+  },
   forgetPassword: (data: EmailAdminDto) =>
     httpAdminPublico.post<ApiResponse<null>>("/Admin/forget-password", data),
   newPassword: (data: NewPasswordDto) =>

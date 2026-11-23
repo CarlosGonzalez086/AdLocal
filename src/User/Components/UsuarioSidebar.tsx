@@ -103,7 +103,7 @@ const UserSidebar = ({
   };
 
   const rol = user?.rol;
-  const planTipo = user?.planTipo;
+  const planTipo = user?.planTipo?.trim().toUpperCase();
 
   const menuItems = useMemo<MenuItemConfig[]>(() => {
     const items: MenuItemConfig[] = [

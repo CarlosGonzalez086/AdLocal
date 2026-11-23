@@ -22,7 +22,7 @@ export function PreviewNegocio() {
   }>();
   const user = useContext(UserContext);
 
-  const { comercioPage, cargarPorId, loading } = useComercio();
+  const { comercioPage, cargarPorId, loading } = useComercio({ autoLoad: false });
 
   const [productos, setProductos] = useState<ProductoServicioDto[]>([]);
 

@@ -74,7 +74,15 @@ const CitasComercioPage = lazy(() =>
 );
 
 export default function AppUser() {
-  const [user, setUser] = useState<JwtPayload | null>(null);
+  const [user, setUser] = useState<JwtPayload | null>(() => {
+    const token = getLocalStorageJWTUsuario();
+    if (!token) return null;
+    try {
+      return jwtDecode<JwtPayload>(token);
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     const updateUserFromStorage = () => {
@@ -86,6 +94,8 @@ export default function AppUser() {
         } catch {
           setUser(null);
         }
+      } else {
+        setUser(null);
       }
     };
 
@@ -109,14 +119,27 @@ export default function AppUser() {
       }
     };
 
+    const handleLogoutEvent = () => {
+      setUser(null);
+    };
+
     window.addEventListener("adlocal_token_refreshed", handleTokenRefreshed);
+    window.addEventListener("adlocal_usuario_logout", handleLogoutEvent);
+    window.addEventListener("storage", updateUserFromStorage);
     return () => {
       window.removeEventListener(
         "adlocal_token_refreshed",
         handleTokenRefreshed,
       );
+      window.removeEventListener("adlocal_usuario_logout", handleLogoutEvent);
+      window.removeEventListener("storage", updateUserFromStorage);
     };
   }, []);
+
+  const rawComercioId = Array.isArray(user?.comercioId)
+    ? user.comercioId[0]
+    : user?.comercioId;
+  const parsedComercioId = Number(rawComercioId);
 
   const userContextValue: User = {
     sub: user?.sub || "",
@@ -127,6 +150,10 @@ export default function AppUser() {
     iss: user?.iss || "",
     FotoUrl:
       ((user as unknown as Record<string, unknown>)?.fotoUrl as string) || "",
+    comercioId:
+      Number.isInteger(parsedComercioId) && parsedComercioId > 0
+        ? parsedComercioId
+        : undefined,
   };
 
   return (
@@ -233,12 +260,16 @@ export default function AppUser() {
             path="productos-servicios/comercio/:id"
             element={<ProductosServicioComercio />}
           />
-          <Route
-            path="configuracion-pagos"
-            element={<ConfiguracionPagosPage />}
-          />
+          {user?.rol !== "Colaborador" && (
+            <>
+              <Route
+                path="configuracion-pagos"
+                element={<ConfiguracionPagosPage />}
+              />
+              <Route path="comisiones" element={<ComisionesComercioPage />} />
+            </>
+          )}
           <Route path="pedidos" element={<PedidosComercioPage />} />
-          <Route path="comisiones" element={<ComisionesComercioPage />} />
           <Route path="citas" element={<CitasComercioPage />} />
           <Route path="vistaprevia/:id" element={<PreviewNegocio />} />
           {user?.rol !== "Colaborador" && (

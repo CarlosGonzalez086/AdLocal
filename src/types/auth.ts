@@ -6,4 +6,6 @@ export interface UsuarioRegistroDto {
 export interface NewPasswordDto {
   passwordNueva: string;
   codigo: string;
+  token?: string;
+  email?: string;
 }

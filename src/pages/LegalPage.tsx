@@ -70,7 +70,7 @@ export default function LegalPage({ tipo }: LegalPageProps) {
         <Link to="/usuario/login" className="btn btn-outline-secondary btn-sm">
           Volver a iniciar sesión
         </Link>
-        <Link to="/usuario/registro" className="btn btn-primary btn-sm">
+        <Link to="/usuario/crear-cuenta" className="btn btn-primary btn-sm">
           Crear cuenta
         </Link>
       </div>

@@ -67,6 +67,6 @@ describe("P1 Operational & Auth Stability (AdLocal)", () => {
       "utf8",
     );
     expect(modal).not.toContain("todavía requiere el servicio correspondiente");
-    expect(modal).toContain("window.location.assign(checkoutUrl)");
+    expect(modal).toContain("window.location.assign(parsedCheckoutUrl.toString())");
   });
 });

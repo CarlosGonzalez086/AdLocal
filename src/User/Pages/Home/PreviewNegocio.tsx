@@ -1,11 +1,12 @@
 import { Alert, Button, CircularProgress } from "@mui/material";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 import { useParams } from "react-router-dom";
 import Swal from "../../../utils/sweetalert";
 
 import { useComercio } from "../../../hooks/useComercio";
+import { UserContext } from "../../../context/UserContext";
 
 import ComercioDetalle from "../../../components/Comercio/ComercioDetalle";
 import ButtonBack from "../../../components/ButtonBack";
@@ -19,6 +20,7 @@ export function PreviewNegocio() {
   const { id } = useParams<{
     id: string;
   }>();
+  const user = useContext(UserContext);
 
   const { comercioPage, cargarPorId, loading } = useComercio();
 
@@ -33,9 +35,16 @@ export function PreviewNegocio() {
   ============================================ */
 
   const parsedId = Number(id);
-
-  const comercioId =
+  const urlComercioId =
     Number.isInteger(parsedId) && parsedId > 0 ? parsedId : null;
+  const contextComercioId =
+    typeof user?.comercioId === "number" &&
+    Number.isInteger(user.comercioId) &&
+    user.comercioId > 0
+      ? user.comercioId
+      : null;
+
+  const comercioId = urlComercioId ?? contextComercioId;
 
   /* ============================================
      PRODUCTOS

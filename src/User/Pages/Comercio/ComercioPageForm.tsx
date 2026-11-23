@@ -75,8 +75,10 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
   }, [isEditMode, maxNegocios, totalByUser, navigate]);
 
   const handleSave = async (data: ComercioDto) => {
-    await guardarPage(data);
-    navigate(COMMERCE_ROUTE);
+    const ok = await guardarPage(data);
+    if (ok) {
+      navigate(COMMERCE_ROUTE);
+    }
   };
 
   return (

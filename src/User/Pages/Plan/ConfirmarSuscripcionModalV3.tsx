@@ -258,9 +258,23 @@ export const ConfirmarSuscripcionModalV3 = ({
           throw new Error("No se recibió una URL válida de checkout.");
         }
 
+        let parsedCheckoutUrl: URL;
+        try {
+          parsedCheckoutUrl = new URL(checkoutUrl.trim());
+        } catch {
+          throw new Error("La URL de checkout no es válida.");
+        }
+        const hostAllowed =
+          parsedCheckoutUrl.protocol === "https:" &&
+          (parsedCheckoutUrl.hostname === "checkout.stripe.com" ||
+            parsedCheckoutUrl.hostname.endsWith(".stripe.com"));
+        if (!hostAllowed) {
+          throw new Error("Dominio de checkout no autorizado.");
+        }
+
         resetModal();
         onClose();
-        window.location.assign(checkoutUrl);
+        window.location.assign(parsedCheckoutUrl.toString());
       }
     } catch (error) {
       console.error("Error al procesar el pago:", error);

@@ -47,6 +47,15 @@ export const ComprobantePedidoModal = ({
               referrerPolicy="no-referrer"
             />
           </div>
+          <div className="d-flex justify-content-end mt-2">
+            <a
+              href={comprobanteUrl}
+              download={`comprobante-${numeroPedido || "pago"}`}
+              className="btn btn-outline-secondary btn-sm"
+            >
+              Descargar comprobante
+            </a>
+          </div>
 
           {estadoPago === EstadoPagoPedido.PendienteVerificacion && (
             <div className="d-flex justify-content-end align-items-center gap-2 flex-wrap mt-3">

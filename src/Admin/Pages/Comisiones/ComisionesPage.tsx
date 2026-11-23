@@ -185,15 +185,23 @@ export const ComisionesPage = () => {
     await cargar(periodo, page, rows, comercioId, estatus);
   };
   const abrirComprobante = async (uuid: string) => {
-    const response = await httpAdmin.get<Blob>(
-      `/PagosComisiones/${uuid}/comprobante`,
-      { responseType: "blob" },
-    );
-    window.open(
-      URL.createObjectURL(response.data),
-      "_blank",
-      "noopener,noreferrer",
-    );
+    try {
+      const response = await httpAdmin.get<Blob>(
+        `/PagosComisiones/${uuid}/comprobante`,
+        { responseType: "blob" },
+      );
+      const mime = response.data.type.toLowerCase();
+      const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf"];
+      if (!allowed.includes(mime)) {
+        await Swal.fire("Archivo no compatible", "Formato de comprobante no permitido.", "warning");
+        return;
+      }
+      const objectUrl = URL.createObjectURL(response.data);
+      window.open(objectUrl, "_blank", "noopener,noreferrer");
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+    } catch {
+      await Swal.fire("Error", "No se pudo abrir el comprobante.", "error");
+    }
   };
   return (
     <div>

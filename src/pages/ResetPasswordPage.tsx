@@ -116,10 +116,12 @@ export default function ResetPasswordPage() {
         ? await admin.newPassword({
             codigo: cleanCode,
             passwordNueva: password,
+            token,
           })
         : await user.newPassword({
             codigo: cleanCode,
             passwordNueva: password,
+            token,
           });
 
       const data = response as { codigo?: string; mensaje?: string } | undefined;

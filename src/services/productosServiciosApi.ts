@@ -26,7 +26,9 @@ export const productosServiciosApi = {
     ),
 
   getById: (id: number) =>
-    httpUsuario.get<ApiResponse<ProductoServicioDto>>(`/${id}`),
+    httpUsuario.get<ApiResponse<ProductoServicioDto>>(
+      `/ProductosServicios/${id}`,
+    ),
 
   getAllPaged: (params?: {
     page?: number;

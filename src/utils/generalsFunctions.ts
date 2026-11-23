@@ -76,8 +76,8 @@ export const normalizeComercioData = (
   id: data.id ?? 0,
   nombre: data.nombre ?? "",
   direccion: data.direccion ?? "",
-  telefono: data.telefono ?? "",
-  email: data.email ?? "",
+  telefono: data.telefono?.trim() || undefined,
+  email: data.email?.trim() || undefined,
   descripcion: data.descripcion ?? "",
 
   logoBase64: data.logoBase64?.startsWith("data:image/")

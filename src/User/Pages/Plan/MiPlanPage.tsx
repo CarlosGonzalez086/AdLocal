@@ -18,6 +18,7 @@ import { useSuscripciones } from "../../../hooks/useSuscripciones";
 import { calcularDiasRestantesDesdeHoy } from "../../../utils/generalsFunctions";
 import type { JwtPayload } from "../../Auth/PrivateRouteUsuario";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 type ProcessingType = "activation" | "cancellation" | null;
 
@@ -60,6 +61,7 @@ const PlanesPage = ({ user }: PlanesPageProps) => {
   const { suscripcion, obtenerMiSuscripcion, loading } = useSuscripciones();
 
   const { cancelarPlan, isCancel } = useCheckout();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const { actualizarJwt } = useActualizarJwt();
 
@@ -92,6 +94,19 @@ const PlanesPage = ({ user }: PlanesPageProps) => {
   useEffect(() => {
     void obtenerSuscripcionRef.current();
   }, []);
+
+  useEffect(() => {
+    const checkoutStatus = searchParams.get("checkout");
+    if (!checkoutStatus) return;
+    if (checkoutStatus === "success") {
+      setIsSubSuccess(true);
+    } else if (checkoutStatus === "cancel") {
+      toast("Pago cancelado. Puedes intentarlo nuevamente cuando lo necesites.");
+    }
+    const next = new URLSearchParams(searchParams);
+    next.delete("checkout");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     if (isSubSuccess) {

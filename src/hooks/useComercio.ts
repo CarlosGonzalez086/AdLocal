@@ -4,7 +4,6 @@ import { useActualizarJwt } from "./useActualizarJwt";
 import { comercioCreateSchema, comercioUpdateSchema, type ComercioCreateDto } from "../schemas/comercioCreate.schema";
 import { normalizeComercioData } from "../utils/generalsFunctions";
 import { UserContext } from "../context/UserContext";
-import { useNavigate } from "react-router-dom";
 import { comercioDtoDefault, type ColaborarDto, type ComercioDto, type ComercioDtoListItem } from "../types/User/comercio";
 import { comercioApi } from "../services/comercioApi";
 import type { ProfileUser } from "../types/User/UserAuth";
@@ -21,7 +20,6 @@ export interface ListarParamsColaboradores {
 
 export const useComercio = () => {
   const user = useContext(UserContext);
-  const navigate = useNavigate();
   const { actualizarJwt } = useActualizarJwt();
   const [comercio, setComercio] = useState<ComercioDto>(comercioDtoDefault);
   const [comercioPage, setComercioPage] = useState<ComercioDto>(comercioDtoDefault);
@@ -206,7 +204,7 @@ export const useComercio = () => {
     }
   };
 
-  const guardarPage = async (data: ComercioCreateDto) => {
+  const guardarPage = async (data: ComercioCreateDto): Promise<boolean> => {
     setLoading(true);
 
     try {
@@ -224,7 +222,7 @@ export const useComercio = () => {
             result.error.issues.map((e) => e.message).join("\n"),
             "warning",
           );
-          return;
+          return false;
         }
 
         const { data: resp } = await comercioApi.actualizar({
@@ -234,11 +232,10 @@ export const useComercio = () => {
 
         if (resp.codigo !== "200") {
           Swal.fire("Error", resp.mensaje, "error");
-          return;
+          return false;
         }
 
         Swal.fire("Actualizado", resp.mensaje, "success");
-        navigate("/usuario/app/comercio");
       } else {
         const result = comercioCreateSchema.safeParse(normalizedData);
 
@@ -248,21 +245,27 @@ export const useComercio = () => {
             result.error.issues.map((e) => e.message).join("\n"),
             "warning",
           );
-          return;
+          return false;
         }
 
         const { data: resp } = await comercioApi.crear(result.data);
 
         if (resp.codigo !== "200") {
           Swal.fire("Error", resp.mensaje, "error");
-          return;
+          return false;
         }
 
+        if (user?.sub) {
+          await actualizarJwt({ email: user.sub, updateJWT: true });
+        }
         Swal.fire("Creado", resp.mensaje, "success");
-        navigate("/usuario/app/comercio");
       }
 
       await cargar();
+      return true;
+    } catch (error: unknown) {
+      notificarErrorApi(error, "No fue posible guardar el comercio.");
+      return false;
     } finally {
       setLoading(false);
     }

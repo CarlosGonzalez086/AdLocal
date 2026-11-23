@@ -79,9 +79,11 @@ export function ProductosServicioComercio() {
     listar({ page, rows, orderBy, search, idComercio: Number(id) });
   }, [page, rows, orderBy, search, id, listar]);
 
-  const max = Number(claims?.maxProductos);
-  const restantes = max - total;
-  const limiteAlcanzado = restantes <= 0;
+  const rawMax = Number(claims?.maxProductos ?? 0);
+  const isUnlimited = rawMax < 0;
+  const max = Number.isFinite(rawMax) && rawMax > 0 ? rawMax : 0;
+  const restantes = isUnlimited ? Number.POSITIVE_INFINITY : Math.max(0, max - total);
+  const limiteAlcanzado = !isUnlimited && (max === 0 || restantes <= 0);
   const porcentaje = max > 0 ? Math.min((total / max) * 100, 100) : 0;
 
   const columns: TableColumn<ProductoServicioDto>[] = [
@@ -92,7 +94,7 @@ export function ProductosServicioComercio() {
       label: "Precio",
       render: (p) => (
         <span className="fw-semibold fz-body-sm">
-          ${p.precio}
+          {p.precio != null ? `$${p.precio}` : p.precioDesde != null ? `Desde $${p.precioDesde}` : "Cotización"}
         </span>
       ),
     },

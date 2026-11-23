@@ -127,6 +127,9 @@ const UserHeader = ({
     handleCloseMenu();
 
     clearStorageUsuario();
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("adlocal_usuario_logout"));
+    }
 
     navigate("/usuario/login", {
       replace: true,

@@ -414,18 +414,18 @@ export function ComercioPreviewCard({
 
         <hr className="commercePreviewDivider" />
 
-        <div className="d-flex flex-column flex-sm-row justify-content-end gap-2">
-          <Button
-            type="button"
-            variant="contained"
-            className="btn-adlocal--solid"
-            onClick={() => setEditando(true)}
-            startIcon={<MaterialSymbol icon="edit" size="small" />}
-          >
-            Editar comercio
-          </Button>
+        {user?.rol !== "Colaborador" && (
+          <div className="d-flex flex-column flex-sm-row justify-content-end gap-2">
+            <Button
+              type="button"
+              variant="contained"
+              className="btn-adlocal--solid"
+              onClick={() => setEditando(true)}
+              startIcon={<MaterialSymbol icon="edit" size="small" />}
+            >
+              Editar comercio
+            </Button>
 
-          {user?.rol !== "Colaborador" && (
             <Button
               type="button"
               variant="outlined"
@@ -435,8 +435,8 @@ export function ComercioPreviewCard({
             >
               Eliminar comercio
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

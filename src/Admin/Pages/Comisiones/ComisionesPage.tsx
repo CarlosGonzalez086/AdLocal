@@ -22,6 +22,7 @@ import MaterialSymbol from "../../../components/UI/MaterialSymbol/MaterialSymbol
 import { httpAdmin } from "../../../api/httpAdmin";
 import type { ApiResponse } from "../../../api/apiResponse";
 import type { PagoComision } from "../../../types/User/pagoComisiones";
+import { resolveComprobanteBlob } from "../../../utils/comprobanteBlob";
 import { extraerMensajeError } from "../../../utils/errorHandler";
 
 const moneda = (valor: number) =>
@@ -198,13 +199,8 @@ export const ComisionesPage = () => {
         `/PagosComisiones/${uuid}/comprobante`,
         { responseType: "blob" },
       );
-      const mime = response.data.type.split(";")[0].trim().toLowerCase();
-      const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf"];
-      if (mime && !allowed.includes(mime)) {
-        await Swal.fire("Archivo no compatible", "Formato de comprobante no permitido.", "warning");
-        return;
-      }
-      const objectUrl = URL.createObjectURL(response.data);
+      const { blob } = await resolveComprobanteBlob(response.data);
+      const objectUrl = URL.createObjectURL(blob);
       window.open(objectUrl, "_blank", "noopener,noreferrer");
       window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
     } catch {

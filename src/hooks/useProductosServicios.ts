@@ -114,7 +114,7 @@ export const useProductosServicios = () => {
     id: number,
     idComercio: number,
     refrescarParams?: ListarParams,
-  ) => {
+  ): Promise<boolean> => {
     const result = await showConfirmDialog({
       title: "Eliminar producto o servicio",
       text: "Esta acción eliminará el producto o servicio de forma permanente y no se puede deshacer.",
@@ -124,7 +124,7 @@ export const useProductosServicios = () => {
       isDestructive: true,
     });
 
-    if (!result.isConfirmed) return;
+    if (!result.isConfirmed) return false;
 
     setLoading(true);
     try {
@@ -132,7 +132,7 @@ export const useProductosServicios = () => {
 
       if (data.codigo !== "200") {
         showErrorAlert("Error", data.mensaje);
-        return;
+        return false;
       }
 
       showSuccessAlert("Éxito", data.mensaje);
@@ -140,8 +140,10 @@ export const useProductosServicios = () => {
       if (refrescarParams) {
         await listar(refrescarParams);
       }
+      return true;
     } catch (error) {
       notificarErrorApi(error, "No se pudo eliminar el producto o servicio.");
+      return false;
     } finally {
       setLoading(false);
     }

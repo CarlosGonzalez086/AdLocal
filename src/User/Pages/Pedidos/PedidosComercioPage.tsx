@@ -324,6 +324,8 @@ export const PedidosComercioPage = () => {
         open={Boolean(comprobanteUrl) || cargandoComprobante}
         loading={cargandoComprobante}
         comprobanteUrl={comprobanteUrl}
+        comprobanteIsPdf={pedidosHook.comprobanteMeta?.isPdf}
+        comprobanteExt={pedidosHook.comprobanteMeta?.ext}
         numeroPedido={pedidosHook.detalle?.numeroPedido}
         estadoPago={pedidosHook.detalle?.estadoPago}
         onClose={cerrarComprobante}

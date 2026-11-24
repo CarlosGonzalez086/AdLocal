@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import Swal from "../utils/sweetalert";
 import { pedidosComercioApi } from "../services/pedidosComercioApi";
+import { resolveComprobanteBlob } from "../utils/comprobanteBlob";
 import { extraerMensajeError } from "../utils/errorHandler";
 import type {
   ComercioPedidoSelectorDto,
@@ -214,23 +215,20 @@ export const usePedidosComercio = () => {
     }
   };
 
+  const [comprobanteMeta, setComprobanteMeta] = useState<{
+    isPdf: boolean;
+    ext: string;
+  } | null>(null);
+
   const abrirComprobante = useCallback(async () => {
     if (!detalle || !comercioId) return null;
     const { data } = await pedidosComercioApi.comprobante(
       comercioId,
       detalle.uuid,
     );
-    const tiposPermitidos = new Set([
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/webp",
-      "application/pdf",
-    ]);
-    if (data.type && !tiposPermitidos.has(data.type.toLowerCase())) {
-      throw new Error("Tipo de archivo de comprobante no permitido.");
-    }
-    return URL.createObjectURL(data);
+    const resolved = await resolveComprobanteBlob(data);
+    setComprobanteMeta({ isPdf: resolved.isPdf, ext: resolved.ext });
+    return URL.createObjectURL(resolved.blob);
   }, [detalle, comercioId]);
 
   const cambiarComercio = (id: number) => {
@@ -271,6 +269,7 @@ export const usePedidosComercio = () => {
     cambiarEstado,
     revisarPago,
     abrirComprobante,
+    comprobanteMeta,
     registrarReembolso,
     conciliarInventario,
   };

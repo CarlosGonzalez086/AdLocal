@@ -226,22 +226,8 @@ export const ConfirmarSuscripcionModalV3 = ({
         );
 
         if (!result) {
-          throw new Error("El pago no devolvió una respuesta válida.");
+          return;
         }
-
-        await Swal.fire({
-          icon: "success",
-
-          title: "Pago realizado",
-
-          text: "Tu suscripción se está activando.",
-
-          showConfirmButton: false,
-
-          timer: 1800,
-
-          timerProgressBar: true,
-        });
 
         setIsSubSuccess(true);
 
@@ -255,7 +241,7 @@ export const ConfirmarSuscripcionModalV3 = ({
         const checkoutUrl = await pagarConNuevaTarjeta(Number(plan.id));
 
         if (typeof checkoutUrl !== "string" || !checkoutUrl.trim()) {
-          throw new Error("No se recibió una URL válida de checkout.");
+          return;
         }
 
         let parsedCheckoutUrl: URL;

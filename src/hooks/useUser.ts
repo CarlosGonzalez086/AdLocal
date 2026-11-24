@@ -17,6 +17,15 @@ export const useUser = () => {
 
       const resp = await authUser.crearUser(data);
 
+      if (resp.data?.codigo && resp.data.codigo !== "200") {
+        Swal.fire(
+          "Error",
+          resp.data.mensaje || "No fue posible crear el usuario.",
+          "error",
+        );
+        return resp.data;
+      }
+
       Swal.fire(
         "Usuario creado",
         "La cuenta se creó correctamente.",
@@ -63,6 +72,16 @@ export const useUser = () => {
 
       const resp = await authUser.forgetPassword(data);
 
+      if (resp.data?.codigo && resp.data.codigo !== "200") {
+        Swal.fire(
+          "Error",
+          resp.data.mensaje ||
+            "No fue posible enviar el correo de recuperación.",
+          "error",
+        );
+        return resp.data;
+      }
+
       Swal.fire(
         "Correo enviado",
         "Revisa tu correo para continuar con la recuperación de contraseña.",
@@ -90,6 +109,15 @@ export const useUser = () => {
       setLoading(true);
 
       const resp = await authUser.newPassword(data);
+
+      if (resp.data?.codigo && resp.data.codigo !== "200") {
+        Swal.fire(
+          "Error",
+          resp.data.mensaje || "No fue posible actualizar la contraseña.",
+          "error",
+        );
+        return resp.data;
+      }
 
       Swal.fire(
         "Contraseña actualizada",
@@ -136,7 +164,7 @@ export const useUser = () => {
 
       Swal.fire(
         "Error",
-        "No fue posible obtener la información del administrador.",
+        "No fue posible obtener la información del usuario.",
         "error",
       );
 
@@ -152,6 +180,16 @@ export const useUser = () => {
 
       const resp = await authUser.actualizarUser(data);
 
+      if (resp.data?.codigo && resp.data.codigo !== "200") {
+        Swal.fire(
+          "Error",
+          resp.data.mensaje ||
+            "No fue posible actualizar la información del usuario.",
+          "error",
+        );
+        return resp.data;
+      }
+
       Swal.fire(
         "Información actualizada",
         "Los datos del usuario se actualizaron correctamente.",
@@ -164,7 +202,7 @@ export const useUser = () => {
 
       Swal.fire(
         "Error",
-        "No fue posible actualizar la información del administrador.",
+        "No fue posible actualizar la información del usuario.",
         "error",
       );
 

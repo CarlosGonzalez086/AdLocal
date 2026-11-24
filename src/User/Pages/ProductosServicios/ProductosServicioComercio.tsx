@@ -27,10 +27,19 @@ import { jwtDecode } from "jwt-decode";
 
 export function ProductosServicioComercio() {
   const { id } = useParams();
+  return <ProductosServicioComercioContent key={id ?? "none"} id={id} />;
+}
+
+function ProductosServicioComercioContent({ id }: { id?: string }) {
   const dataJwt = getLocalStorageJWTUsuario();
-  const claims: JwtClaims | null = dataJwt
-    ? jwtDecode<JwtClaims>(dataJwt)
-    : null;
+  let claims: JwtClaims | null = null;
+  if (dataJwt) {
+    try {
+      claims = jwtDecode<JwtClaims>(dataJwt);
+    } catch {
+      claims = null;
+    }
+  }
 
   const initialForm: ProductoServicioDto = {
     id: undefined,
@@ -72,6 +81,7 @@ export function ProductosServicioComercio() {
   const [rows, setRows] = useState(10);
   const [orderBy, setOrderBy] = useState("recent");
   const [search, setSearch] = useState("");
+  const [totalSinFiltro, setTotalSinFiltro] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
   const [producto, setProducto] = useState<ProductoServicioDto>(initialForm);
 
@@ -79,12 +89,13 @@ export function ProductosServicioComercio() {
     listar({ page, rows, orderBy, search, idComercio: Number(id) });
   }, [page, rows, orderBy, search, id, listar]);
 
+  const totalCatalogo = search.trim() ? (totalSinFiltro ?? total) : total;
   const rawMax = Number(claims?.maxProductos ?? 0);
   const isUnlimited = rawMax < 0;
   const max = Number.isFinite(rawMax) && rawMax > 0 ? rawMax : 0;
-  const restantes = isUnlimited ? Number.POSITIVE_INFINITY : Math.max(0, max - total);
+  const restantes = isUnlimited ? Number.POSITIVE_INFINITY : Math.max(0, max - totalCatalogo);
   const limiteAlcanzado = !isUnlimited && (max === 0 || restantes <= 0);
-  const porcentaje = max > 0 ? Math.min((total / max) * 100, 100) : 0;
+  const porcentaje = max > 0 ? Math.min((totalCatalogo / max) * 100, 100) : 0;
 
   const columns: TableColumn<ProductoServicioDto>[] = [
     { key: "nombre", label: "Nombre" },
@@ -130,6 +141,11 @@ export function ProductosServicioComercio() {
             value={search}
             placeholder="Buscar producto o servicio…"
             onChange={(value) => {
+              if (!search.trim() && value.trim()) {
+                setTotalSinFiltro(total);
+              } else if (!value.trim()) {
+                setTotalSinFiltro(null);
+              }
               setSearch(value);
               setPage(0);
             }}
@@ -164,7 +180,9 @@ export function ProductosServicioComercio() {
               <span
                 className={`badge-adlocal ${limiteAlcanzado ? "badge-adlocal-danger" : "badge-adlocal-success"} fz-caption fw-bold`}
               >
-                {isUnlimited ? `${total} / Ilimitado` : `${total} / ${max}`}
+                {isUnlimited
+                  ? `${totalCatalogo} / Ilimitado`
+                  : `${totalCatalogo} / ${max}`}
               </span>
             </div>
 
@@ -250,15 +268,20 @@ export function ProductosServicioComercio() {
             <Tooltip title="Eliminar" arrow disableTouchListener>
               <IconButton
                 size="small"
-                onClick={() =>
-                  eliminar(Number(p.id), Number(id), {
+                onClick={async () => {
+                  const deleted = await eliminar(Number(p.id), Number(id), {
                     page,
                     rows,
                     orderBy,
                     search,
                     idComercio: Number(id),
-                  })
-                }
+                  });
+                  if (deleted && search.trim()) {
+                    setTotalSinFiltro((prev) =>
+                      prev !== null ? Math.max(0, prev - 1) : null,
+                    );
+                  }
+                }}
                 sx={{
                   width: 36,
                   height: 36,
@@ -321,9 +344,19 @@ export function ProductosServicioComercio() {
           setOpen(false);
           setProducto(initialForm);
         }}
-        onSave={(p) =>
-          guardar(p, { page, rows, orderBy, search, idComercio: Number(id) })
-        }
+        onSave={async (p) => {
+          const res = await guardar(p, {
+            page,
+            rows,
+            orderBy,
+            search,
+            idComercio: Number(id),
+          });
+          if ("success" in res && res.success && !p.id && search.trim()) {
+            setTotalSinFiltro((prev) => (prev !== null ? prev + 1 : null));
+          }
+          return res;
+        }}
         producto={producto}
         loading={loading}
       />

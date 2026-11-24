@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { CircularProgress } from "@mui/material";
 import Swal from "../../../utils/sweetalert";
 import ButtonBack from "../../../components/ButtonBack";
 import { useComercio } from "../../../hooks/useComercio";
@@ -89,18 +90,25 @@ export function ComercioPageForm({ user }: ComercioPageFormProps) {
         </h1>
       </div>
 
-      <ComercioForm
-        key={
-          isEditMode
-            ? `comercio-edit-${comercioPage?.id ?? 0}`
-            : "comercio-new"
-        }
-        initialData={isEditMode ? comercioPage : null}
-        loading={loading}
-        onSave={handleSave}
-        soloVer={true}
-        user={user}
-      />
+      {comercioId === null ? null : isEditMode &&
+        (loading || !comercioPage || comercioPage.id !== comercioId) ? (
+        <div className="d-flex justify-content-center py-5">
+          <CircularProgress />
+        </div>
+      ) : (
+        <ComercioForm
+          key={
+            isEditMode
+              ? `comercio-edit-${comercioPage?.id ?? 0}`
+              : "comercio-new"
+          }
+          initialData={isEditMode ? comercioPage : null}
+          loading={loading}
+          onSave={handleSave}
+          soloVer={true}
+          user={user}
+        />
+      )}
     </div>
   );
 }
